@@ -25,6 +25,11 @@ namespace NesCore.Processing
         {
         }
 
+        public override string ToString()
+        {
+            return Name + ": Mode: " + AddressingMode + ", Size: " + Size + "b, Cycles: " + Cycles + "/" + PageCycles;
+        }
+
         public string Name { get; private set; }
         public AddressingMode AddressingMode { get; private set; }
         public byte Size { get; private set; }

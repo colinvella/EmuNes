@@ -1,5 +1,6 @@
 ﻿using NesCore.Addressing;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NesCore.Processing
 {
-    public class InstructionSet
+    public class InstructionSet: IEnumerable
     {
         public InstructionSet(Processor processor)
         {
@@ -19,6 +20,11 @@ namespace NesCore.Processing
 
         public Processor Processor { get; private set; }
         public Memory Memory { get; private set; }
+
+        public IEnumerator GetEnumerator()
+        {
+            return instructions.GetEnumerator();
+        }
 
         public Instruction this[byte opCode]
         {

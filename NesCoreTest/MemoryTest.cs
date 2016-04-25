@@ -10,7 +10,7 @@ namespace NesCoreTest
     public class MemoryTest
     {
         [TestMethod]
-        public void TestByteWrite()
+        public void ByteWrite()
         {
             NesCore.Console console = new NesCore.Console();
             Memory memory = console.Memory;

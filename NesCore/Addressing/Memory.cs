@@ -31,5 +31,6 @@ namespace NesCore.Addressing
 
         public UInt16 Read16Bug(UInt16 address) { return 0; }
 
+        // test
     }
 }

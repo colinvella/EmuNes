@@ -25,6 +25,32 @@ namespace NesCore.Processing
         {
         }
 
+        public Instruction(String name, AddressingMode addressingMode, byte cycles, Execute execute)
+            : this(name, addressingMode, 0, cycles, 0, execute)
+        {
+            switch (addressingMode)
+            {
+                case AddressingMode.Implied:
+                case AddressingMode.Accumulator:
+                    Size = 1; break;
+                case AddressingMode.Immediate:
+                case AddressingMode.Relative:
+                case AddressingMode.ZeroPage:
+                case AddressingMode.ZeroPageX:
+                case AddressingMode.ZeroPageY:
+                    Size = 2; break;
+                case AddressingMode.Absolute:
+                case AddressingMode.AbsoluteX:
+                case AddressingMode.AbsoluteY:
+                case AddressingMode.IndexedIndirect:
+                case AddressingMode.Indirect:
+                case AddressingMode.IndirectIndexed:
+                    Size = 3; break;
+                default:
+                    throw new ArgumentException("addressingMode");
+            }
+        }
+
         public override string ToString()
         {
             return Name + ": Mode: " + AddressingMode + ", Size: " + Size + "b, Cycles: " + Cycles + "/" + PageCycles;

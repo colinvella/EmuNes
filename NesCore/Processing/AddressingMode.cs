@@ -8,7 +8,7 @@ namespace NesCore.Processing
 {
     public enum AddressingMode
     {
-        None,
+        Undefined,
         Absolute,
         AbsoluteX,
         AbsoluteY,

@@ -203,6 +203,27 @@ namespace NesCore.Processing
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
 
+            // LSR - logical shift right
+            Execute Lsr = (address, mode) =>
+            {
+                State state = Processor.State;
+                if (mode == AddressingMode.Accumulator)
+                {
+                    state.CarryFlag = (state.Accumulator & 0x01) != 0;
+                    state.Accumulator >>= 1;
+                    SetZeroAndNegativeFlags(state.Accumulator);
+                }
+                else
+                {
+                    byte value = Memory.Read(address);
+                    state.CarryFlag = (value & 0x01) != 0;
+                    value >>= 1;
+                    Memory.Write(address, value);
+                    SetZeroAndNegativeFlags(value);
+                }
+            };
+
+
 
 
 
@@ -435,7 +456,7 @@ namespace NesCore.Processing
             instructions[0x40] = new Instruction("RTI", AddressingMode.Implied, 1, 6, Rti);
 
             // EOR - logical exclusive or - indexed indirect mode
-            instructions[0x41] = new Instruction("EOR", AddressingMode.IndexedIndirect, 2, 6, Rti);
+            instructions[0x41] = new Instruction("EOR", AddressingMode.IndexedIndirect, 2, 6, Eor);
 
             // KIL - illegal opcode
             instructions[0x42] = new Instruction("KIL", AddressingMode.Implied, 0, 2, DoNothing);
@@ -445,6 +466,14 @@ namespace NesCore.Processing
 
             // NOP - no operation - zero page mode
             instructions[0x44] = new Instruction("NOP", AddressingMode.ZeroPage, 2, 3, DoNothing);
+
+            // EOR - logical exclusive or - zero page mode
+            instructions[0x45] = new Instruction("EOR", AddressingMode.ZeroPage, 2, 3, Eor);
+
+            // LSR - logical shift right - zero page mode
+            instructions[0x46] = new Instruction("LSR", AddressingMode.ZeroPage, 2, 5, Lsr);
+
+
 
 
             // 0x78 - 0x80

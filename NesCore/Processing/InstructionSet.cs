@@ -41,6 +41,27 @@ namespace NesCore.Processing
             // no operation
             Execute NoOperation = (address, mode) => { };
 
+            // store operations
+
+            // STA - store accumulator
+            Execute StoreAccumulator = (address, mode) =>
+            {
+                Memory.Write(address, Processor.State.Accumulator);
+            };
+
+            // STX - store register x
+            Execute StoreRegisterX = (address, mode) =>
+            {
+                Memory.Write(address, Processor.State.RegisterX);
+            };
+
+            // STY - store register y
+            Execute StoreRegisterY = (address, mode) =>
+            {
+                Memory.Write(address, Processor.State.RegisterY);
+            };
+
+
             // ORA - logical inclusive OR
             Execute LogicalInclusiveOr = (address, mode) =>
             {
@@ -77,11 +98,8 @@ namespace NesCore.Processing
                 }
             };
 
-            // PHP - push processor status
-            Execute PushProcessorStatus = (address, mode) =>
-            {
-                Processor.Push((byte)(Processor.State.Flags | State.BreakCommandMask));
-            };
+
+            // branch instructions
 
             // BPL - branch on plus
             Execute BranchOnPlus = (address, mode) =>
@@ -97,6 +115,43 @@ namespace NesCore.Processing
                 // add extra cycles as necessary
                 AddBranchCycles(address, mode);
             };
+
+            // BMI - branch on minus
+            Execute BranchOnMinus = (address, mode) =>
+            {
+                State state = Processor.State;
+
+                // no branching if zero or positive
+                if (!state.NegativeFlag)
+                    return;
+
+                // set program counter to the given address operand
+                state.ProgramCounter = address;
+
+                // add extra cycles as necessary
+                AddBranchCycles(address, mode);
+            };
+
+            // BVC - branch if overflow clear
+            Execute BranchIfOverflowClear = (address, mode) =>
+            {
+                State state = Processor.State;
+                if (state.OverflowFlag)
+                    return;
+                state.ProgramCounter = address;
+                AddBranchCycles(address, mode);
+            };
+
+            // BVS - branch if overflow set
+            Execute BranchIfOverflowSet = (address, mode) =>
+            {
+                State state = Processor.State;
+                if (!state.OverflowFlag)
+                    return;
+                state.ProgramCounter = address;
+                AddBranchCycles(address, mode);
+            };
+
 
             // CLC - clear carry
             Execute ClearCarryFlag = (address, mode) =>
@@ -186,30 +241,6 @@ namespace NesCore.Processing
                 }
             };
 
-            // PLP - pull processor status
-            Execute PullProcessorStatus = (address, mode) =>
-            {
-                State state = Processor.State;
-                state.Flags = Processor.Pull();
-                state.BreakCommandFlag = false; // & 0xEF
-                state.UnusedFlag = true; // | 0x20
-            };
-
-            // BMI - branch on minus
-            Execute BranchOnMinus = (address, mode) =>
-            {
-                State state = Processor.State;
-
-                // no branching if zero or positive
-                if (!state.NegativeFlag)
-                    return;
-
-                // set program counter to the given address operand
-                state.ProgramCounter = address;
-
-                // add extra cycles as necessary
-                AddBranchCycles(address, mode);
-            };
 
             // SEC - set carry flag
             Execute SetCarryFlag = (address, mode) =>
@@ -256,6 +287,8 @@ namespace NesCore.Processing
                 }
             };
 
+            // stack instructions
+
             // PHA - push accumulator
             Execute PushAccumulator = (address, mode) =>
             {
@@ -268,6 +301,23 @@ namespace NesCore.Processing
                 Processor.State.Accumulator = Processor.Pull();
             };
 
+            // PHP - push processor status
+            Execute PushProcessorStatus = (address, mode) =>
+            {
+                Processor.Push((byte)(Processor.State.Flags | State.BreakCommandMask));
+            };
+
+            // PLP - pull processor status
+            Execute PullProcessorStatus = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.Flags = Processor.Pull();
+                state.BreakCommandFlag = false; // & 0xEF
+                state.UnusedFlag = true; // | 0x20
+            };
+
+
+
 
             // JMP - jump
             Execute Jump = (address, mode) =>
@@ -275,15 +325,6 @@ namespace NesCore.Processing
                 Processor.State.ProgramCounter = address;
             };
 
-            // BVC - branch if overflow clear
-            Execute BranchIfOverflowClear = (address, mode) =>
-            {
-                State state = Processor.State;
-                if (state.OverflowFlag)
-                    return;
-                state.ProgramCounter = address;
-                AddBranchCycles(address, mode);
-            };
 
             // CLI - clear interrupt disable flag
             Execute ClearInterruptDisableFlag = (address, mode) =>
@@ -458,15 +499,33 @@ namespace NesCore.Processing
             instructions[0x6D] = new Instruction("ADC", AddressingMode.Absolute, 4, AddWithCarry);
             instructions[0x6E] = new Instruction("ROR", AddressingMode.Absolute, 6, RotateRight);
             instructions[0x6F] = new Instruction("RRA", AddressingMode.Absolute, 6, IllegalOpCode);
-            
+
             // 0x70 - 0x7F
-
+            instructions[0x70] = new Instruction("BVS", AddressingMode.Relative, 2, BranchIfOverflowClear);
+            instructions[0x71] = new Instruction("ADC", AddressingMode.IndirectIndexed, 5, AddWithCarry);
             instructions[0x72] = new Instruction("KIL", AddressingMode.Implied, 2, IllegalOpCode);
-
-
+            instructions[0x73] = new Instruction("RRA", AddressingMode.IndirectIndexed, 8, IllegalOpCode);
+            instructions[0x74] = new Instruction("NOP", AddressingMode.ZeroPageX, 4, IllegalOpCode);
+            instructions[0x75] = new Instruction("ADC", AddressingMode.ZeroPageX, 4, AddWithCarry);
+            instructions[0x76] = new Instruction("ROR", AddressingMode.ZeroPageX, 6, RotateRight);
+            instructions[0x77] = new Instruction("RRA", AddressingMode.ZeroPageX, 6, IllegalOpCode);
             instructions[0x78] = new Instruction("SEI", AddressingMode.Implied, 2, SetInterruptDisableFlag);
+            instructions[0x79] = new Instruction("ADC", AddressingMode.AbsoluteY, 4, AddWithCarry);
+            instructions[0x7A] = new Instruction("NOP", AddressingMode.Absolute, 2, IllegalOpCode);
+            instructions[0x7B] = new Instruction("RRA", AddressingMode.AbsoluteY, 7, IllegalOpCode);
+            instructions[0x7C] = new Instruction("NOP", AddressingMode.AbsoluteX, 4, IllegalOpCode);
+            instructions[0x7D] = new Instruction("ADC", AddressingMode.AbsoluteX, 4, AddWithCarry);
+            instructions[0x7E] = new Instruction("ROR", AddressingMode.AbsoluteX, 7, RotateRight);
+            instructions[0x7F] = new Instruction("RRA", AddressingMode.AbsoluteX, 7, IllegalOpCode);
 
             // 0x80 - 0x8F
+            instructions[0x80] = new Instruction("NOP", AddressingMode.Immediate, 2, IllegalOpCode);
+            instructions[0x81] = new Instruction("STA", AddressingMode.IndexedIndirect, 6, StoreAccumulator);
+            instructions[0x82] = new Instruction("NOP", AddressingMode.Immediate, 2, IllegalOpCode);
+            instructions[0x83] = new Instruction("SAX", AddressingMode.IndexedIndirect, 6, IllegalOpCode);
+            instructions[0x84] = new Instruction("STY", AddressingMode.ZeroPage, 3, StoreRegisterY);
+            instructions[0x85] = new Instruction("STA", AddressingMode.ZeroPage, 3, StoreAccumulator);
+            instructions[0x86] = new Instruction("STX", AddressingMode.ZeroPage, 3, StoreRegisterX);
 
             // 0x90 - 0x9F
 

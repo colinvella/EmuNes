@@ -129,7 +129,7 @@ namespace NesCore.Processing
 
             UInt16 address = 0;
             pageCrossed = false;
-            // immediate address is word following op code
+            // immediate address is word address after op code
             UInt16 immediateAddress = (UInt16)(State.ProgramCounter + 1);
 
             switch (addressingMode)

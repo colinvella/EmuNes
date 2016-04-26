@@ -10,39 +10,31 @@ namespace NesCore.Processing
 
     public class Instruction
     {
-        public Instruction(String name, AddressingMode addressingMode, byte size, byte cycles, byte pageCycles, Execute execute)
+        public Instruction(String name, AddressingMode addressingMode, byte cycles, Execute execute)
         {
             Name = name;
             AddressingMode = addressingMode;
-            Size = size;
             Cycles = cycles;
-            PageCycles = pageCycles;
             Exceute = execute;
-        }
 
-        public Instruction(String name, AddressingMode addressingMode, byte size, byte cycles, Execute execute)
-            : this(name, addressingMode, size, cycles, 0, execute)
-        {
-        }
-
-        public Instruction(String name, AddressingMode addressingMode, byte cycles, Execute execute)
-            : this(name, addressingMode, 0, cycles, 0, execute)
-        {
             switch (addressingMode)
             {
+                // implied and accumulator modes do not require operands
                 case AddressingMode.Implied:
                 case AddressingMode.Accumulator:
                     Size = 1; break;
+                // immediate, indexed indirect, relative and zero page variants only require a byte operand
                 case AddressingMode.Immediate:
+                case AddressingMode.IndexedIndirect:
                 case AddressingMode.Relative:
                 case AddressingMode.ZeroPage:
                 case AddressingMode.ZeroPageX:
                 case AddressingMode.ZeroPageY:
                     Size = 2; break;
+                // absolute and indirect variants require a word operand
                 case AddressingMode.Absolute:
                 case AddressingMode.AbsoluteX:
                 case AddressingMode.AbsoluteY:
-                case AddressingMode.IndexedIndirect:
                 case AddressingMode.Indirect:
                 case AddressingMode.IndirectIndexed:
                     Size = 3; break;
@@ -53,14 +45,13 @@ namespace NesCore.Processing
 
         public override string ToString()
         {
-            return Name + ": Mode: " + AddressingMode + ", Size: " + Size + "b, Cycles: " + Cycles + "/" + PageCycles;
+            return Name + ": Mode: " + AddressingMode + ", Size: " + Size + "b, Cycles: " + Cycles;
         }
 
         public string Name { get; private set; }
         public AddressingMode AddressingMode { get; private set; }
         public byte Size { get; private set; }
         public byte Cycles { get; private set; }
-        public byte PageCycles { get; private set; }
         public readonly Execute Exceute;
     }
 }

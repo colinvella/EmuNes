@@ -1,5 +1,4 @@
-﻿using NesCore.Addressing;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +12,14 @@ namespace NesCore.Processing
         public InstructionSet(Processor processor)
         {
             Processor = processor;
-            Memory = processor.Console.Memory;
+            SystemBus = processor.SystemBus;
 
             Initialise();
         }
 
         public Processor Processor { get; private set; }
-        public Memory Memory { get; private set; }
+
+        private SystemBus SystemBus { get; set; }
 
         public IEnumerator GetEnumerator()
         {
@@ -56,19 +56,19 @@ namespace NesCore.Processing
             // STA - store accumulator
             Execute StoreAccumulator = (address, mode) =>
             {
-                Memory.Write(address, Processor.State.Accumulator);
+                SystemBus.Write(address, Processor.State.Accumulator);
             };
 
             // STX - store register x
             Execute StoreRegisterX = (address, mode) =>
             {
-                Memory.Write(address, Processor.State.RegisterX);
+                SystemBus.Write(address, Processor.State.RegisterX);
             };
 
             // STY - store register y
             Execute StoreRegisterY = (address, mode) =>
             {
-                Memory.Write(address, Processor.State.RegisterY);
+                SystemBus.Write(address, Processor.State.RegisterY);
             };
 
             // logical instructions 
@@ -77,7 +77,7 @@ namespace NesCore.Processing
             Execute LogicalAnd = (address, mode) =>
             {
                 State state = Processor.State;
-                state.Accumulator &= Memory.Read(address);
+                state.Accumulator &= SystemBus.Read(address);
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
 
@@ -85,7 +85,7 @@ namespace NesCore.Processing
             Execute LogicalInclusiveOr = (address, mode) =>
             {
                 State state = Processor.State;
-                state.Accumulator |= Memory.Read(address);
+                state.Accumulator |= SystemBus.Read(address);
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
 
@@ -93,7 +93,7 @@ namespace NesCore.Processing
             Execute LogicalExclusiveOr = (address, mode) =>
             {
                 State state = Processor.State;
-                state.Accumulator ^= Memory.Read(address);
+                state.Accumulator ^= SystemBus.Read(address);
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
 
@@ -115,13 +115,13 @@ namespace NesCore.Processing
                 else
                 {
                     // read value from address
-                    byte value = Memory.Read(address);
+                    byte value = SystemBus.Read(address);
                     // carry if highest bit is 1
                     state.CarryFlag = ((value >> 7) & 1) != 0;
                     // shift left
                     value <<= 1;
                     // write shifted value back to memory
-                    Memory.Write(address, value);
+                    SystemBus.Write(address, value);
                     // update zero and negative flags
                     SetZeroAndNegativeFlags(value);
                 }
@@ -145,12 +145,12 @@ namespace NesCore.Processing
                 else
                 {
                     // work on value retrieved from memory
-                    byte value = Memory.Read(address);
+                    byte value = SystemBus.Read(address);
                     state.CarryFlag = (value & 0x80) != 0;
                     value = (byte)(value << 1);
                     if (carryFlag)
                         value |= 1;
-                    Memory.Write(address, value);
+                    SystemBus.Write(address, value);
                     SetZeroAndNegativeFlags(value);
                 }
             };
@@ -173,12 +173,12 @@ namespace NesCore.Processing
                 else
                 {
                     // work on value retrieved from memory
-                    byte value = Memory.Read(address);
+                    byte value = SystemBus.Read(address);
                     state.CarryFlag = (value & 0x01) != 0;
                     value = (byte)(value >> 1);
                     if (carryFlag)
                         value |= 0x80;
-                    Memory.Write(address, value);
+                    SystemBus.Write(address, value);
                     SetZeroAndNegativeFlags(value);
                 }
             };
@@ -255,7 +255,7 @@ namespace NesCore.Processing
             Execute BitTest = (address, mode) =>
             {
                 State state = Processor.State;
-                byte value = Memory.Read(address);
+                byte value = SystemBus.Read(address);
                 state.OverflowFlag = (value & 0x40) != 0; // bit 6
                 state.NegativeFlag = (value & 0x80) != 0; // bit 7
                 state.ZeroFlag = (value & state.Accumulator) != 0;
@@ -291,10 +291,10 @@ namespace NesCore.Processing
                 }
                 else
                 {
-                    byte value = Memory.Read(address);
+                    byte value = SystemBus.Read(address);
                     state.CarryFlag = (value & 0x01) != 0;
                     value >>= 1;
-                    Memory.Write(address, value);
+                    SystemBus.Write(address, value);
                     SetZeroAndNegativeFlags(value);
                 }
             };
@@ -367,7 +367,7 @@ namespace NesCore.Processing
             {
                 State state = Processor.State;
                 byte oldAccumulatorValue = state.Accumulator;
-                byte operandValue = Memory.Read(address);
+                byte operandValue = SystemBus.Read(address);
                 byte carryValue = state.CarryFlag ? (byte)1 : (byte)0;
                 state.Accumulator = (byte)(oldAccumulatorValue + operandValue + carryValue);
                 SetZeroAndNegativeFlags(state.Accumulator);
@@ -391,7 +391,7 @@ namespace NesCore.Processing
                 Processor.Push16(Processor.State.ProgramCounter);
                 PushProcessorStatus(address, mode);
                 SetInterruptDisableFlag(address, mode);
-                Processor.State.ProgramCounter = Memory.Read16(Memory.IrqVector);
+                Processor.State.ProgramCounter = Processor.Read16(Processor.IrqVector);
             };
 
             // Op Codes
@@ -607,7 +607,7 @@ namespace NesCore.Processing
             state.Cycles++;
 
             // one more cycle is needed when crossing pages
-            if (Memory.PagesDiffer(state.ProgramCounter, address))
+            if (Processor.PagesDiffer(state.ProgramCounter, address))
                 state.Cycles++;
         }
 

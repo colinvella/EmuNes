@@ -1,5 +1,4 @@
-﻿using NesCore.Addressing;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,21 +11,25 @@ namespace NesCore.Processing
         public const int Frequency = 1789773;
         public const byte StackBase = 0xFD;
 
-        public Processor(Console console)
+        public const UInt16 ResetVector = 0xFFFC;
+        public const UInt16 IrqVector = 0xFFFE;
+
+
+        public Processor(SystemBus systemBus)
         {
-            Console = console;
+            SystemBus = systemBus;
             State = new State();
             InstructionSet = new InstructionSet(this);
         }
 
-        public Console Console { get; private set; }
+        public SystemBus SystemBus { get; private set; }
         public State State { get; private set; }
         public InstructionSet InstructionSet { get; private set; }
 
         // resets the processor state
         public void Reset()
         {
-            State.ProgramCounter = Memory.ResetVector;
+            State.ProgramCounter = ResetVector;
             State.StackPointer = StackBase;
             State.InterruptDisableFlag = true;
         }
@@ -54,8 +57,7 @@ namespace NesCore.Processing
             UInt64 cycles = State.Cycles;
 
             // read next op code
-            Memory memory = Console.Memory;
-            byte opCode = memory.Read(State.ProgramCounter);
+            byte opCode = SystemBus.Read(State.ProgramCounter);
 
             // get corresponding instruction
             Instruction instruction = InstructionSet[opCode];
@@ -87,7 +89,7 @@ namespace NesCore.Processing
         public void Push(byte value)
         {
             // stack is located in address range 0x100 to 0x1FF and initially set to 0x1FF
-            Console.Memory.Write((UInt16)(0x100 | State.StackPointer), value);
+            SystemBus.Write((UInt16)(0x100 | State.StackPointer), value);
             State.StackPointer--;
         }
 
@@ -103,7 +105,7 @@ namespace NesCore.Processing
         public byte Pull()
         {
             State.StackPointer++;
-            return Console.Memory.Read((UInt16)(0x100 | State.StackPointer));
+            return SystemBus.Read((UInt16)(0x100 | State.StackPointer));
         }
 
         // pull word from stack
@@ -125,8 +127,6 @@ namespace NesCore.Processing
 
         private UInt16 GetAddressOperand(AddressingMode addressingMode, out bool pageCrossed)
         {
-            Memory memory = Console.Memory;
-
             UInt16 address = 0;
             pageCrossed = false;
             // immediate address is word address after op code
@@ -136,17 +136,17 @@ namespace NesCore.Processing
             {
                 case AddressingMode.Absolute:
                     // absolute address is the word located at immediate address
-                    address = memory.Read16(immediateAddress);
+                    address = Read16(immediateAddress);
                     break;
                 case AddressingMode.AbsoluteX:
                     // absolute x address is the absolute address offset by the X register
-                    address = (UInt16)(memory.Read16(immediateAddress) + State.RegisterX);
-                    pageCrossed = memory.PagesDiffer((UInt16)(address - State.RegisterX), address);
+                    address = (UInt16)(Read16(immediateAddress) + State.RegisterX);
+                    pageCrossed = PagesDiffer((UInt16)(address - State.RegisterX), address);
                     break;
                 case AddressingMode.AbsoluteY:
                     // absolute y address is the absolute address offset by the Y register
-                    address = (UInt16)(memory.Read16(immediateAddress) + State.RegisterY);
-                    pageCrossed = memory.PagesDiffer((UInt16)(address - State.RegisterY), address);
+                    address = (UInt16)(Read16(immediateAddress) + State.RegisterY);
+                    pageCrossed = PagesDiffer((UInt16)(address - State.RegisterY), address);
                     break;
                 case AddressingMode.Accumulator:
                     // address n/a
@@ -160,41 +160,50 @@ namespace NesCore.Processing
                     break;
                 case AddressingMode.IndexedIndirect:
                     // indexed indirect is address located at the x register, offset by the byte immediately following the op code
-                    address = memory.Read16Bug((UInt16)(memory.Read(immediateAddress) + State.RegisterX));
+                    address = Read16Bug((UInt16)(SystemBus.Read(immediateAddress) + State.RegisterX));
                     break;
                 case AddressingMode.Indirect:
                     // indirect address is the address located at the absolute address (with 6502 addressing bug)
-                    address = memory.Read16Bug(memory.Read16(immediateAddress));
+                    address = Read16Bug(Read16(immediateAddress));
                     break;
                 case AddressingMode.IndirectIndexed:
                     // indirect indexed address is the address located at the byte address immediately after the op code, then offset by the Y register
-                    address = (UInt16)(memory.Read16Bug((memory.Read(immediateAddress))) + State.RegisterY);
-                    pageCrossed = memory.PagesDiffer((UInt16)(address - State.RegisterY), address);
+                    address = (UInt16)(Read16Bug((SystemBus.Read(immediateAddress))) + State.RegisterY);
+                    pageCrossed = PagesDiffer((UInt16)(address - State.RegisterY), address);
                     break;
                 case AddressingMode.Relative:
                     // address is relative signed byte offset following op code, applied at the end of the instruction
-                    byte offset = memory.Read(immediateAddress);
+                    byte offset = SystemBus.Read(immediateAddress);
                     address = (UInt16)(State.ProgramCounter + 2 + offset);
                     if (offset >= 0x80)
                         address -= 0x100;
                     break;
                 case AddressingMode.ZeroPage:
                     // address is absolute byte address within 0th page
-                    address = memory.Read(immediateAddress);
+                    address = SystemBus.Read(immediateAddress);
                     break;
                 case AddressingMode.ZeroPageX:
                     // address is absolute byte address within 0th page, offset by x register
-                    address = (UInt16)(memory.Read(immediateAddress) + State.RegisterX);
+                    address = (UInt16)(SystemBus.Read(immediateAddress) + State.RegisterX);
                     break;
                 case AddressingMode.ZeroPageY:
                     // address is absolute byte address within 0th page, offset by y register
-                    address = (UInt16)(memory.Read(immediateAddress) + State.RegisterY);
+                    address = (UInt16)(SystemBus.Read(immediateAddress) + State.RegisterY);
                     break;
             }
 
             return address;
         }
 
+        // returns true if address pages differ (differ by high byte)
+        public bool PagesDiffer(UInt16 addressOne, UInt16 addressTwo)
+        {
+            return (addressOne & 0xFF00) != (addressTwo & 0xFF00);
+        }
+
+        public UInt16 Read16(UInt16 address) { return 0; }
+
+        public UInt16 Read16Bug(UInt16 address) { return 0; }
 
     }
 }

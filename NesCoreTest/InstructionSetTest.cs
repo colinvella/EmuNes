@@ -11,9 +11,9 @@ namespace NesCoreTest
         [TestMethod]
         public void CompleteDefinition()
         {
-            NesCore.Console console = new NesCore.Console();
+            Processor processor = new Processor(null);
             byte opCode = 0;
-            foreach (Instruction instruction in console.Processor.InstructionSet)
+            foreach (Instruction instruction in processor.InstructionSet)
             {
                 Assert.IsNotNull(instruction, "Opcode instruction " + ToHex(opCode) + " not defined");
                 System.Console.WriteLine(ToHex(opCode) + ": " + instruction);

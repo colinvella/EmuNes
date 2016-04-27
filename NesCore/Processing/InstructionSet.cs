@@ -67,6 +67,32 @@ namespace NesCore.Processing
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
 
+            // load instructions
+
+            // LDA - load accumulator
+            Execute LoadAccumulator = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.Accumulator = SystemBus.Read(address);
+                SetZeroAndNegativeFlags(state.Accumulator);
+            };
+
+            // LDX - load register x
+            Execute LoadRegisterX = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.RegisterX = SystemBus.Read(address);
+                SetZeroAndNegativeFlags(state.RegisterX);
+            };
+
+            // LDY - load register y
+            Execute LoadRegisterY = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.RegisterY = SystemBus.Read(address);
+                SetZeroAndNegativeFlags(state.RegisterY);
+            };
+
             // store instructions
 
             // STA - store accumulator
@@ -613,6 +639,15 @@ namespace NesCore.Processing
             instructions[0x9F] = new Instruction("AHX", AddressingMode.AbsoluteY, 5, IllegalOpCode);
 
             // 0xA0 - 0xAF
+            instructions[0xA0] = new Instruction("LDY", AddressingMode.Immediate, 2, LoadRegisterY);
+            instructions[0xA1] = new Instruction("LDA", AddressingMode.IndexedIndirect, 6, LoadAccumulator);
+            instructions[0xA2] = new Instruction("LDX", AddressingMode.Immediate, 2, LoadRegisterX);
+            instructions[0xA3] = new Instruction("LAX", AddressingMode.IndexedIndirect, 6, IllegalOpCode);
+            instructions[0xA4] = new Instruction("LDY", AddressingMode.ZeroPage, 3, LoadRegisterY);
+            instructions[0xA5] = new Instruction("LDA", AddressingMode.ZeroPage, 3, LoadAccumulator);
+            instructions[0xA6] = new Instruction("LDX", AddressingMode.ZeroPage, 3, LoadRegisterX);
+            instructions[0xA7] = new Instruction("LAX", AddressingMode.ZeroPage, 3, IllegalOpCode);
+
 
             // 0xB0 - 0xBF
 

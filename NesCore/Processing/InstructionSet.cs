@@ -51,6 +51,22 @@ namespace NesCore.Processing
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
 
+            // TYA - transfer y to accumulator
+            Execute TransferYToAccumulator = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.Accumulator = state.RegisterY;
+                SetZeroAndNegativeFlags(state.Accumulator);
+            };
+
+            // TXS - Transfer x to stack pointer
+            Execute TransferXToStackPointer = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.StackPointer = state.RegisterX;
+                SetZeroAndNegativeFlags(state.Accumulator);
+            };
+
             // store instructions
 
             // STA - store accumulator
@@ -185,8 +201,8 @@ namespace NesCore.Processing
 
             // branch instructions
 
-            // BPL - branch on plus
-            Execute BranchOnPlus = (address, mode) =>
+            // BPL - branch if plus
+            Execute BranchIfPlus = (address, mode) =>
             {
                 State state = Processor.State;
 
@@ -200,8 +216,8 @@ namespace NesCore.Processing
                 AddBranchCycles(address, mode);
             };
 
-            // BMI - branch on minus
-            Execute BranchOnMinus = (address, mode) =>
+            // BMI - branch if minus
+            Execute BranchIfMinus = (address, mode) =>
             {
                 State state = Processor.State;
 
@@ -213,6 +229,26 @@ namespace NesCore.Processing
                 state.ProgramCounter = address;
 
                 // add extra cycles as necessary
+                AddBranchCycles(address, mode);
+            };
+
+            // BCC - branch if carry clear
+            Execute BranchIfCarryClear = (address, mode) =>
+            {
+                State state = Processor.State;
+                if (state.CarryFlag)
+                    return;
+                state.ProgramCounter = address;
+                AddBranchCycles(address, mode);
+            };
+
+            // BCS - branch if carry set
+            Execute BranchIfCarrySet = (address, mode) =>
+            {
+                State state = Processor.State;
+                if (!state.CarryFlag)
+                    return;
+                state.ProgramCounter = address;
                 AddBranchCycles(address, mode);
             };
 
@@ -415,7 +451,7 @@ namespace NesCore.Processing
             instructions[0x0F] = new Instruction("SLO", AddressingMode.Absolute, 6, IllegalOpCode);
 
             // 0x10 - 0x1F
-            instructions[0x10] = new Instruction("BPL", AddressingMode.Relative, 2, BranchOnPlus);
+            instructions[0x10] = new Instruction("BPL", AddressingMode.Relative, 2, BranchIfPlus);
             instructions[0x11] = new Instruction("ORA", AddressingMode.IndirectIndexed, 5, LogicalInclusiveOr);
             instructions[0x12] = new Instruction("KIL", AddressingMode.Implied, 2, IllegalOpCode);
             instructions[0x13] = new Instruction("SLO", AddressingMode.IndirectIndexed, 8, IllegalOpCode);
@@ -451,7 +487,7 @@ namespace NesCore.Processing
             instructions[0x2F] = new Instruction("RLA", AddressingMode.Absolute, 6, IllegalOpCode);
 
             // 0x30 - 0x3F
-            instructions[0x30] = new Instruction("BMI", AddressingMode.Relative, 2, BranchOnMinus);
+            instructions[0x30] = new Instruction("BMI", AddressingMode.Relative, 2, BranchIfMinus);
             instructions[0x31] = new Instruction("AND", AddressingMode.IndirectIndexed, 5, LogicalAnd);
             instructions[0x32] = new Instruction("KIL", AddressingMode.Implied, 2, IllegalOpCode);
             instructions[0x33] = new Instruction("RLA", AddressingMode.IndirectIndexed, 8, IllegalOpCode);
@@ -559,12 +595,25 @@ namespace NesCore.Processing
             instructions[0x8F] = new Instruction("SAX", AddressingMode.Absolute, 4, IllegalOpCode);
 
             // 0x90 - 0x9F
-
+            instructions[0x90] = new Instruction("BCC", AddressingMode.Relative, 2, BranchIfCarryClear);
+            instructions[0x91] = new Instruction("STA", AddressingMode.IndirectIndexed, 6, StoreAccumulator);
             instructions[0x92] = new Instruction("KIL", AddressingMode.Implied, 2, IllegalOpCode);
-
+            instructions[0x93] = new Instruction("AHX", AddressingMode.IndirectIndexed, 6, IllegalOpCode);
+            instructions[0x94] = new Instruction("STY", AddressingMode.ZeroPageX, 4, StoreRegisterY);
+            instructions[0x95] = new Instruction("STA", AddressingMode.ZeroPageX, 4, StoreAccumulator);
+            instructions[0x96] = new Instruction("STX", AddressingMode.ZeroPageY, 4, StoreRegisterX);
+            instructions[0x97] = new Instruction("SAX", AddressingMode.ZeroPageY, 4, IllegalOpCode);
+            instructions[0x98] = new Instruction("TYA", AddressingMode.Implied, 2, TransferYToAccumulator);
+            instructions[0x99] = new Instruction("STA", AddressingMode.AbsoluteY, 5, StoreAccumulator);
+            instructions[0x9A] = new Instruction("TXS", AddressingMode.Implied, 2, TransferXToStackPointer);
+            instructions[0x9B] = new Instruction("TAS", AddressingMode.AbsoluteY, 5, IllegalOpCode);
+            instructions[0x9C] = new Instruction("SHY", AddressingMode.AbsoluteX, 5, IllegalOpCode);
+            instructions[0x9D] = new Instruction("STA", AddressingMode.AbsoluteX, 5, StoreAccumulator);
+            instructions[0x9E] = new Instruction("SHX", AddressingMode.AbsoluteY, 5, IllegalOpCode);
+            instructions[0x9F] = new Instruction("AHX", AddressingMode.AbsoluteY, 5, IllegalOpCode);
 
             // 0xA0 - 0xAF
-            
+
             // 0xB0 - 0xBF
 
             instructions[0xB2] = new Instruction("KIL", AddressingMode.Implied, 2, IllegalOpCode);

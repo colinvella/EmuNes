@@ -41,7 +41,17 @@ namespace NesCore.Processing
             // no operation
             Execute NoOperation = (address, mode) => { };
 
-            // store operations
+            // move instructions
+
+            // TXA - transfer x to accumulator
+            Execute TransferXToAccumulator = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.Accumulator = state.RegisterX;
+                SetZeroAndNegativeFlags(state.Accumulator);
+            };
+
+            // store instructions
 
             // STA - store accumulator
             Execute StoreAccumulator = (address, mode) =>
@@ -61,6 +71,15 @@ namespace NesCore.Processing
                 Memory.Write(address, Processor.State.RegisterY);
             };
 
+            // logical instructions 
+
+            // AND - logical And
+            Execute LogicalAnd = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.Accumulator &= Memory.Read(address);
+                SetZeroAndNegativeFlags(state.Accumulator);
+            };
 
             // ORA - logical inclusive OR
             Execute LogicalInclusiveOr = (address, mode) =>
@@ -69,6 +88,16 @@ namespace NesCore.Processing
                 state.Accumulator |= Memory.Read(address);
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
+
+            // EOR - logical exlusive OR
+            Execute LogicalExclusiveOr = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.Accumulator ^= Memory.Read(address);
+                SetZeroAndNegativeFlags(state.Accumulator);
+            };
+
+            // shift instructions
 
             // ASL - arithmetic shift left
             Execute ArithmeticShiftLeft = (address, mode) =>
@@ -98,6 +127,61 @@ namespace NesCore.Processing
                 }
             };
 
+            // ROL - rotate left
+            Execute RotateLeft = (address, mode) =>
+            {
+                State state = Processor.State;
+                bool carryFlag = state.CarryFlag;
+
+                if (mode == AddressingMode.Accumulator)
+                {
+                    // work on accumulator value
+                    state.CarryFlag = (state.Accumulator & 0x80) != 0;
+                    state.Accumulator = (byte)(state.Accumulator << 1);
+                    if (carryFlag)
+                        state.Accumulator |= 1;
+                    SetZeroAndNegativeFlags(state.Accumulator);
+                }
+                else
+                {
+                    // work on value retrieved from memory
+                    byte value = Memory.Read(address);
+                    state.CarryFlag = (value & 0x80) != 0;
+                    value = (byte)(value << 1);
+                    if (carryFlag)
+                        value |= 1;
+                    Memory.Write(address, value);
+                    SetZeroAndNegativeFlags(value);
+                }
+            };
+
+            // ROR - rotate right
+            Execute RotateRight = (address, mode) =>
+            {
+                State state = Processor.State;
+                bool carryFlag = state.CarryFlag;
+
+                if (mode == AddressingMode.Accumulator)
+                {
+                    // work on accumulator value
+                    state.CarryFlag = (state.Accumulator & 0x01) != 0;
+                    state.Accumulator = (byte)(state.Accumulator >> 1);
+                    if (carryFlag)
+                        state.Accumulator |= 0x80;
+                    SetZeroAndNegativeFlags(state.Accumulator);
+                }
+                else
+                {
+                    // work on value retrieved from memory
+                    byte value = Memory.Read(address);
+                    state.CarryFlag = (value & 0x01) != 0;
+                    value = (byte)(value >> 1);
+                    if (carryFlag)
+                        value |= 0x80;
+                    Memory.Write(address, value);
+                    SetZeroAndNegativeFlags(value);
+                }
+            };
 
             // branch instructions
 
@@ -167,14 +251,6 @@ namespace NesCore.Processing
                 state.ProgramCounter = address;
             };
 
-            // AND - logical And
-            Execute LogicalAnd = (address, mode) =>
-            {
-                State state = Processor.State;
-                state.Accumulator &= Memory.Read(address);
-                SetZeroAndNegativeFlags(state.Accumulator);
-            };
-
             // BIT - bit test
             Execute BitTest = (address, mode) =>
             {
@@ -183,62 +259,6 @@ namespace NesCore.Processing
                 state.OverflowFlag = (value & 0x40) != 0; // bit 6
                 state.NegativeFlag = (value & 0x80) != 0; // bit 7
                 state.ZeroFlag = (value & state.Accumulator) != 0;
-            };
-
-            // ROL - rotate left
-            Execute RotateLeft = (address, mode) =>
-            {
-                State state = Processor.State;
-                bool carryFlag = state.CarryFlag;
-
-                if (mode == AddressingMode.Accumulator)
-                {
-                    // work on accumulator value
-                    state.CarryFlag = (state.Accumulator & 0x80) != 0;
-                    state.Accumulator = (byte)(state.Accumulator << 1);
-                    if (carryFlag)
-                        state.Accumulator |= 1;
-                    SetZeroAndNegativeFlags(state.Accumulator);
-                }
-                else
-                {
-                    // work on value retrieved from memory
-                    byte value = Memory.Read(address);
-                    state.CarryFlag = (value & 0x80) != 0;
-                    value = (byte)(value << 1);
-                    if (carryFlag)
-                        value |= 1;
-                    Memory.Write(address, value);
-                    SetZeroAndNegativeFlags(value);
-                }
-            };
-
-            // ROR - rotate right
-            Execute RotateRight = (address, mode) =>
-            {
-                State state = Processor.State;
-                bool carryFlag = state.CarryFlag;
-
-                if (mode == AddressingMode.Accumulator)
-                {
-                    // work on accumulator value
-                    state.CarryFlag = (state.Accumulator & 0x01) != 0;
-                    state.Accumulator = (byte)(state.Accumulator >> 1);
-                    if (carryFlag)
-                        state.Accumulator |= 0x80;
-                    SetZeroAndNegativeFlags(state.Accumulator);
-                }
-                else
-                {
-                    // work on value retrieved from memory
-                    byte value = Memory.Read(address);
-                    state.CarryFlag = (value & 0x01) != 0;
-                    value = (byte)(value >> 1);
-                    if (carryFlag)
-                        value |= 0x80;
-                    Memory.Write(address, value);
-                    SetZeroAndNegativeFlags(value);
-                }
             };
 
 
@@ -257,14 +277,6 @@ namespace NesCore.Processing
                 state.UnusedFlag = true; // | 0x20
 
                 state.ProgramCounter = Processor.Pull16();
-            };
-
-            // EOR - logical exlusive OR
-            Execute LogicalExclusiveOr = (address, mode) =>
-            {
-                State state = Processor.State;
-                state.Accumulator ^= Memory.Read(address);
-                SetZeroAndNegativeFlags(state.Accumulator);
             };
 
             // LSR - logical shift right
@@ -338,6 +350,16 @@ namespace NesCore.Processing
                 State state = Processor.State;
                 state.ProgramCounter = Processor.Pull16();
                 ++state.ProgramCounter;
+            };
+
+            // arithmetic instructions
+
+            // DEY - Decrement Y Register
+            Execute DecrementRegisterY = (address, mode) =>
+            {
+                State state = Processor.State;
+                --state.RegisterY;
+                SetZeroAndNegativeFlags(state.RegisterY);
             };
 
             // ADC - add with carry
@@ -526,6 +548,15 @@ namespace NesCore.Processing
             instructions[0x84] = new Instruction("STY", AddressingMode.ZeroPage, 3, StoreRegisterY);
             instructions[0x85] = new Instruction("STA", AddressingMode.ZeroPage, 3, StoreAccumulator);
             instructions[0x86] = new Instruction("STX", AddressingMode.ZeroPage, 3, StoreRegisterX);
+            instructions[0x87] = new Instruction("SAX", AddressingMode.ZeroPage, 3, IllegalOpCode);
+            instructions[0x88] = new Instruction("DEY", AddressingMode.Implied, 2, DecrementRegisterY);
+            instructions[0x89] = new Instruction("NOP", AddressingMode.Immediate, 2, IllegalOpCode);
+            instructions[0x8A] = new Instruction("TXA", AddressingMode.Implied, 2, TransferXToAccumulator);
+            instructions[0x8B] = new Instruction("XAA", AddressingMode.Immediate, 2, IllegalOpCode);
+            instructions[0x8C] = new Instruction("STY", AddressingMode.Absolute, 4, StoreRegisterY);
+            instructions[0x8D] = new Instruction("STA", AddressingMode.Absolute, 5, StoreAccumulator);
+            instructions[0x8E] = new Instruction("STX", AddressingMode.Absolute, 4, StoreRegisterX);
+            instructions[0x8F] = new Instruction("SAX", AddressingMode.Absolute, 4, IllegalOpCode);
 
             // 0x90 - 0x9F
 

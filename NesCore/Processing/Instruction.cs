@@ -10,8 +10,9 @@ namespace NesCore.Processing
 
     public class Instruction
     {
-        public Instruction(String name, AddressingMode addressingMode, byte cycles, Execute execute)
+        public Instruction(byte code, String name, AddressingMode addressingMode, byte cycles, Execute execute)
         {
+            Code = code;
             Name = name;
             AddressingMode = addressingMode;
             Cycles = cycles;
@@ -48,6 +49,7 @@ namespace NesCore.Processing
             return Name + ": Mode: " + AddressingMode + ", Size: " + Size + "b, Cycles: " + Cycles;
         }
 
+        public byte Code { get; private set; }
         public string Name { get; private set; }
         public AddressingMode AddressingMode { get; private set; }
         public byte Size { get; private set; }

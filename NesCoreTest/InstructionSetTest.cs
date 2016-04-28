@@ -9,7 +9,7 @@ namespace NesCoreTest
     public class InstructionSetTest
     {
         [TestMethod]
-        public void CompleteDefinition()
+        public void CheckDefinition()
         {
             Processor processor = new Processor(null);
             byte opCode = 0;
@@ -17,6 +17,10 @@ namespace NesCoreTest
             {
                 Assert.IsNotNull(instruction, "Opcode instruction " + ToHex(opCode) + " not defined");
                 System.Console.WriteLine(ToHex(opCode) + ": " + instruction);
+
+                Assert.IsTrue(opCode == instruction.Code,
+                    "Instruction mapping mismatch: " + ToHex(opCode) + " / " + ToHex(instruction.Code));
+
                 opCode++;
             }
         }

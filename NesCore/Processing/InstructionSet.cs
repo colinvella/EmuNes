@@ -288,6 +288,13 @@ namespace NesCore.Processing
                 CompareValues(Processor.State.Accumulator, value);
             };
 
+            // CPX - compare x register
+            Execute CompareRegisterX = (address, mode) =>
+            {
+                byte value = SystemBus.Read(address);
+                CompareValues(Processor.State.RegisterX, value);
+            };
+
             // CPY - compare y register
             Execute CompareRegisterY = (address, mode) =>
             {
@@ -296,6 +303,26 @@ namespace NesCore.Processing
             };
 
             // branch instructions
+
+            // BEQ - branch if  equal
+            Execute BranchIfEqual = (address, mode) =>
+            {
+                State state = Processor.State;
+                if (!state.ZeroFlag)
+                    return;
+                state.ProgramCounter = address;
+                AddBranchCycles(address, mode);
+            };
+
+            // BNE - branch if not equal
+            Execute BranchIfNotEqual = (address, mode) =>
+            {
+                State state = Processor.State;
+                if (state.ZeroFlag)
+                    return;
+                state.ProgramCounter = address;
+                AddBranchCycles(address, mode);
+            };
 
             // BPL - branch if plus
             Execute BranchIfPlus = (address, mode) =>
@@ -427,6 +454,18 @@ namespace NesCore.Processing
                 Processor.State.CarryFlag = false;
             };
 
+            // SED - set decimal mode flag
+            Execute SetDecimalModeFlag = (address, mode) =>
+            {
+                Processor.State.DecimalModeFlag = true;
+            };
+
+            // CLD - clear decimal mode flag
+            Execute ClearDecimalModeFlag = (address, mode) =>
+            {
+                Processor.State.DecimalModeFlag = false;
+            };
+
             // CLV - clear overflow flag
             Execute ClearOverflowFlag = (address, mode) =>
             {
@@ -457,12 +496,29 @@ namespace NesCore.Processing
 
             // arithmetic instructions
 
+            // INX - increment register x
+            Execute IncrementRegisterX = (address, mode) =>
+            {
+                State state = Processor.State;
+                ++state.RegisterX;
+                SetZeroAndNegativeFlags(state.RegisterX);
+            };
+
             // INY - increment register y
             Execute IncrementRegisterY = (address, mode) =>
             {
                 State state = Processor.State;
                 ++state.RegisterY;
                 SetZeroAndNegativeFlags(state.RegisterY);
+            };
+
+            // INC - increment memory
+            Execute IncrementMemory = (address, mode) =>
+            {
+                byte value = SystemBus.Read(address);
+                ++value;
+                SystemBus.Write(address, value);
+                SetZeroAndNegativeFlags(value);
             };
 
             // DEC - decrement memory
@@ -501,6 +557,22 @@ namespace NesCore.Processing
                 SetZeroAndNegativeFlags(state.Accumulator);
                 state.CarryFlag = oldAccumulatorValue + operandValue + carryValue > 0xFF;
                 state.OverflowFlag = ((oldAccumulatorValue ^ operandValue) & 0x80) == 0
+                    && ((oldAccumulatorValue ^ state.Accumulator) & 0x80) != 0;
+            };
+
+
+            // SBC - subtract with carry
+            Execute SubtractWithCarry = (address, mode) =>
+            {
+                State state = Processor.State;
+                byte oldAccumulatorValue = state.Accumulator;
+                byte operandValue = SystemBus.Read(address);
+                byte carryValue = state.CarryFlag ? (byte)1 : (byte)0;
+                int result = oldAccumulatorValue - operandValue - 1 + carryValue;
+                state.Accumulator = (byte)result;
+                SetZeroAndNegativeFlags(state.Accumulator);
+                state.CarryFlag = result >= 0;
+                state.OverflowFlag = ((oldAccumulatorValue ^ operandValue) & 0x80) != 0
                     && ((oldAccumulatorValue ^ state.Accumulator) & 0x80) != 0;
             };
 
@@ -764,19 +836,58 @@ namespace NesCore.Processing
             instructions[0xCF] = new Instruction("DCP", AddressingMode.Absolute, 6, IllegalOpCode);
 
             // 0xD0 - 0xDF
-
+            instructions[0xD0] = new Instruction("BNE", AddressingMode.Relative, 2, BranchIfNotEqual);
+            instructions[0xD1] = new Instruction("CMP", AddressingMode.IndirectIndexed, 5, CompareAccumulator);
             instructions[0xD2] = new Instruction("KIL", AddressingMode.Implied, 2, IllegalOpCode);
-
+            instructions[0xD3] = new Instruction("DCP", AddressingMode.IndirectIndexed, 8, IllegalOpCode);
+            instructions[0xD4] = new Instruction("NOP", AddressingMode.ZeroPageX, 4, IllegalOpCode);
+            instructions[0xD5] = new Instruction("CMP", AddressingMode.ZeroPageX, 4, CompareAccumulator);
+            instructions[0xD6] = new Instruction("DEC", AddressingMode.ZeroPageX, 6, DecrementMemory);
+            instructions[0xD7] = new Instruction("DCP", AddressingMode.ZeroPageX, 6, IllegalOpCode);
+            instructions[0xD8] = new Instruction("CLD", AddressingMode.Implied, 2, ClearDecimalModeFlag);
+            instructions[0xD9] = new Instruction("CMP", AddressingMode.AbsoluteY, 4, CompareAccumulator);
+            instructions[0xDA] = new Instruction("NOP", AddressingMode.Implied, 2, IllegalOpCode);
+            instructions[0xDB] = new Instruction("DCP", AddressingMode.AbsoluteY, 7, IllegalOpCode);
+            instructions[0xDC] = new Instruction("NOP", AddressingMode.AbsoluteX, 4, IllegalOpCode);
+            instructions[0xDD] = new Instruction("CMP", AddressingMode.AbsoluteX, 4, CompareAccumulator);
+            instructions[0xDE] = new Instruction("DEC", AddressingMode.AbsoluteX, 7, DecrementMemory);
+            instructions[0xDF] = new Instruction("DCP", AddressingMode.AbsoluteX, 7, IllegalOpCode);
 
             // 0xE0 - 0xEF
-
-            instructions[0xEA] = new Instruction("NOP", AddressingMode.Implied, 2, NoOperation);
-
+            instructions[0xE0] = new Instruction("CPX", AddressingMode.Immediate, 2, CompareRegisterX);
+            instructions[0xE1] = new Instruction("SBC", AddressingMode.IndexedIndirect, 6, SubtractWithCarry);
+            instructions[0xE2] = new Instruction("NOP", AddressingMode.Immediate, 2, IllegalOpCode);
+            instructions[0xE3] = new Instruction("ISC", AddressingMode.IndexedIndirect, 8, IllegalOpCode);
+            instructions[0xE4] = new Instruction("CPX", AddressingMode.ZeroPage, 3, CompareRegisterX);
+            instructions[0xE5] = new Instruction("SBC", AddressingMode.ZeroPage, 3, SubtractWithCarry);
+            instructions[0xE6] = new Instruction("INC", AddressingMode.ZeroPage, 5, IncrementMemory);
+            instructions[0xE7] = new Instruction("ISC", AddressingMode.ZeroPage, 5, IllegalOpCode);
+            instructions[0xE8] = new Instruction("INX", AddressingMode.Implied, 2, IncrementRegisterX);
+            instructions[0xE9] = new Instruction("SBC", AddressingMode.Immediate, 2, SubtractWithCarry);
+            instructions[0xEA] = new Instruction("NOP", AddressingMode.Implied, 2, NoOperation); // legal NOP
+            instructions[0xEB] = new Instruction("SBC", AddressingMode.Immediate, 2, IllegalOpCode);
+            instructions[0xEC] = new Instruction("CPX", AddressingMode.Absolute, 4, CompareRegisterX);
+            instructions[0xED] = new Instruction("SBC", AddressingMode.Absolute, 4, SubtractWithCarry);
+            instructions[0xEE] = new Instruction("INC", AddressingMode.Absolute, 6, IncrementMemory);
+            instructions[0xEF] = new Instruction("ISC", AddressingMode.Absolute, 6, IllegalOpCode);
 
             // 0xF0 - 0xFF
-
+            instructions[0xF0] = new Instruction("BEQ", AddressingMode.Relative, 2, BranchIfEqual);
+            instructions[0xF1] = new Instruction("SBC", AddressingMode.IndirectIndexed, 5, SubtractWithCarry);
             instructions[0xF2] = new Instruction("KIL", AddressingMode.Implied, 2, IllegalOpCode);
-
+            instructions[0xF3] = new Instruction("ISC", AddressingMode.IndirectIndexed, 8, IllegalOpCode);
+            instructions[0xF4] = new Instruction("NOP", AddressingMode.ZeroPageX, 4, IllegalOpCode);
+            instructions[0xF5] = new Instruction("SBC", AddressingMode.ZeroPageX, 4, SubtractWithCarry);
+            instructions[0xF6] = new Instruction("INC", AddressingMode.ZeroPageX, 6, IncrementMemory);
+            instructions[0xF7] = new Instruction("ISC", AddressingMode.ZeroPageX, 6, IllegalOpCode);
+            instructions[0xF8] = new Instruction("SED", AddressingMode.Implied, 2, SetDecimalModeFlag);
+            instructions[0xF9] = new Instruction("SBC", AddressingMode.AbsoluteY, 4, SubtractWithCarry);
+            instructions[0xFA] = new Instruction("NOP", AddressingMode.Implied, 2, IllegalOpCode);
+            instructions[0xFB] = new Instruction("ISC", AddressingMode.AbsoluteY, 7, IllegalOpCode);
+            instructions[0xFC] = new Instruction("NOP", AddressingMode.AbsoluteX, 4, IllegalOpCode);
+            instructions[0xFD] = new Instruction("SBC", AddressingMode.AbsoluteX, 4, SubtractWithCarry);
+            instructions[0xFE] = new Instruction("INC", AddressingMode.AbsoluteX, 7, IncrementMemory);
+            instructions[0xFF] = new Instruction("ISC", AddressingMode.AbsoluteX, 7, IllegalOpCode);
         }
 
         // private helper functions

@@ -43,6 +43,30 @@ namespace NesCore.Processing
 
             // move instructions
 
+            // TAX - transfer accumulator to x
+            Execute TransferAccumulatorToX = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.RegisterX = state.Accumulator;
+                SetZeroAndNegativeFlags(state.RegisterX);
+            };
+
+            // TAY - transfer accumulator to y
+            Execute TransferAccumulatorToY = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.RegisterY = state.Accumulator;
+                SetZeroAndNegativeFlags(state.RegisterY);
+            };
+
+            // TSX - transfer stack pointer to x
+            Execute TransferStackPointerToX = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.RegisterX = state.StackPointer;
+                SetZeroAndNegativeFlags(state.RegisterX);
+            };
+
             // TXA - transfer x to accumulator
             Execute TransferXToAccumulator = (address, mode) =>
             {
@@ -139,6 +163,16 @@ namespace NesCore.Processing
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
 
+            // BIT - bit test
+            Execute BitTest = (address, mode) =>
+            {
+                State state = Processor.State;
+                byte value = SystemBus.Read(address);
+                state.OverflowFlag = (value & 0x40) != 0; // bit 6
+                state.NegativeFlag = (value & 0x80) != 0; // bit 7
+                state.ZeroFlag = (value & state.Accumulator) != 0;
+            };
+
             // shift instructions
 
             // ASL - arithmetic shift left
@@ -225,6 +259,42 @@ namespace NesCore.Processing
                 }
             };
 
+            // LSR - logical shift right
+            Execute LogicalShiftRight = (address, mode) =>
+            {
+                State state = Processor.State;
+                if (mode == AddressingMode.Accumulator)
+                {
+                    state.CarryFlag = (state.Accumulator & 0x01) != 0;
+                    state.Accumulator >>= 1;
+                    SetZeroAndNegativeFlags(state.Accumulator);
+                }
+                else
+                {
+                    byte value = SystemBus.Read(address);
+                    state.CarryFlag = (value & 0x01) != 0;
+                    value >>= 1;
+                    SystemBus.Write(address, value);
+                    SetZeroAndNegativeFlags(value);
+                }
+            };
+
+            // compare instructions
+
+            // CMP - compare accumulator
+            Execute CompareAccumulator = (address, mode) =>
+            {
+                byte value = SystemBus.Read(address);
+                CompareValues(Processor.State.Accumulator, value);
+            };
+
+            // CPY - compare y register
+            Execute CompareRegisterY = (address, mode) =>
+            {
+                byte value = SystemBus.Read(address);
+                CompareValues(Processor.State.RegisterY, value);
+            };
+
             // branch instructions
 
             // BPL - branch if plus
@@ -298,13 +368,6 @@ namespace NesCore.Processing
                 AddBranchCycles(address, mode);
             };
 
-
-            // CLC - clear carry
-            Execute ClearCarryFlag = (address, mode) =>
-            {
-                Processor.State.CarryFlag = false;
-            };
-
             // JSR - jump to subroutine
             Execute JumpToSubroutine = (address, mode) =>
             {
@@ -313,52 +376,12 @@ namespace NesCore.Processing
                 state.ProgramCounter = address;
             };
 
-            // BIT - bit test
-            Execute BitTest = (address, mode) =>
+            // RTS - return from subroutine
+            Execute ReturnFromSubroutine = (address, mode) =>
             {
                 State state = Processor.State;
-                byte value = SystemBus.Read(address);
-                state.OverflowFlag = (value & 0x40) != 0; // bit 6
-                state.NegativeFlag = (value & 0x80) != 0; // bit 7
-                state.ZeroFlag = (value & state.Accumulator) != 0;
-            };
-
-
-            // SEC - set carry flag
-            Execute SetCarryFlag = (address, mode) =>
-            {
-                Processor.State.CarryFlag = true;
-            };
-
-            // RTI - Return from interrupt
-            Execute ReturnFromInterrupt = (address, mode) =>
-            {
-                State state = Processor.State;
-                state.Flags = Processor.Pull();
-                state.BreakCommandFlag = false; // & 0xEF
-                state.UnusedFlag = true; // | 0x20
-
                 state.ProgramCounter = Processor.Pull16();
-            };
-
-            // LSR - logical shift right
-            Execute LogicalShiftRight = (address, mode) =>
-            {
-                State state = Processor.State;
-                if (mode == AddressingMode.Accumulator)
-                {
-                    state.CarryFlag = (state.Accumulator & 0x01) != 0;
-                    state.Accumulator >>= 1;
-                    SetZeroAndNegativeFlags(state.Accumulator);
-                }
-                else
-                {
-                    byte value = SystemBus.Read(address);
-                    state.CarryFlag = (value & 0x01) != 0;
-                    value >>= 1;
-                    SystemBus.Write(address, value);
-                    SetZeroAndNegativeFlags(value);
-                }
+                ++state.ProgramCounter;
             };
 
             // stack instructions
@@ -390,7 +413,37 @@ namespace NesCore.Processing
                 state.UnusedFlag = true; // | 0x20
             };
 
+            // clear / set flag instructions
 
+            // SEC - set carry flag
+            Execute SetCarryFlag = (address, mode) =>
+            {
+                Processor.State.CarryFlag = true;
+            };
+
+            // CLC - clear carry flag
+            Execute ClearCarryFlag = (address, mode) =>
+            {
+                Processor.State.CarryFlag = false;
+            };
+
+            // CLV - clear overflow flag
+            Execute ClearOverflowFlag = (address, mode) =>
+            {
+                Processor.State.OverflowFlag = false;
+            };
+
+            // SEI - set interrupt disable flag
+            Execute SetInterruptDisableFlag = (address, mode) =>
+            {
+                Processor.State.InterruptDisableFlag = true;
+            };
+
+            // CLI - clear interrupt disable flag
+            Execute ClearInterruptDisableFlag = (address, mode) =>
+            {
+                Processor.State.InterruptDisableFlag = false;
+            };
 
 
             // JMP - jump
@@ -400,21 +453,34 @@ namespace NesCore.Processing
             };
 
 
-            // CLI - clear interrupt disable flag
-            Execute ClearInterruptDisableFlag = (address, mode) =>
-            {
-                Processor.State.InterruptDisableFlag = false;
-            };
 
-            // RTS - return from subroutine
-            Execute ReturnFromSubroutine = (address, mode) =>
-            {
-                State state = Processor.State;
-                state.ProgramCounter = Processor.Pull16();
-                ++state.ProgramCounter;
-            };
 
             // arithmetic instructions
+
+            // INY - increment register y
+            Execute IncrementRegisterY = (address, mode) =>
+            {
+                State state = Processor.State;
+                ++state.RegisterY;
+                SetZeroAndNegativeFlags(state.RegisterY);
+            };
+
+            // DEC - decrement memory
+            Execute DecrementMemory = (address, mode) =>
+            {
+                byte value = SystemBus.Read(address);
+                --value;
+                SystemBus.Write(address, value);
+                SetZeroAndNegativeFlags(value);
+            };
+
+            // DEX - Decrement X Register
+            Execute DecrementRegisterX = (address, mode) =>
+            {
+                State state = Processor.State;
+                --state.RegisterX;
+                SetZeroAndNegativeFlags(state.RegisterX);
+            };
 
             // DEY - Decrement Y Register
             Execute DecrementRegisterY = (address, mode) =>
@@ -438,14 +504,7 @@ namespace NesCore.Processing
                     && ((oldAccumulatorValue ^ state.Accumulator) & 0x80) != 0;
             };
 
-
-
-
-            // SEI - set interrupt disable flag
-            Execute SetInterruptDisableFlag = (address, mode) =>
-            {
-                Processor.State.InterruptDisableFlag = true;
-            };
+            // interrupt instructions
 
             // BRK - break (force interrupt)
             Execute Break = (address, mode) =>
@@ -455,6 +514,18 @@ namespace NesCore.Processing
                 SetInterruptDisableFlag(address, mode);
                 Processor.State.ProgramCounter = Processor.Read16(Processor.IrqVector);
             };
+
+            // RTI - Return from interrupt
+            Execute ReturnFromInterrupt = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.Flags = Processor.Pull();
+                state.BreakCommandFlag = false; // & 0xEF
+                state.UnusedFlag = true; // | 0x20
+
+                state.ProgramCounter = Processor.Pull16();
+            };
+
 
             // Op Codes
 
@@ -647,15 +718,50 @@ namespace NesCore.Processing
             instructions[0xA5] = new Instruction("LDA", AddressingMode.ZeroPage, 3, LoadAccumulator);
             instructions[0xA6] = new Instruction("LDX", AddressingMode.ZeroPage, 3, LoadRegisterX);
             instructions[0xA7] = new Instruction("LAX", AddressingMode.ZeroPage, 3, IllegalOpCode);
-
+            instructions[0xA8] = new Instruction("TAY", AddressingMode.Implied, 2, TransferAccumulatorToY);
+            instructions[0xA9] = new Instruction("LDA", AddressingMode.Immediate, 2, LoadAccumulator);
+            instructions[0xAA] = new Instruction("TAX", AddressingMode.Implied, 2, TransferAccumulatorToX);
+            instructions[0xAB] = new Instruction("LAX", AddressingMode.Immediate, 2, IllegalOpCode);
+            instructions[0xAC] = new Instruction("LDY", AddressingMode.Absolute, 4, LoadRegisterY);
+            instructions[0xAD] = new Instruction("LDA", AddressingMode.Absolute, 4, LoadAccumulator);
+            instructions[0xAE] = new Instruction("LDX", AddressingMode.Absolute, 4, LoadRegisterX);
+            instructions[0xAF] = new Instruction("LAX", AddressingMode.Absolute, 4, IllegalOpCode);
 
             // 0xB0 - 0xBF
-
+            instructions[0xB0] = new Instruction("BCS", AddressingMode.Relative, 2, BranchIfCarrySet);
+            instructions[0xB1] = new Instruction("LDA", AddressingMode.IndirectIndexed, 5, LoadAccumulator);
             instructions[0xB2] = new Instruction("KIL", AddressingMode.Implied, 2, IllegalOpCode);
-
+            instructions[0xB3] = new Instruction("LAX", AddressingMode.IndirectIndexed, 5, IllegalOpCode);
+            instructions[0xB4] = new Instruction("LDY", AddressingMode.ZeroPageX, 4, LoadRegisterY);
+            instructions[0xB5] = new Instruction("LDA", AddressingMode.ZeroPageX, 4, LoadAccumulator);
+            instructions[0xB6] = new Instruction("LDX", AddressingMode.ZeroPageY, 4, LoadRegisterX);
+            instructions[0xB7] = new Instruction("LAX", AddressingMode.ZeroPageY, 4, IllegalOpCode);
+            instructions[0xB8] = new Instruction("CLV", AddressingMode.Implied, 2, ClearOverflowFlag);
+            instructions[0xB9] = new Instruction("LDA", AddressingMode.AbsoluteY, 4, LoadAccumulator);
+            instructions[0xBA] = new Instruction("TSX", AddressingMode.Implied, 2, TransferStackPointerToX);
+            instructions[0xBB] = new Instruction("LAS", AddressingMode.AbsoluteY, 4, IllegalOpCode);
+            instructions[0xBC] = new Instruction("LDY", AddressingMode.AbsoluteX, 4, LoadRegisterY);
+            instructions[0xBD] = new Instruction("LDA", AddressingMode.AbsoluteX, 4, LoadAccumulator);
+            instructions[0xBE] = new Instruction("LDX", AddressingMode.AbsoluteY, 4, LoadRegisterX);
+            instructions[0xBF] = new Instruction("LAX", AddressingMode.AbsoluteY, 4, IllegalOpCode);
 
             // 0xC0 - 0xCF
-
+            instructions[0xC0] = new Instruction("CPY", AddressingMode.Immediate, 2, CompareRegisterY);
+            instructions[0xC1] = new Instruction("CMP", AddressingMode.IndexedIndirect, 6, CompareAccumulator);
+            instructions[0xC2] = new Instruction("NOP", AddressingMode.Immediate, 2, IllegalOpCode);
+            instructions[0xC3] = new Instruction("DCP", AddressingMode.IndexedIndirect, 8, IllegalOpCode);
+            instructions[0xC4] = new Instruction("CPY", AddressingMode.ZeroPage, 3, CompareRegisterY);
+            instructions[0xC5] = new Instruction("CMP", AddressingMode.ZeroPage, 3, CompareAccumulator);
+            instructions[0xC6] = new Instruction("DEC", AddressingMode.ZeroPage, 5, DecrementMemory);
+            instructions[0xC7] = new Instruction("DCP", AddressingMode.ZeroPage, 5, IllegalOpCode);
+            instructions[0xC8] = new Instruction("INY", AddressingMode.Implied, 2, IncrementRegisterY);
+            instructions[0xC9] = new Instruction("CMP", AddressingMode.Immediate, 2, CompareAccumulator);
+            instructions[0xCA] = new Instruction("DEX", AddressingMode.Implied, 2, DecrementRegisterX);
+            instructions[0xCB] = new Instruction("AXS", AddressingMode.Immediate, 2, IllegalOpCode);
+            instructions[0xCC] = new Instruction("CPY", AddressingMode.Absolute, 4, CompareRegisterY);
+            instructions[0xCD] = new Instruction("CMP", AddressingMode.Absolute, 4, CompareAccumulator);
+            instructions[0xCE] = new Instruction("DEC", AddressingMode.Absolute, 6, DecrementMemory);
+            instructions[0xCF] = new Instruction("DCP", AddressingMode.Absolute, 6, IllegalOpCode);
 
             // 0xD0 - 0xDF
 
@@ -693,6 +799,13 @@ namespace NesCore.Processing
             // one more cycle is needed when crossing pages
             if (Processor.PagesDiffer(state.ProgramCounter, address))
                 state.Cycles++;
+        }
+
+        // compares values and set the appropriate flags
+        private void CompareValues(byte valueOne, byte valueTwo)
+        {
+            SetZeroAndNegativeFlags((byte)(valueOne - valueTwo));
+            Processor.State.CarryFlag = valueOne >= valueTwo;
         }
 
         // instruction opcode map

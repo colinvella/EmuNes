@@ -11,6 +11,7 @@ namespace NesCore.Processing
         public const int Frequency = 1789773;
         public const byte StackBase = 0xFD;
 
+        public const UInt16 NmiVector = 0xFFFA;
         public const UInt16 ResetVector = 0xFFFC;
         public const UInt16 IrqVector = 0xFFFE;
 
@@ -47,13 +48,13 @@ namespace NesCore.Processing
             if (State.InterruptType != InterruptType.None)
             {
                 if (State.InterruptType == InterruptType.NonMaskable)
-                    HandleNMI();
+                    HandleInterrupt(NmiVector);
                 else
-                    HandleIRQ();
+                    HandleInterrupt(IrqVector);
                 State.InterruptType = InterruptType.None;
             }
 
-            // keep ttrack of current cycle
+            // keep track of current cycle
             UInt64 cycles = State.Cycles;
 
             // read next op code
@@ -117,14 +118,15 @@ namespace NesCore.Processing
             return (UInt16)((hi << 8) | lo);
         }
 
-        public void HandleNMI()
+        public void HandleInterrupt(UInt16 interruptVector)
         {
+            Push16(State.ProgramCounter);
+            InstructionSet.PushProcessorStatus(0x0000, AddressingMode.Implied);
+            State.ProgramCounter = Read16(interruptVector);
+            State.InterruptDisableFlag = true;
+            State.Cycles += 7;
         }
-
-        public void HandleIRQ()
-        {
-        }
-
+        
         private UInt16 GetAddressOperand(AddressingMode addressingMode, out bool pageCrossed)
         {
             UInt16 address = 0;
@@ -201,9 +203,27 @@ namespace NesCore.Processing
             return (addressOne & 0xFF00) != (addressTwo & 0xFF00);
         }
 
-        public UInt16 Read16(UInt16 address) { return 0; }
+        // reads 16-bit value from the system bus in little-endian order
+        public UInt16 Read16(UInt16 address)
+        {
+            byte valueLoByte = SystemBus.Read(address++);
+            byte valueHiByte = SystemBus.Read(address);
+            return (UInt16)(valueHiByte << 8 | valueLoByte);
+        }
 
-        public UInt16 Read16Bug(UInt16 address) { return 0; }
+        // reads 16-bit value from the system bus in little-endian order
+        // but emulates a 6502 bug that caused the low byte to wrap without
+        // incrementing the high byte
+        public UInt16 Read16Bug(UInt16 address)
+        {
+            byte addressHiByte = (byte)(address >> 8);
+            byte addressLoByte = (byte)(address & 0xFF);
+            ++addressLoByte;
+            UInt16 nextAddress = (UInt16)(addressHiByte << 8 | addressLoByte);
 
+            byte valueLoByte = SystemBus.Read(address);
+            byte valueHiByte = SystemBus.Read(nextAddress);
+            return (UInt16)(valueHiByte << 8 | valueLoByte);
+        }
     }
 }

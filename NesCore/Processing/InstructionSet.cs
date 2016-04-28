@@ -19,6 +19,9 @@ namespace NesCore.Processing
 
         public Processor Processor { get; private set; }
 
+        // some instructions exposed
+        public Execute PushProcessorStatus { get; private set; }
+
         private SystemBus SystemBus { get; set; }
 
         public IEnumerator GetEnumerator()
@@ -426,7 +429,7 @@ namespace NesCore.Processing
             };
 
             // PHP - push processor status
-            Execute PushProcessorStatus = (address, mode) =>
+            PushProcessorStatus = (address, mode) =>
             {
                 Processor.Push((byte)(Processor.State.Flags | State.BreakCommandMask));
             };
@@ -484,15 +487,11 @@ namespace NesCore.Processing
                 Processor.State.InterruptDisableFlag = false;
             };
 
-
             // JMP - jump
             Execute Jump = (address, mode) =>
             {
                 Processor.State.ProgramCounter = address;
             };
-
-
-
 
             // arithmetic instructions
 

@@ -37,7 +37,7 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Addressing\Memory.cs" />
+    <Compile Include="Storage\Memory.cs" />
     <Compile Include="Console.cs" />
     <Compile Include="Processing\AddressingMode.cs" />
     <Compile Include="Processing\Instruction.cs" />

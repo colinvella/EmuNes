@@ -35,7 +35,28 @@ namespace NesCore.Processing
             State.InterruptDisableFlag = true;
         }
 
-        public UInt64 ExecuteNextInstruction()
+        public UInt64 ExecuteInstructions(UInt16 count)
+        {
+            UInt64 consumedCycles = 0;
+            while (count-- > 0)
+                consumedCycles += ExecuteInstruction();
+            return consumedCycles;
+        }
+
+        public UInt64 ExecuteUntilBreak()
+        {
+            UInt64 consumedCycles = 0;
+            while (true)
+            {
+                bool breakReached = SystemBus.Read(State.ProgramCounter) == 0x00;
+                consumedCycles += ExecuteInstruction();
+                if (breakReached)
+                    break;
+            }
+            return consumedCycles;
+        }
+
+        public UInt64 ExecuteInstruction()
         {
             // consume 1 cycle and do nothing if there are pending stall cycles
             if (State.StallCycles > 0)

@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using NesCore;
-using NesCore.Addressing;
+using NesCore.Storage;
 
 namespace NesCoreTest
 {

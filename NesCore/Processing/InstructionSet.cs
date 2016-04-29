@@ -22,18 +22,6 @@ namespace NesCore.Processing
         // some instructions exposed
         public Execute PushProcessorStatus { get; private set; }
 
-        public void WriteTo(byte opCode, UInt16 address)
-        {
-            Instruction instruction = instructions[opCode];
-
-            AddressingMode addressingMode = instruction.AddressingMode;
-            if (addressingMode != AddressingMode.Implied && addressingMode != AddressingMode.Accumulator)
-                throw new InvalidOperationException(
-                    "This method can only be invoked for instructions using Implied or Accumulator addressing modes");\
-
-
-        }
-
         private SystemBus SystemBus { get; set; }
 
         public IEnumerator GetEnumerator()
@@ -907,7 +895,7 @@ namespace NesCore.Processing
         private void SetZeroAndNegativeFlags(byte value)
         {
             State state = Processor.State;
-            state.ZeroFlag = value != 0;
+            state.ZeroFlag = value == 0;
             state.NegativeFlag = (value & 0x80) != 0;
         }
 

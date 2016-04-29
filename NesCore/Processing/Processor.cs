@@ -232,6 +232,12 @@ namespace NesCore.Processing
             return (UInt16)(valueHiByte << 8 | valueLoByte);
         }
 
+        public void Write16(UInt16 address, UInt16 value)
+        {
+            SystemBus.Write(address++, (byte)(value & 0xFF));
+            SystemBus.Write(address, (byte)(value >> 8));
+        }
+
         // reads 16-bit value from the system bus in little-endian order
         // but emulates a 6502 bug that caused the low byte to wrap without
         // incrementing the high byte

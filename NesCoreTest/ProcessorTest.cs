@@ -7,7 +7,7 @@ namespace NesCoreTest
 {
     [TestClass]
     public class ProcessorTest
-        : SystemBus
+        : SystemBusTest
     {
         [TestMethod]
         public void TestAdcAbZeroes()
@@ -29,17 +29,5 @@ namespace NesCoreTest
             Assert.IsTrue(!state.NegativeFlag);
             Assert.IsTrue(state.ZeroFlag);
         }
-
-        public byte Read(ushort address)
-        {
-            return memory[address];
-        }
-
-        public void Write(ushort address, byte value)
-        {
-            memory[address] = value;
-        }
-
-        private byte[] memory = new byte[UInt16.MaxValue];
     }
 }

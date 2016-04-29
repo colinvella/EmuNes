@@ -22,7 +22,24 @@ namespace NesCore.Processing
         // some instructions exposed
         public Execute PushProcessorStatus { get; private set; }
 
-        private SystemBus SystemBus { get; set; }
+        public Instruction FindBy(string opName, AddressingMode addressingMode)
+        {
+            opName = opName.ToUpper();
+            foreach (Instruction instruction in instructions)
+            {
+                if (instruction.Name == opName && instruction.AddressingMode == addressingMode)
+                    return instruction;
+            }
+            return null;
+        }
+
+        public IEnumerable<Instruction> GetInstructionVariants(string opName)
+        {
+            if (instructionVariants.ContainsKey(opName))
+                return instructionVariants[opName];
+            else
+                return null;
+        }
 
         public IEnumerator GetEnumerator()
         {
@@ -33,6 +50,8 @@ namespace NesCore.Processing
         {
             get { return instructions[opCode]; }
         }
+
+        private SystemBus SystemBus { get; set; }
 
         private void Initialise()
         {
@@ -887,6 +906,26 @@ namespace NesCore.Processing
             instructions[0xFD] = new Instruction(0xFD, "SBC", AddressingMode.AbsoluteX, 4, SubtractWithCarry);
             instructions[0xFE] = new Instruction(0xFE, "INC", AddressingMode.AbsoluteX, 7, IncrementMemory);
             instructions[0xFF] = new Instruction(0xFF, "ISC", AddressingMode.AbsoluteX, 7, IllegalOpCode);
+
+            // set up instruction variants
+            foreach (Instruction instruction in instructions)
+            {
+                // only add legal variants
+                if (instruction.Exceute == IllegalOpCode)
+                    continue;
+
+                string opName = instruction.Name;
+                List<Instruction> group = null;
+                if (instructionVariants.ContainsKey(opName))
+                    group = instructionVariants[opName];
+                else
+                {
+                    group = new List<Instruction>();
+                    instructionVariants[opName] = group;
+                }
+
+                group.Add(instruction);
+            }
         }
 
         // private helper functions
@@ -920,6 +959,9 @@ namespace NesCore.Processing
 
         // instruction opcode map
         private Instruction[] instructions = new Instruction[256];
+
+        // instruction variants
+        private Dictionary<string, List<Instruction>> instructionVariants = new Dictionary<string, List<Instruction>>();
 
     }
 }

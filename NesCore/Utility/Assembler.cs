@@ -110,6 +110,18 @@ namespace NesCore.Utility
                     systemBus.Write(WriteAddress++, instruction.Code);
                     systemBus.Write(WriteAddress++, byteOperand);
                 }
+                else if (ParseIndexedIndirectOperand(operandToken, out byteOperand))
+                {
+                    // indexed indirect mode instructions (izx)
+                    Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.IndexedIndirect);
+                    if (instruction == null)
+                        throw new AssemblerException(sourceLineNumber, sourceLine,
+                            "Instruction " + opName + " does not support indexed indirect mode");
+
+                    // write opcode and indirect operand
+                    systemBus.Write(WriteAddress++, instruction.Code);
+                    systemBus.Write(WriteAddress++, byteOperand);
+                }
                 else if (ParseIndirectOperand(operandToken, out wordOperand))
                 {
                     // indirect mode instructions
@@ -224,6 +236,16 @@ namespace NesCore.Utility
             if (!operand.StartsWith("#"))
                 return false;
             return ParseByteHexValue(operand.Substring(1), out value);        
+        }
+
+        private bool ParseIndexedIndirectOperand(string operand, out byte value)
+        {
+            value = 0;
+            if (!operand.StartsWith("("))
+                return false;
+            if (!operand.EndsWith(",X)"))
+                return false;
+            return ParseByteHexValue(operand.Substring(1, operand.Length - 4), out value);
         }
 
         private bool ParseIndirectOperand(string operand, out UInt16 value)

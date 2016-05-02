@@ -32,7 +32,6 @@ namespace NesCoreTest
         {
             // assembler test
             ResetSystem();
-            Write(0x1000, 0xDF);
             assembler.GenerateProgram(0x1000,
                 @"BRK");
             Assert.IsTrue(Read(0x1000) == 0x00, "BRK instruction not assembled");
@@ -48,7 +47,28 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.InterruptDisableFlag, "Interrupt Disable flag not set");
             Assert.IsTrue(processor.Pull() == (byte)(statusFlags | 0x10), "status flags not preserved");
             Assert.IsTrue(processor.Pull16() == 0x1001, "PC not pushed on stack prior to BRK");
+        }
 
+        [TestMethod]
+        public void TestInstructionOraIzx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ORA ($10,X) ; OR accumulator with contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
+            Assert.IsTrue(Read(0x1000) == 0x01, "ORA/IZX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x80;
+            processor.Write16(0x0090, 0x2000);
+            Write(0x2000, 0x0F);
+            processor.State.Accumulator = 0xF0;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
         }
 
         [TestMethod]

@@ -53,10 +53,9 @@
   </Choose>
   <ItemGroup>
     <Compile Include="MemoryTest.cs" />
-    <Compile Include="ProcessorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="InstructionSetTest.cs" />
-    <Compile Include="AssemblerTest.cs" />
+    <Compile Include="ProcessorTest.cs" />
     <Compile Include="SystemBusTest.cs" />
   </ItemGroup>
   <ItemGroup>

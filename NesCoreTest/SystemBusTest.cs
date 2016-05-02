@@ -23,7 +23,7 @@ namespace NesCoreTest
 
         public void WipeMemory()
         {
-            memory = new byte[UInt16.MaxValue];
+            memory = new byte[UInt16.MaxValue + 1];
         }
 
         private byte[] memory;

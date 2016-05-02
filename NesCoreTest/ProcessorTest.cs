@@ -72,6 +72,59 @@ namespace NesCoreTest
         }
 
         [TestMethod]
+        public void TestInstructionOraZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ORA $10 ; OR accumulator with contents of address $0010");
+            Assert.IsTrue(Read(0x1000) == 0x05, "ORA/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            Write(0x0010, 0x0F);
+            processor.State.Accumulator = 0xF0;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionAslZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @";7 shifts of 00000001 -> 10000000, C
+                  ASL $10 ; ASL contents of address $0010
+                  ASL $10 ; ASL contents of address $0010
+                  ASL $10 ; ASL contents of address $0010
+                  ASL $10 ; ASL contents of address $0010
+                  ASL $10 ; ASL contents of address $0010
+                  ASL $10 ; ASL contents of address $0010
+                  ASL $10 ; ASL contents of address $0010
+                  ASL $10 ; ASL contents of address $0010");
+            Assert.IsTrue(Read(0x1000) == 0x06, "ASL/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            Write(0x0010, 0x01);
+ 
+            // execute first 7 ASL
+            processor.ExecuteInstructions(7);
+
+            Assert.IsTrue(Read(0x0010) == 0x80, "Value $80 expected at location $0010");
+
+            // execute last ASL
+            processor.ExecuteInstruction();
+            Assert.IsTrue(Read(0x0010) == 0x00, "Value $00 expected at location $0010");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry not set");
+        }
+
+        [TestMethod]
         public void TestImpliedInstructions()
         {
             ResetSystem();

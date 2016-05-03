@@ -15,7 +15,7 @@ namespace NesCore.Utility
             Processor = processor;
             WriteAddress = 0x0000;
             labelToAddress = new Dictionary<string, ushort>();
-            unresolvedLabelOperands = new Dictionary<string, ushort>();
+            unresolvedLabelReferences = new Dictionary<string, List<LabelReference>>();
         }
 
         public Processor Processor { get; private set; }
@@ -30,14 +30,14 @@ namespace NesCore.Utility
         public void GenerateProgram(string source)
         {
             labelToAddress.Clear();
-            unresolvedLabelOperands.Clear();
+            unresolvedLabelReferences.Clear();
 
-            string[] sourceLines = source.Split(new char[] { '\r', '\n' });
+            string[] sourceLines = source.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             UInt16 sourceLineNumber = 0;
             foreach (string sourceLine in sourceLines)
                 GenerateInstruction(sourceLine, sourceLineNumber++);
 
-            //TODO: handle unresolved labels
+            ResolveLabelReferences();
         }
 
         private void GenerateInstruction(string sourceLine, UInt16 sourceLineNumber = 0)
@@ -66,13 +66,16 @@ namespace NesCore.Utility
                 if (!IsLabel(label))
                     throw new AssemblerException(sourceLineNumber, sourceLine, "Invalid label: " + label);
 
+                if (labelToAddress.ContainsKey(label))
+                    throw new AssemblerException(sourceLineNumber, sourceLine, "Duplicate label not allowed");
+
                 // index label for reference by branch and jump instructions
                 labelToAddress[label] = WriteAddress;
                 return;
             }
 
             // split lines into tokens using whitespace as delimeters
-            string[] tokens = sourceLine.Split(new char[] { ' ', '\t' });
+            string[] tokens = sourceLine.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
 
             string opName = tokens[0].ToUpper();
 
@@ -177,39 +180,67 @@ namespace NesCore.Utility
                     Processor.Write16(WriteAddress, wordOperand);
                     WriteAddress += 2;
                 }
-                else if (ParseLabel(operandToken, out wordOperand))
+                else if (ParseLabelReference(sourceLineNumber, sourceLine, operandToken, out wordOperand))
                 {
-                    // absolute address (JMP, JSR) or relative address (branch instructions)
-                    Instruction instruction = Processor.InstructionSet.GetInstructionVariants(opName).First();
-
+                    // absolute or relative address (jump, branch instructions)
+                    //Instruction instruction = Processor.InstructionSet.GetInstructionVariants(opName).First();
+                    Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.Absolute);
+                    if (instruction == null)
+                        instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.Relative);
+                    if (instruction == null)
+                        throw new AssemblerException(sourceLineNumber, sourceLine,
+                            "Instruction " + opName + " does not support absolute or relative addressing mode");
+                    
                     // write instruction
                     systemBus.Write(WriteAddress++, instruction.Code);
-
                     if (instruction.AddressingMode == AddressingMode.Absolute)
-                    {
-                        // operand is absolute address
-                        Processor.Write16(WriteAddress, wordOperand);
-                        WriteAddress += 2;
-                    }
-                    else if (instruction.AddressingMode == AddressingMode.Relative)
-                    {
-                        // compute relative byte offset from end of branch instruction
-                        // to target label
-                        int addressOffset = wordOperand - (WriteAddress + 1);
-
-                        // validate range
-                        if (addressOffset > 0xFF || addressOffset < -0x80)
-                            throw new AssemblerException(sourceLineNumber, sourceLine, 
-                                "Branch offset to label '" + operandToken + "' is out of range");
-
-                        // write branch offset operand
-                        byte branchOffset = (byte)addressOffset;
-                        systemBus.Write(WriteAddress++, branchOffset);
-                    }
+                        WriteAddress += 2; // leave space for absolute address
+                    else
+                        WriteAddress += 1; // leave space for relative byte offset
                 }
                 else
                 {
                     throw new AssemblerException(sourceLineNumber, sourceLine, "Unrecognised addressing mode");
+                }
+            }
+        }
+
+        private void ResolveLabelReferences()
+        {
+            foreach (string label in unresolvedLabelReferences.Keys)
+            {
+                if (!labelToAddress.ContainsKey(label))
+                    throw new AssemblerException(0, "", "Unable to resolve label: " + label);
+                UInt16 resolvedAddress = labelToAddress[label];
+                foreach (LabelReference labelReference in unresolvedLabelReferences[label])
+                {
+                    // get opcode to determine if absolute or relative
+                    UInt16 instructionAddress = labelReference.OperandAddress;
+                    --instructionAddress;
+                    byte opCode = Processor.SystemBus.Read(instructionAddress);
+                    Instruction instruction = Processor.InstructionSet[opCode];
+                    bool relative = instruction.AddressingMode == AddressingMode.Relative;
+
+                    if (relative)
+                    {
+                        // compute relative byte offset
+                        int addressOffset = resolvedAddress - (labelReference.OperandAddress + 1);
+
+                        // validate range
+                        if (addressOffset > 0x7F || addressOffset < -0x80)
+                            throw new AssemblerException(labelReference.SourceLineNumber, labelReference.SourceLine,
+                                "Branch offset to label '" + label + "' is out of range");
+
+                        byte branchOffset = (byte)addressOffset;
+
+                        // write branch offset
+                        Processor.SystemBus.Write(labelReference.OperandAddress, branchOffset);
+                    }
+                    else
+                    {
+                        // write absolute address
+                        Processor.Write16(labelReference.OperandAddress, resolvedAddress);
+                    }
                 }
             }
         }
@@ -220,20 +251,24 @@ namespace NesCore.Utility
             return regex.Match(input) != null;
         }
 
-        private bool ParseLabel(string operand, out UInt16 absoluteAddress)
+        private bool ParseLabelReference(UInt16 sourceLineNumber, string sourceLine, string operand, out UInt16 absoluteAddress)
         {
             absoluteAddress = 0;
             if (!IsLabel(operand))
                 return false;
-            if (labelToAddress.ContainsKey(operand))
-            {
-                absoluteAddress = labelToAddress[operand];
-            }
+
+            // keep track of locations with unresolved label operands
+            List<LabelReference> labelReferences = null;
+            if (unresolvedLabelReferences.ContainsKey(operand))
+                labelReferences = unresolvedLabelReferences[operand];
             else
             {
-                // keep track of instruction locations with unresolved label operands
-                unresolvedLabelOperands[operand] = (UInt16)(WriteAddress);
+                labelReferences = new List<LabelReference>();
+                unresolvedLabelReferences[operand] = labelReferences;
             }
+
+            labelReferences.Add(new LabelReference(sourceLineNumber, sourceLine, (UInt16)(WriteAddress + 1)));
+
             return true;
         }
 
@@ -345,6 +380,20 @@ namespace NesCore.Utility
         }
 
         private Dictionary<string, UInt16> labelToAddress;
-        private Dictionary<string, UInt16> unresolvedLabelOperands;
+        private Dictionary<string, List<LabelReference>> unresolvedLabelReferences;
+
+        private class LabelReference
+        {
+            public LabelReference(UInt16 sourceLineNumber, string sourceLine, UInt16 operandAddress)
+            {
+                SourceLineNumber = sourceLineNumber;
+                SourceLine = sourceLine;
+                OperandAddress = operandAddress;
+            }
+
+            public UInt16 SourceLineNumber { get; set; }
+            public string SourceLine { get; set; }
+            public UInt16 OperandAddress { get; set; }
+        }
     }
 }

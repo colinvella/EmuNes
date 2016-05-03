@@ -216,9 +216,73 @@ namespace NesCoreTest
         }
 
 
+        [TestMethod]
+        public void TestInstructionAslAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ASL $2000 ;ASL contents of address $2000");
+            Assert.IsTrue(Read(0x1000) == 0x0E, "ASL/Abs instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            Write(0x2000, 0x04);
+            processor.ExecuteInstruction();
+            Assert.IsTrue(Read(0x2000) == 0x08, "Value $08 expected at address $2000");
+        }
+
+        [TestMethod]
+        public void TestInstructionBpl()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDA #$01 ;load accumulator with positive value
+                  BPL  $40 ;branch to $40 bytes ahead of instruction");
+            Assert.IsTrue(Read(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x01, "immediate operand $01 expected");
+            Assert.IsTrue(Read(0x1002) == 0x10, "BPL instruction not assembled");
+            Assert.IsTrue(Read(0x1003) == 0x40, "Relative branch offset $40 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstructions(2);
+            Assert.IsTrue(processor.State.ProgramCounter == 0x1044, "Value $1044 expected in PC");
+        }
 
 
 
+        [TestMethod]
+        public void TestLabelDeclarations()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"Start:
+                    LDA #$01    ;load accumulator with $01 (positive)
+                    BPL Middle  ;branch to Middle label
+                    NOP         ;do nothing
+                  Middle:
+                    LDX #$02    ;load X wit $02 (positive)
+                    BPL Start   ;branch to start if positive");
+            Assert.IsTrue(Read(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x01, "immediate operand $01 expected");
+            Assert.IsTrue(Read(0x1002) == 0x10, "BPL instruction not assembled");
+            Assert.IsTrue(Read(0x1003) == 0x01, "Computed relative branch offset $01 expected (to skip NOP)");
+            Assert.IsTrue(Read(0x1004) == 0xEA, "NOP instruction not assembled");
+            Assert.IsTrue(Read(0x1005) == 0xA2, "LDX/Imm instruction not assembled");
+            Assert.IsTrue(Read(0x1006) == 0x02, "immediate operand $02 expected");
+            Assert.IsTrue(Read(0x1007) == 0x10, "BPL instruction not assembled");
+            Assert.IsTrue(Read(0x1008) == 0xF7, "Computed relative byte offset $F7 (-9) expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstructions(4);
+            Assert.IsTrue(processor.State.ProgramCounter == 0x1000, "Value $1000 expected in PC (branch back to Start)");
+            Assert.IsTrue(processor.State.Accumulator == 0x01, "value $01 expected in A");
+            Assert.IsTrue(processor.State.RegisterX == 0x02, "value $02 expected in X");
+        }
 
 
 

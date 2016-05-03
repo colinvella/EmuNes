@@ -177,6 +177,30 @@ namespace NesCore.Utility
                     systemBus.Write(WriteAddress++, instruction.Code);
                     systemBus.Write(WriteAddress++, byteOperand);
                 }
+                else if (ParseZeroPageXOperand(operandToken, out byteOperand))
+                {
+                    // zero page x mode instruction
+                    Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.ZeroPageX);
+                    if (instruction == null)
+                        throw new AssemblerException(sourceLineNumber, sourceLine,
+                            "Instruction " + opName + " does not support zero page X addressing mode");
+
+                    // write opcode and zero page x operand
+                    systemBus.Write(WriteAddress++, instruction.Code);
+                    systemBus.Write(WriteAddress++, byteOperand);
+                }
+                else if (ParseZeroPageYOperand(operandToken, out byteOperand))
+                {
+                    // zero page x mode instruction
+                    Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.ZeroPageY);
+                    if (instruction == null)
+                        throw new AssemblerException(sourceLineNumber, sourceLine,
+                            "Instruction " + opName + " does not support zero page Y addressing mode");
+
+                    // write opcode and zero page y operand
+                    systemBus.Write(WriteAddress++, instruction.Code);
+                    systemBus.Write(WriteAddress++, byteOperand);
+                }
                 else if (ParseAbsoluteOperand(operandToken, out wordOperand))
                 {
                     // absolute mode instructions

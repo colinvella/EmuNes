@@ -273,6 +273,29 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
         }
 
+        [TestMethod]
+        public void TestInstructionOraZpx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ORA $10,X ; OR accumulator with contents of address $0010 + X");
+            Assert.IsTrue(Read(0x1000) == 0x15, "ORA/ZPX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            Write(0x0040, 0x0F);
+            processor.State.Accumulator = 0xF0;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
+        }
+
+
+
 
 
 

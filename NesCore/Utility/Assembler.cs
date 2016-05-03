@@ -178,6 +178,10 @@ namespace NesCore.Utility
                         byte branchOffset = (byte)addressOffset;
                         systemBus.Write(WriteAddress++, branchOffset);
                     }
+                    else
+                    {
+                        throw new AssemblerException(sourceLineNumber, sourceLine, "Unrecognised addressing mode");
+                    }
                 }
             }
         }

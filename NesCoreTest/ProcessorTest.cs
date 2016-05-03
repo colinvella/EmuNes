@@ -117,12 +117,34 @@ namespace NesCoreTest
             processor.ExecuteInstructions(7);
 
             Assert.IsTrue(Read(0x0010) == 0x80, "Value $80 expected at location $0010");
+            Assert.IsTrue(!processor.State.CarryFlag, "Carry should not set");
 
             // execute last ASL
             processor.ExecuteInstruction();
             Assert.IsTrue(Read(0x0010) == 0x00, "Value $00 expected at location $0010");
-            Assert.IsTrue(processor.State.CarryFlag, "Carry not set");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry should be set");
         }
+
+        [TestMethod]
+        public void TestInstructionPhp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"PHP");
+            Assert.IsTrue(Read(0x1000) == 0x08, "PHP instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            byte statusFlags = processor.State.Flags;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.Pull() == (byte)(statusFlags | 0x10), "status flags not preserved");
+        }
+
+
+
 
         [TestMethod]
         public void TestImpliedInstructions()

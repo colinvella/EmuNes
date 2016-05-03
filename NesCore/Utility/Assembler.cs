@@ -117,7 +117,7 @@ namespace NesCore.Utility
                     Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.Immediate);
                     if (instruction == null)
                         throw new AssemblerException(sourceLineNumber, sourceLine,
-                            "Instruction " + opName + " does not support immediate mode");
+                            "Instruction " + opName + " does not support immediate addressing mode");
 
                     // write opcode and immediate operand
                     systemBus.Write(WriteAddress++, instruction.Code);
@@ -129,7 +129,7 @@ namespace NesCore.Utility
                     Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.IndexedIndirect);
                     if (instruction == null)
                         throw new AssemblerException(sourceLineNumber, sourceLine,
-                            "Instruction " + opName + " does not support indexed indirect mode");
+                            "Instruction " + opName + " does not support indexed indirect addressing mode");
 
                     // write opcode and indirect operand
                     systemBus.Write(WriteAddress++, instruction.Code);
@@ -141,7 +141,7 @@ namespace NesCore.Utility
                     Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.Indirect);
                     if (instruction == null)
                         throw new AssemblerException(sourceLineNumber, sourceLine,
-                            "Instruction " + opName + " does not support indirect mode");
+                            "Instruction " + opName + " does not support indirect addressing mode");
 
                     // write opcode and indirect operand
                     systemBus.Write(WriteAddress++, instruction.Code);
@@ -161,6 +161,21 @@ namespace NesCore.Utility
                     // write opcode and zero page/relative operand
                     systemBus.Write(WriteAddress++, instruction.Code);
                     systemBus.Write(WriteAddress++, byteOperand);
+                }
+                else if (ParseAbsoluteOperand(operandToken, out wordOperand))
+                {
+                    // absolute mode instructions
+                    Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.Absolute);
+                    if (instruction == null)
+                        throw new AssemblerException(sourceLineNumber, sourceLine,
+                            "Instruction " + opName + " does not support absolute addressing mode");
+
+                    // write instruction
+                    systemBus.Write(WriteAddress++, instruction.Code);
+
+                    // operand is absolute address
+                    Processor.Write16(WriteAddress, wordOperand);
+                    WriteAddress += 2;
                 }
                 else if (ParseLabel(operandToken, out wordOperand))
                 {
@@ -191,10 +206,10 @@ namespace NesCore.Utility
                         byte branchOffset = (byte)addressOffset;
                         systemBus.Write(WriteAddress++, branchOffset);
                     }
-                    else
-                    {
-                        throw new AssemblerException(sourceLineNumber, sourceLine, "Unrecognised addressing mode");
-                    }
+                }
+                else
+                {
+                    throw new AssemblerException(sourceLineNumber, sourceLine, "Unrecognised addressing mode");
                 }
             }
         }

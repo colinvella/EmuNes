@@ -195,27 +195,33 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.CarryFlag, "Carry should be set");
         }
 
-
-
-
         [TestMethod]
-        public void TestImpliedInstructions()
+        public void TestInstructionOraAbs()
         {
+            // assembler test
             ResetSystem();
-            processor.Write16(Processor.IrqVector, 0x2030);
             assembler.GenerateProgram(0x1000,
-                @"BRK");
+                @"ORA $2000; OR contents at address $2000 with accumulator");
+            Assert.IsTrue(Read(0x1000) == 0x0D, "ORA/ABS instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Operand should be $2000");
 
-            WipeMemory();
-            assembler.GenerateProgram(0x1000,
-                @"NOP ;no operation
-                  TAX ;transfer A to X");
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0xF0;
+            processor.Write16(0x2000, 0x0F);
 
-            Assert.IsTrue(Read(0x1000) == 0xEA);
-            Assert.IsTrue(Read(0x1001) == 0xAA);
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
         }
 
-        [TestMethod]
+
+
+
+
+
+
+
         public void TestImmediateInstructions()
         {
             ResetSystem();

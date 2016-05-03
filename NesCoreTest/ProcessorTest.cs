@@ -97,7 +97,7 @@ namespace NesCoreTest
             // assembler test
             ResetSystem();
             assembler.GenerateProgram(0x1000,
-                @";7 shifts of 00000001 -> 10000000, C
+                @";8 shifts
                   ASL $10 ; ASL contents of address $0010
                   ASL $10 ; ASL contents of address $0010
                   ASL $10 ; ASL contents of address $0010
@@ -117,7 +117,7 @@ namespace NesCoreTest
             processor.ExecuteInstructions(7);
 
             Assert.IsTrue(Read(0x0010) == 0x80, "Value $80 expected at location $0010");
-            Assert.IsTrue(!processor.State.CarryFlag, "Carry should not set");
+            Assert.IsTrue(!processor.State.CarryFlag, "Carry should not be set");
 
             // execute last ASL
             processor.ExecuteInstruction();
@@ -141,6 +141,58 @@ namespace NesCoreTest
             processor.ExecuteInstruction();
 
             Assert.IsTrue(processor.Pull() == (byte)(statusFlags | 0x10), "status flags not preserved");
+        }
+
+        [TestMethod]
+        public void TestInstructionOraImm()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ORA #$0F; OR value $0F with accumulator");
+            Assert.IsTrue(Read(0x1000) == 0x09, "ORA/IMM instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x0F, "Immediate value $0F not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0xF0;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionAslAcc()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @";8 shifts
+                  ASL A;ASL contents of accumulator
+                  ASL A;ASL contents of accumulator
+                  ASL A;ASL contents of accumulator
+                  ASL A;ASL contents of accumulator
+                  ASL A;ASL contents of accumulator
+                  ASL A;ASL contents of accumulator
+                  ASL A;ASL contents of accumulator
+                  ASL A;ASL contents of accumulator");
+            Assert.IsTrue(Read(0x1000) == 0x0A, "ASL/Acc instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x01;
+
+            // execute first 7 ASL
+            processor.ExecuteInstructions(7);
+
+            Assert.IsTrue(processor.State.Accumulator == 0x80, "Value $80 expected in accumulator");
+            Assert.IsTrue(!processor.State.CarryFlag, "Carry should not be set");
+
+            // execute last ASL
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.Accumulator == 0x00, "Value $00 expected in accumulator");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry should be set");
         }
 
 

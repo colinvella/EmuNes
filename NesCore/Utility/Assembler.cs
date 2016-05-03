@@ -84,9 +84,12 @@ namespace NesCore.Utility
 
             if (tokens.Length == 1)
             {
-                // implied or accumulator instruction
-                Instruction instruction = Processor.InstructionSet.GetInstructionVariants(opName).First();
-                // write implied or accumulator mode opcode
+                // implied instructions
+                Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.Implied);
+                if (instruction == null)
+                    throw new AssemblerException(sourceLineNumber, sourceLine,
+                        "Instruction " + opName + " does not support implied mode");
+                // write implied mode opcode
                 systemBus.Write(WriteAddress++, instruction.Code);
                 return;
             }
@@ -98,7 +101,17 @@ namespace NesCore.Utility
                 byte byteOperand = 0;
                 UInt16 wordOperand = 0;
                 // determine addressing mode from operand
-                if (ParseImmediateOperand(operandToken, out byteOperand))
+                if (operandToken.ToUpper() == "A")
+                {
+                    // accumulator mode instructions
+                    Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.Accumulator);
+                    if (instruction == null)
+                        throw new AssemblerException(sourceLineNumber, sourceLine,
+                            "Instruction " + opName + " does not support accumulator mode");
+                    // accumulator is implied within op code
+                    systemBus.Write(WriteAddress++, instruction.Code);
+                }
+                else if (ParseImmediateOperand(operandToken, out byteOperand))
                 {
                     // immediate mode instructions
                     Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.Immediate);

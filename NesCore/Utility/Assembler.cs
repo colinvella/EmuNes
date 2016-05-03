@@ -126,7 +126,7 @@ namespace NesCore.Utility
                     systemBus.Write(WriteAddress++, instruction.Code);
                     systemBus.Write(WriteAddress++, byteOperand);
                 }
-                else if (ParseIndexedIndirectOperand(operandToken, out byteOperand))
+                else if (ParseIndexedIndirectOperand(operandToken, out byteOperand)) // ($NN, X)
                 {
                     // indexed indirect mode instructions (izx)
                     Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.IndexedIndirect);
@@ -144,12 +144,24 @@ namespace NesCore.Utility
                     Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.Indirect);
                     if (instruction == null)
                         throw new AssemblerException(sourceLineNumber, sourceLine,
-                            "Instruction " + opName + " does not support indirect addressing mode");
+                            "Instruction " + opName + " does not support indirect (IZX) addressing mode");
 
                     // write opcode and indirect operand
                     systemBus.Write(WriteAddress++, instruction.Code);
                     Processor.Write16(WriteAddress, byteOperand);
                     WriteAddress += 2;
+                }
+                else if (ParseIndirectIndexedOperand(operandToken, out byteOperand)) // ($NN), Y
+                {
+                    // indirect indexed mode instructions (izy)
+                    Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.IndirectIndexed);
+                    if (instruction == null)
+                        throw new AssemblerException(sourceLineNumber, sourceLine,
+                            "Instruction " + opName + " does not support indirect indexed (IZY) addressing mode");
+
+                    // write opcode and indirect operand
+                    systemBus.Write(WriteAddress++, instruction.Code);
+                    systemBus.Write(WriteAddress++, byteOperand);
                 }
                 else if (ParseByteHexValue(operandToken, out byteOperand))
                 {
@@ -305,12 +317,24 @@ namespace NesCore.Utility
             return ParseByteHexValue(operand.Substring(1), out value);        
         }
 
-        private bool ParseIndexedIndirectOperand(string operand, out byte value)
+        private bool ParseIndexedIndirectOperand(string operand, out byte value) // ($NN,X)
         {
+            operand = operand.Replace(" ", "");
             value = 0;
             if (!operand.StartsWith("("))
                 return false;
             if (!operand.EndsWith(",X)"))
+                return false;
+            return ParseByteHexValue(operand.Substring(1, operand.Length - 4), out value);
+        }
+
+        private bool ParseIndirectIndexedOperand(string operand, out byte value) // ($NN),Y
+        {
+            operand = operand.Replace(" ", "");
+            value = 0;
+            if (!operand.StartsWith("("))
+                return false;
+            if (!operand.EndsWith("),Y"))
                 return false;
             return ParseByteHexValue(operand.Substring(1, operand.Length - 4), out value);
         }

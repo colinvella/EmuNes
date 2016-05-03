@@ -251,6 +251,30 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.ProgramCounter == 0x1044, "Value $1044 expected in PC");
         }
 
+        [TestMethod]
+        public void TestInstructionOraIzy()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ORA ($10),Y ; OR accumulator with contents of zero page offset $10 (absolute $0010), offset by contents of Y register ($30)");
+            Assert.IsTrue(Read(0x1000) == 0x11, "ORA/IZY instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x30;  // Y = $30
+            processor.Write16(0x0010, 0x2000); // ($10) = ($0010) = $2000
+            Write(0x2030, 0x0F); // ($10),Y = $2000 + $30 = $2030
+            processor.State.Accumulator = 0xF0;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
+        }
+
+
+
 
 
         [TestMethod]

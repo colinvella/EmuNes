@@ -100,7 +100,7 @@ namespace NesCore.Processing
                 ++State.Cycles;
 
             // execute the instruction
-            instruction.Exceute(address, instruction.AddressingMode);
+            instruction.Exceute(address);
 
             // determine and return cycles consumed by this instruction
             UInt64 consumedCycles = State.Cycles - cycles;
@@ -142,7 +142,7 @@ namespace NesCore.Processing
         public void HandleInterrupt(UInt16 interruptVector)
         {
             Push16(State.ProgramCounter);
-            InstructionSet.PushProcessorStatus(0x0000, AddressingMode.Implied);
+            InstructionSet.PushProcessorStatus(0x0000);
             State.ProgramCounter = Read16(interruptVector);
             State.InterruptDisableFlag = true;
             State.Cycles += 7;

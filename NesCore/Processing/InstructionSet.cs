@@ -58,15 +58,15 @@ namespace NesCore.Processing
             // general instruction operations
 
             // general illegal opcode
-            Execute IllegalOpCode = (address, mode) => { };
+            Execute IllegalOpCode = (address) => { };
 
             // no operation
-            Execute NoOperation = (address, mode) => { };
+            Execute NoOperation = (address) => { };
 
             // move instructions
 
             // TAX - transfer accumulator to x
-            Execute TransferAccumulatorToX = (address, mode) =>
+            Execute TransferAccumulatorToX = (address) =>
             {
                 State state = Processor.State;
                 state.RegisterX = state.Accumulator;
@@ -74,7 +74,7 @@ namespace NesCore.Processing
             };
 
             // TAY - transfer accumulator to y
-            Execute TransferAccumulatorToY = (address, mode) =>
+            Execute TransferAccumulatorToY = (address) =>
             {
                 State state = Processor.State;
                 state.RegisterY = state.Accumulator;
@@ -82,7 +82,7 @@ namespace NesCore.Processing
             };
 
             // TSX - transfer stack pointer to x
-            Execute TransferStackPointerToX = (address, mode) =>
+            Execute TransferStackPointerToX = (address) =>
             {
                 State state = Processor.State;
                 state.RegisterX = state.StackPointer;
@@ -90,7 +90,7 @@ namespace NesCore.Processing
             };
 
             // TXA - transfer x to accumulator
-            Execute TransferXToAccumulator = (address, mode) =>
+            Execute TransferXToAccumulator = (address) =>
             {
                 State state = Processor.State;
                 state.Accumulator = state.RegisterX;
@@ -98,7 +98,7 @@ namespace NesCore.Processing
             };
 
             // TYA - transfer y to accumulator
-            Execute TransferYToAccumulator = (address, mode) =>
+            Execute TransferYToAccumulator = (address) =>
             {
                 State state = Processor.State;
                 state.Accumulator = state.RegisterY;
@@ -106,7 +106,7 @@ namespace NesCore.Processing
             };
 
             // TXS - Transfer x to stack pointer
-            Execute TransferXToStackPointer = (address, mode) =>
+            Execute TransferXToStackPointer = (address) =>
             {
                 State state = Processor.State;
                 state.StackPointer = state.RegisterX;
@@ -116,7 +116,7 @@ namespace NesCore.Processing
             // load instructions
 
             // LDA - load accumulator
-            Execute LoadAccumulator = (address, mode) =>
+            Execute LoadAccumulator = (address) =>
             {
                 State state = Processor.State;
                 state.Accumulator = SystemBus.Read(address);
@@ -124,7 +124,7 @@ namespace NesCore.Processing
             };
 
             // LDX - load register x
-            Execute LoadRegisterX = (address, mode) =>
+            Execute LoadRegisterX = (address) =>
             {
                 State state = Processor.State;
                 state.RegisterX = SystemBus.Read(address);
@@ -132,7 +132,7 @@ namespace NesCore.Processing
             };
 
             // LDY - load register y
-            Execute LoadRegisterY = (address, mode) =>
+            Execute LoadRegisterY = (address) =>
             {
                 State state = Processor.State;
                 state.RegisterY = SystemBus.Read(address);
@@ -142,19 +142,19 @@ namespace NesCore.Processing
             // store instructions
 
             // STA - store accumulator
-            Execute StoreAccumulator = (address, mode) =>
+            Execute StoreAccumulator = (address) =>
             {
                 SystemBus.Write(address, Processor.State.Accumulator);
             };
 
             // STX - store register x
-            Execute StoreRegisterX = (address, mode) =>
+            Execute StoreRegisterX = (address) =>
             {
                 SystemBus.Write(address, Processor.State.RegisterX);
             };
 
             // STY - store register y
-            Execute StoreRegisterY = (address, mode) =>
+            Execute StoreRegisterY = (address) =>
             {
                 SystemBus.Write(address, Processor.State.RegisterY);
             };
@@ -162,7 +162,7 @@ namespace NesCore.Processing
             // logical instructions 
 
             // AND - logical And
-            Execute LogicalAnd = (address, mode) =>
+            Execute LogicalAnd = (address) =>
             {
                 State state = Processor.State;
                 state.Accumulator &= SystemBus.Read(address);
@@ -170,7 +170,7 @@ namespace NesCore.Processing
             };
 
             // ORA - logical inclusive OR
-            Execute LogicalInclusiveOr = (address, mode) =>
+            Execute LogicalInclusiveOr = (address) =>
             {
                 State state = Processor.State;
                 state.Accumulator |= SystemBus.Read(address);
@@ -178,7 +178,7 @@ namespace NesCore.Processing
             };
 
             // EOR - logical exlusive OR
-            Execute LogicalExclusiveOr = (address, mode) =>
+            Execute LogicalExclusiveOr = (address) =>
             {
                 State state = Processor.State;
                 state.Accumulator ^= SystemBus.Read(address);
@@ -186,7 +186,7 @@ namespace NesCore.Processing
             };
 
             // BIT - bit test
-            Execute BitTest = (address, mode) =>
+            Execute BitTest = (address) =>
             {
                 State state = Processor.State;
                 byte value = SystemBus.Read(address);
@@ -198,7 +198,7 @@ namespace NesCore.Processing
             // shift instructions
 
             // ASL - arithmetic shift left - accumulator version
-            Execute ArithmeticShiftLeftAccumulator = (address, mode) =>
+            Execute ArithmeticShiftLeftAccumulator = (address) =>
             {
                 State state = Processor.State;
                 // carry if highest bit is 1
@@ -210,7 +210,7 @@ namespace NesCore.Processing
             };
 
             // ASL - arithmetic shift left - memory version
-            Execute ArithmeticShiftLeftMemory = (address, mode) =>
+            Execute ArithmeticShiftLeftMemory = (address) =>
             {
                 State state = Processor.State;
                 // read value from address
@@ -226,7 +226,7 @@ namespace NesCore.Processing
             };
 
             // ROL - rotate left (shift accumulator left, bit 7 to carry, and carry to bit 0)
-            Execute RotateLeftAccumulator = (address, mode) =>
+            Execute RotateLeftAccumulator = (address) =>
             {
                 State state = Processor.State;
                 bool carryFlag = state.CarryFlag;
@@ -238,7 +238,7 @@ namespace NesCore.Processing
             };
 
             // ROL - rotate left (shift memory value left, bit 7 to carry, and carry to bit 0)
-            Execute RotateLeftMemory = (address, mode) =>
+            Execute RotateLeftMemory = (address) =>
             {
                 State state = Processor.State;
                 bool carryFlag = state.CarryFlag;
@@ -252,7 +252,7 @@ namespace NesCore.Processing
             };
 
             // ROR - rotate right (shift accumulator right, bit 0 to carry and carry to bit 7)
-            Execute RotateRightAccumulator = (address, mode) =>
+            Execute RotateRightAccumulator = (address) =>
             {
                 State state = Processor.State;
                 bool carryFlag = state.CarryFlag;
@@ -264,7 +264,7 @@ namespace NesCore.Processing
             };
 
             // ROR - rotate right (shift memory value right, bit 0 to carry and carry to bit 7)
-            Execute RotateRightMemory = (address, mode) =>
+            Execute RotateRightMemory = (address) =>
             {
                 State state = Processor.State;
                 bool carryFlag = state.CarryFlag;
@@ -279,7 +279,7 @@ namespace NesCore.Processing
             };
 
             // LSR - logical shift right - accumulator version
-            Execute LogicalShiftRightAccumulator = (address, mode) =>
+            Execute LogicalShiftRightAccumulator = (address) =>
             {
                 State state = Processor.State;
                 state.CarryFlag = (state.Accumulator & 0x01) != 0;
@@ -288,7 +288,7 @@ namespace NesCore.Processing
             };
 
             // LSR - logical shift right - memory version
-            Execute LogicalShiftRightMemory = (address, mode) =>
+            Execute LogicalShiftRightMemory = (address) =>
             {
                 State state = Processor.State;
                 byte value = SystemBus.Read(address);
@@ -301,21 +301,21 @@ namespace NesCore.Processing
             // compare instructions
 
             // CMP - compare accumulator
-            Execute CompareAccumulator = (address, mode) =>
+            Execute CompareAccumulator = (address) =>
             {
                 byte value = SystemBus.Read(address);
                 CompareValues(Processor.State.Accumulator, value);
             };
 
             // CPX - compare x register
-            Execute CompareRegisterX = (address, mode) =>
+            Execute CompareRegisterX = (address) =>
             {
                 byte value = SystemBus.Read(address);
                 CompareValues(Processor.State.RegisterX, value);
             };
 
             // CPY - compare y register
-            Execute CompareRegisterY = (address, mode) =>
+            Execute CompareRegisterY = (address) =>
             {
                 byte value = SystemBus.Read(address);
                 CompareValues(Processor.State.RegisterY, value);
@@ -324,27 +324,27 @@ namespace NesCore.Processing
             // branch instructions
 
             // BEQ - branch if  equal
-            Execute BranchIfEqual = (address, mode) =>
+            Execute BranchIfEqual = (address) =>
             {
                 State state = Processor.State;
                 if (!state.ZeroFlag)
                     return;
                 state.ProgramCounter = address;
-                AddBranchCycles(address, mode);
+                AddBranchCycles(address);
             };
 
             // BNE - branch if not equal
-            Execute BranchIfNotEqual = (address, mode) =>
+            Execute BranchIfNotEqual = (address) =>
             {
                 State state = Processor.State;
                 if (state.ZeroFlag)
                     return;
                 state.ProgramCounter = address;
-                AddBranchCycles(address, mode);
+                AddBranchCycles(address);
             };
 
             // BPL - branch if plus
-            Execute BranchIfPlus = (address, mode) =>
+            Execute BranchIfPlus = (address) =>
             {
                 State state = Processor.State;
 
@@ -355,11 +355,11 @@ namespace NesCore.Processing
                 // set program counter to the given address operand
                 state.ProgramCounter = address;
                 // add extra cycles as necessary
-                AddBranchCycles(address, mode);
+                AddBranchCycles(address);
             };
 
             // BMI - branch if minus
-            Execute BranchIfMinus = (address, mode) =>
+            Execute BranchIfMinus = (address) =>
             {
                 State state = Processor.State;
 
@@ -371,51 +371,51 @@ namespace NesCore.Processing
                 state.ProgramCounter = address;
 
                 // add extra cycles as necessary
-                AddBranchCycles(address, mode);
+                AddBranchCycles(address);
             };
 
             // BCC - branch if carry clear
-            Execute BranchIfCarryClear = (address, mode) =>
+            Execute BranchIfCarryClear = (address) =>
             {
                 State state = Processor.State;
                 if (state.CarryFlag)
                     return;
                 state.ProgramCounter = address;
-                AddBranchCycles(address, mode);
+                AddBranchCycles(address);
             };
 
             // BCS - branch if carry set
-            Execute BranchIfCarrySet = (address, mode) =>
+            Execute BranchIfCarrySet = (address) =>
             {
                 State state = Processor.State;
                 if (!state.CarryFlag)
                     return;
                 state.ProgramCounter = address;
-                AddBranchCycles(address, mode);
+                AddBranchCycles(address);
             };
 
             // BVC - branch if overflow clear
-            Execute BranchIfOverflowClear = (address, mode) =>
+            Execute BranchIfOverflowClear = (address) =>
             {
                 State state = Processor.State;
                 if (state.OverflowFlag)
                     return;
                 state.ProgramCounter = address;
-                AddBranchCycles(address, mode);
+                AddBranchCycles(address);
             };
 
             // BVS - branch if overflow set
-            Execute BranchIfOverflowSet = (address, mode) =>
+            Execute BranchIfOverflowSet = (address) =>
             {
                 State state = Processor.State;
                 if (!state.OverflowFlag)
                     return;
                 state.ProgramCounter = address;
-                AddBranchCycles(address, mode);
+                AddBranchCycles(address);
             };
 
             // JSR - jump to subroutine
-            Execute JumpToSubroutine = (address, mode) =>
+            Execute JumpToSubroutine = (address) =>
             {
                 State state = Processor.State;
                 Processor.Push16((UInt16)(state.ProgramCounter - 1));
@@ -423,7 +423,7 @@ namespace NesCore.Processing
             };
 
             // RTS - return from subroutine
-            Execute ReturnFromSubroutine = (address, mode) =>
+            Execute ReturnFromSubroutine = (address) =>
             {
                 State state = Processor.State;
                 state.ProgramCounter = (byte)(Processor.Pull16() + 1);
@@ -433,25 +433,25 @@ namespace NesCore.Processing
             // stack instructions
 
             // PHA - push accumulator
-            Execute PushAccumulator = (address, mode) =>
+            Execute PushAccumulator = (address) =>
             {
                 Processor.Push(Processor.State.Accumulator);
             };
 
             // PLA - Pull Accumulator
-            Execute PullAccumulator = (address, mode) =>
+            Execute PullAccumulator = (address) =>
             {
                 Processor.State.Accumulator = Processor.Pull();
             };
 
             // PHP - push processor status
-            PushProcessorStatus = (address, mode) =>
+            PushProcessorStatus = (address) =>
             {
                 Processor.Push((byte)(Processor.State.Flags | State.BreakCommandMask));
             };
 
             // PLP - pull processor status
-            Execute PullProcessorStatus = (address, mode) =>
+            Execute PullProcessorStatus = (address) =>
             {
                 State state = Processor.State;
                 state.Flags = Processor.Pull();
@@ -462,49 +462,49 @@ namespace NesCore.Processing
             // clear / set flag instructions
 
             // SEC - set carry flag
-            Execute SetCarryFlag = (address, mode) =>
+            Execute SetCarryFlag = (address) =>
             {
                 Processor.State.CarryFlag = true;
             };
 
             // CLC - clear carry flag
-            Execute ClearCarryFlag = (address, mode) =>
+            Execute ClearCarryFlag = (address) =>
             {
                 Processor.State.CarryFlag = false;
             };
 
             // SED - set decimal mode flag
-            Execute SetDecimalModeFlag = (address, mode) =>
+            Execute SetDecimalModeFlag = (address) =>
             {
                 Processor.State.DecimalModeFlag = true;
             };
 
             // CLD - clear decimal mode flag
-            Execute ClearDecimalModeFlag = (address, mode) =>
+            Execute ClearDecimalModeFlag = (address) =>
             {
                 Processor.State.DecimalModeFlag = false;
             };
 
             // CLV - clear overflow flag
-            Execute ClearOverflowFlag = (address, mode) =>
+            Execute ClearOverflowFlag = (address) =>
             {
                 Processor.State.OverflowFlag = false;
             };
 
             // SEI - set interrupt disable flag
-            Execute SetInterruptDisableFlag = (address, mode) =>
+            Execute SetInterruptDisableFlag = (address) =>
             {
                 Processor.State.InterruptDisableFlag = true;
             };
 
             // CLI - clear interrupt disable flag
-            Execute ClearInterruptDisableFlag = (address, mode) =>
+            Execute ClearInterruptDisableFlag = (address) =>
             {
                 Processor.State.InterruptDisableFlag = false;
             };
 
             // JMP - jump
-            Execute Jump = (address, mode) =>
+            Execute Jump = (address) =>
             {
                 Processor.State.ProgramCounter = address;
             };
@@ -512,7 +512,7 @@ namespace NesCore.Processing
             // arithmetic instructions
 
             // INX - increment register x
-            Execute IncrementRegisterX = (address, mode) =>
+            Execute IncrementRegisterX = (address) =>
             {
                 State state = Processor.State;
                 ++state.RegisterX;
@@ -520,7 +520,7 @@ namespace NesCore.Processing
             };
 
             // INY - increment register y
-            Execute IncrementRegisterY = (address, mode) =>
+            Execute IncrementRegisterY = (address) =>
             {
                 State state = Processor.State;
                 ++state.RegisterY;
@@ -528,7 +528,7 @@ namespace NesCore.Processing
             };
 
             // INC - increment memory
-            Execute IncrementMemory = (address, mode) =>
+            Execute IncrementMemory = (address) =>
             {
                 byte value = SystemBus.Read(address);
                 ++value;
@@ -537,7 +537,7 @@ namespace NesCore.Processing
             };
 
             // DEC - decrement memory
-            Execute DecrementMemory = (address, mode) =>
+            Execute DecrementMemory = (address) =>
             {
                 byte value = SystemBus.Read(address);
                 --value;
@@ -546,7 +546,7 @@ namespace NesCore.Processing
             };
 
             // DEX - Decrement X Register
-            Execute DecrementRegisterX = (address, mode) =>
+            Execute DecrementRegisterX = (addressode) =>
             {
                 State state = Processor.State;
                 --state.RegisterX;
@@ -554,7 +554,7 @@ namespace NesCore.Processing
             };
 
             // DEY - Decrement Y Register
-            Execute DecrementRegisterY = (address, mode) =>
+            Execute DecrementRegisterY = (address) =>
             {
                 State state = Processor.State;
                 --state.RegisterY;
@@ -562,7 +562,7 @@ namespace NesCore.Processing
             };
 
             // ADC - add with carry
-            Execute AddWithCarry = (address, mode) =>
+            Execute AddWithCarry = (address) =>
             {
                 State state = Processor.State;
                 byte oldAccumulatorValue = state.Accumulator;
@@ -577,7 +577,7 @@ namespace NesCore.Processing
 
 
             // SBC - subtract with carry
-            Execute SubtractWithCarry = (address, mode) =>
+            Execute SubtractWithCarry = (address) =>
             {
                 State state = Processor.State;
                 byte oldAccumulatorValue = state.Accumulator;
@@ -594,16 +594,16 @@ namespace NesCore.Processing
             // interrupt instructions
 
             // BRK - break (force interrupt)
-            Execute Break = (address, mode) =>
+            Execute Break = (address) =>
             {
                 Processor.Push16(Processor.State.ProgramCounter);
-                PushProcessorStatus(address, mode);
-                SetInterruptDisableFlag(address, mode);
+                PushProcessorStatus(address);
+                SetInterruptDisableFlag(address);
                 Processor.State.ProgramCounter = Processor.Read16(Processor.IrqVector);
             };
 
             // RTI - Return from interrupt
-            Execute ReturnFromInterrupt = (address, mode) =>
+            Execute ReturnFromInterrupt = (address) =>
             {
                 State state = Processor.State;
                 state.Flags = Processor.Pull();
@@ -936,7 +936,7 @@ namespace NesCore.Processing
         }
 
         // adds additional branch cycles
-        private void AddBranchCycles(UInt16 address, AddressingMode mode)
+        private void AddBranchCycles(UInt16 address)
         {
             State state = Processor.State;
             // at least one cycle required for branching

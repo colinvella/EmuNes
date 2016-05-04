@@ -197,108 +197,105 @@ namespace NesCore.Processing
 
             // shift instructions
 
-            // ASL - arithmetic shift left
-            Execute ArithmeticShiftLeft = (address, mode) =>
+            // ASL - arithmetic shift left - accumulator version
+            Execute ArithmeticShiftLeftAccumulator = (address, mode) =>
             {
                 State state = Processor.State;
-                if (mode == AddressingMode.Accumulator)
-                {
-                    // carry if highest bit is 1
-                    state.CarryFlag = ((state.Accumulator >> 7) & 1) != 0;
-                    // shift left
-                    state.Accumulator <<= 1;
-                    // update zero and negative flags
-                    SetZeroAndNegativeFlags(state.Accumulator);
-                }
-                else
-                {
-                    // read value from address
-                    byte value = SystemBus.Read(address);
-                    // carry if highest bit is 1
-                    state.CarryFlag = ((value >> 7) & 1) != 0;
-                    // shift left
-                    value <<= 1;
-                    // write shifted value back to memory
-                    SystemBus.Write(address, value);
-                    // update zero and negative flags
-                    SetZeroAndNegativeFlags(value);
-                }
+                // carry if highest bit is 1
+                state.CarryFlag = ((state.Accumulator >> 7) & 1) != 0;
+                // shift left
+                state.Accumulator <<= 1;
+                // update zero and negative flags
+                SetZeroAndNegativeFlags(state.Accumulator);
+            };
+
+            // ASL - arithmetic shift left - memory version
+            Execute ArithmeticShiftLeftMemory = (address, mode) =>
+            {
+                State state = Processor.State;
+                // read value from address
+                byte value = SystemBus.Read(address);
+                // carry if highest bit is 1
+                state.CarryFlag = ((value >> 7) & 1) != 0;
+                // shift left
+                value <<= 1;
+                // write shifted value back to memory
+                SystemBus.Write(address, value);
+                // update zero and negative flags
+                SetZeroAndNegativeFlags(value);
             };
 
             // ROL - rotate left (shift accumulator left, bit 7 to carry, and carry to bit 0)
-            Execute RotateLeft = (address, mode) =>
+            Execute RotateLeftAccumulator = (address, mode) =>
             {
                 State state = Processor.State;
                 bool carryFlag = state.CarryFlag;
+                state.CarryFlag = (state.Accumulator & 0x80) != 0;
+                state.Accumulator = (byte)(state.Accumulator << 1);
+                if (carryFlag)
+                    state.Accumulator |= 1;
+                SetZeroAndNegativeFlags(state.Accumulator);
+            };
 
-                if (mode == AddressingMode.Accumulator)
-                {
-                    // work on accumulator value
-                    state.CarryFlag = (state.Accumulator & 0x80) != 0;
-                    state.Accumulator = (byte)(state.Accumulator << 1);
-                    if (carryFlag)
-                        state.Accumulator |= 1;
-                    SetZeroAndNegativeFlags(state.Accumulator);
-                }
-                else
-                {
-                    // work on value retrieved from memory
-                    byte value = SystemBus.Read(address);
-                    state.CarryFlag = (value & 0x80) != 0;
-                    value = (byte)(value << 1);
-                    if (carryFlag)
-                        value |= 1;
-                    SystemBus.Write(address, value);
-                    SetZeroAndNegativeFlags(value);
-                }
+            // ROL - rotate left (shift memory value left, bit 7 to carry, and carry to bit 0)
+            Execute RotateLeftMemory = (address, mode) =>
+            {
+                State state = Processor.State;
+                bool carryFlag = state.CarryFlag;
+                byte value = SystemBus.Read(address);
+                state.CarryFlag = (value & 0x80) != 0;
+                value = (byte)(value << 1);
+                if (carryFlag)
+                    value |= 1;
+                SystemBus.Write(address, value);
+                SetZeroAndNegativeFlags(value);
             };
 
             // ROR - rotate right (shift accumulator right, bit 0 to carry and carry to bit 7)
-            Execute RotateRight = (address, mode) =>
+            Execute RotateRightAccumulator = (address, mode) =>
             {
                 State state = Processor.State;
                 bool carryFlag = state.CarryFlag;
-
-                if (mode == AddressingMode.Accumulator)
-                {
-                    // work on accumulator value
-                    state.CarryFlag = (state.Accumulator & 0x01) != 0;
-                    state.Accumulator = (byte)(state.Accumulator >> 1);
-                    if (carryFlag)
-                        state.Accumulator |= 0x80;
-                    SetZeroAndNegativeFlags(state.Accumulator);
-                }
-                else
-                {
-                    // work on value retrieved from memory
-                    byte value = SystemBus.Read(address);
-                    state.CarryFlag = (value & 0x01) != 0;
-                    value = (byte)(value >> 1);
-                    if (carryFlag)
-                        value |= 0x80;
-                    SystemBus.Write(address, value);
-                    SetZeroAndNegativeFlags(value);
-                }
+                state.CarryFlag = (state.Accumulator & 0x01) != 0;
+                state.Accumulator = (byte)(state.Accumulator >> 1);
+                if (carryFlag)
+                    state.Accumulator |= 0x80;
+                SetZeroAndNegativeFlags(state.Accumulator);
             };
 
-            // LSR - logical shift right
-            Execute LogicalShiftRight = (address, mode) =>
+            // ROR - rotate right (shift memory value right, bit 0 to carry and carry to bit 7)
+            Execute RotateRightMemory = (address, mode) =>
             {
                 State state = Processor.State;
-                if (mode == AddressingMode.Accumulator)
-                {
-                    state.CarryFlag = (state.Accumulator & 0x01) != 0;
-                    state.Accumulator >>= 1;
-                    SetZeroAndNegativeFlags(state.Accumulator);
-                }
-                else
-                {
-                    byte value = SystemBus.Read(address);
-                    state.CarryFlag = (value & 0x01) != 0;
-                    value >>= 1;
-                    SystemBus.Write(address, value);
-                    SetZeroAndNegativeFlags(value);
-                }
+                bool carryFlag = state.CarryFlag;
+                byte value = SystemBus.Read(address);
+                state.CarryFlag = (value & 0x01) != 0;
+                value = (byte)(value >> 1);
+                if (carryFlag)
+                    value |= 0x80;
+                SystemBus.Write(address, value);
+                SetZeroAndNegativeFlags(value);
+          
+            };
+
+            // LSR - logical shift right - accumulator version
+            Execute LogicalShiftRightAccumulator = (address, mode) =>
+            {
+                State state = Processor.State;
+                state.CarryFlag = (state.Accumulator & 0x01) != 0;
+                state.Accumulator >>= 1;
+                SetZeroAndNegativeFlags(state.Accumulator);
+            };
+
+            // LSR - logical shift right - memory version
+            Execute LogicalShiftRightMemory = (address, mode) =>
+            {
+                State state = Processor.State;
+                byte value = SystemBus.Read(address);
+                state.CarryFlag = (value & 0x01) != 0;
+                value >>= 1;
+                SystemBus.Write(address, value);
+                SetZeroAndNegativeFlags(value);
             };
 
             // compare instructions
@@ -626,15 +623,15 @@ namespace NesCore.Processing
             instructions[0x03] = new Instruction(0x03, "SLO", AddressingMode.IndexedIndirect, 8, IllegalOpCode);
             instructions[0x04] = new Instruction(0x04, "NOPx", AddressingMode.ZeroPage, 3, IllegalOpCode);
             instructions[0x05] = new Instruction(0x05, "ORA", AddressingMode.ZeroPage, 3, LogicalInclusiveOr);
-            instructions[0x06] = new Instruction(0x06, "ASL", AddressingMode.ZeroPage, 5, ArithmeticShiftLeft);
+            instructions[0x06] = new Instruction(0x06, "ASL", AddressingMode.ZeroPage, 5, ArithmeticShiftLeftMemory);
             instructions[0x07] = new Instruction(0x07, "SLO", AddressingMode.ZeroPage, 5, IllegalOpCode);
             instructions[0x08] = new Instruction(0x08, "PHP", AddressingMode.Implied, 3, PushProcessorStatus);
             instructions[0x09] = new Instruction(0x09, "ORA", AddressingMode.Immediate, 2, LogicalInclusiveOr);
-            instructions[0x0A] = new Instruction(0x0A, "ASL", AddressingMode.Accumulator, 2, ArithmeticShiftLeft);
+            instructions[0x0A] = new Instruction(0x0A, "ASL", AddressingMode.Accumulator, 2, ArithmeticShiftLeftAccumulator);
             instructions[0x0B] = new Instruction(0x0B, "ANC", AddressingMode.Immediate, 2, IllegalOpCode);
             instructions[0x0C] = new Instruction(0x0C, "NOPx", AddressingMode.Absolute, 4, IllegalOpCode);
             instructions[0x0D] = new Instruction(0x0D, "ORA", AddressingMode.Absolute, 4, LogicalInclusiveOr);
-            instructions[0x0E] = new Instruction(0x0E, "ASL", AddressingMode.Absolute, 6, ArithmeticShiftLeft);
+            instructions[0x0E] = new Instruction(0x0E, "ASL", AddressingMode.Absolute, 6, ArithmeticShiftLeftMemory);
             instructions[0x0F] = new Instruction(0x0F, "SLO", AddressingMode.Absolute, 6, IllegalOpCode);
 
             // 0x10 - 0x1F
@@ -644,7 +641,7 @@ namespace NesCore.Processing
             instructions[0x13] = new Instruction(0x13, "SLO", AddressingMode.IndirectIndexed, 8, IllegalOpCode);
             instructions[0x14] = new Instruction(0x14, "NOPx", AddressingMode.ZeroPageX, 4, IllegalOpCode);
             instructions[0x15] = new Instruction(0x15, "ORA", AddressingMode.ZeroPageX, 4, LogicalInclusiveOr);
-            instructions[0x16] = new Instruction(0x16, "ASL", AddressingMode.ZeroPageX, 6, ArithmeticShiftLeft);
+            instructions[0x16] = new Instruction(0x16, "ASL", AddressingMode.ZeroPageX, 6, ArithmeticShiftLeftMemory);
             instructions[0x17] = new Instruction(0x17, "SLO", AddressingMode.ZeroPageX, 6, IllegalOpCode);
             instructions[0x18] = new Instruction(0x18, "CLC", AddressingMode.Implied, 2, ClearCarryFlag);
             instructions[0x19] = new Instruction(0x19, "ORA", AddressingMode.AbsoluteY, 4, LogicalInclusiveOr);
@@ -652,7 +649,7 @@ namespace NesCore.Processing
             instructions[0x1B] = new Instruction(0x1B, "SLO", AddressingMode.AbsoluteY, 7, IllegalOpCode);
             instructions[0x1C] = new Instruction(0x1C, "NOPx", AddressingMode.AbsoluteX, 4, IllegalOpCode);
             instructions[0x1D] = new Instruction(0x1D, "ORA", AddressingMode.AbsoluteX, 4, LogicalInclusiveOr);
-            instructions[0x1E] = new Instruction(0x1E, "ASL", AddressingMode.AbsoluteX, 7, ArithmeticShiftLeft);
+            instructions[0x1E] = new Instruction(0x1E, "ASL", AddressingMode.AbsoluteX, 7, ArithmeticShiftLeftMemory);
             instructions[0x1F] = new Instruction(0x1F, "SLO", AddressingMode.AbsoluteX, 7, IllegalOpCode);
 
             // 0x20 - 0x2F
@@ -662,15 +659,15 @@ namespace NesCore.Processing
             instructions[0x23] = new Instruction(0x23, "RLA", AddressingMode.IndexedIndirect, 8, IllegalOpCode);
             instructions[0x24] = new Instruction(0x24, "BIT", AddressingMode.ZeroPage, 3, BitTest);
             instructions[0x25] = new Instruction(0x25, "AND", AddressingMode.ZeroPage, 3, LogicalAnd);
-            instructions[0x26] = new Instruction(0x26, "ROL", AddressingMode.ZeroPage, 5, RotateLeft);
+            instructions[0x26] = new Instruction(0x26, "ROL", AddressingMode.ZeroPage, 5, RotateLeftMemory);
             instructions[0x27] = new Instruction(0x27, "RLA", AddressingMode.ZeroPage, 5, IllegalOpCode);
             instructions[0x28] = new Instruction(0x28, "PLP", AddressingMode.Implied, 4, PullProcessorStatus);
             instructions[0x29] = new Instruction(0x29, "AND", AddressingMode.Immediate, 2, LogicalAnd);
-            instructions[0x2A] = new Instruction(0x2A, "ROL", AddressingMode.Accumulator, 2, RotateLeft);
+            instructions[0x2A] = new Instruction(0x2A, "ROL", AddressingMode.Accumulator, 2, RotateLeftAccumulator);
             instructions[0x2B] = new Instruction(0x2B, "ANC", AddressingMode.Immediate, 2, IllegalOpCode);
             instructions[0x2C] = new Instruction(0x2C, "BIT", AddressingMode.Absolute, 4, BitTest);
             instructions[0x2D] = new Instruction(0x2D, "AND", AddressingMode.Absolute, 4, LogicalAnd);
-            instructions[0x2E] = new Instruction(0x2E, "ROL", AddressingMode.Absolute, 6, RotateLeft);
+            instructions[0x2E] = new Instruction(0x2E, "ROL", AddressingMode.Absolute, 6, RotateLeftMemory);
             instructions[0x2F] = new Instruction(0x2F, "RLA", AddressingMode.Absolute, 6, IllegalOpCode);
 
             // 0x30 - 0x3F
@@ -680,7 +677,7 @@ namespace NesCore.Processing
             instructions[0x33] = new Instruction(0x33, "RLA", AddressingMode.IndirectIndexed, 8, IllegalOpCode);
             instructions[0x34] = new Instruction(0x34, "NOPx", AddressingMode.ZeroPageX, 4, IllegalOpCode);
             instructions[0x35] = new Instruction(0x35, "AND", AddressingMode.ZeroPageX, 4, LogicalAnd);
-            instructions[0x36] = new Instruction(0x36, "ROL", AddressingMode.ZeroPageX, 6, RotateLeft);
+            instructions[0x36] = new Instruction(0x36, "ROL", AddressingMode.ZeroPageX, 6, RotateLeftMemory);
             instructions[0x37] = new Instruction(0x37, "RLA", AddressingMode.ZeroPageX, 6, IllegalOpCode);
             instructions[0x38] = new Instruction(0x38, "SEC", AddressingMode.Implied, 2, SetCarryFlag);
             instructions[0x39] = new Instruction(0x39, "AND", AddressingMode.AbsoluteY, 4, LogicalAnd);
@@ -688,7 +685,7 @@ namespace NesCore.Processing
             instructions[0x3B] = new Instruction(0x3B, "RLA", AddressingMode.AbsoluteY, 7, IllegalOpCode);
             instructions[0x3C] = new Instruction(0x3C, "NOPx", AddressingMode.AbsoluteX, 3, IllegalOpCode);
             instructions[0x3D] = new Instruction(0x3D, "AND", AddressingMode.AbsoluteX, 4, LogicalAnd);
-            instructions[0x3E] = new Instruction(0x3E, "ROL", AddressingMode.AbsoluteX, 7, RotateLeft);
+            instructions[0x3E] = new Instruction(0x3E, "ROL", AddressingMode.AbsoluteX, 7, RotateLeftMemory);
             instructions[0x3F] = new Instruction(0x3F, "RLA", AddressingMode.AbsoluteX, 7, IllegalOpCode);
 
             // 0x40 - 0x4F
@@ -698,15 +695,15 @@ namespace NesCore.Processing
             instructions[0x43] = new Instruction(0x43, "KIL", AddressingMode.IndexedIndirect, 8, IllegalOpCode);
             instructions[0x44] = new Instruction(0x44, "NOPx", AddressingMode.ZeroPage, 3, IllegalOpCode);
             instructions[0x45] = new Instruction(0x45, "EOR", AddressingMode.ZeroPage, 3, LogicalExclusiveOr);
-            instructions[0x46] = new Instruction(0x46, "LSR", AddressingMode.ZeroPage, 5, LogicalShiftRight);
+            instructions[0x46] = new Instruction(0x46, "LSR", AddressingMode.ZeroPage, 5, LogicalShiftRightMemory);
             instructions[0x47] = new Instruction(0x47, "SRE", AddressingMode.ZeroPage, 5, IllegalOpCode);
             instructions[0x48] = new Instruction(0x48, "PHA", AddressingMode.Implied, 3, PushAccumulator);
             instructions[0x49] = new Instruction(0x49, "EOR", AddressingMode.Immediate, 2, LogicalExclusiveOr);
-            instructions[0x4A] = new Instruction(0x4A, "LSR", AddressingMode.Accumulator, 2, LogicalShiftRight);
+            instructions[0x4A] = new Instruction(0x4A, "LSR", AddressingMode.Accumulator, 2, LogicalShiftRightAccumulator);
             instructions[0x4B] = new Instruction(0x4B, "LSR", AddressingMode.Immediate, 2, IllegalOpCode);
             instructions[0x4C] = new Instruction(0x4C, "JMP", AddressingMode.Absolute, 3, Jump);
             instructions[0x4D] = new Instruction(0x4D, "EOR", AddressingMode.Absolute, 4, LogicalExclusiveOr);
-            instructions[0x4E] = new Instruction(0x4E, "LSR", AddressingMode.Absolute, 6, LogicalShiftRight);
+            instructions[0x4E] = new Instruction(0x4E, "LSR", AddressingMode.Absolute, 6, LogicalShiftRightMemory);
             instructions[0x4F] = new Instruction(0x4F, "SRE", AddressingMode.Absolute, 6, IllegalOpCode);
 
             // 0x50 - 0x5F
@@ -716,7 +713,7 @@ namespace NesCore.Processing
             instructions[0x53] = new Instruction(0x53, "SRE", AddressingMode.IndirectIndexed, 8, IllegalOpCode);
             instructions[0x54] = new Instruction(0x54, "NOPx", AddressingMode.ZeroPageX, 4, IllegalOpCode);
             instructions[0x55] = new Instruction(0x55, "EOR", AddressingMode.ZeroPageX, 4, LogicalExclusiveOr);
-            instructions[0x56] = new Instruction(0x56, "LSR", AddressingMode.ZeroPageX, 6, LogicalShiftRight);
+            instructions[0x56] = new Instruction(0x56, "LSR", AddressingMode.ZeroPageX, 6, LogicalShiftRightMemory);
             instructions[0x57] = new Instruction(0x57, "SRE", AddressingMode.ZeroPageX, 6, IllegalOpCode);
             instructions[0x58] = new Instruction(0x58, "CLI", AddressingMode.Implied, 2, ClearInterruptDisableFlag);
             instructions[0x59] = new Instruction(0x59, "EOR", AddressingMode.AbsoluteY, 4, LogicalExclusiveOr);
@@ -724,7 +721,7 @@ namespace NesCore.Processing
             instructions[0x5B] = new Instruction(0x5B, "SRE", AddressingMode.AbsoluteY, 7, IllegalOpCode);
             instructions[0x5C] = new Instruction(0x5C, "NOPx", AddressingMode.AbsoluteX, 4, IllegalOpCode);
             instructions[0x5D] = new Instruction(0x5D, "EOR", AddressingMode.AbsoluteX, 4, LogicalExclusiveOr);
-            instructions[0x5E] = new Instruction(0x5E, "LSR", AddressingMode.AbsoluteX, 7, LogicalShiftRight);
+            instructions[0x5E] = new Instruction(0x5E, "LSR", AddressingMode.AbsoluteX, 7, LogicalShiftRightMemory);
             instructions[0x5F] = new Instruction(0x5F, "SRE", AddressingMode.AbsoluteX, 7, IllegalOpCode);
 
             // 0x60 - 0x6F
@@ -734,15 +731,15 @@ namespace NesCore.Processing
             instructions[0x63] = new Instruction(0x63, "RRA", AddressingMode.IndexedIndirect, 8, IllegalOpCode);
             instructions[0x64] = new Instruction(0x64, "NOPx", AddressingMode.ZeroPage, 3, IllegalOpCode);
             instructions[0x65] = new Instruction(0x65, "ADC", AddressingMode.ZeroPage, 3, AddWithCarry);
-            instructions[0x66] = new Instruction(0x66, "ROR", AddressingMode.ZeroPage, 5, RotateRight);
+            instructions[0x66] = new Instruction(0x66, "ROR", AddressingMode.ZeroPage, 5, RotateRightMemory);
             instructions[0x67] = new Instruction(0x67, "RRA", AddressingMode.ZeroPage, 5, IllegalOpCode);
             instructions[0x68] = new Instruction(0x68, "PLA", AddressingMode.Implied, 4, PullAccumulator);
             instructions[0x69] = new Instruction(0x69, "ADC", AddressingMode.Immediate, 2, AddWithCarry);
-            instructions[0x6A] = new Instruction(0x6A, "ROR", AddressingMode.Accumulator, 2, RotateRight);
+            instructions[0x6A] = new Instruction(0x6A, "ROR", AddressingMode.Accumulator, 2, RotateRightAccumulator);
             instructions[0x6B] = new Instruction(0x6B, "ARR", AddressingMode.Immediate, 2, IllegalOpCode);
             instructions[0x6C] = new Instruction(0x6C, "JMP", AddressingMode.Indirect, 5, Jump);
             instructions[0x6D] = new Instruction(0x6D, "ADC", AddressingMode.Absolute, 4, AddWithCarry);
-            instructions[0x6E] = new Instruction(0x6E, "ROR", AddressingMode.Absolute, 6, RotateRight);
+            instructions[0x6E] = new Instruction(0x6E, "ROR", AddressingMode.Absolute, 6, RotateRightMemory);
             instructions[0x6F] = new Instruction(0x6F, "RRA", AddressingMode.Absolute, 6, IllegalOpCode);
 
             // 0x70 - 0x7F
@@ -752,7 +749,7 @@ namespace NesCore.Processing
             instructions[0x73] = new Instruction(0x73, "RRA", AddressingMode.IndirectIndexed, 8, IllegalOpCode);
             instructions[0x74] = new Instruction(0x74, "NOPx", AddressingMode.ZeroPageX, 4, IllegalOpCode);
             instructions[0x75] = new Instruction(0x75, "ADC", AddressingMode.ZeroPageX, 4, AddWithCarry);
-            instructions[0x76] = new Instruction(0x76, "ROR", AddressingMode.ZeroPageX, 6, RotateRight);
+            instructions[0x76] = new Instruction(0x76, "ROR", AddressingMode.ZeroPageX, 6, RotateRightMemory);
             instructions[0x77] = new Instruction(0x77, "RRA", AddressingMode.ZeroPageX, 6, IllegalOpCode);
             instructions[0x78] = new Instruction(0x78, "SEI", AddressingMode.Implied, 2, SetInterruptDisableFlag);
             instructions[0x79] = new Instruction(0x79, "ADC", AddressingMode.AbsoluteY, 4, AddWithCarry);
@@ -760,7 +757,7 @@ namespace NesCore.Processing
             instructions[0x7B] = new Instruction(0x7B, "RRA", AddressingMode.AbsoluteY, 7, IllegalOpCode);
             instructions[0x7C] = new Instruction(0x7C, "NOPx", AddressingMode.AbsoluteX, 4, IllegalOpCode);
             instructions[0x7D] = new Instruction(0x7D, "ADC", AddressingMode.AbsoluteX, 4, AddWithCarry);
-            instructions[0x7E] = new Instruction(0x7E, "ROR", AddressingMode.AbsoluteX, 7, RotateRight);
+            instructions[0x7E] = new Instruction(0x7E, "ROR", AddressingMode.AbsoluteX, 7, RotateRightMemory);
             instructions[0x7F] = new Instruction(0x7F, "RRA", AddressingMode.AbsoluteX, 7, IllegalOpCode);
 
             // 0x80 - 0x8F

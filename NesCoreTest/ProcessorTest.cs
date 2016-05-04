@@ -649,6 +649,150 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.ProgramCounter == 0x1048, "Value $1048 expected in PC");
         }
 
+        [TestMethod]
+        public void TestInstructionAndIzy()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"AND ($10),Y ; AND accumulator with contents of zero page offset $10 (absolute $0010), offset by contents of Y register ($30)");
+            Assert.IsTrue(Read(0x1000) == 0x31, "AND/IZY instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x30;  // Y = $30
+            processor.Write16(0x0010, 0x2000); // ($10) = ($0010) = $2000
+            Write(0x2030, 0x0F); // ($10),Y = $2000 + $30 = $2030
+            processor.State.Accumulator = 0xFF;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x0F, "Value $0F expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionAndZpx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"AND $10,X ; AND accumulator with contents of address $0010 + X");
+            Assert.IsTrue(Read(0x1000) == 0x35, "AND/ZPX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            Write(0x0040, 0x0F);
+            processor.State.Accumulator = 0xFF;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x0F, "Value $0F expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionRolZpx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ROL $10,X ; ROL contents of address $0010 offset by X");
+            Assert.IsTrue(Read(0x1000) == 0x36, "ROL/ZPX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x20;
+            processor.State.CarryFlag = false;
+            Write(0x0030, 0x81);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x0030) == 0x02, "Value $02 expected at address $0030 = ($10,X), X = $20");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 7)");
+        }
+
+        [TestMethod]
+        public void TestInstructionSex()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"SEC ;set carry flag");
+            Assert.IsTrue(Read(0x1000) == 0x38, "SEC instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.CarryFlag = false;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set");
+        }
+
+        [TestMethod]
+        public void TestInstructionAndAby()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"AND $2000,Y ; AND accumulator with contents of address $2000 + Y");
+            Assert.IsTrue(Read(0x1000) == 0x39, "AND/ABY instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABY operand $2000 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x30;
+            Write(0x2030, 0x0F);
+            processor.State.Accumulator = 0xFF;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x0F, "Value $0F expected at address $2030");
+        }
+
+        [TestMethod]
+        public void TestInstructionAndAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"AND $2000,X ; AND accumulator with contents of address $2000 + X");
+            Assert.IsTrue(Read(0x1000) == 0x3D, "AND/ABX instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            Write(0x2030, 0x0F);
+            processor.State.Accumulator = 0xFF;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x0F, "Value $0F expected at address $2030");
+        }
+
+        [TestMethod]
+        public void TestInstructionRolAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ROL $2000,X ; ROL contents of address $2000 offset by X");
+            Assert.IsTrue(Read(0x1000) == 0x3E, "ROL/ABX instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            processor.State.CarryFlag = false;
+            Write(0x2030, 0x81);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x2030) == 0x02, "Value $02 expected at address $2030 = $2000,X where X = $30");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 7)");
+        }
 
 
 

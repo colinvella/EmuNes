@@ -157,6 +157,10 @@ namespace NesCore.Processing
 
             switch (addressingMode)
             {
+                case AddressingMode.Implied:
+                case AddressingMode.Accumulator:
+                    // address n/a
+                    break;
                 case AddressingMode.Absolute:
                     // absolute address is the word located at immediate address
                     address = Read16(immediateAddress);
@@ -171,15 +175,9 @@ namespace NesCore.Processing
                     address = (UInt16)(Read16(immediateAddress) + State.RegisterY);
                     pageCrossed = PagesDiffer((UInt16)(address - State.RegisterY), address);
                     break;
-                case AddressingMode.Accumulator:
-                    // address n/a
-                    break;
                 case AddressingMode.Immediate:
                     // address is immediate address following op code
                     address = immediateAddress;
-                    break;
-                case AddressingMode.Implied:
-                    // address n/a
                     break;
                 case AddressingMode.IndexedIndirect:
                     // indexed indirect is address located at the x register, offset by the byte immediately following the op code

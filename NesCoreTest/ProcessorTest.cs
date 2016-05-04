@@ -492,6 +492,134 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 7)");
         }
 
+        [TestMethod]
+        public void TestInstructionPlp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"PHP ;push processor status
+                  CLC ;clear carry
+                  PLP ;pull processor status");
+            Assert.IsTrue(Read(0x1000) == 0x08, "PHP instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.CarryFlag = true;
+
+            processor.ExecuteInstructions(2);
+            Assert.IsTrue(!processor.State.CarryFlag, "carry flag should be clear");
+
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.CarryFlag, "carry flag should be restored to set");
+        }
+
+        [TestMethod]
+        public void TestInstructionAndImm()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"AND #$F0 ; AND accumulator with value $F0)");
+            Assert.IsTrue(Read(0x1000) == 0x29, "AND/IMM instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0xF0, "Imm $F0 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0xFF;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xF0, "Value $F0 expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionRolAcc()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ROL A ;ROL contents of accumulator");
+            Assert.IsTrue(Read(0x1000) == 0x2A, "ROL/Acc instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.CarryFlag = false;
+            processor.State.Accumulator = 0x81;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x02, "Value $02 expected in accumulator");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 7)");
+        }
+
+        [TestMethod]
+        public void TestInstructionBitAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"BIT $2000 ; bit test the contents of address $2000");
+            Assert.IsTrue(Read(0x1000) == 0x2C, "BIT/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.ZeroFlag = true;
+            processor.State.NegativeFlag = false;
+            processor.State.OverflowFlag = false;
+            Write(0x2000, 0xC0); // $C0 = b11000000
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(!processor.State.ZeroFlag, "Zero flag expected to be clear");
+            Assert.IsTrue(processor.State.NegativeFlag, "Negative (S) flag expected to be clear");
+            Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be clear");
+        }
+
+        [TestMethod]
+        public void TestInstructionAndAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"AND $2000 ; AND accumulator with contents of address $2000");
+            Assert.IsTrue(Read(0x1000) == 0x2D, "AND/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            Write(0x2000, 0x0F);
+            processor.State.Accumulator = 0xFF;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x0F, "Value $0F expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionRolAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ROL $2000 ; ROL contents of address $2000");
+            Assert.IsTrue(Read(0x1000) == 0x2E, "ROL/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.CarryFlag = false;
+            Write(0x2000, 0x81);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x2000) == 0x02, "Value $02 expected at address $2000");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 7)");
+        }
+
+
+
 
 
 

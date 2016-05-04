@@ -348,6 +348,133 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
         }
 
+        [TestMethod]
+        public void TestInstructionOraAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ORA $2000,X ; OR accumulator with contents of address $2000 + X = $2000 + $30 = $2030");
+            Assert.IsTrue(Read(0x1000) == 0x1D, "ORA/ABX instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            Write(0x2030, 0x0F);
+            processor.State.Accumulator = 0xF0;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionAslAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ASL $2000, X ;ASL contents of address $2000 + X = $2000 + $30 = $2030");
+            Assert.IsTrue(Read(0x1000) == 0x1E, "ASL/Abx instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            Write(0x2030, 0x04);
+            processor.ExecuteInstruction();
+            Assert.IsTrue(Read(0x2030) == 0x08, "Value $08 expected at address $2030");
+        }
+
+        [TestMethod]
+        public void TestInstructionJsrAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"JSR $2000 ;jump to subroutine at absolute $2000");
+            Assert.IsTrue(Read(0x1000) == 0x20, "JSR/abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABS operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            Write(0x0030, 0x04);
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ProgramCounter == 0x2000, "PC expected to be $2000");
+            Assert.IsTrue(processor.Pull16() == 0x1002, "Top of stack expected to hold address of instruction after JSR - 1");
+        }
+
+        [TestMethod]
+        public void TestInstructionAndIzx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"AND ($10,X) ; AND accumulator with contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
+            Assert.IsTrue(Read(0x1000) == 0x21, "AND/IZX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Izx 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x80;
+            processor.Write16(0x0090, 0x2000);
+            Write(0x2000, 0xF0);
+            processor.State.Accumulator = 0xFF;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xF0, "Value $F0 expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionBitZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"BIT $10 ; bit test the contents of address $0010");
+            Assert.IsTrue(Read(0x1000) == 0x24, "BIT/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.ZeroFlag = true;
+            processor.State.NegativeFlag = false;
+            processor.State.OverflowFlag = false;
+            Write(0x0010, 0xC0); // $C0 = b11000000
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(!processor.State.ZeroFlag, "Zero flag expected to be clear");
+            Assert.IsTrue(processor.State.NegativeFlag, "Negative (S) flag expected to be clear");
+            Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be clear");
+        }
+
+        [TestMethod]
+        public void TestInstructionAndZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"AND $10 ; AND accumulator with contents of address $0010");
+            Assert.IsTrue(Read(0x1000) == 0x25, "AND/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            Write(0x0010, 0x0F);
+            processor.State.Accumulator = 0xFF;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x0F, "Value $0F expected in Accumulator");
+        }
+
+
+
+
+
 
 
 

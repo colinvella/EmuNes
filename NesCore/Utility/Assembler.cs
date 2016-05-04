@@ -177,6 +177,32 @@ namespace NesCore.Utility
                     systemBus.Write(WriteAddress++, instruction.Code);
                     systemBus.Write(WriteAddress++, byteOperand);
                 }
+                else if (ParseAbsoluteXOperand(operandToken, out wordOperand))
+                {
+                    // absolute x mode instruction
+                    Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.AbsoluteX);
+                    if (instruction == null)
+                        throw new AssemblerException(sourceLineNumber, sourceLine,
+                            "Instruction " + opName + " does not support absolute X addressing mode");
+
+                    // write opcode and absolute x operand
+                    systemBus.Write(WriteAddress++, instruction.Code);
+                    Processor.Write16(WriteAddress, wordOperand);
+                    WriteAddress += 2;
+                }
+                else if (ParseAbsoluteYOperand(operandToken, out wordOperand))
+                {
+                    // absolute x mode instruction
+                    Instruction instruction = Processor.InstructionSet.FindBy(opName, AddressingMode.AbsoluteY);
+                    if (instruction == null)
+                        throw new AssemblerException(sourceLineNumber, sourceLine,
+                            "Instruction " + opName + " does not support absolute Y addressing mode");
+
+                    // write opcode and absolute y operand
+                    systemBus.Write(WriteAddress++, instruction.Code);
+                    Processor.Write16(WriteAddress, wordOperand);
+                    WriteAddress += 2;
+                }
                 else if (ParseZeroPageXOperand(operandToken, out byteOperand))
                 {
                     // zero page x mode instruction
@@ -316,21 +342,27 @@ namespace NesCore.Utility
         private bool ParseAbsoluteXOperand(string operand, out UInt16 value)
         {
             value = 0;
-            operand = operand.ToUpper();
+            operand = operand.Replace(" ", "").ToUpper();
             if (!operand.EndsWith(",X"))
                 return false;
 
-            return ParseHexValue(operand.Replace(",X", ""), out value);
+            if (!ParseHexValue(operand.Replace(",X", ""), out value))
+                return false;
+
+            return value > 0xFF;
         }
 
         private bool ParseAbsoluteYOperand(string operand, out UInt16 value)
         {
             value = 0;
-            operand = operand.ToUpper();
+            operand = operand.Replace(" ", "").ToUpper();
             if (!operand.EndsWith(",Y"))
                 return false;
 
-            return ParseHexValue(operand.Replace(",Y", ""), out value);
+            if (!ParseHexValue(operand.Replace(",Y", ""), out value))
+                return false;
+
+            return value > 0xFF;
         }
 
         private bool ParseImmediateOperand(string operand, out byte value)

@@ -294,8 +294,59 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
         }
 
+        [TestMethod]
+        public void TestInstructionAslZpx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ASL $20, X ;ASL contents of address $20 + X = $0020 + $10 = $0030");
+            Assert.IsTrue(Read(0x1000) == 0x16, "ASL/Zpx instruction not assembled");
 
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x10;
+            Write(0x0030, 0x04);
+            processor.ExecuteInstruction();
+            Assert.IsTrue(Read(0x0030) == 0x08, "Value $08 expected at address $0030");
+        }
 
+        [TestMethod]
+        public void TestInstructionClc()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CLC ;clear carry flag");
+            Assert.IsTrue(Read(0x1000) == 0x18, "CLC instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.CarryFlag = true;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be False");
+        }
+
+        [TestMethod]
+        public void TestInstructionOraAby()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ORA $2000,Y ; OR accumulator with contents of address $2000 + Y = $2000 + $30 = $2030");
+            Assert.IsTrue(Read(0x1000) == 0x19, "ORA/ABY instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABY operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x30;
+            Write(0x2030, 0x0F);
+            processor.State.Accumulator = 0xF0;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
+        }
 
 
 

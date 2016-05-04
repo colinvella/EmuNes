@@ -238,17 +238,23 @@ namespace NesCoreTest
             // assembler test
             ResetSystem();
             assembler.GenerateProgram(0x1000,
-                @"LDA #$01 ;load accumulator with positive value
-                  BPL  $40 ;branch to $40 bytes ahead of instruction");
+                @"LDA #$FF ;load accumulator with negative value
+                  BPL  $30 ;branch on plus to $30 bytes ahead of instruction
+                  LDA #$01 ;load accumulator with positive value
+                  BPL  $40 ;branch on plus to $40 bytes ahead of instruction");
             Assert.IsTrue(Read(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x01, "immediate operand $01 expected");
+            Assert.IsTrue(Read(0x1001) == 0xFF, "immediate operand $FF expected");
             Assert.IsTrue(Read(0x1002) == 0x10, "BPL instruction not assembled");
-            Assert.IsTrue(Read(0x1003) == 0x40, "Relative branch offset $40 expected");
+            Assert.IsTrue(Read(0x1003) == 0x30, "Relative branch offset $30 expected");
+            Assert.IsTrue(Read(0x1004) == 0xA9, "LDA/Imm instruction not assembled");
+            Assert.IsTrue(Read(0x1005) == 0x01, "immediate operand $01 expected");
+            Assert.IsTrue(Read(0x1006) == 0x10, "BPL instruction not assembled");
+            Assert.IsTrue(Read(0x1007) == 0x40, "Relative branch offset $40 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
-            processor.ExecuteInstructions(2);
-            Assert.IsTrue(processor.State.ProgramCounter == 0x1044, "Value $1044 expected in PC");
+            processor.ExecuteInstructions(4);
+            Assert.IsTrue(processor.State.ProgramCounter == 0x1048, "Value $1048 expected in PC");
         }
 
         [TestMethod]
@@ -616,6 +622,31 @@ namespace NesCoreTest
 
             Assert.IsTrue(Read(0x2000) == 0x02, "Value $02 expected at address $2000");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 7)");
+        }
+
+        [TestMethod]
+        public void TestInstructionBmi()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDA #$01 ;load accumulator with positive value
+                  BMI  $30 ;branch on minus to $30 bytes ahead of instruction
+                  LDA #$FF ;load accumulator with negative value
+                  BMI  $40 ;branch on minus to $40 bytes ahead of instruction");
+            Assert.IsTrue(Read(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x01, "immediate operand $01 expected");
+            Assert.IsTrue(Read(0x1002) == 0x30, "BMI instruction not assembled");
+            Assert.IsTrue(Read(0x1003) == 0x30, "Relative branch offset $30 expected");
+            Assert.IsTrue(Read(0x1004) == 0xA9, "LDA/Imm instruction not assembled");
+            Assert.IsTrue(Read(0x1005) == 0xFF, "immediate operand $FF expected");
+            Assert.IsTrue(Read(0x1006) == 0x30, "BMI instruction not assembled");
+            Assert.IsTrue(Read(0x1007) == 0x40, "Relative branch offset $40 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstructions(4);
+            Assert.IsTrue(processor.State.ProgramCounter == 0x1048, "Value $1048 expected in PC");
         }
 
 

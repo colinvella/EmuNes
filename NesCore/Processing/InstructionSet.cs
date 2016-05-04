@@ -352,7 +352,7 @@ namespace NesCore.Processing
                 State state = Processor.State;
 
                 // no branching if zero
-                if (state.ZeroFlag)
+                if (state.NegativeFlag)
                     return;
 
                 // set program counter to the given address operand

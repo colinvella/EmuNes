@@ -794,6 +794,78 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 7)");
         }
 
+        [TestMethod]
+        public void TestInstructionEorIzx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"EOR ($10,X) ; EOR accumulator with contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
+            Assert.IsTrue(Read(0x1000) == 0x41, "EOR/IZX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Izx $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x80;
+            processor.Write16(0x0090, 0x2000);
+            Write(0x2000, 0xF0);
+            processor.State.Accumulator = 0x0F;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionEorZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"EOR $10 ; EOR accumulator with contents of address $0010");
+            Assert.IsTrue(Read(0x1000) == 0x45, "EOR/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            Write(0x0010, 0x0F);
+            processor.State.Accumulator = 0xF0;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
+        }
+
+
+
+
+
+
+
+        [TestMethod]
+        public void TestInstructionEorIzy()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"EOR ($10),Y ; EOR accumulator with contents of zero page offset $10 (absolute $0010), offset by contents of Y register ($30)");
+            Assert.IsTrue(Read(0x1000) == 0x51, "EOR/IZY instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x30;  // Y = $30
+            processor.Write16(0x0010, 0x2000); // ($10) = ($0010) = $2000
+            Write(0x2030, 0x0F); // ($10),Y = $2000 + $30 = $2030
+            processor.State.Accumulator = 0xF0;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
+        }
+
+
+
 
 
 
@@ -878,6 +950,27 @@ namespace NesCoreTest
 
             Assert.IsTrue(cyclesPerSecond > Processor.Frequency, "Processor running t0o slowly");
         }
+
+        [TestMethod]
+        public void TestInstructionRti()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"RTI ;return from interrup handler");
+            Assert.IsTrue(Read(0x1000) == 0x40, "RTI instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.Push16(0x2000); // dummy PC value prior to break
+            processor.Push(0x00); // dummy processor state
+            processor.State.BreakCommandFlag = true; // break flag set as within interrupt handler
+
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ProgramCounter == 0x2000, "PC not restored to $2000");
+            Assert.IsTrue(!processor.State.BreakCommandFlag, "break command flag not cleared");
+        }
+
 
         private void ResetSystem()
         {

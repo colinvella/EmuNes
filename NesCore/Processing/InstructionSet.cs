@@ -225,7 +225,7 @@ namespace NesCore.Processing
                 }
             };
 
-            // ROL - rotate left
+            // ROL - rotate left (shift accumulator left, bit 7 to carry, and carry to bit 0)
             Execute RotateLeft = (address, mode) =>
             {
                 State state = Processor.State;
@@ -253,7 +253,7 @@ namespace NesCore.Processing
                 }
             };
 
-            // ROR - rotate right
+            // ROR - rotate right (shift accumulator right, bit 0 to carry and carry to bit 7)
             Execute RotateRight = (address, mode) =>
             {
                 State state = Processor.State;

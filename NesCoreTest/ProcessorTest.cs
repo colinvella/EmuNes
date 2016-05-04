@@ -471,6 +471,27 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.Accumulator == 0x0F, "Value $0F expected in Accumulator");
         }
 
+        [TestMethod]
+        public void TestInstructionRolZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ROL $10 ; ROL contents of address $0010");
+            Assert.IsTrue(Read(0x1000) == 0x26, "ROL/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.CarryFlag = false;
+            Write(0x0010, 0x81);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x0010) == 0x02, "Value $02 expected at address 0x0010");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 7)");
+        }
+
 
 
 
@@ -510,7 +531,7 @@ namespace NesCoreTest
         }
 
 
-
+        [TestMethod]
         public void TestImmediateInstructions()
         {
             ResetSystem();
@@ -530,6 +551,29 @@ namespace NesCoreTest
             processor.ExecuteInstructions(4);
 
             Assert.IsTrue(processor.State.RegisterX == 0x0F);
+        }
+
+        [TestMethod]
+        public void TestRawPerformance()
+        {
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"Start:
+                    LDA #$01  ;load positive value in accumulator
+                    BPL Start ;branch to start if positive");
+            processor.State.ProgramCounter = 0x1000;
+
+            double testDuration = 1.0;
+            ulong cycles = 0;
+            DateTime dateTimeStart = DateTime.Now;
+            while ((DateTime.Now - dateTimeStart).TotalSeconds < testDuration)
+            {
+                cycles += processor.ExecuteInstruction();
+            }
+            ulong cyclesPerSecond = (ulong)(cycles / testDuration);
+            Console.WriteLine("Cycles per second: " + cyclesPerSecond);
+
+            Assert.IsTrue(cyclesPerSecond > Processor.Frequency, "Processor running t0o slowly");
         }
 
         private void ResetSystem()

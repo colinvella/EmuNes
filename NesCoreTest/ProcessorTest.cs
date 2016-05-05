@@ -2348,7 +2348,34 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.RegisterX == 0x01, "Value $01 expected in register X");
         }
 
+        [TestMethod]
+        public void TestInstructionCpyImm()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CPY #$10; cpmpare register Y with value $10");
+            Assert.IsTrue(Read(0x1000) == 0xC0, "CPY/IMM instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Imm operand $10 expected");
 
+            // execution test (equal)
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x10;
+            processor.State.ZeroFlag = false;
+            processor.State.NegativeFlag = true;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ZeroFlag, "Zero flag expected to be set");
+            Assert.IsTrue(!processor.State.NegativeFlag, "Negative flag expected to be clear");
+
+            // execution test (not equal)
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x0F;
+            processor.State.ZeroFlag = true;
+            processor.State.NegativeFlag = false;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(!processor.State.ZeroFlag, "Zero flag expected to be clear");
+            Assert.IsTrue(processor.State.NegativeFlag, "Negative flag expected to be set");
+        }
 
 
 

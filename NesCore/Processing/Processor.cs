@@ -100,7 +100,7 @@ namespace NesCore.Processing
                 ++State.Cycles;
 
             // execute the instruction
-            instruction.Exceute(address, instruction.AddressingMode);
+            instruction.Exceute(address);
 
             // determine and return cycles consumed by this instruction
             UInt64 consumedCycles = State.Cycles - cycles;
@@ -142,7 +142,7 @@ namespace NesCore.Processing
         public void HandleInterrupt(UInt16 interruptVector)
         {
             Push16(State.ProgramCounter);
-            InstructionSet.PushProcessorStatus(0x0000, AddressingMode.Implied);
+            InstructionSet.PushProcessorStatus(0x0000);
             State.ProgramCounter = Read16(interruptVector);
             State.InterruptDisableFlag = true;
             State.Cycles += 7;
@@ -157,6 +157,10 @@ namespace NesCore.Processing
 
             switch (addressingMode)
             {
+                case AddressingMode.Implied:
+                case AddressingMode.Accumulator:
+                    // address n/a
+                    break;
                 case AddressingMode.Absolute:
                     // absolute address is the word located at immediate address
                     address = Read16(immediateAddress);
@@ -171,15 +175,9 @@ namespace NesCore.Processing
                     address = (UInt16)(Read16(immediateAddress) + State.RegisterY);
                     pageCrossed = PagesDiffer((UInt16)(address - State.RegisterY), address);
                     break;
-                case AddressingMode.Accumulator:
-                    // address n/a
-                    break;
                 case AddressingMode.Immediate:
                     // address is immediate address following op code
                     address = immediateAddress;
-                    break;
-                case AddressingMode.Implied:
-                    // address n/a
                     break;
                 case AddressingMode.IndexedIndirect:
                     // indexed indirect is address located at the x register, offset by the byte immediately following the op code

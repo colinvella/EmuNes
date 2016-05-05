@@ -715,7 +715,7 @@ namespace NesCoreTest
         }
 
         [TestMethod]
-        public void TestInstructionSex()
+        public void TestInstructionSec()
         {
             // assembler test
             ResetSystem();
@@ -808,12 +808,12 @@ namespace NesCoreTest
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x80;
             processor.Write16(0x0090, 0x2000);
-            Write(0x2000, 0xF0);
-            processor.State.Accumulator = 0x0F;
+            Write(0x2000, 0xFF);
+            processor.State.Accumulator = 0xF0;
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
+            Assert.IsTrue(processor.State.Accumulator == 0x0F, "Value $0F expected in Accumulator");
         }
 
         [TestMethod]
@@ -829,11 +829,11 @@ namespace NesCoreTest
             // execution test
             processor.State.ProgramCounter = 0x1000;
             Write(0x0010, 0x0F);
-            processor.State.Accumulator = 0xF0;
+            processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
+            Assert.IsTrue(processor.State.Accumulator == 0xF0, "Value $F0 expected in Accumulator");
         }
 
         [TestMethod]
@@ -848,12 +848,126 @@ namespace NesCoreTest
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
+            processor.State.CarryFlag = false;
             Write(0x0010, 0x81);
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0010) == 0xC0, "Value $C0 expected at address $0010");
+            Assert.IsTrue(Read(0x0010) == 0x40, "Value $40 expected at address 0x0010");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
+
+        [TestMethod]
+        public void TestInstructionPha()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"PHA      ;push A to stack");
+            Assert.IsTrue(Read(0x1000) == 0x48, "PHA instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x01;
+
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.Pull() == 0x01, "Top of stack expected to contain $01");
+        }
+
+        [TestMethod]
+        public void TestInstructionEorImm()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"EOR #$FF; EOR value $FF with accumulator");
+            Assert.IsTrue(Read(0x1000) == 0x49, "EOR/IMM instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0xFF, "Immediate value $FF not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0xF0;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x0F, "Value $0F expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionLsrAcc()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LSR A ;LSR contents of A");
+            Assert.IsTrue(Read(0x1000) == 0x4A, "LSR/Acc instruction not assembled");
+         
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.CarryFlag = false;
+            processor.State.Accumulator = 0x81;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x40, "Value $40 expected in A");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
+        }
+
+        [TestMethod]
+        public void TestInstructionJmpAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"JMP $2000 ;jump to address $2000");
+            Assert.IsTrue(Read(0x1000) == 0x4C, "JMP/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.ProgramCounter == 0x2000, "PC expected to point to $2000");
+        }
+
+        [TestMethod]
+        public void TestInstructionEorAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"EOR $2000; EOR contents of address $2000 with accumulator");
+            Assert.IsTrue(Read(0x1000) == 0x4D, "EOR/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0xF0;
+            Write(0x2000, 0xFF);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x0F, "Value $0F expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionLsrAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LSR $2000 ; LSR contents of address $2000");
+            Assert.IsTrue(Read(0x1000) == 0x4E, "LSR/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.CarryFlag = false;
+            Write(0x2000, 0x81);
+
+            processor.ExecuteInstruction();
+
 
 
 
@@ -874,11 +988,11 @@ namespace NesCoreTest
             processor.State.RegisterY = 0x30;  // Y = $30
             processor.Write16(0x0010, 0x2000); // ($10) = ($0010) = $2000
             Write(0x2030, 0x0F); // ($10),Y = $2000 + $30 = $2030
-            processor.State.Accumulator = 0xF0;
+            processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
+            Assert.IsTrue(processor.State.Accumulator == 0xF0, "Value $F0 expected in Accumulator");
         }
 
 

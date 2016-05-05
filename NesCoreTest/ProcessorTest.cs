@@ -79,7 +79,7 @@ namespace NesCoreTest
             assembler.GenerateProgram(0x1000,
                 @"ORA $10 ; OR accumulator with contents of address $0010");
             Assert.IsTrue(Read(0x1000) == 0x05, "ORA/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand 0x10 not written");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1881,6 +1881,252 @@ namespace NesCoreTest
 
             Assert.IsTrue(Read(0x2030) == 0x01, "Value $01 expected in address $2000");
         }
+
+        [TestMethod]
+        public void TestInstructionLdyImm()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDY #$01 ;load value $01 in register Y");
+            Assert.IsTrue(Read(0x1000) == 0xA0, "LDY/Imm instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x01, "Imm operand $01 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x00;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.RegisterY == 0x01, "Value $01 expected in register Y");
+        }
+
+        [TestMethod]
+        public void TestInstructionLdaIzx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDA ($10,X) ;load into the accumulator the contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
+            Assert.IsTrue(Read(0x1000) == 0xA1, "LDA/IZX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x80;
+            processor.Write16(0x0090, 0x2000);
+            Write(0x2000, 0x01);
+            processor.State.Accumulator = 0x00;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x01, "Value $01 expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionLdxImm()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDX #$01 ;load value $01 in register X");
+            Assert.IsTrue(Read(0x1000) == 0xA2, "LDX/Imm instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x01, "Imm operand $01 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x00;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.RegisterX == 0x01, "Value $01 expected in register X");
+        }
+
+        [TestMethod]
+        public void TestInstructionLdyZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDY $10 ; Load into register Y the contents of address $0010");
+            Assert.IsTrue(Read(0x1000) == 0xA4, "LDY/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            Write(0x0010, 0x01);
+            processor.State.RegisterY = 0x00;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.RegisterY == 0x01, "Value $01 expected in register Y");
+        }
+
+        [TestMethod]
+        public void TestInstructionLdaZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDA $10 ; Load into accumulator the contents of address $0010");
+            Assert.IsTrue(Read(0x1000) == 0xA5, "LDA/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            Write(0x0010, 0x01);
+            processor.State.Accumulator = 0x00;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x01, "Value $01 expected in accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionLdxZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDX $10 ; Load into register X the contents of address $0010");
+            Assert.IsTrue(Read(0x1000) == 0xA6, "LDX/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            Write(0x0010, 0x01);
+            processor.State.RegisterX = 0x00;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.RegisterX == 0x01, "Value $01 expected in register X");
+        }
+
+        [TestMethod]
+        public void TestInstructionTay()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"TAY ;transfer the contents of A to Y");
+            Assert.IsTrue(Read(0x1000) == 0xA8, "TAY instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x10;
+            processor.State.RegisterY = 0x00;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.RegisterY == 0x10, "Value $10 expected in Y");
+        }
+
+        [TestMethod]
+        public void TestInstructionLdaImm()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDA #$01 ;load value $01 in accumulator");
+            Assert.IsTrue(Read(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x01, "Imm operand $01 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x00;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x01, "Value $01 expected in accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionTax()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"TAX ;transfer the contents of A to X");
+            Assert.IsTrue(Read(0x1000) == 0xAA, "TAX instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x10;
+            processor.State.RegisterX = 0x00;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.RegisterX == 0x10, "Value $10 expected in X");
+        }
+
+        [TestMethod]
+        public void TestInstructionLdyAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDY $2000; Load into Y the contents at address $2000");
+            Assert.IsTrue(Read(0x1000) == 0xAC, "LDY/ABS instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x00;
+            processor.Write16(0x2000, 0x01);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.RegisterY == 0x01, "Value $01 expected in Y");
+        }
+
+        [TestMethod]
+        public void TestInstructionLdaAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDA $2000; Load into A the contents at address $2000");
+            Assert.IsTrue(Read(0x1000) == 0xAD, "LDA/ABS instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x00;
+            processor.Write16(0x2000, 0x01);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x01, "Value $01 expected in A");
+        }
+
+        [TestMethod]
+        public void TestInstructionLdxAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDX $2000; Load into X the contents at address $2000");
+            Assert.IsTrue(Read(0x1000) == 0xAE, "LDX/ABS instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x00;
+            processor.Write16(0x2000, 0x01);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.RegisterX == 0x01, "Value $01 expected in X");
+        }
+
+
+
+
+
+
+
+
+
 
 
 

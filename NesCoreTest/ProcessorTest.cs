@@ -836,7 +836,24 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator");
         }
 
+        [TestMethod]
+        public void TestInstructionLsrZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LSR $10 ; LSR contents of address $0010");
+            Assert.IsTrue(Read(0x1000) == 0x46, "LSR/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
 
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            Write(0x0010, 0x81);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x0010) == 0xC0, "Value $C0 expected at address $0010");
+        }
 
 
 

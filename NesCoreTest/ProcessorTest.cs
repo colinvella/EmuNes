@@ -795,6 +795,26 @@ namespace NesCoreTest
         }
 
         [TestMethod]
+        public void TestInstructionRti()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"RTI ;return from interrup handler");
+            Assert.IsTrue(Read(0x1000) == 0x40, "RTI instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.Push16(0x2000); // dummy PC value prior to break
+            processor.Push(0x00); // dummy processor state
+            processor.State.BreakCommandFlag = true; // break flag set as within interrupt handler
+
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ProgramCounter == 0x2000, "PC not restored to $2000");
+            Assert.IsTrue(!processor.State.BreakCommandFlag, "break command flag not cleared");
+        }
+
+        [TestMethod]
         public void TestInstructionEorIzx()
         {
             // assembler test
@@ -968,10 +988,32 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
+            Assert.IsTrue(Read(0x2000) == 0x40, "Value $40 expected at address $2000");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
+        }
 
+        [TestMethod]
+        public void TestInstructionBvc()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"BVC $40 ; branch if overflow clear to relative offset $40 ($1042)");
+            Assert.IsTrue(Read(0x1000) == 0x50, "BVC instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x40, "Relative operand $40 expected");
 
+            // execution test (overflow clear)
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.OverflowFlag = false;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ProgramCounter == 0x1042, "PC expected to point to address $1042");
 
-
+            // execution test (overflow set)
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.OverflowFlag = true;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ProgramCounter == 0x1002, "PC expected to point to address $1002");
+        }
 
         [TestMethod]
         public void TestInstructionEorIzy()
@@ -993,6 +1035,131 @@ namespace NesCoreTest
             processor.ExecuteInstruction();
 
             Assert.IsTrue(processor.State.Accumulator == 0xF0, "Value $F0 expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionEorZpx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"EOR $10,X ; EOR accumulator with contents of address $0010 + X");
+            Assert.IsTrue(Read(0x1000) == 0x55, "EOR/ZPX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            Write(0x0040, 0x0F);
+            processor.State.Accumulator = 0xFF;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xF0, "Value $F0 expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionLsrZpx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LSR $10,X ;LSR contents of address $0010 + X");
+            Assert.IsTrue(Read(0x1000) == 0x56, "LSR/ZPX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            Write(0x0040, 0x81);
+            processor.State.CarryFlag = false;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x0040) == 0x40, "Value $40 expected at address 0x0040");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
+        }
+
+        [TestMethod]
+        public void TestInstructionCli()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CLI ;clear interrup disable flag");
+            Assert.IsTrue(Read(0x1000) == 0x58, "CLI instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.InterruptDisableFlag = true;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(!processor.State.InterruptDisableFlag, "Interrup disable flag expected to be clear");
+        }
+
+        [TestMethod]
+        public void TestInstructionEorAby()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"EOR $2000,Y ; EOR accumulator with contents of address $2000 + Y");
+            Assert.IsTrue(Read(0x1000) == 0x59, "EOR/ABY instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABY operand $2000 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x30;
+            Write(0x2030, 0x0F);
+            processor.State.Accumulator = 0xFF;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xF0, "Value $F0 expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionEorAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"EOR $2000,X ; EOR accumulator with contents of address $2000 + X");
+            Assert.IsTrue(Read(0x1000) == 0x5D, "EOR/ABX instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            Write(0x2030, 0x0F);
+            processor.State.Accumulator = 0xFF;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0xF0, "Value $F0 expected in Accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionLsrAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LSR $2000,X ;LSR contents of address $2000 + X");
+            Assert.IsTrue(Read(0x1000) == 0x5E, "LSR/ABX instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            Write(0x2030, 0x81);
+            processor.State.CarryFlag = false;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x2030) == 0x40, "Value $40 expected at address 0x0040");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
 
 
@@ -1081,27 +1248,6 @@ namespace NesCoreTest
 
             Assert.IsTrue(cyclesPerSecond > Processor.Frequency, "Processor running t0o slowly");
         }
-
-        [TestMethod]
-        public void TestInstructionRti()
-        {
-            // assembler test
-            ResetSystem();
-            assembler.GenerateProgram(0x1000,
-                @"RTI ;return from interrup handler");
-            Assert.IsTrue(Read(0x1000) == 0x40, "RTI instruction not assembled");
-
-            // execution test
-            processor.State.ProgramCounter = 0x1000;
-            processor.Push16(0x2000); // dummy PC value prior to break
-            processor.Push(0x00); // dummy processor state
-            processor.State.BreakCommandFlag = true; // break flag set as within interrupt handler
-
-            processor.ExecuteInstruction();
-            Assert.IsTrue(processor.State.ProgramCounter == 0x2000, "PC not restored to $2000");
-            Assert.IsTrue(!processor.State.BreakCommandFlag, "break command flag not cleared");
-        }
-
 
         private void ResetSystem()
         {

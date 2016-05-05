@@ -1201,23 +1201,175 @@ namespace NesCoreTest
             // add $01 to $7F to trigger sign overflow
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(processor.State.Accumulator == 0x80, "Value $80 expected in Accumulator");
-            Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
-            Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
-
-            // add $80 to $80 to trigger carry
-            processor.ExecuteInstruction();
-            Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
-            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set");
-
-            // add $01 to $00
-            processor.ExecuteInstruction();
-            Assert.IsTrue(!processor.State.OverflowFlag, "Overflow flag expected to be clear");
-            Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
+            RunAdcExecutionTest();
         }
 
+        [TestMethod]
+        public void TestInstructionAdcZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ADC $10  ;ADC to the accumulator the contents of address $0010
+                  ADC #$80 ;ADC another $80 to cause carry
+                  ADC #$01 ;ADC another $01 for no carry");
+            Assert.IsTrue(Read(0x1000) == 0x65, "ADC/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
 
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.Write16(0x0010, 0x01);
+            processor.State.Accumulator = 0x7F;
 
+            // add $01 to $7F to trigger sign overflow
+            processor.ExecuteInstruction();
+
+            RunAdcExecutionTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionRorZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ROR $10 ; ROR contents of address $0010");
+            Assert.IsTrue(Read(0x1000) == 0x66, "ROR/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.CarryFlag = false;
+            Write(0x0010, 0x81);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x0010) == 0x40, "Value $40 expected at address 0x0010");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
+        }
+
+        [TestMethod]
+        public void TestInstructionPla()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"PLA ;pull value from stack into A");
+            Assert.IsTrue(Read(0x1000) == 0x68, "PLA instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.Push(0x01);
+            processor.State.Accumulator = 0x00;
+
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.Accumulator == 0x01, "A expected to contain $01 from stack");
+        }
+
+        [TestMethod]
+        public void TestInstructionAdcImm()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ADC #$01 ;ADC to the accumulator the value $01
+                  ADC #$80 ;ADC another $80 to cause carry
+                  ADC #$01 ;ADC another $01 for no carry");
+            Assert.IsTrue(Read(0x1000) == 0x69, "ADC/Imm instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x01, "Imm operand $01 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x7F;
+
+            // add $01 to $7F to trigger sign overflow
+            processor.ExecuteInstruction();
+
+            RunAdcExecutionTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionRorAcc()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ROR A ;ROR contents of A");
+            Assert.IsTrue(Read(0x1000) == 0x6A, "ROR/Acc instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.CarryFlag = false;
+            processor.State.Accumulator = 0x81;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator== 0x40, "Value $40 expected in A");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
+        }
+
+        [TestMethod]
+        public void TestInstructionJmpInd()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"JMP ($2000) ;jump to address value contained at address $2000");
+            Assert.IsTrue(Read(0x1000) == 0x6C, "JMP/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Ind operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.Write16(0x2000, 0x3000);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.ProgramCounter == 0x3000, "PC expected to point to $3000");
+        }
+
+        [TestMethod]
+        public void TestInstructionAdcAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ADC $2000 ;ADC to the accumulator the contents of address $2000
+                  ADC #$80  ;ADC another $80 to cause carry
+                  ADC #$01  ;ADC another $01 for no carry");
+            Assert.IsTrue(Read(0x1000) == 0x6D, "ADC/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.Write16(0x2000, 0x01);
+            processor.State.Accumulator = 0x7F;
+
+            // add $01 to $7F to trigger sign overflow
+            processor.ExecuteInstruction();
+
+            RunAdcExecutionTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionRorAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ROR $2000 ; ROR contents of address $2000");
+            Assert.IsTrue(Read(0x1000) == 0x6E, "ROR/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.CarryFlag = false;
+            Write(0x2000, 0x81);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x2000) == 0x40, "Value $40 expected at address $2000");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
+        }
 
 
 
@@ -1258,29 +1410,6 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.RegisterX == 0x02, "value $02 expected in X");
         }
 
-
-        [TestMethod]
-        public void TestImmediateInstructions()
-        {
-            ResetSystem();
-            assembler.GenerateProgram(0x1000,
-                @"LDX #$10 ;load value 16 in x register
-                  INX      ;increment x register
-                  DEX      ;decrement x register
-                  DEX      ;decrement x register");
-
-            Assert.IsTrue(Read(0x1000) == 0xA2); //LDX
-            Assert.IsTrue(Read(0x1001) == 0x10); //#$10
-            Assert.IsTrue(Read(0x1002) == 0xE8); //INX
-            Assert.IsTrue(Read(0x1003) == 0xCA); //DEX
-            Assert.IsTrue(Read(0x1004) == 0xCA); //DEX
-
-            processor.State.ProgramCounter = 0x1000;
-            processor.ExecuteInstructions(4);
-
-            Assert.IsTrue(processor.State.RegisterX == 0x0F);
-        }
-
         [TestMethod]
         public void TestRawPerformance()
         {
@@ -1308,6 +1437,24 @@ namespace NesCoreTest
         {
             WipeMemory();
             processor.Reset();
+        }
+
+        // common execution test for all ADC variants
+        private void RunAdcExecutionTest()
+        {
+            Assert.IsTrue(processor.State.Accumulator == 0x80, "Value $80 expected in Accumulator");
+            Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
+            Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
+
+            // add $80 to $80 to trigger carry
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set");
+
+            // add $01 to $00
+            processor.ExecuteInstruction();
+            Assert.IsTrue(!processor.State.OverflowFlag, "Overflow flag expected to be clear");
+            Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
         }
 
         private Processor processor;

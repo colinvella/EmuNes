@@ -148,7 +148,7 @@ namespace NesCore.Utility
 
                     // write opcode and indirect operand
                     systemBus.Write(WriteAddress++, instruction.Code);
-                    Processor.Write16(WriteAddress, byteOperand);
+                    Processor.Write16(WriteAddress, wordOperand);
                     WriteAddress += 2;
                 }
                 else if (ParseIndirectIndexedOperand(operandToken, out byteOperand)) // ($NN), Y

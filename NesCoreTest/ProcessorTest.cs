@@ -57,7 +57,7 @@ namespace NesCoreTest
             assembler.GenerateProgram(0x1000,
                 @"ORA ($10,X) ; OR accumulator with contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
             Assert.IsTrue(Read(0x1000) == 0x01, "ORA/IZX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect 0x10 not written");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1527,9 +1527,178 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
 
+        [TestMethod]
+        public void TestInstructionStaIzx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"STA ($10,X) ; Store accumulator value to address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
+            Assert.IsTrue(Read(0x1000) == 0x81, "STA/IZX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect $10 not written");
 
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x80;
+            processor.Write16(0x0090, 0x2000);
+            Write(0x2000, 0x00);
+            processor.State.Accumulator = 0x01;
 
+            processor.ExecuteInstruction();
 
+            Assert.IsTrue(processor.Read16(0x2000) == 0x01, "Value $01 expected at address $2000");
+        }
+
+        [TestMethod]
+        public void TestInstructionStyZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"STY $10 ;store contents of register Y in address $0010");
+            Assert.IsTrue(Read(0x1000) == 0x84, "STY/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x01;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x0010) == 0x01, "Value $01 expected in address $0010");
+        }
+
+        [TestMethod]
+        public void TestInstructionStaZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"STA $10 ;store contents of A in address $0010");
+            Assert.IsTrue(Read(0x1000) == 0x85, "STA instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x01;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x0010) == 0x01, "Value $01 expected in address $0010");
+        }
+
+        [TestMethod]
+        public void TestInstructionStxZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"STX $10 ;store contents of register X in address $0010");
+            Assert.IsTrue(Read(0x1000) == 0x86, "STX/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x01;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x0010) == 0x01, "Value $01 expected in address $0010");
+        }
+        
+        [TestMethod]
+        public void TestInstructionDey()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"DEY ;decrement register Y");
+            Assert.IsTrue(Read(0x1000) == 0x88, "DEY instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x10;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.RegisterY == 0x0F, "Value $0F expected in register Y");
+        }
+
+        [TestMethod]
+        public void TestInstructionTxa()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"TXA ;transfer the contents of X to A");
+            Assert.IsTrue(Read(0x1000) == 0x8A, "TXA instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x00;
+            processor.State.RegisterX = 0x10;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x10, "Value $10 expected in A");
+        }
+
+        [TestMethod]
+        public void TestInstructionStyAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"STY $2000 ;store value in register Y to address $2000");
+            Assert.IsTrue(Read(0x1000) == 0x8C, "STY/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x01;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x2000) == 0x01, "Value $01 expected in address $2000");
+        }
+
+        [TestMethod]
+        public void TestInstructionStaAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"STA $2000 ;store value in A to address $2000");
+            Assert.IsTrue(Read(0x1000) == 0x8D, "STA/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x01;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x2000) == 0x01, "Value $01 expected in address $2000");
+        }
+
+        [TestMethod]
+        public void TestInstructionStxAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"STX $2000 ;store value in register X to address $2000");
+            Assert.IsTrue(Read(0x1000) == 0x8E, "STX/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abs operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x01;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x2000) == 0x01, "Value $01 expected in address $2000");
+        }
 
 
 

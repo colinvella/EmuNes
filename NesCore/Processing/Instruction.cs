@@ -27,6 +27,7 @@ namespace NesCore.Processing
                 // immediate, indexed indirect, relative and zero page variants only require a byte operand
                 case AddressingMode.Immediate:
                 case AddressingMode.IndexedIndirect:
+                case AddressingMode.IndirectIndexed:
                 case AddressingMode.Relative:
                 case AddressingMode.ZeroPage:
                 case AddressingMode.ZeroPageX:
@@ -37,7 +38,6 @@ namespace NesCore.Processing
                 case AddressingMode.AbsoluteX:
                 case AddressingMode.AbsoluteY:
                 case AddressingMode.Indirect:
-                case AddressingMode.IndirectIndexed:
                     Size = 3; break;
                 default:
                     throw new ArgumentException("addressingMode");

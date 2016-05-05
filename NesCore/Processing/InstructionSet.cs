@@ -743,7 +743,7 @@ namespace NesCore.Processing
             instructions[0x6F] = new Instruction(0x6F, "RRA", AddressingMode.Absolute, 6, IllegalOpCode);
 
             // 0x70 - 0x7F
-            instructions[0x70] = new Instruction(0x70, "BVS", AddressingMode.Relative, 2, BranchIfOverflowClear);
+            instructions[0x70] = new Instruction(0x70, "BVS", AddressingMode.Relative, 2, BranchIfOverflowSet);
             instructions[0x71] = new Instruction(0x71, "ADC", AddressingMode.IndirectIndexed, 5, AddWithCarry);
             instructions[0x72] = new Instruction(0x72, "KIL", AddressingMode.Implied, 2, IllegalOpCode);
             instructions[0x73] = new Instruction(0x73, "RRA", AddressingMode.IndirectIndexed, 8, IllegalOpCode);

@@ -1198,9 +1198,6 @@ namespace NesCoreTest
             Write(0x2000, 0x01);
             processor.State.Accumulator = 0x7F;
 
-            // add $01 to $7F to trigger sign overflow
-            processor.ExecuteInstruction();
-
             RunAdcExecutionTest();
         }
 
@@ -1220,9 +1217,6 @@ namespace NesCoreTest
             processor.State.ProgramCounter = 0x1000;
             processor.Write16(0x0010, 0x01);
             processor.State.Accumulator = 0x7F;
-
-            // add $01 to $7F to trigger sign overflow
-            processor.ExecuteInstruction();
 
             RunAdcExecutionTest();
         }
@@ -1281,9 +1275,6 @@ namespace NesCoreTest
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.Accumulator = 0x7F;
-
-            // add $01 to $7F to trigger sign overflow
-            processor.ExecuteInstruction();
 
             RunAdcExecutionTest();
         }
@@ -1344,9 +1335,6 @@ namespace NesCoreTest
             processor.Write16(0x2000, 0x01);
             processor.State.Accumulator = 0x7F;
 
-            // add $01 to $7F to trigger sign overflow
-            processor.ExecuteInstruction();
-
             RunAdcExecutionTest();
         }
 
@@ -1371,6 +1359,50 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
 
+        [TestMethod]
+        public void TestInstructionBvs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"BVS $40 ; branch if overflow set to relative offset $40 ($1042)");
+            Assert.IsTrue(Read(0x1000) == 0x70, "BVS instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x40, "Relative operand $40 expected");
+
+            // execution test (overflow set)
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.OverflowFlag = true;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ProgramCounter == 0x1042, "PC expected to point to address $1042");
+
+            // execution test (overflow clear)
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.OverflowFlag = false;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ProgramCounter == 0x1002, "PC expected to point to address $1002");
+        }
+
+        [TestMethod]
+        public void TestInstructionAdcIzy()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ADC ($10),Y ;ADC to accumulator, the contents of zero page offset $10 (absolute $0010), offset by contents of Y register ($30)
+                  ADC #$80    ;ADC another $80 to cause carry
+                  ADC #$01    ;ADC another $01 for no carry");
+            Assert.IsTrue(Read(0x1000) == 0x71, "ADC/IZY instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x30;  // Y = $30
+            processor.Write16(0x0010, 0x2000); // ($10) = ($0010) = $2000
+            Write(0x2030, 0x01); // ($10),Y = $2000 + $30 = $2030
+            processor.State.Accumulator = 0x7F;
+
+            RunAdcExecutionTest();
+        }
 
 
 
@@ -1442,6 +1474,9 @@ namespace NesCoreTest
         // common execution test for all ADC variants
         private void RunAdcExecutionTest()
         {
+            // add $01 to $7F to trigger sign overflow
+            processor.ExecuteInstruction();
+
             Assert.IsTrue(processor.State.Accumulator == 0x80, "Value $80 expected in Accumulator");
             Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
             Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");

@@ -1179,6 +1179,43 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.ProgramCounter == 0x2000, "PC not restored to $2000");
         }
 
+        [TestMethod]
+        public void TestInstructionAdcIzx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ADC ($10,X) ;ADC to the accumulator the contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)
+                  ADC #$80    ;ADC another $80 to cause carry
+                  ADC #$01    ;ADC another $01 for no carry");
+            Assert.IsTrue(Read(0x1000) == 0x61, "ADC/IZX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect 0x10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x80;
+            processor.Write16(0x0090, 0x2000);
+            Write(0x2000, 0x01);
+            processor.State.Accumulator = 0x7F;
+
+            // add $01 to $7F to trigger sign overflow
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x80, "Value $80 expected in Accumulator");
+            Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
+            Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
+
+            // add $80 to $80 to trigger carry
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set");
+
+            // add $01 to $00
+            processor.ExecuteInstruction();
+            Assert.IsTrue(!processor.State.OverflowFlag, "Overflow flag expected to be clear");
+            Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
+        }
+
 
 
 

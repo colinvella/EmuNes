@@ -426,7 +426,7 @@ namespace NesCore.Processing
             Execute ReturnFromSubroutine = (address) =>
             {
                 State state = Processor.State;
-                state.ProgramCounter = (byte)(Processor.Pull16() + 1);
+                state.ProgramCounter = Processor.Pull16();
                 ++state.ProgramCounter;
             };
 

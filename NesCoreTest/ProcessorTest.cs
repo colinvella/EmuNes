@@ -1162,6 +1162,24 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
 
+        [TestMethod]
+        public void TestInstructionRts()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"RTS ;return from subroutine");
+            Assert.IsTrue(Read(0x1000) == 0x60, "RTS instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.Push16(0x2000 - 0x1); // dummy PC value prior to JSR
+
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ProgramCounter == 0x2000, "PC not restored to $2000");
+        }
+
+
 
 
 

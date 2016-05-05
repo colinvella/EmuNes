@@ -2285,6 +2285,71 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.RegisterX == 0x10, "Value $10 expected in X");
         }
 
+        [TestMethod]
+        public void TestInstructionLdyAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDY $2000,X ; Load into register Y the contents of address $2000 + X");
+            Assert.IsTrue(Read(0x1000) == 0xBC, "LDY/ABX instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            Write(0x2030, 0x01);
+            processor.State.RegisterY = 0x00;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.RegisterY == 0x01, "Value $01 expected in register Y");
+        }
+
+        [TestMethod]
+        public void TestInstructionLdaAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDA $2000,X ; Load into accumulator the contents of address $2000 + X");
+            Assert.IsTrue(Read(0x1000) == 0xBD, "LDA/ABX instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            Write(0x2030, 0x01);
+            processor.State.Accumulator = 0x00;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x01, "Value $01 expected in accumulator");
+        }
+
+        [TestMethod]
+        public void TestInstructionLdxAby()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"LDX $2000,Y ; Load into register X the contents of address $2000 + Y");
+            Assert.IsTrue(Read(0x1000) == 0xBE, "LDX/ABY instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABY operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x30;
+            Write(0x2030, 0x01);
+            processor.State.RegisterX = 0x00;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.RegisterX == 0x01, "Value $01 expected in register X");
+        }
+
+
+
 
 
 

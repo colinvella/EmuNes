@@ -1404,6 +1404,130 @@ namespace NesCoreTest
             RunAdcExecutionTest();
         }
 
+        [TestMethod]
+        public void TestInstructionAdcZpx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ADC $10,X ;ADC to the accumulator the contents of address $0010 + X
+                  ADC #$80  ;ADC another $80 to cause carry
+                  ADC #$01  ;ADC another $01 for no carry");
+            Assert.IsTrue(Read(0x1000) == 0x75, "ADC/ZPX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            processor.Write16(0x0040, 0x01);
+            processor.State.Accumulator = 0x7F;
+
+            RunAdcExecutionTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionRorZpx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ROR $10,X ; ROR contents of address $0010 + X");
+            Assert.IsTrue(Read(0x1000) == 0x76, "ROR/ZPX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            processor.State.CarryFlag = false;
+            Write(0x0040, 0x81);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x0040) == 0x40, "Value $40 expected at address 0x0040");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
+        }
+
+        [TestMethod]
+        public void TestInstructionSei()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"SEI ;set interrup disable flag");
+            Assert.IsTrue(Read(0x1000) == 0x78, "SEI instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.InterruptDisableFlag = false;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.InterruptDisableFlag, "Interrupt disable flag expected to be set");
+        }
+
+        [TestMethod]
+        public void TestInstructionAdcAby()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ADC $2000,Y ;ADC to the accumulator the contents of address $2000 + Y
+                  ADC #$80    ;ADC another $80 to cause carry
+                  ADC #$01    ;ADC another $01 for no carry");
+            Assert.IsTrue(Read(0x1000) == 0x79, "ADC/Aby instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABY operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x30;
+            processor.Write16(0x2030, 0x01);
+            processor.State.Accumulator = 0x7F;
+
+            RunAdcExecutionTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionAdcAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ADC $2000,X ;ADC to the accumulator the contents of address $2000 + X
+                  ADC #$80    ;ADC another $80 to cause carry
+                  ADC #$01    ;ADC another $01 for no carry");
+            Assert.IsTrue(Read(0x1000) == 0x7D, "ADC/Abx instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            processor.Write16(0x2030, 0x01);
+            processor.State.Accumulator = 0x7F;
+
+            RunAdcExecutionTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionRorAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"ROR $2000,X ; ROR contents of address $2000 + X");
+            Assert.IsTrue(Read(0x1000) == 0x7E, "ROR/ABX instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x30;
+            processor.State.CarryFlag = false;
+            Write(0x2030, 0x81);
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(Read(0x2030) == 0x40, "Value $40 expected at address 0x2030");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
+        }
+
+
 
 
 

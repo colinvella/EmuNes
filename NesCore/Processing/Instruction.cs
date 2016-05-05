@@ -24,7 +24,7 @@ namespace NesCore.Processing
                 case AddressingMode.Implied:
                 case AddressingMode.Accumulator:
                     Size = 1; break;
-                // immediate, indexed indirect, relative and zero page variants only require a byte operand
+                // immediate, indexed indirect, indirect indexed, relative and zero page variants only require a byte operand
                 case AddressingMode.Immediate:
                 case AddressingMode.IndexedIndirect:
                 case AddressingMode.IndirectIndexed:

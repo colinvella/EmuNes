@@ -2764,6 +2764,170 @@ namespace NesCoreTest
             Assert.IsTrue(Read(0x2030) == 0x0F, "Value in $2030 expected to be $0F");
         }
 
+        [TestMethod]
+        public void TestInstructionCpxImm()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CPX #$10 ;compare register X with value $10");
+            Assert.IsTrue(Read(0x1000) == 0xE0, "CPX/IMM instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Imm operand $10 expected");
+
+            // execution test (equal)
+            processor.State.RegisterX = 0x10;
+            RunCompareEqualTest();
+
+            // execution test (less)
+            processor.State.RegisterX = 0x0F;
+            RunCompareLessTest();
+
+            // execution test (greater)
+            processor.State.RegisterX = 0x11;
+            RunCompareGreaterTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionSbcIzx()
+        {
+            Assert.Fail("Not implemented yet");
+        }
+
+        [TestMethod]
+        public void TestInstructionCpxZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CPX $10 ;compare register X with value at address $0010");
+            Assert.IsTrue(Read(0x1000) == 0xE4, "CPX/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 expected");
+
+            Write(0x0010, 0x10);
+
+            // execution test (equal)
+            processor.State.RegisterX = 0x10;
+            RunCompareEqualTest();
+
+            // execution test (less)
+            processor.State.RegisterX = 0x0F;
+            RunCompareLessTest();
+
+            // execution test (greater)
+            processor.State.RegisterX = 0x11;
+            RunCompareGreaterTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionSbcZp()
+        {
+            Assert.Fail("Not implemented yet");
+        }
+
+        [TestMethod]
+        public void TestInstructionIncZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"INC $10 ;Increment value stored at address $0010");
+            Assert.IsTrue(Read(0x1000) == 0xE6, "INC/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 expected");
+
+            Write(0x0010, 0x10);
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(Read(0x0010) == 0x11, "Value in $0010 expected to be $11");
+        }
+
+        [TestMethod]
+        public void TestInstructionInx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"INX ;increment register X");
+            Assert.IsTrue(Read(0x1000) == 0xE8, "INX instruction not assembled");
+
+            processor.State.RegisterX = 0x10;
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.RegisterX == 0x11, "$11 expected in register X");
+        }
+
+        [TestMethod]
+        public void TestInstructionSbcImm()
+        {
+            Assert.Fail("Not implemented yet");
+        }
+
+        [TestMethod]
+        public void TestInstructionNop()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"NOP ;no operation");
+            Assert.IsTrue(Read(0x1000) == 0xEA, "NOP instruction not assembled");
+
+            byte flags = processor.State.Flags;
+            byte accumulator = processor.State.Accumulator;
+            byte registerX = processor.State.RegisterX;
+            byte registerY = processor.State.RegisterY;
+
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.Flags == flags, "Status flags not expected to change");
+            Assert.IsTrue(processor.State.Accumulator == accumulator, "Accumulator not expected to change");
+            Assert.IsTrue(processor.State.RegisterX == registerX, "Register X not expected to change");
+            Assert.IsTrue(processor.State.RegisterY == registerY, "Register Y not expected to change");
+        }
+
+        [TestMethod]
+        public void TestInstructionCpxAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CPX $2000 ;compare register X with value at address $2000");
+            Assert.IsTrue(Read(0x1000) == 0xEC, "CPX/ABS instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABS operand $2000 expected");
+
+            Write(0x2000, 0x10);
+
+            // execution test (equal)
+            processor.State.RegisterX = 0x10;
+            RunCompareEqualTest();
+
+            // execution test (less)
+            processor.State.RegisterX = 0x0F;
+            RunCompareLessTest();
+
+            // execution test (greater)
+            processor.State.RegisterX = 0x11;
+            RunCompareGreaterTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionSbcAbs()
+        {
+            Assert.Fail("Not implemented yet");
+        }
+
+        [TestMethod]
+        public void TestInstructionIncAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"INC $2000 ;increment value stored at address $2000");
+            Assert.IsTrue(Read(0x1000) == 0xEE, "INC/ABS instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABS operand $2000 expected");
+
+            Write(0x2000, 0x10);
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(Read(0x2000) == 0x11, "Value in $2000 expected to be $11");
+        }
 
 
 

@@ -2354,39 +2354,210 @@ namespace NesCoreTest
             // assembler test
             ResetSystem();
             assembler.GenerateProgram(0x1000,
-                @"CPY #$10; cpmpare register Y with value $10");
+                @"CPY #$10 ;compare register Y with value $10");
             Assert.IsTrue(Read(0x1000) == 0xC0, "CPY/IMM instruction not assembled");
             Assert.IsTrue(Read(0x1001) == 0x10, "Imm operand $10 expected");
 
             // execution test (equal)
-            processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x10;
-            processor.State.ZeroFlag = false;
-            processor.State.NegativeFlag = true;
-            processor.ExecuteInstruction();
-            Assert.IsTrue(processor.State.ZeroFlag, "Zero flag expected to be set");
-            Assert.IsTrue(!processor.State.NegativeFlag, "Negative flag expected to be clear");
+            RunCompareEqualTest();
 
-            // execution test (not equal)
-            processor.State.ProgramCounter = 0x1000;
+            // execution test (less)
             processor.State.RegisterY = 0x0F;
-            processor.State.ZeroFlag = true;
-            processor.State.NegativeFlag = false;
-            processor.ExecuteInstruction();
-            Assert.IsTrue(!processor.State.ZeroFlag, "Zero flag expected to be clear");
-            Assert.IsTrue(processor.State.NegativeFlag, "Negative flag expected to be set");
+            RunCompareLessTest();
+
+            // execution test (greater)
+            processor.State.RegisterY = 0x11;
+            RunCompareGreaterTest();
         }
 
+        [TestMethod]
+        public void TestInstructionCmpIzx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CMP ($10,X) ;compare accumulator with contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
+            Assert.IsTrue(Read(0x1000) == 0xC1, "CMP/IZX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Izx 0x10 not written");
 
+            // execution test
+            processor.State.RegisterX = 0x80;
+            processor.Write16(0x0090, 0x2000);
+            Write(0x2000, 0x10);
 
+            // execution test (equal)
+            processor.State.Accumulator = 0x10;
+            RunCompareEqualTest();
 
+            // execution test (less)
+            processor.State.Accumulator = 0x0F;
+            RunCompareLessTest();
 
+            // execution test (greater)
+            processor.State.Accumulator = 0x11;
+            RunCompareGreaterTest();
+        }
 
+        [TestMethod]
+        public void TestInstructionCpyZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CPY $10 ;compare register Y with value at address $0010");
+            Assert.IsTrue(Read(0x1000) == 0xC4, "CPY/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 expected");
 
+            Write(0x0010, 0x10);
 
+            // execution test (equal)
+            processor.State.RegisterY = 0x10;
+            RunCompareEqualTest();
 
+            // execution test (less)
+            processor.State.RegisterY = 0x0F;
+            RunCompareLessTest();
 
+            // execution test (greater)
+            processor.State.RegisterY = 0x11;
+            RunCompareGreaterTest();
+        }
 
+        [TestMethod]
+        public void TestInstructionDecZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"DEC $10 ;decrement value stored at address $0010");
+            Assert.IsTrue(Read(0x1000) == 0xC6, "DEC/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 expected");
+
+            Write(0x0010, 0x10);
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(Read(0x0010) == 0x0F, "Value in $0010 expected to be $0F");
+        }
+
+        [TestMethod]
+        public void TestInstructionIny()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"INY ;increment register Y");
+            Assert.IsTrue(Read(0x1000) == 0xC8, "INY instruction not assembled");
+
+            processor.State.RegisterY = 0x10;
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.RegisterY == 0x11, "$11 expected in register Y");
+        }
+
+        [TestMethod]
+        public void TestInstructionCmpImm()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CMP #$10 ;compare accumulator with value $10");
+            Assert.IsTrue(Read(0x1000) == 0xC9, "CMP/IMM instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "Imm operand $10 expected");
+
+            // execution test (equal)
+            processor.State.Accumulator = 0x10;
+            RunCompareEqualTest();
+
+            // execution test (less)
+            processor.State.Accumulator = 0x0F;
+            RunCompareLessTest();
+
+            // execution test (greater)
+            processor.State.Accumulator = 0x11;
+            RunCompareGreaterTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionDex()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"DEX ;decrement register X");
+            Assert.IsTrue(Read(0x1000) == 0xCA, "DEX instruction not assembled");
+
+            processor.State.RegisterX = 0x10;
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.RegisterX == 0x0F, "$0F expected in register X");
+        }
+
+        [TestMethod]
+        public void TestInstructionCpyAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CPY $2000 ;compare register Y with value at address $2000");
+            Assert.IsTrue(Read(0x1000) == 0xCC, "CPY/ABS instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABS operand $2000 expected");
+
+            Write(0x2000, 0x10);
+
+            // execution test (equal)
+            processor.State.RegisterY = 0x10;
+            RunCompareEqualTest();
+
+            // execution test (less)
+            processor.State.RegisterY = 0x0F;
+            RunCompareLessTest();
+
+            // execution test (greater)
+            processor.State.RegisterY = 0x11;
+            RunCompareGreaterTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionCmpAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CMP $2000 ;compare accumulator with value at address $2000");
+            Assert.IsTrue(Read(0x1000) == 0xCD, "CMP/ABS instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABS operand $2000 expected");
+
+            Write(0x2000, 0x10);
+
+            // execution test (equal)
+            processor.State.Accumulator = 0x10;
+            RunCompareEqualTest();
+
+            // execution test (less)
+            processor.State.Accumulator = 0x0F;
+            RunCompareLessTest();
+
+            // execution test (greater)
+            processor.State.Accumulator = 0x11;
+            RunCompareGreaterTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionDecAbs()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"DEC $2000 ;decrement value stored at address $2000");
+            Assert.IsTrue(Read(0x1000) == 0xCE, "DEC/ABS instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABS operand $2000 expected");
+
+            Write(0x2000, 0x10);
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(Read(0x2000) == 0x0F, "Value in $2000 expected to be $0F");
+        }
 
 
 
@@ -2476,6 +2647,46 @@ namespace NesCoreTest
             Assert.IsTrue(!processor.State.OverflowFlag, "Overflow flag expected to be clear");
             Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
         }
+
+        // general comparision test (equal)
+        private void RunCompareEqualTest()
+        {
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.ZeroFlag = false;
+            processor.State.NegativeFlag = true;
+            processor.State.CarryFlag = false;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ZeroFlag, "Zero flag expected to be set");
+            Assert.IsTrue(!processor.State.NegativeFlag, "Negative flag expected to be clear");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set");
+        }
+
+        // general comparision test (less)
+        private void RunCompareLessTest()
+        {
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.ZeroFlag = true;
+            processor.State.NegativeFlag = false;
+            processor.State.CarryFlag = true;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(!processor.State.ZeroFlag, "Zero flag expected to be clear");
+            Assert.IsTrue(processor.State.NegativeFlag, "Negative flag expected to be set");
+            Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
+        }
+
+        // general comparision test (greater)
+        private void RunCompareGreaterTest()
+        {
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.ZeroFlag = true;
+            processor.State.NegativeFlag = false;
+            processor.State.CarryFlag = false;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(!processor.State.ZeroFlag, "Zero flag expected to be clear");
+            Assert.IsTrue(!processor.State.NegativeFlag, "Negative flag expected to be clear");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set");
+        }
+
 
         private Processor processor;
         private Assembler assembler;

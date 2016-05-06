@@ -2425,6 +2425,31 @@ namespace NesCoreTest
         }
 
         [TestMethod]
+        public void TestInstructionCmpZp()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CMP $10 ;compare accumulator with value at address $0010");
+            Assert.IsTrue(Read(0x1000) == 0xC5, "CMP/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 expected");
+
+            Write(0x0010, 0x10);
+
+            // execution test (equal)
+            processor.State.Accumulator = 0x10;
+            RunCompareEqualTest();
+
+            // execution test (less)
+            processor.State.Accumulator = 0x0F;
+            RunCompareLessTest();
+
+            // execution test (greater)
+            processor.State.Accumulator = 0x11;
+            RunCompareGreaterTest();
+        }
+
+        [TestMethod]
         public void TestInstructionDecZp()
         {
             // assembler test
@@ -2558,6 +2583,199 @@ namespace NesCoreTest
             processor.ExecuteInstruction();
             Assert.IsTrue(Read(0x2000) == 0x0F, "Value in $2000 expected to be $0F");
         }
+
+        [TestMethod]
+        public void TestInstructionBne()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"BNE $40 ; branch if not equal to relative offset $40 ($1042)");
+            Assert.IsTrue(Read(0x1000) == 0xD0, "BNE instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x40, "Relative operand $40 expected");
+
+            // execution test (not equal: zero flag clear)
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.ZeroFlag = false;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ProgramCounter == 0x1042, "PC expected to point to address $1042");
+
+            // execution test (equal: zero flag set)
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.ZeroFlag = true;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ProgramCounter == 0x1002, "PC expected to point to address $1002");
+        }
+
+        [TestMethod]
+        public void TestInstructionCmpIzy()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CMP ($10),Y ; Compare accumulator with contents of zero page offset $10 (absolute $0010), offset by contents of Y register ($30)");
+            Assert.IsTrue(Read(0x1000) == 0xD1, "CMP/IZY instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "IZY operand $10 not written");
+
+            processor.State.RegisterY = 0x30;  // Y = $30
+            processor.Write16(0x0010, 0x2000); // ($10) = ($0010) = $2000
+            Write(0x2030, 0x10); // ($10),Y = $2000 + $30 = $2030
+
+            // execution test (equal)
+            processor.State.Accumulator = 0x10;
+            RunCompareEqualTest();
+
+            // execution test (less)
+            processor.State.Accumulator = 0x0F;
+            RunCompareLessTest();
+
+            // execution test (greater)
+            processor.State.Accumulator = 0x11;
+            RunCompareGreaterTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionCmpZpx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CMP $10,X ;compare accumulator with value at address $0010 + X");
+            Assert.IsTrue(Read(0x1000) == 0xD5, "CMP/ZPX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 expected");
+
+            processor.State.RegisterX = 0x30;
+            Write(0x0040, 0x10);
+
+            // execution test (equal)
+            processor.State.Accumulator = 0x10;
+            RunCompareEqualTest();
+
+            // execution test (less)
+            processor.State.Accumulator = 0x0F;
+            RunCompareLessTest();
+
+            // execution test (greater)
+            processor.State.Accumulator = 0x11;
+            RunCompareGreaterTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionDecZpx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"DEC $10,X ;decrement value stored at address $0010 + X");
+            Assert.IsTrue(Read(0x1000) == 0xD6, "DEC/ZPX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 expected");
+
+            processor.State.RegisterX = 0x30;
+            Write(0x0040, 0x10);
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(Read(0x0040) == 0x0F, "Value in $0040 expected to be $0F");
+        }
+
+        [TestMethod]
+        public void TestInstructionCld()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CLD ;clear decimal mode flag");
+            Assert.IsTrue(Read(0x1000) == 0xD8, "CLD instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.DecimalModeFlag = true;
+
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(!processor.State.DecimalModeFlag, "Decimal mode flag expected to be clear");
+        }
+
+        [TestMethod]
+        public void TestInstructionCmpAby()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CMP $2000,Y ;compare accumulator with value at address $2000 + Y");
+            Assert.IsTrue(Read(0x1000) == 0xD9, "CMP/ABY instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABY operand $2000 expected");
+
+            processor.State.RegisterY = 0x30;
+            Write(0x2030, 0x10);
+
+            // execution test (equal)
+            processor.State.Accumulator = 0x10;
+            RunCompareEqualTest();
+
+            // execution test (less)
+            processor.State.Accumulator = 0x0F;
+            RunCompareLessTest();
+
+            // execution test (greater)
+            processor.State.Accumulator = 0x11;
+            RunCompareGreaterTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionCmpAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"CMP $2000,X ;compare accumulator with value at address $2000 + X");
+            Assert.IsTrue(Read(0x1000) == 0xDD, "CMP/ABX instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 expected");
+
+            processor.State.RegisterX = 0x30;
+            Write(0x2030, 0x10);
+
+            // execution test (equal)
+            processor.State.Accumulator = 0x10;
+            RunCompareEqualTest();
+
+            // execution test (less)
+            processor.State.Accumulator = 0x0F;
+            RunCompareLessTest();
+
+            // execution test (greater)
+            processor.State.Accumulator = 0x11;
+            RunCompareGreaterTest();
+        }
+
+        [TestMethod]
+        public void TestInstructionDecAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"DEC $2000,X ;decrement value stored at address $2000 + X");
+            Assert.IsTrue(Read(0x1000) == 0xDE, "DEC/ABX instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 expected");
+
+            processor.State.RegisterX = 0x30;
+            Write(0x2030, 0x10);
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(Read(0x2030) == 0x0F, "Value in $2030 expected to be $0F");
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

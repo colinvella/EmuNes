@@ -2594,13 +2594,13 @@ namespace NesCoreTest
             Assert.IsTrue(Read(0x1000) == 0xD0, "BNE instruction not assembled");
             Assert.IsTrue(Read(0x1001) == 0x40, "Relative operand $40 expected");
 
-            // execution test (not equal: zero flag clear)
+            // execution test (not equal: zero flag clear - do branch)
             processor.State.ProgramCounter = 0x1000;
             processor.State.ZeroFlag = false;
             processor.ExecuteInstruction();
             Assert.IsTrue(processor.State.ProgramCounter == 0x1042, "PC expected to point to address $1042");
 
-            // execution test (equal: zero flag set)
+            // execution test (equal: zero flag set - don't branch)
             processor.State.ProgramCounter = 0x1000;
             processor.State.ZeroFlag = true;
             processor.ExecuteInstruction();
@@ -2928,6 +2928,104 @@ namespace NesCoreTest
             processor.ExecuteInstruction();
             Assert.IsTrue(Read(0x2000) == 0x11, "Value in $2000 expected to be $11");
         }
+
+        [TestMethod]
+        public void TestInstructionBeq()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"BEQ $40 ; branch if equal to relative offset $40 ($1042)");
+            Assert.IsTrue(Read(0x1000) == 0xF0, "BEQ instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x40, "Relative operand $40 expected");
+
+            // execution test (equal: zero flag set - do branch)
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.ZeroFlag = true;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ProgramCounter == 0x1042, "PC expected to point to address $1042");
+
+            // execution test (not equal: zero flag clear - don't branch)
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.ZeroFlag = false;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.ProgramCounter == 0x1002, "PC expected to point to address $1002");
+        }
+
+        [TestMethod]
+        public void TestInstructionSbcIzy()
+        {
+            Assert.Fail("Not implemented yet");
+        }
+
+        [TestMethod]
+        public void TestInstructionSbcZpx()
+        {
+            Assert.Fail("Not implemented yet");
+        }
+
+        [TestMethod]
+        public void TestInstructionIncZpx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"INC $10,X ;Increment value stored at address $0010 + X");
+            Assert.IsTrue(Read(0x1000) == 0xF6, "INC/ZPX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 expected");
+
+            processor.State.RegisterX = 0x30;
+            Write(0x0040, 0x10);
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(Read(0x0040) == 0x11, "Value in $0040 expected to be $11");
+        }
+
+        [TestMethod]
+        public void TestInstructionSed()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"SED ;set decimal mode flag");
+            Assert.IsTrue(Read(0x1000) == 0xF8, "SED instruction not assembled");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.DecimalModeFlag = false;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.DecimalModeFlag, "Decimal mode flag expected to be set");
+        }
+
+        [TestMethod]
+        public void TestInstructionSbcAby()
+        {
+            Assert.Fail("Not implemented yet");
+        }
+
+        [TestMethod]
+        public void TestInstructionSbcAbx()
+        {
+            Assert.Fail("Not implemented yet");
+        }
+
+        [TestMethod]
+        public void TestInstructionIncAbx()
+        {
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"INC $2000,X ;increment value stored at address $2000 + X");
+            Assert.IsTrue(Read(0x1000) == 0xFE, "DEC/ABX instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "ABX operand $2000 expected");
+
+            processor.State.RegisterX = 0x30;
+            Write(0x2030, 0x10);
+            processor.State.ProgramCounter = 0x1000;
+            processor.ExecuteInstruction();
+            Assert.IsTrue(Read(0x2030) == 0x11, "Value in $2030 expected to be $11");
+        }
+
 
 
 

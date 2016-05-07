@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NesCore.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,6 +38,16 @@ namespace NesCore.Processing
         public const byte UnusedMask = 32;
         public const byte OverflowMask = 64;
         public const byte NegativeMask = 128;
+
+        public override string ToString()
+        {
+            return "PC: " + Hex.Format(ProgramCounter)
+                + " SP: " + Hex.Format(StackPointer)
+                + " A: " + Hex.Format(Accumulator)
+                + " X: " + Hex.Format(RegisterX)
+                + " Y: " + Hex.Format(RegisterY)
+                + " NVuBDIZC: " + Bin.Format(Flags);
+        }
 
         private void SetFlag(int index, bool enabled)
         {

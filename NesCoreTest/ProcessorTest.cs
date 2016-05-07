@@ -3119,13 +3119,38 @@ namespace NesCoreTest
 
             // add $80 to $80 to trigger carry
             processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.Accumulator == 0x00, "Value $00 expected in Accumulator");
             Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set");
 
             // add $01 to $00
             processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.Accumulator == 0x01, "Value $01 expected in Accumulator");
             Assert.IsTrue(!processor.State.OverflowFlag, "Overflow flag expected to be clear");
             Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
+        }
+
+        // common execution test for all SBC variants
+        private void RunSbcExecutionTest()
+        {
+            // subtract $01 from $00
+            processor.ExecuteInstruction();
+            Assert.IsTrue(!processor.State.OverflowFlag, "Overflow flag expected to be clear");
+            Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
+
+            // subtract $80 from $80 to trigger carry
+            processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
+            Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set");
+
+            // subtract $01 from $7F to trigger sign overflow
+            processor.ExecuteInstruction();
+
+            Assert.IsTrue(processor.State.Accumulator == 0x80, "Value $80 expected in Accumulator");
+            Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
+            Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
+
+
         }
 
         // general comparision test (equal)

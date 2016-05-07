@@ -2790,7 +2790,23 @@ namespace NesCoreTest
         [TestMethod]
         public void TestInstructionSbcIzx()
         {
-            Assert.Fail("Not implemented yet");
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"SBC ($10,X) ;SBC from the accumulator the contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)
+                  SBC #$80    ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
+                  SBC #$FE    ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
+            Assert.IsTrue(Read(0x1000) == 0xE1, "SBC/IZX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "IZX operand $10 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterX = 0x80;
+            processor.Write16(0x0090, 0x2000);
+            Write(0x2000, 0x01);
+            processor.State.Accumulator = 0x01;
+
+            RunSbcExecutionTest();
         }
 
         [TestMethod]
@@ -2821,7 +2837,21 @@ namespace NesCoreTest
         [TestMethod]
         public void TestInstructionSbcZp()
         {
-            Assert.Fail("Not implemented yet");
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"SBC $10  ;SBC from the accumulator the value at address $0010 (and borrow - Carry clear)
+                  SBC #$80 ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
+                  SBC #$FE ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
+            Assert.IsTrue(Read(0x1000) == 0xE5, "SBC/ZP instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x01;
+            processor.Write16(0x0010, 0x01);
+
+            RunSbcExecutionTest();
         }
 
         [TestMethod]
@@ -2858,7 +2888,20 @@ namespace NesCoreTest
         [TestMethod]
         public void TestInstructionSbcImm()
         {
-            Assert.Fail("Not implemented yet");
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"SBC #$01 ;SBC from the accumulator the value $01 (and borrow - Carry clear)
+                  SBC #$80 ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
+                  SBC #$FE ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
+            Assert.IsTrue(Read(0x1000) == 0xE9, "SBC/Imm instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x01, "Imm operand $01 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x01;
+
+            RunSbcExecutionTest();
         }
 
         [TestMethod]
@@ -2910,7 +2953,21 @@ namespace NesCoreTest
         [TestMethod]
         public void TestInstructionSbcAbs()
         {
-            Assert.Fail("Not implemented yet");
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"SBC $2000 ;SBC from the accumulator the value at address $2000 (and borrow - Carry clear)
+                  SBC #$80  ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
+                  SBC #$FE  ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
+            Assert.IsTrue(Read(0x1000) == 0xED, "SBC/Abs instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abs operand $2000 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x01;
+            processor.Write16(0x2000, 0x01);
+
+            RunSbcExecutionTest();
         }
 
         [TestMethod]
@@ -2955,13 +3012,44 @@ namespace NesCoreTest
         [TestMethod]
         public void TestInstructionSbcIzy()
         {
-            Assert.Fail("Not implemented yet");
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"SBC ($10),Y ;SBC from accumulator, the contents of zero page offset $10 (absolute $0010), offset by contents of Y register ($30)
+                  SBC #$80    ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
+                  SBC #$FE    ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
+            Assert.IsTrue(Read(0x1000) == 0xF1, "SBC/IZY instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "IZY operand $10 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.RegisterY = 0x30;  // Y = $30
+            processor.Write16(0x0010, 0x2000); // ($10) = ($0010) = $2000
+            Write(0x2030, 0x01); // ($10),Y = $2000 + $30 = $2030
+            processor.State.Accumulator = 0x01;
+
+            RunSbcExecutionTest();
         }
 
         [TestMethod]
         public void TestInstructionSbcZpx()
         {
-            Assert.Fail("Not implemented yet");
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"SBC $10,X ;SBC from the accumulator the value at address $0010+X (and borrow - Carry clear)
+                  SBC #$80  ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
+                  SBC #$FE  ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
+            Assert.IsTrue(Read(0x1000) == 0xF5, "SBC/ZPX instruction not assembled");
+            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 expected");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x01;
+            processor.State.RegisterX = 0x30;
+            processor.Write16(0x0040, 0x01);
+
+            RunSbcExecutionTest();
         }
 
         [TestMethod]
@@ -3000,13 +3088,43 @@ namespace NesCoreTest
         [TestMethod]
         public void TestInstructionSbcAby()
         {
-            Assert.Fail("Not implemented yet");
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"SBC $2000,Y ;SBC from the accumulator the value at address $2000+Y (and borrow - Carry clear)
+                  SBC #$80    ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
+                  SBC #$FE    ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
+            Assert.IsTrue(Read(0x1000) == 0xF9, "SBC/Aby instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Aby operand $2000 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x01;
+            processor.State.RegisterY = 0x30;
+            processor.Write16(0x2030, 0x01);
+
+            RunSbcExecutionTest();
         }
 
         [TestMethod]
         public void TestInstructionSbcAbx()
         {
-            Assert.Fail("Not implemented yet");
+            // assembler test
+            ResetSystem();
+            assembler.GenerateProgram(0x1000,
+                @"SBC $2000,X ;SBC from the accumulator the value at address $2000+X (and borrow - Carry clear)
+                  SBC #$80    ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
+                  SBC #$FE    ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
+            Assert.IsTrue(Read(0x1000) == 0xFD, "SBC/Abx instruction not assembled");
+            Assert.IsTrue(processor.Read16(0x1001) == 0x2000, "Abx operand $2000 not written");
+
+            // execution test
+            processor.State.ProgramCounter = 0x1000;
+            processor.State.Accumulator = 0x01;
+            processor.State.RegisterX = 0x30;
+            processor.Write16(0x2030, 0x01);
+
+            RunSbcExecutionTest();
         }
 
         [TestMethod]
@@ -3133,24 +3251,23 @@ namespace NesCoreTest
         // common execution test for all SBC variants
         private void RunSbcExecutionTest()
         {
-            // subtract $01 from $00
+            // subtract $01 from $01
             processor.ExecuteInstruction();
+            Assert.IsTrue(processor.State.Accumulator == 0xFF, "Value $FF expected in Accumulator (carry clear => borrow");
             Assert.IsTrue(!processor.State.OverflowFlag, "Overflow flag expected to be clear");
             Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
 
-            // subtract $80 from $80 to trigger carry
+            // subtract $80 from $FF to trigger carry (-1 - (-127) = 126)
             processor.ExecuteInstruction();
-            Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
+            Assert.IsTrue(!processor.State.OverflowFlag, "Overflow flag expected to be clear");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set");
 
-            // subtract $01 from $7F to trigger sign overflow
+            // subtract $FD from $7E (with Carry - no borrow) to trigger sign overflow (126 - (-2) = 128)
             processor.ExecuteInstruction();
 
             Assert.IsTrue(processor.State.Accumulator == 0x80, "Value $80 expected in Accumulator");
             Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
             Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
-
-
         }
 
         // general comparision test (equal)

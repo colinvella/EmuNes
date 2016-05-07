@@ -583,10 +583,10 @@ namespace NesCore.Processing
                 byte oldAccumulatorValue = state.Accumulator;
                 byte operandValue = SystemBus.Read(address);
                 byte carryValue = state.CarryFlag ? (byte)1 : (byte)0;
-                int result = oldAccumulatorValue - operandValue - 1 + carryValue;
+                UInt16 result = (UInt16)(oldAccumulatorValue - operandValue - 1 + carryValue);
                 state.Accumulator = (byte)result;
                 SetZeroAndNegativeFlags(state.Accumulator);
-                state.CarryFlag = result >= 0;
+                state.CarryFlag = result < 0x100;
                 state.OverflowFlag = ((oldAccumulatorValue ^ operandValue) & 0x80) != 0
                     && ((oldAccumulatorValue ^ state.Accumulator) & 0x80) != 0;
             };

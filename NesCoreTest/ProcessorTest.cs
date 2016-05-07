@@ -3123,9 +3123,9 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.OverflowFlag, "Overflow flag expected to be set");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set");
 
-            // add $01 to $00
+            // add $01 to $00 (carry set)
             processor.ExecuteInstruction();
-            Assert.IsTrue(processor.State.Accumulator == 0x01, "Value $01 expected in Accumulator");
+            Assert.IsTrue(processor.State.Accumulator == 0x02, "Value $02 expected in Accumulator");
             Assert.IsTrue(!processor.State.OverflowFlag, "Overflow flag expected to be clear");
             Assert.IsTrue(!processor.State.CarryFlag, "Carry flag expected to be clear");
         }

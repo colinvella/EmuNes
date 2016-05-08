@@ -11,8 +11,8 @@ namespace NesCoreTest
         public ProcessorTest()
         {
             processor = new Processor();
-            processor.ReadByte = Read;
-            processor.WriteByte = Write;
+            processor.ReadByte = ReadByte;
+            processor.WriteByte = WriteByte;
             assembler = new Assembler(processor);
         }
 
@@ -36,7 +36,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"BRK");
-            Assert.IsTrue(Read(0x1000) == 0x00, "BRK instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x00, "BRK instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -58,14 +58,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ORA ($10,X) ; OR accumulator with contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
-            Assert.IsTrue(Read(0x1000) == 0x01, "ORA/IZX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x01, "ORA/IZX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Indexed indirect $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x80;
             processor.WriteWord(0x0090, 0x2000);
-            Write(0x2000, 0x0F);
+            WriteByte(0x2000, 0x0F);
             processor.State.Accumulator = 0xF0;
 
             processor.ExecuteInstruction();
@@ -80,12 +80,12 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ORA $10 ; OR accumulator with contents of address $0010");
-            Assert.IsTrue(Read(0x1000) == 0x05, "ORA/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x05, "ORA/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
-            Write(0x0010, 0x0F);
+            WriteByte(0x0010, 0x0F);
             processor.State.Accumulator = 0xF0;
 
             processor.ExecuteInstruction();
@@ -108,22 +108,22 @@ namespace NesCoreTest
                   ASL $10 ; ASL contents of address $0010
                   ASL $10 ; ASL contents of address $0010
                   ASL $10 ; ASL contents of address $0010");
-            Assert.IsTrue(Read(0x1000) == 0x06, "ASL/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand 0x10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x06, "ASL/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand 0x10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
-            Write(0x0010, 0x01);
+            WriteByte(0x0010, 0x01);
  
             // execute first 7 ASL
             processor.ExecuteInstructions(7);
 
-            Assert.IsTrue(Read(0x0010) == 0x80, "Value $80 expected at location $0010");
+            Assert.IsTrue(ReadByte(0x0010) == 0x80, "Value $80 expected at location $0010");
             Assert.IsTrue(!processor.State.CarryFlag, "Carry should not be set");
 
             // execute last ASL
             processor.ExecuteInstruction();
-            Assert.IsTrue(Read(0x0010) == 0x00, "Value $00 expected at location $0010");
+            Assert.IsTrue(ReadByte(0x0010) == 0x00, "Value $00 expected at location $0010");
             Assert.IsTrue(processor.State.CarryFlag, "Carry should be set");
         }
 
@@ -134,7 +134,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"PHP");
-            Assert.IsTrue(Read(0x1000) == 0x08, "PHP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x08, "PHP instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -152,8 +152,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ORA #$0F; OR value $0F with accumulator");
-            Assert.IsTrue(Read(0x1000) == 0x09, "ORA/IMM instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x0F, "Immediate value $0F not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x09, "ORA/IMM instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x0F, "Immediate value $0F not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -179,7 +179,7 @@ namespace NesCoreTest
                   ASL A;ASL contents of accumulator
                   ASL A;ASL contents of accumulator
                   ASL A;ASL contents of accumulator");
-            Assert.IsTrue(Read(0x1000) == 0x0A, "ASL/Acc instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x0A, "ASL/Acc instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -204,7 +204,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ORA $2000; OR contents at address $2000 with accumulator");
-            Assert.IsTrue(Read(0x1000) == 0x0D, "ORA/ABS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x0D, "ORA/ABS instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Operand should be $2000");
 
             // execution test
@@ -225,13 +225,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ASL $2000 ;ASL contents of address $2000");
-            Assert.IsTrue(Read(0x1000) == 0x0E, "ASL/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x0E, "ASL/Abs instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
-            Write(0x2000, 0x04);
+            WriteByte(0x2000, 0x04);
             processor.ExecuteInstruction();
-            Assert.IsTrue(Read(0x2000) == 0x08, "Value $08 expected at address $2000");
+            Assert.IsTrue(ReadByte(0x2000) == 0x08, "Value $08 expected at address $2000");
         }
 
         [TestMethod]
@@ -244,14 +244,14 @@ namespace NesCoreTest
                   BPL  $30 ;branch on plus to $30 bytes ahead of instruction
                   LDA #$01 ;load accumulator with positive value
                   BPL  $40 ;branch on plus to $40 bytes ahead of instruction");
-            Assert.IsTrue(Read(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0xFF, "immediate operand $FF expected");
-            Assert.IsTrue(Read(0x1002) == 0x10, "BPL instruction not assembled");
-            Assert.IsTrue(Read(0x1003) == 0x30, "Relative branch offset $30 expected");
-            Assert.IsTrue(Read(0x1004) == 0xA9, "LDA/Imm instruction not assembled");
-            Assert.IsTrue(Read(0x1005) == 0x01, "immediate operand $01 expected");
-            Assert.IsTrue(Read(0x1006) == 0x10, "BPL instruction not assembled");
-            Assert.IsTrue(Read(0x1007) == 0x40, "Relative branch offset $40 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0xFF, "immediate operand $FF expected");
+            Assert.IsTrue(ReadByte(0x1002) == 0x10, "BPL instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1003) == 0x30, "Relative branch offset $30 expected");
+            Assert.IsTrue(ReadByte(0x1004) == 0xA9, "LDA/Imm instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1005) == 0x01, "immediate operand $01 expected");
+            Assert.IsTrue(ReadByte(0x1006) == 0x10, "BPL instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1007) == 0x40, "Relative branch offset $40 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -266,14 +266,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ORA ($10),Y ; OR accumulator with contents of zero page offset $10 (absolute $0010), offset by contents of Y register ($30)");
-            Assert.IsTrue(Read(0x1000) == 0x11, "ORA/IZY instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x11, "ORA/IZY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Indexed indirect $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x30;  // Y = $30
             processor.WriteWord(0x0010, 0x2000); // ($10) = ($0010) = $2000
-            Write(0x2030, 0x0F); // ($10),Y = $2000 + $30 = $2030
+            WriteByte(0x2030, 0x0F); // ($10),Y = $2000 + $30 = $2030
             processor.State.Accumulator = 0xF0;
 
             processor.ExecuteInstruction();
@@ -288,13 +288,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ORA $10,X ; OR accumulator with contents of address $0010 + X");
-            Assert.IsTrue(Read(0x1000) == 0x15, "ORA/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand 0x10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x15, "ORA/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand 0x10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x0040, 0x0F);
+            WriteByte(0x0040, 0x0F);
             processor.State.Accumulator = 0xF0;
 
             processor.ExecuteInstruction();
@@ -309,14 +309,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ASL $20, X ;ASL contents of address $20 + X = $0020 + $10 = $0030");
-            Assert.IsTrue(Read(0x1000) == 0x16, "ASL/Zpx instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x16, "ASL/Zpx instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x10;
-            Write(0x0030, 0x04);
+            WriteByte(0x0030, 0x04);
             processor.ExecuteInstruction();
-            Assert.IsTrue(Read(0x0030) == 0x08, "Value $08 expected at address $0030");
+            Assert.IsTrue(ReadByte(0x0030) == 0x08, "Value $08 expected at address $0030");
         }
 
         [TestMethod]
@@ -326,7 +326,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CLC ;clear carry flag");
-            Assert.IsTrue(Read(0x1000) == 0x18, "CLC instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x18, "CLC instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -342,13 +342,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ORA $2000,Y ; OR accumulator with contents of address $2000 + Y = $2000 + $30 = $2030");
-            Assert.IsTrue(Read(0x1000) == 0x19, "ORA/ABY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x19, "ORA/ABY instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABY operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x30;
-            Write(0x2030, 0x0F);
+            WriteByte(0x2030, 0x0F);
             processor.State.Accumulator = 0xF0;
 
             processor.ExecuteInstruction();
@@ -363,13 +363,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ORA $2000,X ; OR accumulator with contents of address $2000 + X = $2000 + $30 = $2030");
-            Assert.IsTrue(Read(0x1000) == 0x1D, "ORA/ABX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x1D, "ORA/ABX instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x2030, 0x0F);
+            WriteByte(0x2030, 0x0F);
             processor.State.Accumulator = 0xF0;
 
             processor.ExecuteInstruction();
@@ -384,15 +384,15 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ASL $2000, X ;ASL contents of address $2000 + X = $2000 + $30 = $2030");
-            Assert.IsTrue(Read(0x1000) == 0x1E, "ASL/Abx instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x1E, "ASL/Abx instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x2030, 0x04);
+            WriteByte(0x2030, 0x04);
             processor.ExecuteInstruction();
-            Assert.IsTrue(Read(0x2030) == 0x08, "Value $08 expected at address $2030");
+            Assert.IsTrue(ReadByte(0x2030) == 0x08, "Value $08 expected at address $2030");
         }
 
         [TestMethod]
@@ -402,12 +402,12 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"JSR $2000 ;jump to subroutine at absolute $2000");
-            Assert.IsTrue(Read(0x1000) == 0x20, "JSR/abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x20, "JSR/abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABS operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
-            Write(0x0030, 0x04);
+            WriteByte(0x0030, 0x04);
             processor.ExecuteInstruction();
             Assert.IsTrue(processor.State.ProgramCounter == 0x2000, "PC expected to be $2000");
             Assert.IsTrue(processor.PullWord() == 0x1002, "Top of stack expected to hold address of instruction after JSR - 1");
@@ -420,14 +420,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"AND ($10,X) ; AND accumulator with contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
-            Assert.IsTrue(Read(0x1000) == 0x21, "AND/IZX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Izx 0x10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x21, "AND/IZX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Izx 0x10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x80;
             processor.WriteWord(0x0090, 0x2000);
-            Write(0x2000, 0xF0);
+            WriteByte(0x2000, 0xF0);
             processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
@@ -442,15 +442,15 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"BIT $10 ; bit test the contents of address $0010");
-            Assert.IsTrue(Read(0x1000) == 0x24, "BIT/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand 0x10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x24, "BIT/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand 0x10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.ZeroFlag = true;
             processor.State.NegativeFlag = false;
             processor.State.OverflowFlag = false;
-            Write(0x0010, 0xC0); // $C0 = b11000000
+            WriteByte(0x0010, 0xC0); // $C0 = b11000000
 
             processor.ExecuteInstruction();
 
@@ -466,12 +466,12 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"AND $10 ; AND accumulator with contents of address $0010");
-            Assert.IsTrue(Read(0x1000) == 0x25, "AND/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand 0x10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x25, "AND/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand 0x10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
-            Write(0x0010, 0x0F);
+            WriteByte(0x0010, 0x0F);
             processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
@@ -486,17 +486,17 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ROL $10 ; ROL contents of address $0010");
-            Assert.IsTrue(Read(0x1000) == 0x26, "ROL/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand 0x10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x26, "ROL/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand 0x10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.CarryFlag = false;
-            Write(0x0010, 0x81);
+            WriteByte(0x0010, 0x81);
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0010) == 0x02, "Value $02 expected at address 0x0010");
+            Assert.IsTrue(ReadByte(0x0010) == 0x02, "Value $02 expected at address 0x0010");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 7)");
         }
 
@@ -509,7 +509,7 @@ namespace NesCoreTest
                 @"PHP ;push processor status
                   CLC ;clear carry
                   PLP ;pull processor status");
-            Assert.IsTrue(Read(0x1000) == 0x08, "PHP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x08, "PHP instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -529,8 +529,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"AND #$F0 ; AND accumulator with value $F0)");
-            Assert.IsTrue(Read(0x1000) == 0x29, "AND/IMM instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0xF0, "Imm $F0 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x29, "AND/IMM instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0xF0, "Imm $F0 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -548,7 +548,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ROL A ;ROL contents of accumulator");
-            Assert.IsTrue(Read(0x1000) == 0x2A, "ROL/Acc instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x2A, "ROL/Acc instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -568,7 +568,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"BIT $2000 ; bit test the contents of address $2000");
-            Assert.IsTrue(Read(0x1000) == 0x2C, "BIT/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x2C, "BIT/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "abs operand $2000 expected");
 
             // execution test
@@ -576,7 +576,7 @@ namespace NesCoreTest
             processor.State.ZeroFlag = true;
             processor.State.NegativeFlag = false;
             processor.State.OverflowFlag = false;
-            Write(0x2000, 0xC0); // $C0 = b11000000
+            WriteByte(0x2000, 0xC0); // $C0 = b11000000
 
             processor.ExecuteInstruction();
 
@@ -592,12 +592,12 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"AND $2000 ; AND accumulator with contents of address $2000");
-            Assert.IsTrue(Read(0x1000) == 0x2D, "AND/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x2D, "AND/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "abs operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
-            Write(0x2000, 0x0F);
+            WriteByte(0x2000, 0x0F);
             processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
@@ -612,17 +612,17 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ROL $2000 ; ROL contents of address $2000");
-            Assert.IsTrue(Read(0x1000) == 0x2E, "ROL/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x2E, "ROL/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "abs operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.CarryFlag = false;
-            Write(0x2000, 0x81);
+            WriteByte(0x2000, 0x81);
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x2000) == 0x02, "Value $02 expected at address $2000");
+            Assert.IsTrue(ReadByte(0x2000) == 0x02, "Value $02 expected at address $2000");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 7)");
         }
 
@@ -636,14 +636,14 @@ namespace NesCoreTest
                   BMI  $30 ;branch on minus to $30 bytes ahead of instruction
                   LDA #$FF ;load accumulator with negative value
                   BMI  $40 ;branch on minus to $40 bytes ahead of instruction");
-            Assert.IsTrue(Read(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x01, "immediate operand $01 expected");
-            Assert.IsTrue(Read(0x1002) == 0x30, "BMI instruction not assembled");
-            Assert.IsTrue(Read(0x1003) == 0x30, "Relative branch offset $30 expected");
-            Assert.IsTrue(Read(0x1004) == 0xA9, "LDA/Imm instruction not assembled");
-            Assert.IsTrue(Read(0x1005) == 0xFF, "immediate operand $FF expected");
-            Assert.IsTrue(Read(0x1006) == 0x30, "BMI instruction not assembled");
-            Assert.IsTrue(Read(0x1007) == 0x40, "Relative branch offset $40 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x01, "immediate operand $01 expected");
+            Assert.IsTrue(ReadByte(0x1002) == 0x30, "BMI instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1003) == 0x30, "Relative branch offset $30 expected");
+            Assert.IsTrue(ReadByte(0x1004) == 0xA9, "LDA/Imm instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1005) == 0xFF, "immediate operand $FF expected");
+            Assert.IsTrue(ReadByte(0x1006) == 0x30, "BMI instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1007) == 0x40, "Relative branch offset $40 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -658,14 +658,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"AND ($10),Y ; AND accumulator with contents of zero page offset $10 (absolute $0010), offset by contents of Y register ($30)");
-            Assert.IsTrue(Read(0x1000) == 0x31, "AND/IZY instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect 0x10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x31, "AND/IZY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Indexed indirect 0x10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x30;  // Y = $30
             processor.WriteWord(0x0010, 0x2000); // ($10) = ($0010) = $2000
-            Write(0x2030, 0x0F); // ($10),Y = $2000 + $30 = $2030
+            WriteByte(0x2030, 0x0F); // ($10),Y = $2000 + $30 = $2030
             processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
@@ -680,13 +680,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"AND $10,X ; AND accumulator with contents of address $0010 + X");
-            Assert.IsTrue(Read(0x1000) == 0x35, "AND/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand 0x10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x35, "AND/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand 0x10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x0040, 0x0F);
+            WriteByte(0x0040, 0x0F);
             processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
@@ -701,18 +701,18 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ROL $10,X ; ROL contents of address $0010 offset by X");
-            Assert.IsTrue(Read(0x1000) == 0x36, "ROL/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x36, "ROL/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x20;
             processor.State.CarryFlag = false;
-            Write(0x0030, 0x81);
+            WriteByte(0x0030, 0x81);
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0030) == 0x02, "Value $02 expected at address $0030 = ($10,X), X = $20");
+            Assert.IsTrue(ReadByte(0x0030) == 0x02, "Value $02 expected at address $0030 = ($10,X), X = $20");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 7)");
         }
 
@@ -723,7 +723,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"SEC ;set carry flag");
-            Assert.IsTrue(Read(0x1000) == 0x38, "SEC instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x38, "SEC instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -739,13 +739,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"AND $2000,Y ; AND accumulator with contents of address $2000 + Y");
-            Assert.IsTrue(Read(0x1000) == 0x39, "AND/ABY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x39, "AND/ABY instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABY operand $2000 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x30;
-            Write(0x2030, 0x0F);
+            WriteByte(0x2030, 0x0F);
             processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
@@ -760,13 +760,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"AND $2000,X ; AND accumulator with contents of address $2000 + X");
-            Assert.IsTrue(Read(0x1000) == 0x3D, "AND/ABX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x3D, "AND/ABX instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x2030, 0x0F);
+            WriteByte(0x2030, 0x0F);
             processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
@@ -781,18 +781,18 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ROL $2000,X ; ROL contents of address $2000 offset by X");
-            Assert.IsTrue(Read(0x1000) == 0x3E, "ROL/ABX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x3E, "ROL/ABX instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
             processor.State.CarryFlag = false;
-            Write(0x2030, 0x81);
+            WriteByte(0x2030, 0x81);
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x2030) == 0x02, "Value $02 expected at address $2030 = $2000,X where X = $30");
+            Assert.IsTrue(ReadByte(0x2030) == 0x02, "Value $02 expected at address $2030 = $2000,X where X = $30");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 7)");
         }
 
@@ -803,7 +803,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"RTI ;return from interrup handler");
-            Assert.IsTrue(Read(0x1000) == 0x40, "RTI instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x40, "RTI instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -823,14 +823,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"EOR ($10,X) ; EOR accumulator with contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
-            Assert.IsTrue(Read(0x1000) == 0x41, "EOR/IZX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Izx $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x41, "EOR/IZX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Izx $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x80;
             processor.WriteWord(0x0090, 0x2000);
-            Write(0x2000, 0xFF);
+            WriteByte(0x2000, 0xFF);
             processor.State.Accumulator = 0xF0;
 
             processor.ExecuteInstruction();
@@ -845,12 +845,12 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"EOR $10 ; EOR accumulator with contents of address $0010");
-            Assert.IsTrue(Read(0x1000) == 0x45, "EOR/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x45, "EOR/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
-            Write(0x0010, 0x0F);
+            WriteByte(0x0010, 0x0F);
             processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
@@ -865,17 +865,17 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LSR $10 ; LSR contents of address $0010");
-            Assert.IsTrue(Read(0x1000) == 0x46, "LSR/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x46, "LSR/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.CarryFlag = false;
-            Write(0x0010, 0x81);
+            WriteByte(0x0010, 0x81);
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0010) == 0x40, "Value $40 expected at address 0x0010");
+            Assert.IsTrue(ReadByte(0x0010) == 0x40, "Value $40 expected at address 0x0010");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
 
@@ -886,7 +886,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"PHA      ;push A to stack");
-            Assert.IsTrue(Read(0x1000) == 0x48, "PHA instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x48, "PHA instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -903,8 +903,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"EOR #$FF; EOR value $FF with accumulator");
-            Assert.IsTrue(Read(0x1000) == 0x49, "EOR/IMM instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0xFF, "Immediate value $FF not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x49, "EOR/IMM instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0xFF, "Immediate value $FF not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -922,7 +922,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LSR A ;LSR contents of A");
-            Assert.IsTrue(Read(0x1000) == 0x4A, "LSR/Acc instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x4A, "LSR/Acc instruction not assembled");
          
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -942,7 +942,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"JMP $2000 ;jump to address $2000");
-            Assert.IsTrue(Read(0x1000) == 0x4C, "JMP/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x4C, "JMP/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abs operand $2000 expected");
 
             // execution test
@@ -960,13 +960,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"EOR $2000; EOR contents of address $2000 with accumulator");
-            Assert.IsTrue(Read(0x1000) == 0x4D, "EOR/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x4D, "EOR/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abs operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.Accumulator = 0xF0;
-            Write(0x2000, 0xFF);
+            WriteByte(0x2000, 0xFF);
 
             processor.ExecuteInstruction();
 
@@ -980,17 +980,17 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LSR $2000 ; LSR contents of address $2000");
-            Assert.IsTrue(Read(0x1000) == 0x4E, "LSR/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x4E, "LSR/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abs operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.CarryFlag = false;
-            Write(0x2000, 0x81);
+            WriteByte(0x2000, 0x81);
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x2000) == 0x40, "Value $40 expected at address $2000");
+            Assert.IsTrue(ReadByte(0x2000) == 0x40, "Value $40 expected at address $2000");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
 
@@ -1001,8 +1001,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"BVC $40 ; branch if overflow clear to relative offset $40 ($1042)");
-            Assert.IsTrue(Read(0x1000) == 0x50, "BVC instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x40, "Relative operand $40 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0x50, "BVC instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x40, "Relative operand $40 expected");
 
             // execution test (overflow clear)
             processor.State.ProgramCounter = 0x1000;
@@ -1024,14 +1024,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"EOR ($10),Y ; EOR accumulator with contents of zero page offset $10 (absolute $0010), offset by contents of Y register ($30)");
-            Assert.IsTrue(Read(0x1000) == 0x51, "EOR/IZY instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x51, "EOR/IZY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Indexed indirect $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x30;  // Y = $30
             processor.WriteWord(0x0010, 0x2000); // ($10) = ($0010) = $2000
-            Write(0x2030, 0x0F); // ($10),Y = $2000 + $30 = $2030
+            WriteByte(0x2030, 0x0F); // ($10),Y = $2000 + $30 = $2030
             processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
@@ -1046,13 +1046,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"EOR $10,X ; EOR accumulator with contents of address $0010 + X");
-            Assert.IsTrue(Read(0x1000) == 0x55, "EOR/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand 0x10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x55, "EOR/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand 0x10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x0040, 0x0F);
+            WriteByte(0x0040, 0x0F);
             processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
@@ -1067,18 +1067,18 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LSR $10,X ;LSR contents of address $0010 + X");
-            Assert.IsTrue(Read(0x1000) == 0x56, "LSR/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x56, "LSR/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x0040, 0x81);
+            WriteByte(0x0040, 0x81);
             processor.State.CarryFlag = false;
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0040) == 0x40, "Value $40 expected at address 0x0040");
+            Assert.IsTrue(ReadByte(0x0040) == 0x40, "Value $40 expected at address 0x0040");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
 
@@ -1089,7 +1089,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CLI ;clear interrup disable flag");
-            Assert.IsTrue(Read(0x1000) == 0x58, "CLI instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x58, "CLI instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1107,13 +1107,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"EOR $2000,Y ; EOR accumulator with contents of address $2000 + Y");
-            Assert.IsTrue(Read(0x1000) == 0x59, "EOR/ABY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x59, "EOR/ABY instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABY operand $2000 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x30;
-            Write(0x2030, 0x0F);
+            WriteByte(0x2030, 0x0F);
             processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
@@ -1128,13 +1128,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"EOR $2000,X ; EOR accumulator with contents of address $2000 + X");
-            Assert.IsTrue(Read(0x1000) == 0x5D, "EOR/ABX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x5D, "EOR/ABX instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x2030, 0x0F);
+            WriteByte(0x2030, 0x0F);
             processor.State.Accumulator = 0xFF;
 
             processor.ExecuteInstruction();
@@ -1149,18 +1149,18 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LSR $2000,X ;LSR contents of address $2000 + X");
-            Assert.IsTrue(Read(0x1000) == 0x5E, "LSR/ABX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x5E, "LSR/ABX instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x2030, 0x81);
+            WriteByte(0x2030, 0x81);
             processor.State.CarryFlag = false;
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x2030) == 0x40, "Value $40 expected at address 0x0040");
+            Assert.IsTrue(ReadByte(0x2030) == 0x40, "Value $40 expected at address 0x0040");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
 
@@ -1171,7 +1171,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"RTS ;return from subroutine");
-            Assert.IsTrue(Read(0x1000) == 0x60, "RTS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x60, "RTS instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1190,14 +1190,14 @@ namespace NesCoreTest
                 @"ADC ($10,X) ;ADC to the accumulator the contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)
                   ADC #$80    ;ADC another $80 to cause carry
                   ADC #$01    ;ADC another $01 for no carry");
-            Assert.IsTrue(Read(0x1000) == 0x61, "ADC/IZX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect 0x10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x61, "ADC/IZX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Indexed indirect 0x10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x80;
             processor.WriteWord(0x0090, 0x2000);
-            Write(0x2000, 0x01);
+            WriteByte(0x2000, 0x01);
             processor.State.Accumulator = 0x7F;
 
             RunAdcExecutionTest();
@@ -1212,8 +1212,8 @@ namespace NesCoreTest
                 @"ADC $10  ;ADC to the accumulator the contents of address $0010
                   ADC #$80 ;ADC another $80 to cause carry
                   ADC #$01 ;ADC another $01 for no carry");
-            Assert.IsTrue(Read(0x1000) == 0x65, "ADC/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x65, "ADC/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1230,17 +1230,17 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ROR $10 ; ROR contents of address $0010");
-            Assert.IsTrue(Read(0x1000) == 0x66, "ROR/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x66, "ROR/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.CarryFlag = false;
-            Write(0x0010, 0x81);
+            WriteByte(0x0010, 0x81);
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0010) == 0x40, "Value $40 expected at address 0x0010");
+            Assert.IsTrue(ReadByte(0x0010) == 0x40, "Value $40 expected at address 0x0010");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
 
@@ -1251,7 +1251,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"PLA ;pull value from stack into A");
-            Assert.IsTrue(Read(0x1000) == 0x68, "PLA instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x68, "PLA instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1271,8 +1271,8 @@ namespace NesCoreTest
                 @"ADC #$01 ;ADC to the accumulator the value $01
                   ADC #$80 ;ADC another $80 to cause carry
                   ADC #$01 ;ADC another $01 for no carry");
-            Assert.IsTrue(Read(0x1000) == 0x69, "ADC/Imm instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x01, "Imm operand $01 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x69, "ADC/Imm instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x01, "Imm operand $01 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1288,7 +1288,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ROR A ;ROR contents of A");
-            Assert.IsTrue(Read(0x1000) == 0x6A, "ROR/Acc instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x6A, "ROR/Acc instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1308,7 +1308,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"JMP ($2000) ;jump to address value contained at address $2000");
-            Assert.IsTrue(Read(0x1000) == 0x6C, "JMP/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x6C, "JMP/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Ind operand $2000 expected");
 
             // execution test
@@ -1329,7 +1329,7 @@ namespace NesCoreTest
                 @"ADC $2000 ;ADC to the accumulator the contents of address $2000
                   ADC #$80  ;ADC another $80 to cause carry
                   ADC #$01  ;ADC another $01 for no carry");
-            Assert.IsTrue(Read(0x1000) == 0x6D, "ADC/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x6D, "ADC/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abs operand $2000 expected");
 
             // execution test
@@ -1347,17 +1347,17 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ROR $2000 ; ROR contents of address $2000");
-            Assert.IsTrue(Read(0x1000) == 0x6E, "ROR/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x6E, "ROR/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abs operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.CarryFlag = false;
-            Write(0x2000, 0x81);
+            WriteByte(0x2000, 0x81);
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x2000) == 0x40, "Value $40 expected at address $2000");
+            Assert.IsTrue(ReadByte(0x2000) == 0x40, "Value $40 expected at address $2000");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
 
@@ -1368,8 +1368,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"BVS $40 ; branch if overflow set to relative offset $40 ($1042)");
-            Assert.IsTrue(Read(0x1000) == 0x70, "BVS instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x40, "Relative operand $40 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0x70, "BVS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x40, "Relative operand $40 expected");
 
             // execution test (overflow set)
             processor.State.ProgramCounter = 0x1000;
@@ -1393,14 +1393,14 @@ namespace NesCoreTest
                 @"ADC ($10),Y ;ADC to accumulator, the contents of zero page offset $10 (absolute $0010), offset by contents of Y register ($30)
                   ADC #$80    ;ADC another $80 to cause carry
                   ADC #$01    ;ADC another $01 for no carry");
-            Assert.IsTrue(Read(0x1000) == 0x71, "ADC/IZY instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect 0x10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x71, "ADC/IZY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Indexed indirect 0x10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x30;  // Y = $30
             processor.WriteWord(0x0010, 0x2000); // ($10) = ($0010) = $2000
-            Write(0x2030, 0x01); // ($10),Y = $2000 + $30 = $2030
+            WriteByte(0x2030, 0x01); // ($10),Y = $2000 + $30 = $2030
             processor.State.Accumulator = 0x7F;
 
             RunAdcExecutionTest();
@@ -1415,8 +1415,8 @@ namespace NesCoreTest
                 @"ADC $10,X ;ADC to the accumulator the contents of address $0010 + X
                   ADC #$80  ;ADC another $80 to cause carry
                   ADC #$01  ;ADC another $01 for no carry");
-            Assert.IsTrue(Read(0x1000) == 0x75, "ADC/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x75, "ADC/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1434,18 +1434,18 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ROR $10,X ; ROR contents of address $0010 + X");
-            Assert.IsTrue(Read(0x1000) == 0x76, "ROR/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x76, "ROR/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
             processor.State.CarryFlag = false;
-            Write(0x0040, 0x81);
+            WriteByte(0x0040, 0x81);
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0040) == 0x40, "Value $40 expected at address 0x0040");
+            Assert.IsTrue(ReadByte(0x0040) == 0x40, "Value $40 expected at address 0x0040");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
 
@@ -1456,7 +1456,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"SEI ;set interrup disable flag");
-            Assert.IsTrue(Read(0x1000) == 0x78, "SEI instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x78, "SEI instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1474,7 +1474,7 @@ namespace NesCoreTest
                 @"ADC $2000,Y ;ADC to the accumulator the contents of address $2000 + Y
                   ADC #$80    ;ADC another $80 to cause carry
                   ADC #$01    ;ADC another $01 for no carry");
-            Assert.IsTrue(Read(0x1000) == 0x79, "ADC/Aby instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x79, "ADC/Aby instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABY operand $2000 expected");
 
             // execution test
@@ -1495,7 +1495,7 @@ namespace NesCoreTest
                 @"ADC $2000,X ;ADC to the accumulator the contents of address $2000 + X
                   ADC #$80    ;ADC another $80 to cause carry
                   ADC #$01    ;ADC another $01 for no carry");
-            Assert.IsTrue(Read(0x1000) == 0x7D, "ADC/Abx instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x7D, "ADC/Abx instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 expected");
 
             // execution test
@@ -1514,18 +1514,18 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"ROR $2000,X ; ROR contents of address $2000 + X");
-            Assert.IsTrue(Read(0x1000) == 0x7E, "ROR/ABX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x7E, "ROR/ABX instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
             processor.State.CarryFlag = false;
-            Write(0x2030, 0x81);
+            WriteByte(0x2030, 0x81);
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x2030) == 0x40, "Value $40 expected at address 0x2030");
+            Assert.IsTrue(ReadByte(0x2030) == 0x40, "Value $40 expected at address 0x2030");
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set (shifted from bit 0)");
         }
 
@@ -1536,14 +1536,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STA ($10,X) ; Store accumulator value to address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
-            Assert.IsTrue(Read(0x1000) == 0x81, "STA/IZX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x81, "STA/IZX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Indexed indirect $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x80;
             processor.WriteWord(0x0090, 0x2000);
-            Write(0x2000, 0x00);
+            WriteByte(0x2000, 0x00);
             processor.State.Accumulator = 0x01;
 
             processor.ExecuteInstruction();
@@ -1558,8 +1558,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STY $10 ;store contents of register Y in address $0010");
-            Assert.IsTrue(Read(0x1000) == 0x84, "STY/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x84, "STY/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1567,7 +1567,7 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0010) == 0x01, "Value $01 expected in address $0010");
+            Assert.IsTrue(ReadByte(0x0010) == 0x01, "Value $01 expected in address $0010");
         }
 
         [TestMethod]
@@ -1577,8 +1577,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STA $10 ;store contents of A in address $0010");
-            Assert.IsTrue(Read(0x1000) == 0x85, "STA instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x85, "STA instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1586,7 +1586,7 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0010) == 0x01, "Value $01 expected in address $0010");
+            Assert.IsTrue(ReadByte(0x0010) == 0x01, "Value $01 expected in address $0010");
         }
 
         [TestMethod]
@@ -1596,8 +1596,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STX $10 ;store contents of register X in address $0010");
-            Assert.IsTrue(Read(0x1000) == 0x86, "STX/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x86, "STX/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1605,7 +1605,7 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0010) == 0x01, "Value $01 expected in address $0010");
+            Assert.IsTrue(ReadByte(0x0010) == 0x01, "Value $01 expected in address $0010");
         }
         
         [TestMethod]
@@ -1615,7 +1615,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"DEY ;decrement register Y");
-            Assert.IsTrue(Read(0x1000) == 0x88, "DEY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x88, "DEY instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1633,7 +1633,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"TXA ;transfer the contents of X to A");
-            Assert.IsTrue(Read(0x1000) == 0x8A, "TXA instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x8A, "TXA instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1652,7 +1652,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STY $2000 ;store value in register Y to address $2000");
-            Assert.IsTrue(Read(0x1000) == 0x8C, "STY/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x8C, "STY/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abs operand $2000 expected");
 
             // execution test
@@ -1661,7 +1661,7 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x2000) == 0x01, "Value $01 expected in address $2000");
+            Assert.IsTrue(ReadByte(0x2000) == 0x01, "Value $01 expected in address $2000");
         }
 
         [TestMethod]
@@ -1671,7 +1671,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STA $2000 ;store value in A to address $2000");
-            Assert.IsTrue(Read(0x1000) == 0x8D, "STA/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x8D, "STA/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abs operand $2000 expected");
 
             // execution test
@@ -1680,7 +1680,7 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x2000) == 0x01, "Value $01 expected in address $2000");
+            Assert.IsTrue(ReadByte(0x2000) == 0x01, "Value $01 expected in address $2000");
         }
 
         [TestMethod]
@@ -1690,7 +1690,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STX $2000 ;store value in register X to address $2000");
-            Assert.IsTrue(Read(0x1000) == 0x8E, "STX/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x8E, "STX/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abs operand $2000 expected");
 
             // execution test
@@ -1699,7 +1699,7 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x2000) == 0x01, "Value $01 expected in address $2000");
+            Assert.IsTrue(ReadByte(0x2000) == 0x01, "Value $01 expected in address $2000");
         }
 
         [TestMethod]
@@ -1709,8 +1709,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"BCC $40 ; branch if carry clear to relative offset $40 ($1042)");
-            Assert.IsTrue(Read(0x1000) == 0x90, "BCC instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x40, "Relative operand $40 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0x90, "BCC instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x40, "Relative operand $40 expected");
 
             // execution test (carry clear)
             processor.State.ProgramCounter = 0x1000;
@@ -1732,8 +1732,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STA ($10),Y ; Store value of accumulator to zero page offset $10 (absolute $0010), offset by contents of Y register ($30)");
-            Assert.IsTrue(Read(0x1000) == 0x91, "STA/IZY instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x91, "STA/IZY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Indexed indirect $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1743,7 +1743,7 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x2030) == 0x01, "Value $01 expected at address $2030");
+            Assert.IsTrue(ReadByte(0x2030) == 0x01, "Value $01 expected at address $2030");
         }
 
         [TestMethod]
@@ -1753,8 +1753,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STY $10,X ;store contents of register Y in address $0010 + X");
-            Assert.IsTrue(Read(0x1000) == 0x94, "STY/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x94, "STY/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1763,7 +1763,7 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0040) == 0x01, "Value $01 expected in address $0040");
+            Assert.IsTrue(ReadByte(0x0040) == 0x01, "Value $01 expected in address $0040");
         }
 
         [TestMethod]
@@ -1773,8 +1773,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STA $10,X ;store contents of A in address $0010 + X");
-            Assert.IsTrue(Read(0x1000) == 0x95, "STA/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x95, "STA/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1783,7 +1783,7 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0040) == 0x01, "Value $01 expected in address $0040");
+            Assert.IsTrue(ReadByte(0x0040) == 0x01, "Value $01 expected in address $0040");
         }
 
         [TestMethod]
@@ -1793,8 +1793,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STX $10,Y ;store contents of register X in address $0010 + Y");
-            Assert.IsTrue(Read(0x1000) == 0x96, "STX/ZPY instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPY operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0x96, "STX/ZPY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPY operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1803,7 +1803,7 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x0040) == 0x01, "Value $01 expected in address $0040");
+            Assert.IsTrue(ReadByte(0x0040) == 0x01, "Value $01 expected in address $0040");
         }
 
         [TestMethod]
@@ -1813,7 +1813,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"TYA ;transfer the contents of Y to A");
-            Assert.IsTrue(Read(0x1000) == 0x98, "TYA instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x98, "TYA instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1832,7 +1832,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STA $2000,Y ;store value in A to address $2000 + Y");
-            Assert.IsTrue(Read(0x1000) == 0x99, "STA/Aby instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x99, "STA/Aby instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Aby operand $2000 expected");
 
             // execution test
@@ -1842,7 +1842,7 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x2030) == 0x01, "Value $01 expected in address $2000");
+            Assert.IsTrue(ReadByte(0x2030) == 0x01, "Value $01 expected in address $2000");
         }
 
         [TestMethod]
@@ -1852,7 +1852,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"TXS ;transfer the contents of X to the stack pointer");
-            Assert.IsTrue(Read(0x1000) == 0x9A, "TXS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x9A, "TXS instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1871,7 +1871,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"STA $2000,X ;store value in A to address $2000 + X");
-            Assert.IsTrue(Read(0x1000) == 0x9D, "STA/Abx instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0x9D, "STA/Abx instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abx operand $2000 expected");
 
             // execution test
@@ -1881,7 +1881,7 @@ namespace NesCoreTest
 
             processor.ExecuteInstruction();
 
-            Assert.IsTrue(Read(0x2030) == 0x01, "Value $01 expected in address $2000");
+            Assert.IsTrue(ReadByte(0x2030) == 0x01, "Value $01 expected in address $2000");
         }
 
         [TestMethod]
@@ -1891,8 +1891,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDY #$01 ;load value $01 in register Y");
-            Assert.IsTrue(Read(0x1000) == 0xA0, "LDY/Imm instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x01, "Imm operand $01 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xA0, "LDY/Imm instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x01, "Imm operand $01 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1910,14 +1910,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDA ($10,X) ;load into the accumulator the contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
-            Assert.IsTrue(Read(0x1000) == 0xA1, "LDA/IZX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xA1, "LDA/IZX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Indexed indirect $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x80;
             processor.WriteWord(0x0090, 0x2000);
-            Write(0x2000, 0x01);
+            WriteByte(0x2000, 0x01);
             processor.State.Accumulator = 0x00;
 
             processor.ExecuteInstruction();
@@ -1932,8 +1932,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDX #$01 ;load value $01 in register X");
-            Assert.IsTrue(Read(0x1000) == 0xA2, "LDX/Imm instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x01, "Imm operand $01 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xA2, "LDX/Imm instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x01, "Imm operand $01 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -1951,12 +1951,12 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDY $10 ; Load into register Y the contents of address $0010");
-            Assert.IsTrue(Read(0x1000) == 0xA4, "LDY/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xA4, "LDY/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
-            Write(0x0010, 0x01);
+            WriteByte(0x0010, 0x01);
             processor.State.RegisterY = 0x00;
 
             processor.ExecuteInstruction();
@@ -1971,12 +1971,12 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDA $10 ; Load into accumulator the contents of address $0010");
-            Assert.IsTrue(Read(0x1000) == 0xA5, "LDA/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xA5, "LDA/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
-            Write(0x0010, 0x01);
+            WriteByte(0x0010, 0x01);
             processor.State.Accumulator = 0x00;
 
             processor.ExecuteInstruction();
@@ -1991,12 +1991,12 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDX $10 ; Load into register X the contents of address $0010");
-            Assert.IsTrue(Read(0x1000) == 0xA6, "LDX/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xA6, "LDX/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
-            Write(0x0010, 0x01);
+            WriteByte(0x0010, 0x01);
             processor.State.RegisterX = 0x00;
 
             processor.ExecuteInstruction();
@@ -2011,7 +2011,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"TAY ;transfer the contents of A to Y");
-            Assert.IsTrue(Read(0x1000) == 0xA8, "TAY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xA8, "TAY instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -2030,8 +2030,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDA #$01 ;load value $01 in accumulator");
-            Assert.IsTrue(Read(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x01, "Imm operand $01 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x01, "Imm operand $01 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -2049,7 +2049,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"TAX ;transfer the contents of A to X");
-            Assert.IsTrue(Read(0x1000) == 0xAA, "TAX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xAA, "TAX instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -2068,7 +2068,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDY $2000; Load into Y the contents at address $2000");
-            Assert.IsTrue(Read(0x1000) == 0xAC, "LDY/ABS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xAC, "LDY/ABS instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abs operand $2000 expected");
 
             // execution test
@@ -2088,7 +2088,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDA $2000; Load into A the contents at address $2000");
-            Assert.IsTrue(Read(0x1000) == 0xAD, "LDA/ABS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xAD, "LDA/ABS instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abs operand $2000 expected");
 
             // execution test
@@ -2108,7 +2108,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDX $2000; Load into X the contents at address $2000");
-            Assert.IsTrue(Read(0x1000) == 0xAE, "LDX/ABS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xAE, "LDX/ABS instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abs operand $2000 expected");
 
             // execution test
@@ -2128,8 +2128,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"BCS $40 ; branch if carry set to relative offset $40 ($1042)");
-            Assert.IsTrue(Read(0x1000) == 0xB0, "BCS instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x40, "Relative operand $40 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xB0, "BCS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x40, "Relative operand $40 expected");
 
             // execution test (carry set)
             processor.State.ProgramCounter = 0x1000;
@@ -2151,14 +2151,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDA ($10),Y ; Load into accumulator the value at zero page offset $10 (absolute $0010), offset by contents of Y register ($30)");
-            Assert.IsTrue(Read(0x1000) == 0xB1, "LDA/IZY instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Indexed indirect $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xB1, "LDA/IZY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Indexed indirect $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x30;  // Y = $30
             processor.WriteWord(0x0010, 0x2000); // ($10) = ($0010) = $2000
-            Write(0x2030, 0x01);
+            WriteByte(0x2030, 0x01);
             processor.State.Accumulator = 0x00;
 
             processor.ExecuteInstruction();
@@ -2173,13 +2173,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDY $10,X ; Load into register Y the contents of address $0010 + X");
-            Assert.IsTrue(Read(0x1000) == 0xB4, "LDY/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xB4, "LDY/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x0040, 0x01);
+            WriteByte(0x0040, 0x01);
             processor.State.RegisterY = 0x00;
 
             processor.ExecuteInstruction();
@@ -2194,13 +2194,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDA $10,X ; Load into accumulator the contents of address $0010 + X");
-            Assert.IsTrue(Read(0x1000) == 0xB5, "LDA/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xB5, "LDA/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x0040, 0x01);
+            WriteByte(0x0040, 0x01);
             processor.State.Accumulator = 0x00;
 
             processor.ExecuteInstruction();
@@ -2215,13 +2215,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDX $10,Y ; Load into register X the contents of address $0010 + Y");
-            Assert.IsTrue(Read(0x1000) == 0xB6, "LDX/ZPY instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPY operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xB6, "LDX/ZPY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPY operand $10 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x30;
-            Write(0x0040, 0x01);
+            WriteByte(0x0040, 0x01);
             processor.State.RegisterX = 0x00;
 
             processor.ExecuteInstruction();
@@ -2236,7 +2236,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CLV ;clear overflow flag");
-            Assert.IsTrue(Read(0x1000) == 0xB8, "CLV instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xB8, "CLV instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -2254,13 +2254,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDA $2000,Y ; Load into accumulator the contents of address $2000 + Y");
-            Assert.IsTrue(Read(0x1000) == 0xB9, "LDA/ABY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xB9, "LDA/ABY instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABY operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x30;
-            Write(0x2030, 0x01);
+            WriteByte(0x2030, 0x01);
             processor.State.Accumulator = 0x00;
 
             processor.ExecuteInstruction();
@@ -2275,7 +2275,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"TSX ;transfer the contents of SP to X");
-            Assert.IsTrue(Read(0x1000) == 0xBA, "TSX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xBA, "TSX instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -2294,13 +2294,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDY $2000,X ; Load into register Y the contents of address $2000 + X");
-            Assert.IsTrue(Read(0x1000) == 0xBC, "LDY/ABX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xBC, "LDY/ABX instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x2030, 0x01);
+            WriteByte(0x2030, 0x01);
             processor.State.RegisterY = 0x00;
 
             processor.ExecuteInstruction();
@@ -2315,13 +2315,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDA $2000,X ; Load into accumulator the contents of address $2000 + X");
-            Assert.IsTrue(Read(0x1000) == 0xBD, "LDA/ABX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xBD, "LDA/ABX instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x30;
-            Write(0x2030, 0x01);
+            WriteByte(0x2030, 0x01);
             processor.State.Accumulator = 0x00;
 
             processor.ExecuteInstruction();
@@ -2336,13 +2336,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"LDX $2000,Y ; Load into register X the contents of address $2000 + Y");
-            Assert.IsTrue(Read(0x1000) == 0xBE, "LDX/ABY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xBE, "LDX/ABY instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABY operand $2000 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x30;
-            Write(0x2030, 0x01);
+            WriteByte(0x2030, 0x01);
             processor.State.RegisterX = 0x00;
 
             processor.ExecuteInstruction();
@@ -2357,8 +2357,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CPY #$10 ;compare register Y with value $10");
-            Assert.IsTrue(Read(0x1000) == 0xC0, "CPY/IMM instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Imm operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xC0, "CPY/IMM instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Imm operand $10 expected");
 
             // execution test (equal)
             processor.State.RegisterY = 0x10;
@@ -2380,13 +2380,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CMP ($10,X) ;compare accumulator with contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)");
-            Assert.IsTrue(Read(0x1000) == 0xC1, "CMP/IZX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Izx 0x10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xC1, "CMP/IZX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Izx 0x10 not written");
 
             // execution test
             processor.State.RegisterX = 0x80;
             processor.WriteWord(0x0090, 0x2000);
-            Write(0x2000, 0x10);
+            WriteByte(0x2000, 0x10);
 
             // execution test (equal)
             processor.State.Accumulator = 0x10;
@@ -2408,10 +2408,10 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CPY $10 ;compare register Y with value at address $0010");
-            Assert.IsTrue(Read(0x1000) == 0xC4, "CPY/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xC4, "CPY/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 expected");
 
-            Write(0x0010, 0x10);
+            WriteByte(0x0010, 0x10);
 
             // execution test (equal)
             processor.State.RegisterY = 0x10;
@@ -2433,10 +2433,10 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CMP $10 ;compare accumulator with value at address $0010");
-            Assert.IsTrue(Read(0x1000) == 0xC5, "CMP/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xC5, "CMP/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 expected");
 
-            Write(0x0010, 0x10);
+            WriteByte(0x0010, 0x10);
 
             // execution test (equal)
             processor.State.Accumulator = 0x10;
@@ -2458,13 +2458,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"DEC $10 ;decrement value stored at address $0010");
-            Assert.IsTrue(Read(0x1000) == 0xC6, "DEC/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xC6, "DEC/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 expected");
 
-            Write(0x0010, 0x10);
+            WriteByte(0x0010, 0x10);
             processor.State.ProgramCounter = 0x1000;
             processor.ExecuteInstruction();
-            Assert.IsTrue(Read(0x0010) == 0x0F, "Value in $0010 expected to be $0F");
+            Assert.IsTrue(ReadByte(0x0010) == 0x0F, "Value in $0010 expected to be $0F");
         }
 
         [TestMethod]
@@ -2474,7 +2474,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"INY ;increment register Y");
-            Assert.IsTrue(Read(0x1000) == 0xC8, "INY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xC8, "INY instruction not assembled");
 
             processor.State.RegisterY = 0x10;
             processor.State.ProgramCounter = 0x1000;
@@ -2489,8 +2489,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CMP #$10 ;compare accumulator with value $10");
-            Assert.IsTrue(Read(0x1000) == 0xC9, "CMP/IMM instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Imm operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xC9, "CMP/IMM instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Imm operand $10 expected");
 
             // execution test (equal)
             processor.State.Accumulator = 0x10;
@@ -2512,7 +2512,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"DEX ;decrement register X");
-            Assert.IsTrue(Read(0x1000) == 0xCA, "DEX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xCA, "DEX instruction not assembled");
 
             processor.State.RegisterX = 0x10;
             processor.State.ProgramCounter = 0x1000;
@@ -2527,10 +2527,10 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CPY $2000 ;compare register Y with value at address $2000");
-            Assert.IsTrue(Read(0x1000) == 0xCC, "CPY/ABS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xCC, "CPY/ABS instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABS operand $2000 expected");
 
-            Write(0x2000, 0x10);
+            WriteByte(0x2000, 0x10);
 
             // execution test (equal)
             processor.State.RegisterY = 0x10;
@@ -2552,10 +2552,10 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CMP $2000 ;compare accumulator with value at address $2000");
-            Assert.IsTrue(Read(0x1000) == 0xCD, "CMP/ABS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xCD, "CMP/ABS instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABS operand $2000 expected");
 
-            Write(0x2000, 0x10);
+            WriteByte(0x2000, 0x10);
 
             // execution test (equal)
             processor.State.Accumulator = 0x10;
@@ -2577,13 +2577,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"DEC $2000 ;decrement value stored at address $2000");
-            Assert.IsTrue(Read(0x1000) == 0xCE, "DEC/ABS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xCE, "DEC/ABS instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABS operand $2000 expected");
 
-            Write(0x2000, 0x10);
+            WriteByte(0x2000, 0x10);
             processor.State.ProgramCounter = 0x1000;
             processor.ExecuteInstruction();
-            Assert.IsTrue(Read(0x2000) == 0x0F, "Value in $2000 expected to be $0F");
+            Assert.IsTrue(ReadByte(0x2000) == 0x0F, "Value in $2000 expected to be $0F");
         }
 
         [TestMethod]
@@ -2593,8 +2593,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"BNE $40 ; branch if not equal to relative offset $40 ($1042)");
-            Assert.IsTrue(Read(0x1000) == 0xD0, "BNE instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x40, "Relative operand $40 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xD0, "BNE instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x40, "Relative operand $40 expected");
 
             // execution test (not equal: zero flag clear - do branch)
             processor.State.ProgramCounter = 0x1000;
@@ -2616,12 +2616,12 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CMP ($10),Y ; Compare accumulator with contents of zero page offset $10 (absolute $0010), offset by contents of Y register ($30)");
-            Assert.IsTrue(Read(0x1000) == 0xD1, "CMP/IZY instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "IZY operand $10 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xD1, "CMP/IZY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "IZY operand $10 not written");
 
             processor.State.RegisterY = 0x30;  // Y = $30
             processor.WriteWord(0x0010, 0x2000); // ($10) = ($0010) = $2000
-            Write(0x2030, 0x10); // ($10),Y = $2000 + $30 = $2030
+            WriteByte(0x2030, 0x10); // ($10),Y = $2000 + $30 = $2030
 
             // execution test (equal)
             processor.State.Accumulator = 0x10;
@@ -2643,11 +2643,11 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CMP $10,X ;compare accumulator with value at address $0010 + X");
-            Assert.IsTrue(Read(0x1000) == 0xD5, "CMP/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xD5, "CMP/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand $10 expected");
 
             processor.State.RegisterX = 0x30;
-            Write(0x0040, 0x10);
+            WriteByte(0x0040, 0x10);
 
             // execution test (equal)
             processor.State.Accumulator = 0x10;
@@ -2669,14 +2669,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"DEC $10,X ;decrement value stored at address $0010 + X");
-            Assert.IsTrue(Read(0x1000) == 0xD6, "DEC/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xD6, "DEC/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand $10 expected");
 
             processor.State.RegisterX = 0x30;
-            Write(0x0040, 0x10);
+            WriteByte(0x0040, 0x10);
             processor.State.ProgramCounter = 0x1000;
             processor.ExecuteInstruction();
-            Assert.IsTrue(Read(0x0040) == 0x0F, "Value in $0040 expected to be $0F");
+            Assert.IsTrue(ReadByte(0x0040) == 0x0F, "Value in $0040 expected to be $0F");
         }
 
         [TestMethod]
@@ -2686,7 +2686,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CLD ;clear decimal mode flag");
-            Assert.IsTrue(Read(0x1000) == 0xD8, "CLD instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xD8, "CLD instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -2704,11 +2704,11 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CMP $2000,Y ;compare accumulator with value at address $2000 + Y");
-            Assert.IsTrue(Read(0x1000) == 0xD9, "CMP/ABY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xD9, "CMP/ABY instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABY operand $2000 expected");
 
             processor.State.RegisterY = 0x30;
-            Write(0x2030, 0x10);
+            WriteByte(0x2030, 0x10);
 
             // execution test (equal)
             processor.State.Accumulator = 0x10;
@@ -2730,11 +2730,11 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CMP $2000,X ;compare accumulator with value at address $2000 + X");
-            Assert.IsTrue(Read(0x1000) == 0xDD, "CMP/ABX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xDD, "CMP/ABX instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 expected");
 
             processor.State.RegisterX = 0x30;
-            Write(0x2030, 0x10);
+            WriteByte(0x2030, 0x10);
 
             // execution test (equal)
             processor.State.Accumulator = 0x10;
@@ -2756,14 +2756,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"DEC $2000,X ;decrement value stored at address $2000 + X");
-            Assert.IsTrue(Read(0x1000) == 0xDE, "DEC/ABX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xDE, "DEC/ABX instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 expected");
 
             processor.State.RegisterX = 0x30;
-            Write(0x2030, 0x10);
+            WriteByte(0x2030, 0x10);
             processor.State.ProgramCounter = 0x1000;
             processor.ExecuteInstruction();
-            Assert.IsTrue(Read(0x2030) == 0x0F, "Value in $2030 expected to be $0F");
+            Assert.IsTrue(ReadByte(0x2030) == 0x0F, "Value in $2030 expected to be $0F");
         }
 
         [TestMethod]
@@ -2773,8 +2773,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CPX #$10 ;compare register X with value $10");
-            Assert.IsTrue(Read(0x1000) == 0xE0, "CPX/IMM instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "Imm operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xE0, "CPX/IMM instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "Imm operand $10 expected");
 
             // execution test (equal)
             processor.State.RegisterX = 0x10;
@@ -2798,14 +2798,14 @@ namespace NesCoreTest
                 @"SBC ($10,X) ;SBC from the accumulator the contents of address $2000 contained at address [$90, $91] computed by $10 offset from X ($80)
                   SBC #$80    ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
                   SBC #$FE    ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
-            Assert.IsTrue(Read(0x1000) == 0xE1, "SBC/IZX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "IZX operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xE1, "SBC/IZX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "IZX operand $10 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterX = 0x80;
             processor.WriteWord(0x0090, 0x2000);
-            Write(0x2000, 0x01);
+            WriteByte(0x2000, 0x01);
             processor.State.Accumulator = 0x01;
 
             RunSbcExecutionTest();
@@ -2818,10 +2818,10 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CPX $10 ;compare register X with value at address $0010");
-            Assert.IsTrue(Read(0x1000) == 0xE4, "CPX/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xE4, "CPX/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 expected");
 
-            Write(0x0010, 0x10);
+            WriteByte(0x0010, 0x10);
 
             // execution test (equal)
             processor.State.RegisterX = 0x10;
@@ -2845,8 +2845,8 @@ namespace NesCoreTest
                 @"SBC $10  ;SBC from the accumulator the value at address $0010 (and borrow - Carry clear)
                   SBC #$80 ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
                   SBC #$FE ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
-            Assert.IsTrue(Read(0x1000) == 0xE5, "SBC/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xE5, "SBC/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -2863,13 +2863,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"INC $10 ;Increment value stored at address $0010");
-            Assert.IsTrue(Read(0x1000) == 0xE6, "INC/ZP instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZP operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xE6, "INC/ZP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZP operand $10 expected");
 
-            Write(0x0010, 0x10);
+            WriteByte(0x0010, 0x10);
             processor.State.ProgramCounter = 0x1000;
             processor.ExecuteInstruction();
-            Assert.IsTrue(Read(0x0010) == 0x11, "Value in $0010 expected to be $11");
+            Assert.IsTrue(ReadByte(0x0010) == 0x11, "Value in $0010 expected to be $11");
         }
 
         [TestMethod]
@@ -2879,7 +2879,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"INX ;increment register X");
-            Assert.IsTrue(Read(0x1000) == 0xE8, "INX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xE8, "INX instruction not assembled");
 
             processor.State.RegisterX = 0x10;
             processor.State.ProgramCounter = 0x1000;
@@ -2896,8 +2896,8 @@ namespace NesCoreTest
                 @"SBC #$01 ;SBC from the accumulator the value $01 (and borrow - Carry clear)
                   SBC #$80 ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
                   SBC #$FE ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
-            Assert.IsTrue(Read(0x1000) == 0xE9, "SBC/Imm instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x01, "Imm operand $01 not written");
+            Assert.IsTrue(ReadByte(0x1000) == 0xE9, "SBC/Imm instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x01, "Imm operand $01 not written");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -2913,7 +2913,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"NOP ;no operation");
-            Assert.IsTrue(Read(0x1000) == 0xEA, "NOP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xEA, "NOP instruction not assembled");
 
             byte flags = processor.State.Flags;
             byte accumulator = processor.State.Accumulator;
@@ -2934,10 +2934,10 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"CPX $2000 ;compare register X with value at address $2000");
-            Assert.IsTrue(Read(0x1000) == 0xEC, "CPX/ABS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xEC, "CPX/ABS instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABS operand $2000 expected");
 
-            Write(0x2000, 0x10);
+            WriteByte(0x2000, 0x10);
 
             // execution test (equal)
             processor.State.RegisterX = 0x10;
@@ -2961,7 +2961,7 @@ namespace NesCoreTest
                 @"SBC $2000 ;SBC from the accumulator the value at address $2000 (and borrow - Carry clear)
                   SBC #$80  ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
                   SBC #$FE  ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
-            Assert.IsTrue(Read(0x1000) == 0xED, "SBC/Abs instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xED, "SBC/Abs instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abs operand $2000 not written");
 
             // execution test
@@ -2979,13 +2979,13 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"INC $2000 ;increment value stored at address $2000");
-            Assert.IsTrue(Read(0x1000) == 0xEE, "INC/ABS instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xEE, "INC/ABS instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABS operand $2000 expected");
 
-            Write(0x2000, 0x10);
+            WriteByte(0x2000, 0x10);
             processor.State.ProgramCounter = 0x1000;
             processor.ExecuteInstruction();
-            Assert.IsTrue(Read(0x2000) == 0x11, "Value in $2000 expected to be $11");
+            Assert.IsTrue(ReadByte(0x2000) == 0x11, "Value in $2000 expected to be $11");
         }
 
         [TestMethod]
@@ -2995,8 +2995,8 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"BEQ $40 ; branch if equal to relative offset $40 ($1042)");
-            Assert.IsTrue(Read(0x1000) == 0xF0, "BEQ instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x40, "Relative operand $40 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xF0, "BEQ instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x40, "Relative operand $40 expected");
 
             // execution test (equal: zero flag set - do branch)
             processor.State.ProgramCounter = 0x1000;
@@ -3020,14 +3020,14 @@ namespace NesCoreTest
                 @"SBC ($10),Y ;SBC from accumulator, the contents of zero page offset $10 (absolute $0010), offset by contents of Y register ($30)
                   SBC #$80    ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
                   SBC #$FE    ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
-            Assert.IsTrue(Read(0x1000) == 0xF1, "SBC/IZY instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "IZY operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xF1, "SBC/IZY instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "IZY operand $10 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
             processor.State.RegisterY = 0x30;  // Y = $30
             processor.WriteWord(0x0010, 0x2000); // ($10) = ($0010) = $2000
-            Write(0x2030, 0x01); // ($10),Y = $2000 + $30 = $2030
+            WriteByte(0x2030, 0x01); // ($10),Y = $2000 + $30 = $2030
             processor.State.Accumulator = 0x01;
 
             RunSbcExecutionTest();
@@ -3042,8 +3042,8 @@ namespace NesCoreTest
                 @"SBC $10,X ;SBC from the accumulator the value at address $0010+X (and borrow - Carry clear)
                   SBC #$80  ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
                   SBC #$FE  ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
-            Assert.IsTrue(Read(0x1000) == 0xF5, "SBC/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xF5, "SBC/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand $10 expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -3061,14 +3061,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"INC $10,X ;Increment value stored at address $0010 + X");
-            Assert.IsTrue(Read(0x1000) == 0xF6, "INC/ZPX instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x10, "ZPX operand $10 expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xF6, "INC/ZPX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x10, "ZPX operand $10 expected");
 
             processor.State.RegisterX = 0x30;
-            Write(0x0040, 0x10);
+            WriteByte(0x0040, 0x10);
             processor.State.ProgramCounter = 0x1000;
             processor.ExecuteInstruction();
-            Assert.IsTrue(Read(0x0040) == 0x11, "Value in $0040 expected to be $11");
+            Assert.IsTrue(ReadByte(0x0040) == 0x11, "Value in $0040 expected to be $11");
         }
 
         [TestMethod]
@@ -3078,7 +3078,7 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"SED ;set decimal mode flag");
-            Assert.IsTrue(Read(0x1000) == 0xF8, "SED instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xF8, "SED instruction not assembled");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -3096,7 +3096,7 @@ namespace NesCoreTest
                 @"SBC $2000,Y ;SBC from the accumulator the value at address $2000+Y (and borrow - Carry clear)
                   SBC #$80    ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
                   SBC #$FE    ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
-            Assert.IsTrue(Read(0x1000) == 0xF9, "SBC/Aby instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xF9, "SBC/Aby instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Aby operand $2000 not written");
 
             // execution test
@@ -3117,7 +3117,7 @@ namespace NesCoreTest
                 @"SBC $2000,X ;SBC from the accumulator the value at address $2000+X (and borrow - Carry clear)
                   SBC #$80    ;SBC another $80 to cause carry ($FF - $80 = $7E <-> -1 - (-127) = 126)
                   SBC #$FE    ;SBC another $FE for no carry ($7E - $FE = $80 <-> 126 - (-2) = 128) - overflow");
-            Assert.IsTrue(Read(0x1000) == 0xFD, "SBC/Abx instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xFD, "SBC/Abx instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "Abx operand $2000 not written");
 
             // execution test
@@ -3136,14 +3136,14 @@ namespace NesCoreTest
             ResetSystem();
             assembler.GenerateProgram(0x1000,
                 @"INC $2000,X ;increment value stored at address $2000 + X");
-            Assert.IsTrue(Read(0x1000) == 0xFE, "DEC/ABX instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1000) == 0xFE, "DEC/ABX instruction not assembled");
             Assert.IsTrue(processor.ReadWord(0x1001) == 0x2000, "ABX operand $2000 expected");
 
             processor.State.RegisterX = 0x30;
-            Write(0x2030, 0x10);
+            WriteByte(0x2030, 0x10);
             processor.State.ProgramCounter = 0x1000;
             processor.ExecuteInstruction();
-            Assert.IsTrue(Read(0x2030) == 0x11, "Value in $2030 expected to be $11");
+            Assert.IsTrue(ReadByte(0x2030) == 0x11, "Value in $2030 expected to be $11");
         }
 
 
@@ -3180,15 +3180,15 @@ namespace NesCoreTest
                   Middle:
                     LDX #$02    ;load X wit $02 (positive)
                     BPL Start   ;branch to start if positive");
-            Assert.IsTrue(Read(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
-            Assert.IsTrue(Read(0x1001) == 0x01, "immediate operand $01 expected");
-            Assert.IsTrue(Read(0x1002) == 0x10, "BPL instruction not assembled");
-            Assert.IsTrue(Read(0x1003) == 0x01, "Computed relative branch offset $01 expected (to skip NOP)");
-            Assert.IsTrue(Read(0x1004) == 0xEA, "NOP instruction not assembled");
-            Assert.IsTrue(Read(0x1005) == 0xA2, "LDX/Imm instruction not assembled");
-            Assert.IsTrue(Read(0x1006) == 0x02, "immediate operand $02 expected");
-            Assert.IsTrue(Read(0x1007) == 0x10, "BPL instruction not assembled");
-            Assert.IsTrue(Read(0x1008) == 0xF7, "Computed relative byte offset $F7 (-9) expected");
+            Assert.IsTrue(ReadByte(0x1000) == 0xA9, "LDA/Imm instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1001) == 0x01, "immediate operand $01 expected");
+            Assert.IsTrue(ReadByte(0x1002) == 0x10, "BPL instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1003) == 0x01, "Computed relative branch offset $01 expected (to skip NOP)");
+            Assert.IsTrue(ReadByte(0x1004) == 0xEA, "NOP instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1005) == 0xA2, "LDX/Imm instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1006) == 0x02, "immediate operand $02 expected");
+            Assert.IsTrue(ReadByte(0x1007) == 0x10, "BPL instruction not assembled");
+            Assert.IsTrue(ReadByte(0x1008) == 0xF7, "Computed relative byte offset $F7 (-9) expected");
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
@@ -3316,12 +3316,12 @@ namespace NesCoreTest
             Assert.IsTrue(processor.State.CarryFlag, "Carry flag expected to be set");
         }
 
-        private byte Read(ushort address)
+        private byte ReadByte(ushort address)
         {
             return memory[address];
         }
 
-        private void Write(ushort address, byte value)
+        private void WriteByte(ushort address, byte value)
         {
             memory[address] = value;
         }

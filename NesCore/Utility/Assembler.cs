@@ -83,8 +83,6 @@ namespace NesCore.Utility
             if (Processor.InstructionSet.GetInstructionVariants(opName) == null)
                 throw new AssemblerException(sourceLineNumber, sourceLine, "Undefined instruction: " + opName);
 
-            SystemBus systemBus = Processor.SystemBus;
-
             if (tokens.Length == 1)
             {
                 // implied instructions
@@ -93,7 +91,7 @@ namespace NesCore.Utility
                     throw new AssemblerException(sourceLineNumber, sourceLine,
                         "Instruction " + opName + " does not support implied mode");
                 // write implied mode opcode
-                systemBus.Write(WriteAddress++, instruction.Code);
+                Processor.WriteByte(WriteAddress++, instruction.Code);
                 return;
             }
             else
@@ -112,7 +110,7 @@ namespace NesCore.Utility
                         throw new AssemblerException(sourceLineNumber, sourceLine,
                             "Instruction " + opName + " does not support accumulator mode");
                     // accumulator is implied within op code
-                    systemBus.Write(WriteAddress++, instruction.Code);
+                    Processor.WriteByte(WriteAddress++, instruction.Code);
                 }
                 else if (ParseImmediateOperand(operandToken, out byteOperand))
                 {
@@ -123,8 +121,8 @@ namespace NesCore.Utility
                             "Instruction " + opName + " does not support immediate addressing mode");
 
                     // write opcode and immediate operand
-                    systemBus.Write(WriteAddress++, instruction.Code);
-                    systemBus.Write(WriteAddress++, byteOperand);
+                    Processor.WriteByte(WriteAddress++, instruction.Code);
+                    Processor.WriteByte(WriteAddress++, byteOperand);
                 }
                 else if (ParseIndexedIndirectOperand(operandToken, out byteOperand)) // ($NN, X)
                 {
@@ -135,8 +133,8 @@ namespace NesCore.Utility
                             "Instruction " + opName + " does not support indexed indirect addressing mode");
 
                     // write opcode and indirect operand
-                    systemBus.Write(WriteAddress++, instruction.Code);
-                    systemBus.Write(WriteAddress++, byteOperand);
+                    Processor.WriteByte(WriteAddress++, instruction.Code);
+                    Processor.WriteByte(WriteAddress++, byteOperand);
                 }
                 else if (ParseIndirectOperand(operandToken, out wordOperand))
                 {
@@ -147,8 +145,8 @@ namespace NesCore.Utility
                             "Instruction " + opName + " does not support indirect (IZX) addressing mode");
 
                     // write opcode and indirect operand
-                    systemBus.Write(WriteAddress++, instruction.Code);
-                    Processor.Write16(WriteAddress, wordOperand);
+                    Processor.WriteByte(WriteAddress++, instruction.Code);
+                    Processor.WriteWord(WriteAddress, wordOperand);
                     WriteAddress += 2;
                 }
                 else if (ParseIndirectIndexedOperand(operandToken, out byteOperand)) // ($NN), Y
@@ -160,8 +158,8 @@ namespace NesCore.Utility
                             "Instruction " + opName + " does not support indirect indexed (IZY) addressing mode");
 
                     // write opcode and indirect operand
-                    systemBus.Write(WriteAddress++, instruction.Code);
-                    systemBus.Write(WriteAddress++, byteOperand);
+                    Processor.WriteByte(WriteAddress++, instruction.Code);
+                    Processor.WriteByte(WriteAddress++, byteOperand);
                 }
                 else if (ParseByteHexValue(operandToken, out byteOperand))
                 {
@@ -174,8 +172,8 @@ namespace NesCore.Utility
                             "Instruction " + opName + " does not support zero page or relative addressing modes");
 
                     // write opcode and zero page/relative operand
-                    systemBus.Write(WriteAddress++, instruction.Code);
-                    systemBus.Write(WriteAddress++, byteOperand);
+                    Processor.WriteByte(WriteAddress++, instruction.Code);
+                    Processor.WriteByte(WriteAddress++, byteOperand);
                 }
                 else if (ParseAbsoluteXOperand(operandToken, out wordOperand))
                 {
@@ -186,8 +184,8 @@ namespace NesCore.Utility
                             "Instruction " + opName + " does not support absolute X addressing mode");
 
                     // write opcode and absolute x operand
-                    systemBus.Write(WriteAddress++, instruction.Code);
-                    Processor.Write16(WriteAddress, wordOperand);
+                    Processor.WriteByte(WriteAddress++, instruction.Code);
+                    Processor.WriteWord(WriteAddress, wordOperand);
                     WriteAddress += 2;
                 }
                 else if (ParseAbsoluteYOperand(operandToken, out wordOperand))
@@ -199,8 +197,8 @@ namespace NesCore.Utility
                             "Instruction " + opName + " does not support absolute Y addressing mode");
 
                     // write opcode and absolute y operand
-                    systemBus.Write(WriteAddress++, instruction.Code);
-                    Processor.Write16(WriteAddress, wordOperand);
+                    Processor.WriteByte(WriteAddress++, instruction.Code);
+                    Processor.WriteWord(WriteAddress, wordOperand);
                     WriteAddress += 2;
                 }
                 else if (ParseZeroPageXOperand(operandToken, out byteOperand))
@@ -212,8 +210,8 @@ namespace NesCore.Utility
                             "Instruction " + opName + " does not support zero page X addressing mode");
 
                     // write opcode and zero page x operand
-                    systemBus.Write(WriteAddress++, instruction.Code);
-                    systemBus.Write(WriteAddress++, byteOperand);
+                    Processor.WriteByte(WriteAddress++, instruction.Code);
+                    Processor.WriteByte(WriteAddress++, byteOperand);
                 }
                 else if (ParseZeroPageYOperand(operandToken, out byteOperand))
                 {
@@ -224,8 +222,8 @@ namespace NesCore.Utility
                             "Instruction " + opName + " does not support zero page Y addressing mode");
 
                     // write opcode and zero page y operand
-                    systemBus.Write(WriteAddress++, instruction.Code);
-                    systemBus.Write(WriteAddress++, byteOperand);
+                    Processor.WriteByte(WriteAddress++, instruction.Code);
+                    Processor.WriteByte(WriteAddress++, byteOperand);
                 }
                 else if (ParseAbsoluteOperand(operandToken, out wordOperand))
                 {
@@ -236,10 +234,10 @@ namespace NesCore.Utility
                             "Instruction " + opName + " does not support absolute addressing mode");
 
                     // write instruction
-                    systemBus.Write(WriteAddress++, instruction.Code);
+                    Processor.WriteByte(WriteAddress++, instruction.Code);
 
                     // operand is absolute address
-                    Processor.Write16(WriteAddress, wordOperand);
+                    Processor.WriteWord(WriteAddress, wordOperand);
                     WriteAddress += 2;
                 }
                 else if (ParseLabelReference(sourceLineNumber, sourceLine, operandToken, out wordOperand))
@@ -252,9 +250,9 @@ namespace NesCore.Utility
                     if (instruction == null)
                         throw new AssemblerException(sourceLineNumber, sourceLine,
                             "Instruction " + opName + " does not support absolute or relative addressing mode");
-                    
+
                     // write instruction
-                    systemBus.Write(WriteAddress++, instruction.Code);
+                    Processor.WriteByte(WriteAddress++, instruction.Code);
                     if (instruction.AddressingMode == AddressingMode.Absolute)
                         WriteAddress += 2; // leave space for absolute address
                     else
@@ -279,7 +277,7 @@ namespace NesCore.Utility
                     // get opcode to determine if absolute or relative
                     ushort instructionAddress = labelReference.OperandAddress;
                     --instructionAddress;
-                    byte opCode = Processor.SystemBus.Read(instructionAddress);
+                    byte opCode = Processor.ReadByte(instructionAddress);
                     Instruction instruction = Processor.InstructionSet[opCode];
                     bool relative = instruction.AddressingMode == AddressingMode.Relative;
 
@@ -296,12 +294,12 @@ namespace NesCore.Utility
                         byte branchOffset = (byte)addressOffset;
 
                         // write branch offset
-                        Processor.SystemBus.Write(labelReference.OperandAddress, branchOffset);
+                        Processor.WriteByte(labelReference.OperandAddress, branchOffset);
                     }
                     else
                     {
                         // write absolute address
-                        Processor.Write16(labelReference.OperandAddress, resolvedAddress);
+                        Processor.WriteWord(labelReference.OperandAddress, resolvedAddress);
                     }
                 }
             }

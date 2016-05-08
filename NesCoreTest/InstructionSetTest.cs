@@ -11,7 +11,7 @@ namespace NesCoreTest
         [TestMethod]
         public void CheckDefinition()
         {
-            Processor processor = new Processor(null);
+            Processor processor = new Processor();
             byte opCode = 0;
             foreach (Instruction instruction in processor.InstructionSet)
             {

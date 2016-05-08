@@ -12,7 +12,6 @@ namespace NesCore.Processing
         public InstructionSet(Processor processor)
         {
             Processor = processor;
-            SystemBus = processor.SystemBus;
 
             Initialise();
         }
@@ -50,8 +49,6 @@ namespace NesCore.Processing
         {
             get { return instructions[opCode]; }
         }
-
-        private SystemBus SystemBus { get; set; }
 
         private void Initialise()
         {
@@ -119,7 +116,7 @@ namespace NesCore.Processing
             Execute LoadAccumulator = (address) =>
             {
                 State state = Processor.State;
-                state.Accumulator = SystemBus.Read(address);
+                state.Accumulator = Processor.ReadByte(address);
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
 
@@ -127,7 +124,7 @@ namespace NesCore.Processing
             Execute LoadRegisterX = (address) =>
             {
                 State state = Processor.State;
-                state.RegisterX = SystemBus.Read(address);
+                state.RegisterX = Processor.ReadByte(address);
                 SetZeroAndNegativeFlags(state.RegisterX);
             };
 
@@ -135,7 +132,7 @@ namespace NesCore.Processing
             Execute LoadRegisterY = (address) =>
             {
                 State state = Processor.State;
-                state.RegisterY = SystemBus.Read(address);
+                state.RegisterY = Processor.ReadByte(address);
                 SetZeroAndNegativeFlags(state.RegisterY);
             };
 
@@ -144,19 +141,19 @@ namespace NesCore.Processing
             // STA - store accumulator
             Execute StoreAccumulator = (address) =>
             {
-                SystemBus.Write(address, Processor.State.Accumulator);
+                Processor.WriteByte(address, Processor.State.Accumulator);
             };
 
             // STX - store register x
             Execute StoreRegisterX = (address) =>
             {
-                SystemBus.Write(address, Processor.State.RegisterX);
+                Processor.WriteByte(address, Processor.State.RegisterX);
             };
 
             // STY - store register y
             Execute StoreRegisterY = (address) =>
             {
-                SystemBus.Write(address, Processor.State.RegisterY);
+                Processor.WriteByte(address, Processor.State.RegisterY);
             };
 
             // logical instructions 
@@ -165,7 +162,7 @@ namespace NesCore.Processing
             Execute LogicalAnd = (address) =>
             {
                 State state = Processor.State;
-                state.Accumulator &= SystemBus.Read(address);
+                state.Accumulator &= Processor.ReadByte(address);
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
 
@@ -173,7 +170,7 @@ namespace NesCore.Processing
             Execute LogicalInclusiveOr = (address) =>
             {
                 State state = Processor.State;
-                state.Accumulator |= SystemBus.Read(address);
+                state.Accumulator |= Processor.ReadByte(address);
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
 
@@ -181,7 +178,7 @@ namespace NesCore.Processing
             Execute LogicalExclusiveOr = (address) =>
             {
                 State state = Processor.State;
-                state.Accumulator ^= SystemBus.Read(address);
+                state.Accumulator ^= Processor.ReadByte(address);
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
 
@@ -189,7 +186,7 @@ namespace NesCore.Processing
             Execute BitTest = (address) =>
             {
                 State state = Processor.State;
-                byte value = SystemBus.Read(address);
+                byte value = Processor.ReadByte(address);
                 state.OverflowFlag = (value & 0x40) != 0; // bit 6
                 state.NegativeFlag = (value & 0x80) != 0; // bit 7
                 state.ZeroFlag = (value & state.Accumulator) != 0;
@@ -214,13 +211,13 @@ namespace NesCore.Processing
             {
                 State state = Processor.State;
                 // read value from address
-                byte value = SystemBus.Read(address);
+                byte value = Processor.ReadByte(address);
                 // carry if highest bit is 1
                 state.CarryFlag = ((value >> 7) & 1) != 0;
                 // shift left
                 value <<= 1;
                 // write shifted value back to memory
-                SystemBus.Write(address, value);
+                Processor.WriteByte(address, value);
                 // update zero and negative flags
                 SetZeroAndNegativeFlags(value);
             };
@@ -242,12 +239,12 @@ namespace NesCore.Processing
             {
                 State state = Processor.State;
                 bool carryFlag = state.CarryFlag;
-                byte value = SystemBus.Read(address);
+                byte value = Processor.ReadByte(address);
                 state.CarryFlag = (value & 0x80) != 0;
                 value = (byte)(value << 1);
                 if (carryFlag)
                     value |= 1;
-                SystemBus.Write(address, value);
+                Processor.WriteByte(address, value);
                 SetZeroAndNegativeFlags(value);
             };
 
@@ -268,12 +265,12 @@ namespace NesCore.Processing
             {
                 State state = Processor.State;
                 bool carryFlag = state.CarryFlag;
-                byte value = SystemBus.Read(address);
+                byte value = Processor.ReadByte(address);
                 state.CarryFlag = (value & 0x01) != 0;
                 value = (byte)(value >> 1);
                 if (carryFlag)
                     value |= 0x80;
-                SystemBus.Write(address, value);
+                Processor.WriteByte(address, value);
                 SetZeroAndNegativeFlags(value);
           
             };
@@ -291,10 +288,10 @@ namespace NesCore.Processing
             Execute LogicalShiftRightMemory = (address) =>
             {
                 State state = Processor.State;
-                byte value = SystemBus.Read(address);
+                byte value = Processor.ReadByte(address);
                 state.CarryFlag = (value & 0x01) != 0;
                 value >>= 1;
-                SystemBus.Write(address, value);
+                Processor.WriteByte(address, value);
                 SetZeroAndNegativeFlags(value);
             };
 
@@ -303,21 +300,21 @@ namespace NesCore.Processing
             // CMP - compare accumulator
             Execute CompareAccumulator = (address) =>
             {
-                byte value = SystemBus.Read(address);
+                byte value = Processor.ReadByte(address);
                 CompareValues(Processor.State.Accumulator, value);
             };
 
             // CPX - compare x register
             Execute CompareRegisterX = (address) =>
             {
-                byte value = SystemBus.Read(address);
+                byte value = Processor.ReadByte(address);
                 CompareValues(Processor.State.RegisterX, value);
             };
 
             // CPY - compare y register
             Execute CompareRegisterY = (address) =>
             {
-                byte value = SystemBus.Read(address);
+                byte value = Processor.ReadByte(address);
                 CompareValues(Processor.State.RegisterY, value);
             };
 
@@ -418,7 +415,7 @@ namespace NesCore.Processing
             Execute JumpToSubroutine = (address) =>
             {
                 State state = Processor.State;
-                Processor.Push16((ushort)(state.ProgramCounter - 1));
+                Processor.PushWord((ushort)(state.ProgramCounter - 1));
                 state.ProgramCounter = address;
             };
 
@@ -426,7 +423,7 @@ namespace NesCore.Processing
             Execute ReturnFromSubroutine = (address) =>
             {
                 State state = Processor.State;
-                state.ProgramCounter = Processor.Pull16();
+                state.ProgramCounter = Processor.PullWord();
                 ++state.ProgramCounter;
             };
 
@@ -435,26 +432,26 @@ namespace NesCore.Processing
             // PHA - push accumulator
             Execute PushAccumulator = (address) =>
             {
-                Processor.Push(Processor.State.Accumulator);
+                Processor.PushByte(Processor.State.Accumulator);
             };
 
             // PLA - Pull Accumulator
             Execute PullAccumulator = (address) =>
             {
-                Processor.State.Accumulator = Processor.Pull();
+                Processor.State.Accumulator = Processor.PullByte();
             };
 
             // PHP - push processor status
             PushProcessorStatus = (address) =>
             {
-                Processor.Push((byte)(Processor.State.Flags | State.BreakCommandMask));
+                Processor.PushByte((byte)(Processor.State.Flags | State.BreakCommandMask));
             };
 
             // PLP - pull processor status
             Execute PullProcessorStatus = (address) =>
             {
                 State state = Processor.State;
-                state.Flags = Processor.Pull();
+                state.Flags = Processor.PullByte();
                 state.BreakCommandFlag = false; // & 0xEF
                 state.UnusedFlag = true; // | 0x20
             };
@@ -530,18 +527,18 @@ namespace NesCore.Processing
             // INC - increment memory
             Execute IncrementMemory = (address) =>
             {
-                byte value = SystemBus.Read(address);
+                byte value = Processor.ReadByte(address);
                 ++value;
-                SystemBus.Write(address, value);
+                Processor.WriteByte(address, value);
                 SetZeroAndNegativeFlags(value);
             };
 
             // DEC - decrement memory
             Execute DecrementMemory = (address) =>
             {
-                byte value = SystemBus.Read(address);
+                byte value = Processor.ReadByte(address);
                 --value;
-                SystemBus.Write(address, value);
+                Processor.WriteByte(address, value);
                 SetZeroAndNegativeFlags(value);
             };
 
@@ -566,7 +563,7 @@ namespace NesCore.Processing
             {
                 State state = Processor.State;
                 byte oldAccumulatorValue = state.Accumulator;
-                byte operandValue = SystemBus.Read(address);
+                byte operandValue = Processor.ReadByte(address);
                 byte carryValue = state.CarryFlag ? (byte)1 : (byte)0;
                 state.Accumulator = (byte)(oldAccumulatorValue + operandValue + carryValue);
                 SetZeroAndNegativeFlags(state.Accumulator);
@@ -581,7 +578,7 @@ namespace NesCore.Processing
             {
                 State state = Processor.State;
                 byte oldAccumulatorValue = state.Accumulator;
-                byte operandValue = SystemBus.Read(address);
+                byte operandValue = Processor.ReadByte(address);
                 byte carryValue = state.CarryFlag ? (byte)1 : (byte)0;
                 ushort result = (ushort)(oldAccumulatorValue - operandValue - 1 + carryValue);
                 state.Accumulator = (byte)result;
@@ -596,21 +593,21 @@ namespace NesCore.Processing
             // BRK - break (force interrupt)
             Execute Break = (address) =>
             {
-                Processor.Push16(Processor.State.ProgramCounter);
+                Processor.PushWord(Processor.State.ProgramCounter);
                 PushProcessorStatus(address);
                 SetInterruptDisableFlag(address);
-                Processor.State.ProgramCounter = Processor.Read16(Processor.IrqVector);
+                Processor.State.ProgramCounter = Processor.ReadWord(Processor.IrqVector);
             };
 
             // RTI - Return from interrupt
             Execute ReturnFromInterrupt = (address) =>
             {
                 State state = Processor.State;
-                state.Flags = Processor.Pull();
+                state.Flags = Processor.PullByte();
                 state.BreakCommandFlag = false; // & 0xEF
                 state.UnusedFlag = true; // | 0x20
 
-                state.ProgramCounter = Processor.Pull16();
+                state.ProgramCounter = Processor.PullWord();
             };
 
 

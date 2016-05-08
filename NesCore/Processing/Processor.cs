@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace NesCore.Processing
 {
+    // delegate for reading a byte from a givne memory address
+    public delegate byte ReadByte(ushort address);
+
+    // delegate for writing a byte from a givne memory address
+    public delegate void WriteByte(ushort address, byte value);
+
     public class Processor
     {
         public const int Frequency = 1789773;
@@ -16,15 +22,17 @@ namespace NesCore.Processing
         public const ushort IrqVector = 0xFFFE;
 
 
-        public Processor(SystemBus systemBus)
+        public Processor()
         {
-            SystemBus = systemBus;
             State = new State();
             InstructionSet = new InstructionSet(this);
         }
 
-        public SystemBus SystemBus { get; private set; }
         public State State { get; private set; }
+
+        public ReadByte ReadByte { get; set; }
+        public WriteByte WriteByte { get; set; }
+
         public InstructionSet InstructionSet { get; private set; }
 
         // resets the processor state
@@ -48,7 +56,7 @@ namespace NesCore.Processing
             UInt64 consumedCycles = 0;
             while (true)
             {
-                bool breakReached = SystemBus.Read(State.ProgramCounter) == 0x00;
+                bool breakReached = ReadByte(State.ProgramCounter) == 0x00;
                 consumedCycles += ExecuteInstruction();
                 if (breakReached)
                     break;
@@ -79,7 +87,7 @@ namespace NesCore.Processing
             UInt64 cycles = State.Cycles;
 
             // read next op code
-            byte opCode = SystemBus.Read(State.ProgramCounter);
+            byte opCode = ReadByte(State.ProgramCounter);
 
             // get corresponding instruction
             Instruction instruction = InstructionSet[opCode];
@@ -106,44 +114,60 @@ namespace NesCore.Processing
             UInt64 consumedCycles = State.Cycles - cycles;
             return consumedCycles;
         }
-        
+
+
+        // reads 16-bit value from the system bus in little-endian order
+        public ushort ReadWord(ushort address)
+        {
+            byte valueLoByte = ReadByte(address++);
+            byte valueHiByte = ReadByte(address);
+            return (ushort)(valueHiByte << 8 | valueLoByte);
+        }
+
+        // write 16-bit value to the system bus in little-endian order
+        public void WriteWord(ushort address, ushort value)
+        {
+            WriteByte(address++, (byte)(value & 0xFF));
+            WriteByte(address, (byte)(value >> 8));
+        }
+
         // push byte onto stack
-        public void Push(byte value)
+        public void PushByte(byte value)
         {
             // stack is located in address range 0x100 to 0x1FF and initially set to 0x1FF
-            SystemBus.Write((ushort)(0x100 | State.StackPointer), value);
+            WriteByte((ushort)(0x100 | State.StackPointer), value);
             State.StackPointer--;
         }
 
         // push word onto stack
-        public void Push16(ushort value)
+        public void PushWord(ushort value)
         {
             // push hi, then lo
-            Push((byte)(value >> 8));
-            Push((byte)(value & 0xFF));
+            PushByte((byte)(value >> 8));
+            PushByte((byte)(value & 0xFF));
         }
 
         // pull byte from stack
-        public byte Pull()
+        public byte PullByte()
         {
             State.StackPointer++;
-            return SystemBus.Read((ushort)(0x100 | State.StackPointer));
+            return ReadByte((ushort)(0x100 | State.StackPointer));
         }
 
         // pull word from stack
-        public ushort Pull16()
+        public ushort PullWord()
         {
             // pull lo, then hi, then combine into word
-            byte lo = Pull();
-            byte hi = Pull();
+            byte lo = PullByte();
+            byte hi = PullByte();
             return (ushort)((hi << 8) | lo);
         }
 
         public void HandleInterrupt(ushort interruptVector)
         {
-            Push16(State.ProgramCounter);
+            PushWord(State.ProgramCounter);
             InstructionSet.PushProcessorStatus(0x0000);
-            State.ProgramCounter = Read16(interruptVector);
+            State.ProgramCounter = ReadWord(interruptVector);
             State.InterruptDisableFlag = true;
             State.Cycles += 7;
         }
@@ -163,16 +187,16 @@ namespace NesCore.Processing
                     break;
                 case AddressingMode.Absolute:
                     // absolute address is the word located at immediate address
-                    address = Read16(immediateAddress);
+                    address = ReadWord(immediateAddress);
                     break;
                 case AddressingMode.AbsoluteX:
                     // absolute x address is the absolute address offset by the X register
-                    address = (ushort)(Read16(immediateAddress) + State.RegisterX);
+                    address = (ushort)(ReadWord(immediateAddress) + State.RegisterX);
                     pageCrossed = PagesDiffer((ushort)(address - State.RegisterX), address);
                     break;
                 case AddressingMode.AbsoluteY:
                     // absolute y address is the absolute address offset by the Y register
-                    address = (ushort)(Read16(immediateAddress) + State.RegisterY);
+                    address = (ushort)(ReadWord(immediateAddress) + State.RegisterY);
                     pageCrossed = PagesDiffer((ushort)(address - State.RegisterY), address);
                     break;
                 case AddressingMode.Immediate:
@@ -181,35 +205,35 @@ namespace NesCore.Processing
                     break;
                 case AddressingMode.IndexedIndirect:
                     // indexed indirect is address located at the x register, offset by the byte immediately following the op code
-                    address = Read16Bug((ushort)(SystemBus.Read(immediateAddress) + State.RegisterX));
+                    address = Read16Bug((ushort)(ReadByte(immediateAddress) + State.RegisterX));
                     break;
                 case AddressingMode.Indirect:
                     // indirect address is the address located at the absolute address (with 6502 addressing bug)
-                    address = Read16Bug(Read16(immediateAddress));
+                    address = Read16Bug(ReadWord(immediateAddress));
                     break;
                 case AddressingMode.IndirectIndexed:
                     // indirect indexed address is the address located at the byte address immediately after the op code, then offset by the Y register
-                    address = (ushort)(Read16Bug((SystemBus.Read(immediateAddress))) + State.RegisterY);
+                    address = (ushort)(Read16Bug((ReadByte(immediateAddress))) + State.RegisterY);
                     pageCrossed = PagesDiffer((ushort)(address - State.RegisterY), address);
                     break;
                 case AddressingMode.Relative:
                     // address is relative signed byte offset following op code, applied at the end of the instruction
-                    byte offset = SystemBus.Read(immediateAddress);
+                    byte offset = ReadByte(immediateAddress);
                     address = (ushort)(State.ProgramCounter + 2 + offset);
                     if (offset >= 0x80)
                         address -= 0x100;
                     break;
                 case AddressingMode.ZeroPage:
                     // address is absolute byte address within 0th page
-                    address = SystemBus.Read(immediateAddress);
+                    address = ReadByte(immediateAddress);
                     break;
                 case AddressingMode.ZeroPageX:
                     // address is absolute byte address within 0th page, offset by x register
-                    address = (ushort)(SystemBus.Read(immediateAddress) + State.RegisterX);
+                    address = (ushort)(ReadByte(immediateAddress) + State.RegisterX);
                     break;
                 case AddressingMode.ZeroPageY:
                     // address is absolute byte address within 0th page, offset by y register
-                    address = (ushort)(SystemBus.Read(immediateAddress) + State.RegisterY);
+                    address = (ushort)(ReadByte(immediateAddress) + State.RegisterY);
                     break;
             }
 
@@ -222,33 +246,6 @@ namespace NesCore.Processing
             return (addressOne & 0xFF00) != (addressTwo & 0xFF00);
         }
 
-        // reads byte value from the system bus
-        public byte Read(ushort address)
-        {
-            return SystemBus.Read(address);
-        }
-
-        // writes byte value to the system bus
-        public byte Write(ushort address, byte value)
-        {
-            return SystemBus.Read(address);
-        }
-
-        // reads 16-bit value from the system bus in little-endian order
-        public ushort Read16(ushort address)
-        {
-            byte valueLoByte = SystemBus.Read(address++);
-            byte valueHiByte = SystemBus.Read(address);
-            return (ushort)(valueHiByte << 8 | valueLoByte);
-        }
-
-        // write 16-bit value to the system bus in little-endian order
-        public void Write16(ushort address, ushort value)
-        {
-            SystemBus.Write(address++, (byte)(value & 0xFF));
-            SystemBus.Write(address, (byte)(value >> 8));
-        }
-
         // reads 16-bit value from the system bus in little-endian order
         // but emulates a 6502 bug that caused the low byte to wrap without
         // incrementing the high byte
@@ -259,8 +256,8 @@ namespace NesCore.Processing
             ++addressLoByte;
             ushort nextAddress = (ushort)(addressHiByte << 8 | addressLoByte);
 
-            byte valueLoByte = SystemBus.Read(address);
-            byte valueHiByte = SystemBus.Read(nextAddress);
+            byte valueLoByte = ReadByte(address);
+            byte valueHiByte = ReadByte(nextAddress);
             return (ushort)(valueHiByte << 8 | valueLoByte);
         }
     }

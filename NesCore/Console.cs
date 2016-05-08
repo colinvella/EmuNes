@@ -13,7 +13,7 @@ namespace NesCore
     {
         public Console()
         {
-            Processor = new Processor(null);
+            Processor = new Processor();
             Memory = new Memory();
         }
 

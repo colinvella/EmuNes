@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NesCore.Storage
 {
-    public class Memory: SystemBus
+    public class Memory
     {
         public Memory()
         {

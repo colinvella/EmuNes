@@ -12,10 +12,7 @@ namespace NesCoreTest
         [TestMethod]
         public void ByteWrite()
         {
-            NesCore.Console console = new NesCore.Console();
-            Memory memory = console.Memory;
-            memory.Write(0x1234, 0x10);
-            Assert.AreEqual(memory.Read(0x1234),  0x10, "Byte Write Test Failed");
+            Assert.Fail("Not implemented yet");
         }
     }
 }

@@ -6,14 +6,11 @@ using System.Threading.Tasks;
 
 namespace NesCore.Storage
 {
-    public class Memory
+    public class Memory: SystemBus
     {
-        public Memory(Console console)
+        public Memory()
         {
-            Console = console;
         }
-
-        public Console Console { get; private set; }
 
         public byte Read(ushort address) { return 0; }
         public void Write(ushort address, byte value) { }

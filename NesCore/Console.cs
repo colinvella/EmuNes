@@ -14,7 +14,7 @@ namespace NesCore
         public Console()
         {
             Processor = new Processor(null);
-            Memory = new Memory(this);
+            Memory = new Memory();
         }
 
         public Processor Processor { get; private set; }

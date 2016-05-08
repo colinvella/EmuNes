@@ -15,8 +15,8 @@ namespace NesCore.Storage
 
         public Console Console { get; private set; }
 
-        public byte Read(UInt16 address) { return 0; }
-        public void Write(UInt16 address, byte value) { }
+        public byte Read(ushort address) { return 0; }
+        public void Write(ushort address, byte value) { }
 
 
         // test

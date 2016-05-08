@@ -8,7 +8,7 @@ namespace NesCore
 {
     public interface SystemBus
     {
-        byte Read(UInt16 address);
-        void Write(UInt16 address, byte value);
+        byte Read(ushort address);
+        void Write(ushort address, byte value);
     }
 }

@@ -13,7 +13,7 @@ namespace NesCore.Utility
             return "$" + value.ToString("X2");
         }
 
-        public static string Format(UInt16 value)
+        public static string Format(ushort value)
         {
             return "$" + value.ToString("X4");
         }

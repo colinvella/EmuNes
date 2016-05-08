@@ -8,21 +8,21 @@ namespace NesCore.Utility
 {
     public class AssemblerException: Exception
     {
-        public AssemblerException(UInt16 sourceLineNumber, string sourceLine, string message)
+        public AssemblerException(ushort sourceLineNumber, string sourceLine, string message)
             : base(message)
         {
             SourceLineNumber = sourceLineNumber;
             SourceLine = sourceLine;
         }
 
-        public AssemblerException(UInt16 sorceLineNumber, string sourceLine, string message, Exception innerException)
+        public AssemblerException(ushort sorceLineNumber, string sourceLine, string message, Exception innerException)
             : base(message, innerException)
         {
             SourceLineNumber = sorceLineNumber;
             SourceLine = sourceLine;
         }
 
-        public UInt16 SourceLineNumber { get; private set; }
+        public ushort SourceLineNumber { get; private set; }
         public string SourceLine { get; private set; }
     }
 }

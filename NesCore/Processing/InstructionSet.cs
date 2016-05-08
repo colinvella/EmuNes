@@ -418,7 +418,7 @@ namespace NesCore.Processing
             Execute JumpToSubroutine = (address) =>
             {
                 State state = Processor.State;
-                Processor.Push16((UInt16)(state.ProgramCounter - 1));
+                Processor.Push16((ushort)(state.ProgramCounter - 1));
                 state.ProgramCounter = address;
             };
 
@@ -583,7 +583,7 @@ namespace NesCore.Processing
                 byte oldAccumulatorValue = state.Accumulator;
                 byte operandValue = SystemBus.Read(address);
                 byte carryValue = state.CarryFlag ? (byte)1 : (byte)0;
-                UInt16 result = (UInt16)(oldAccumulatorValue - operandValue - 1 + carryValue);
+                ushort result = (ushort)(oldAccumulatorValue - operandValue - 1 + carryValue);
                 state.Accumulator = (byte)result;
                 SetZeroAndNegativeFlags(state.Accumulator);
                 state.CarryFlag = result < 0x100;
@@ -936,7 +936,7 @@ namespace NesCore.Processing
         }
 
         // adds additional branch cycles
-        private void AddBranchCycles(UInt16 address)
+        private void AddBranchCycles(ushort address)
         {
             State state = Processor.State;
             // at least one cycle required for branching

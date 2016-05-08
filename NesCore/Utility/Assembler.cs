@@ -19,9 +19,9 @@ namespace NesCore.Utility
         }
 
         public Processor Processor { get; private set; }
-        public UInt16 WriteAddress { get; set; }
+        public ushort WriteAddress { get; set; }
 
-        public void GenerateProgram(UInt16 startAddress, string programSource)
+        public void GenerateProgram(ushort startAddress, string programSource)
         {
             WriteAddress = startAddress;
             GenerateProgram(programSource);
@@ -33,14 +33,14 @@ namespace NesCore.Utility
             unresolvedLabelReferences.Clear();
 
             string[] sourceLines = source.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            UInt16 sourceLineNumber = 0;
+            ushort sourceLineNumber = 0;
             foreach (string sourceLine in sourceLines)
                 GenerateInstruction(sourceLine, sourceLineNumber++);
 
             ResolveLabelReferences();
         }
 
-        private void GenerateInstruction(string sourceLine, UInt16 sourceLineNumber = 0)
+        private void GenerateInstruction(string sourceLine, ushort sourceLineNumber = 0)
         {
             // trim from spaces
             sourceLine = sourceLine.Trim();
@@ -102,7 +102,7 @@ namespace NesCore.Utility
                 String operandToken = string.Join("", tokens.Skip(1));
 
                 byte byteOperand = 0;
-                UInt16 wordOperand = 0;
+                ushort wordOperand = 0;
                 // determine addressing mode from operand
                 if (operandToken.ToUpper() == "A")
                 {
@@ -273,11 +273,11 @@ namespace NesCore.Utility
             {
                 if (!labelToAddress.ContainsKey(label))
                     throw new AssemblerException(0, "", "Unable to resolve label: " + label);
-                UInt16 resolvedAddress = labelToAddress[label];
+                ushort resolvedAddress = labelToAddress[label];
                 foreach (LabelReference labelReference in unresolvedLabelReferences[label])
                 {
                     // get opcode to determine if absolute or relative
-                    UInt16 instructionAddress = labelReference.OperandAddress;
+                    ushort instructionAddress = labelReference.OperandAddress;
                     --instructionAddress;
                     byte opCode = Processor.SystemBus.Read(instructionAddress);
                     Instruction instruction = Processor.InstructionSet[opCode];
@@ -313,7 +313,7 @@ namespace NesCore.Utility
             return regex.Match(input) != null;
         }
 
-        private bool ParseLabelReference(UInt16 sourceLineNumber, string sourceLine, string operand, out UInt16 absoluteAddress)
+        private bool ParseLabelReference(ushort sourceLineNumber, string sourceLine, string operand, out ushort absoluteAddress)
         {
             absoluteAddress = 0;
             if (!IsLabel(operand))
@@ -329,17 +329,17 @@ namespace NesCore.Utility
                 unresolvedLabelReferences[operand] = labelReferences;
             }
 
-            labelReferences.Add(new LabelReference(sourceLineNumber, sourceLine, (UInt16)(WriteAddress + 1)));
+            labelReferences.Add(new LabelReference(sourceLineNumber, sourceLine, (ushort)(WriteAddress + 1)));
 
             return true;
         }
 
-        private bool ParseAbsoluteOperand(string operand, out UInt16 value)
+        private bool ParseAbsoluteOperand(string operand, out ushort value)
         {
             return ParseHexValue(operand, out value);
         }
 
-        private bool ParseAbsoluteXOperand(string operand, out UInt16 value)
+        private bool ParseAbsoluteXOperand(string operand, out ushort value)
         {
             value = 0;
             operand = operand.Replace(" ", "").ToUpper();
@@ -352,7 +352,7 @@ namespace NesCore.Utility
             return value > 0xFF;
         }
 
-        private bool ParseAbsoluteYOperand(string operand, out UInt16 value)
+        private bool ParseAbsoluteYOperand(string operand, out ushort value)
         {
             value = 0;
             operand = operand.Replace(" ", "").ToUpper();
@@ -395,7 +395,7 @@ namespace NesCore.Utility
             return ParseByteHexValue(operand.Substring(1, operand.Length - 4), out value);
         }
 
-        private bool ParseIndirectOperand(string operand, out UInt16 value)
+        private bool ParseIndirectOperand(string operand, out ushort value)
         {
             value = 0;
             if (!operand.StartsWith("("))
@@ -431,7 +431,7 @@ namespace NesCore.Utility
         private bool ParseByteHexValue(string operand, out byte value)
         {
             value = 0;
-            UInt16 wordValue = 0;
+            ushort wordValue = 0;
             if (!ParseHexValue(operand, out wordValue))
                 return false;
             if (wordValue > 0xFF)
@@ -440,7 +440,7 @@ namespace NesCore.Utility
             return true;
         }
 
-        private bool ParseHexValue(string operand, out UInt16 value)
+        private bool ParseHexValue(string operand, out ushort value)
         {
             value = 0;
             operand = operand.ToUpper();
@@ -459,21 +459,21 @@ namespace NesCore.Utility
             }
         }
 
-        private Dictionary<string, UInt16> labelToAddress;
+        private Dictionary<string, ushort> labelToAddress;
         private Dictionary<string, List<LabelReference>> unresolvedLabelReferences;
 
         private class LabelReference
         {
-            public LabelReference(UInt16 sourceLineNumber, string sourceLine, UInt16 operandAddress)
+            public LabelReference(ushort sourceLineNumber, string sourceLine, ushort operandAddress)
             {
                 SourceLineNumber = sourceLineNumber;
                 SourceLine = sourceLine;
                 OperandAddress = operandAddress;
             }
 
-            public UInt16 SourceLineNumber { get; set; }
+            public ushort SourceLineNumber { get; set; }
             public string SourceLine { get; set; }
-            public UInt16 OperandAddress { get; set; }
+            public ushort OperandAddress { get; set; }
         }
     }
 }

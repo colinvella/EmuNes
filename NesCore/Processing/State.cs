@@ -10,8 +10,8 @@ namespace NesCore.Processing
     public class State
     {
         public UInt64 Cycles { get; set; }
-        public UInt16 StallCycles { get; set; }
-        public UInt16 ProgramCounter { get; set; }
+        public ushort StallCycles { get; set; }
+        public ushort ProgramCounter { get; set; }
         public byte StackPointer { get; set; }
         public byte Accumulator { get; set; }
         public byte RegisterX { get; set; }

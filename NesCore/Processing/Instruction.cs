@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NesCore.Processing
 {
-    public delegate void Execute(UInt16 address);
+    public delegate void Execute(ushort address);
 
     public class Instruction
     {

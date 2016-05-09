@@ -94,7 +94,7 @@ namespace NesCore.Processing
 
             // determine address operand and if a page is crossed
             bool pageCrossed = false;
-            ushort address = GetAddressOperand(instruction.AddressingMode, out pageCrossed);
+            ushort address = instruction.Fetch((ushort)(State.ProgramCounter + 1), out pageCrossed);
 
             // advance program counter by instruction size
             State.ProgramCounter += instruction.Size;
@@ -172,74 +172,6 @@ namespace NesCore.Processing
             State.Cycles += 7;
         }
         
-        private ushort GetAddressOperand(AddressingMode addressingMode, out bool pageCrossed)
-        {
-            ushort address = 0;
-            pageCrossed = false;
-            // immediate address is word address after op code
-            ushort immediateAddress = (ushort)(State.ProgramCounter + 1);
-
-            switch (addressingMode)
-            {
-                case AddressingMode.Implied:
-                case AddressingMode.Accumulator:
-                    // address n/a
-                    break;
-                case AddressingMode.Absolute:
-                    // absolute address is the word located at immediate address
-                    address = ReadWord(immediateAddress);
-                    break;
-                case AddressingMode.AbsoluteX:
-                    // absolute x address is the absolute address offset by the X register
-                    address = (ushort)(ReadWord(immediateAddress) + State.RegisterX);
-                    pageCrossed = PagesDiffer((ushort)(address - State.RegisterX), address);
-                    break;
-                case AddressingMode.AbsoluteY:
-                    // absolute y address is the absolute address offset by the Y register
-                    address = (ushort)(ReadWord(immediateAddress) + State.RegisterY);
-                    pageCrossed = PagesDiffer((ushort)(address - State.RegisterY), address);
-                    break;
-                case AddressingMode.Immediate:
-                    // address is immediate address following op code
-                    address = immediateAddress;
-                    break;
-                case AddressingMode.IndexedIndirect:
-                    // indexed indirect is address located at the x register, offset by the byte immediately following the op code
-                    address = Read16Bug((ushort)(ReadByte(immediateAddress) + State.RegisterX));
-                    break;
-                case AddressingMode.Indirect:
-                    // indirect address is the address located at the absolute address (with 6502 addressing bug)
-                    address = Read16Bug(ReadWord(immediateAddress));
-                    break;
-                case AddressingMode.IndirectIndexed:
-                    // indirect indexed address is the address located at the byte address immediately after the op code, then offset by the Y register
-                    address = (ushort)(Read16Bug((ReadByte(immediateAddress))) + State.RegisterY);
-                    pageCrossed = PagesDiffer((ushort)(address - State.RegisterY), address);
-                    break;
-                case AddressingMode.Relative:
-                    // address is relative signed byte offset following op code, applied at the end of the instruction
-                    byte offset = ReadByte(immediateAddress);
-                    address = (ushort)(State.ProgramCounter + 2 + offset);
-                    if (offset >= 0x80)
-                        address -= 0x100;
-                    break;
-                case AddressingMode.ZeroPage:
-                    // address is absolute byte address within 0th page
-                    address = ReadByte(immediateAddress);
-                    break;
-                case AddressingMode.ZeroPageX:
-                    // address is absolute byte address within 0th page, offset by x register
-                    address = (ushort)(ReadByte(immediateAddress) + State.RegisterX);
-                    break;
-                case AddressingMode.ZeroPageY:
-                    // address is absolute byte address within 0th page, offset by y register
-                    address = (ushort)(ReadByte(immediateAddress) + State.RegisterY);
-                    break;
-            }
-
-            return address;
-        }
-
         // returns true if address pages differ (differ by high byte)
         public bool PagesDiffer(ushort addressOne, ushort addressTwo)
         {
@@ -249,7 +181,7 @@ namespace NesCore.Processing
         // reads 16-bit value from the system bus in little-endian order
         // but emulates a 6502 bug that caused the low byte to wrap without
         // incrementing the high byte
-        public ushort Read16Bug(ushort address)
+        public ushort ReadWordWrap(ushort address)
         {
             byte addressHiByte = (byte)(address >> 8);
             byte addressLoByte = (byte)(address & 0xFF);

@@ -12,12 +12,13 @@ namespace NesCore.Processing
 
     public class Instruction
     {
-        public Instruction(byte code, String name, AddressingMode addressingMode, byte cycles, Execute execute)
+        public Instruction(byte code, String name, AddressingMode addressingMode, byte cycles, Fetch fetch, Execute execute)
         {
             Code = code;
             Name = name;
             AddressingMode = addressingMode;
             Cycles = cycles;
+            Fetch = fetch;
             Exceute = execute;
 
             switch (addressingMode)
@@ -56,6 +57,7 @@ namespace NesCore.Processing
         public AddressingMode AddressingMode { get; private set; }
         public byte Size { get; private set; }
         public byte Cycles { get; private set; }
+        public readonly Fetch Fetch;
         public readonly Execute Exceute;
     }
 }

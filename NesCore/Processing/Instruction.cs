@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace NesCore.Processing
 {
+    public delegate ushort Fetch(ushort operandAddress, out bool pageCrossed);
+
     public delegate void Execute(ushort address);
 
     public class Instruction

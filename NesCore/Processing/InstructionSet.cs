@@ -50,8 +50,105 @@ namespace NesCore.Processing
             get { return instructions[opCode]; }
         }
 
+        /*
+        private ushort GetAddressOperand(AddressingMode addressingMode, out bool pageCrossed)
+        {
+            ushort address = 0;
+            pageCrossed = false;
+            // immediate address is word address after op code
+            ushort immediateAddress = (ushort)(State.ProgramCounter + 1);
+
+            switch (addressingMode)
+            {
+                case AddressingMode.ZeroPage:
+                    // address is absolute byte address within 0th page
+                    address = ReadByte(immediateAddress);
+                    break;
+                case AddressingMode.ZeroPageX:
+                    // address is absolute byte address within 0th page, offset by x register
+                    address = (ushort)(ReadByte(immediateAddress) + State.RegisterX);
+                    break;
+                case AddressingMode.ZeroPageY:
+                    // address is absolute byte address within 0th page, offset by y register
+                    address = (ushort)(ReadByte(immediateAddress) + State.RegisterY);
+                    break;
+            }
+
+            return address;
+        }*/
+
         private void Initialise()
         {
+            // addressing mode fetches
+
+            Fetch FetchImpliedOrAccumulator = (ushort operandAddress, out bool pageCrossed) =>
+            {
+                pageCrossed = false;
+                return 0x0000;
+            };
+
+            Fetch FetchAbsolute = (ushort operandAddress, out bool pageCrossed) =>
+            {
+                pageCrossed = false;
+                return Processor.ReadWord(operandAddress);
+            };
+
+            Fetch FetchImmediate = (ushort operandAddress, out bool pageCrossed) =>
+            {
+                pageCrossed = false;
+                return operandAddress;
+            };
+
+            Fetch FetchIndirectIndexed = (ushort operandAddress, out bool pageCrossed) =>
+            {
+                // indirect indexed address is the address located at the byte address immediately after the op code, then offset by the Y register
+                ushort address = (ushort)(Processor.Read16Bug((Processor.ReadByte(operandAddress))) + Processor.State.RegisterY);
+                pageCrossed = Processor.PagesDiffer((ushort)(address - Processor.State.RegisterY), address);
+                return address;
+            };
+
+            Fetch FetchIndirect = (ushort operandAddress, out bool pageCrossed) =>
+            {
+                pageCrossed = false;
+                // indirect address is the address located at the absolute address (with 6502 addressing bug)
+                return Processor.Read16Bug(Processor.ReadWord(operandAddress));
+            };
+
+            Fetch FetchIndexedIndirect = (ushort operandAddress, out bool pageCrossed) =>
+            {
+                // indirect indexed address is the address located at the byte address immediately after the op code, then offset by the Y register
+                ushort address = (ushort)(Processor.Read16Bug((Processor.ReadByte(operandAddress))) + Processor.State.RegisterY);
+                pageCrossed = Processor.PagesDiffer((ushort)(address - Processor.State.RegisterY), address);
+                return address;
+            };
+
+            Fetch FetchRelative = (ushort operandAddress, out bool pageCrossed) =>
+            {
+                // address is relative signed byte offset following op code, applied at the end of the instruction
+                pageCrossed = false;
+                byte offset = Processor.ReadByte(operandAddress);
+                ushort valueAddress = (ushort)(operandAddress + 1 + offset);
+                if (offset >= 0x80)
+                    valueAddress -= 0x100;
+                return valueAddress;
+            };
+
+            Fetch FetchAbsoluteX = (ushort operandAddress, out bool pageCrossed) =>
+            {
+                ushort absoluteAddress = Processor.ReadWord(operandAddress);
+                ushort valueAddress = (ushort)(absoluteAddress + Processor.State.RegisterX);
+                pageCrossed = Processor.PagesDiffer(absoluteAddress, valueAddress);
+                return valueAddress;
+            };
+
+            Fetch FetchAbsoluteY = (ushort operandAddress, out bool pageCrossed) =>
+            {
+                ushort absoluteAddress = Processor.ReadWord(operandAddress);
+                ushort valueAddress = (ushort)(absoluteAddress + Processor.State.RegisterY);
+                pageCrossed = Processor.PagesDiffer(absoluteAddress, valueAddress);
+                return valueAddress;
+            };
+
             // general instruction operations
 
             // general illegal opcode

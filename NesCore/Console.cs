@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using NesCore.Processor;
-using NesCore.Storage;
+using NesCore.Memory;
 
 namespace NesCore
 {

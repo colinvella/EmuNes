@@ -3199,7 +3199,7 @@ namespace NesCoreTest
         }
 
         [TestMethod]
-        public void TestRawPerformance()
+        public void TestRawProcessorPerformance()
         {
             ResetSystem();
             assembler.GenerateProgram(0x1000,

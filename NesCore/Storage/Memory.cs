@@ -6,16 +6,12 @@ using System.Threading.Tasks;
 
 namespace NesCore.Storage
 {
-    public class Memory
+    public interface MemoryMap
     {
-        public Memory()
+        string this[ushort address]
         {
+            get;
+            set;
         }
-
-        public byte Read(ushort address) { return 0; }
-        public void Write(ushort address, byte value) { }
-
-
-        // test
     }
 }

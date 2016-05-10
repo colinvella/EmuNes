@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NesCore;
-using NesCore.Processing;
+using NesCore.Processor;
 
 namespace NesCoreTest
 {
@@ -11,7 +11,7 @@ namespace NesCoreTest
         [TestMethod]
         public void CheckDefinition()
         {
-            Processor processor = new Processor();
+            Mos6502 processor = new Mos6502();
             byte opCode = 0;
             foreach (Instruction instruction in processor.InstructionSet)
             {

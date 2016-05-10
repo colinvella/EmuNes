@@ -39,12 +39,12 @@
   <ItemGroup>
     <Compile Include="Storage\Memory.cs" />
     <Compile Include="Console.cs" />
-    <Compile Include="Processing\AddressingMode.cs" />
-    <Compile Include="Processing\Instruction.cs" />
-    <Compile Include="Processing\InstructionSet.cs" />
-    <Compile Include="Processing\InterruptType.cs" />
-    <Compile Include="Processing\Processor.cs" />
-    <Compile Include="Processing\State.cs" />
+    <Compile Include="Processor\AddressingMode.cs" />
+    <Compile Include="Processor\Instruction.cs" />
+    <Compile Include="Processor\InstructionSet.cs" />
+    <Compile Include="Processor\InterruptType.cs" />
+    <Compile Include="Processor\Mos6502.cs" />
+    <Compile Include="Processor\State.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\Assembler.cs" />
     <Compile Include="Utility\AssemblerException.cs" />

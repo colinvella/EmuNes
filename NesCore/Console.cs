@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using NesCore.Processing;
+using NesCore.Processor;
 using NesCore.Storage;
 
 namespace NesCore
@@ -13,11 +13,11 @@ namespace NesCore
     {
         public Console()
         {
-            Processor = new Processor();
-            Memory = new Memory();
+            Processor = new Mos6502();
+            //Memory = new Memory();
         }
 
-        public Processor Processor { get; private set; }
-        public Memory Memory { get; private set; }
+        public Mos6502 Processor { get; private set; }
+        //public Memory Memory { get; private set; }
     }
 }

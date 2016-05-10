@@ -1,4 +1,4 @@
-﻿using NesCore.Processing;
+﻿using NesCore.Processor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ namespace NesCore.Utility
 {
     public class Assembler
     {
-        public Assembler(Processor processor)
+        public Assembler(Mos6502 processor)
         {
             Processor = processor;
             WriteAddress = 0x0000;
@@ -18,7 +18,7 @@ namespace NesCore.Utility
             unresolvedLabelReferences = new Dictionary<string, List<LabelReference>>();
         }
 
-        public Processor Processor { get; private set; }
+        public Mos6502 Processor { get; private set; }
         public ushort WriteAddress { get; set; }
 
         public void GenerateProgram(ushort startAddress, string programSource)

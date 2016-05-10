@@ -5,18 +5,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NesCore.Processing
+namespace NesCore.Processor
 {
     public class InstructionSet: IEnumerable
     {
-        public InstructionSet(Processor processor)
+        public InstructionSet(Mos6502 processor)
         {
             Processor = processor;
 
             Initialise();
         }
 
-        public Processor Processor { get; private set; }
+        public Mos6502 Processor { get; private set; }
 
         // some instructions exposed
         public Execute PushProcessorStatus { get; private set; }
@@ -684,7 +684,7 @@ namespace NesCore.Processing
                 Processor.PushWord(Processor.State.ProgramCounter);
                 PushProcessorStatus(address);
                 SetInterruptDisableFlag(address);
-                Processor.State.ProgramCounter = Processor.ReadWord(Processor.IrqVector);
+                Processor.State.ProgramCounter = Processor.ReadWord(Mos6502.IrqVector);
             };
 
             // RTI - Return from interrupt

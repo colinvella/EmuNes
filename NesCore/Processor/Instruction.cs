@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NesCore.Processing
+namespace NesCore.Processor
 {
     public delegate ushort Fetch(ushort operandAddress, out bool pageCrossed);
 

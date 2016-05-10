@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NesCore.Processing
+namespace NesCore.Processor
 {
     // delegate for reading a byte from a givne memory address
     public delegate byte ReadByte(ushort address);
 
-    // delegate for writing a byte from a givne memory address
+    // delegate for writing a byte from a given memory address
     public delegate void WriteByte(ushort address, byte value);
 
-    public class Processor
+    public class Mos6502
     {
         public const int Frequency = 1789773;
         public const byte StackBase = 0xFD;
@@ -22,7 +22,7 @@ namespace NesCore.Processing
         public const ushort IrqVector = 0xFFFE;
 
 
-        public Processor()
+        public Mos6502()
         {
             State = new State();
             InstructionSet = new InstructionSet(this);

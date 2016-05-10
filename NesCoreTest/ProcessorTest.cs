@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NesCore.Processing;
+using NesCore.Processor;
 using NesCore.Utility;
 
 namespace NesCoreTest
@@ -10,7 +10,7 @@ namespace NesCoreTest
     {
         public ProcessorTest()
         {
-            processor = new Processor();
+            processor = new Mos6502();
             processor.ReadByte = ReadByte;
             processor.WriteByte = WriteByte;
             assembler = new Assembler(processor);
@@ -40,7 +40,7 @@ namespace NesCoreTest
 
             // execution test
             processor.State.ProgramCounter = 0x1000;
-            processor.WriteWord(Processor.IrqVector, 0x2030);
+            processor.WriteWord(Mos6502.IrqVector, 0x2030);
             processor.State.InterruptDisableFlag = false;
             byte statusFlags = processor.State.Flags;
 
@@ -3218,7 +3218,7 @@ namespace NesCoreTest
             ulong cyclesPerSecond = (ulong)(cycles / testDuration);
             Console.WriteLine("Cycles per second: " + cyclesPerSecond);
 
-            Assert.IsTrue(cyclesPerSecond > Processor.Frequency, "Processor running t0o slowly");
+            Assert.IsTrue(cyclesPerSecond > Mos6502.Frequency, "Processor running t0o slowly");
         }
 
         private void ResetSystem()
@@ -3326,7 +3326,7 @@ namespace NesCoreTest
             memory[address] = value;
         }
 
-        private Processor processor;
+        private Mos6502 processor;
         private Assembler assembler;
 
         private byte[] memory;

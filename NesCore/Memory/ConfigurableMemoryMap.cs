@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace NesCore.Memory
 {
-    public class MemoryMap
+    public class ConfigurableMemoryMap : IMemoryMap
     {
         public const int Size = ushort.MaxValue + 1;
 
         public delegate byte ReadMemoryHandler(ushort address);
         public delegate void WriteMemoryHandler(ushort address, byte value);
 
-        public MemoryMap()
+        public ConfigurableMemoryMap()
         {
             readMemoryHandlers = new ReadMemoryHandler[Size];
             writeMemoryHandlers = new WriteMemoryHandler[Size];
@@ -31,12 +31,20 @@ namespace NesCore.Memory
             }
         }
 
+        /// <summary>
+        /// Initialises all the memory locations to zeroes
+        /// </summary>
         public void Wipe()
         {
             for (int address = 0; address < Size; address++)
                 this[(ushort)address] = 0;
         }
 
+        /// <summary>
+        /// Reads or writes a byte value at the given address 
+        /// </summary>
+        /// <param name="address">Address from where to read or where to write byte value</param>
+        /// <returns></returns>
         public byte this[ushort address]
         {
             get { return readMemoryHandlers[address](address); }

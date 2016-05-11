@@ -11,7 +11,7 @@ namespace NesCoreTest
     {
         public MemoryTest()
         {
-            memoryMap = new MemoryMap();
+            memoryMap = new ConfigurableMemoryMap();
         }
 
         [TestMethod, TestCategory("Memory")]
@@ -56,6 +56,6 @@ namespace NesCoreTest
             Console.WriteLine("Writes per second: " + writes / testDuration);
         }
 
-        private MemoryMap memoryMap;
+        private ConfigurableMemoryMap memoryMap;
     }
 }

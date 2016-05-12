@@ -51,6 +51,8 @@
     <Compile Include="Utility\AssemblerException.cs" />
     <Compile Include="Utility\Bin.cs" />
     <Compile Include="Utility\Hex.cs" />
+    <Compile Include="Video\Colour.cs" />
+    <Compile Include="Video\Palette.cs" />
     <Compile Include="Video\Registers.cs" />
     <Compile Include="Video\RicohRP2C0X.cs" />
   </ItemGroup>

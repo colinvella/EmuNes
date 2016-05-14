@@ -19,10 +19,149 @@ namespace NesCore.Video
 
         public Registers Registers { get; private set; }
 
-        int Cycle; // 0-340
-        int ScanLine; // 0-261, 0-239=visible, 240=post, 241-260=vblank, 261=pre
+        // implementation hooks
+        public WritePixel WritePixel { get; set; }
+        public WritePixel PresentFrame { get; set; }
 
+        public void Reset()
+        {
+            Cycle = 340;
+
+            ScanLine = 240;
+
+            //WriteControl(0);
+            //WriteMask(0);
+            //WriteOAMAddress(0);
+        }
+
+        // $2000: PPUCTRL
+        public void WriteControl(byte value)
+        {
+            flagNameTable = (byte)(value & 0x03);
+            flagIncrement = (value & 0x04) != 0;
+            flagSpriteTable = (value & 0x08) != 0;
+            flagBackgroundTable = (value & 0x10) != 0;
+            flagSpriteSize = (value & 0x20) != 0;
+            flagMasterSlave = (value & 0x40) != 0;
+            nmiOutput = (value & 0x80) != 0;
+
+            //NmiChange();
+            // t: ....BA.. ........ = d: ......BA
+            t = (short)((t & 0xF3FF) | ((value & 0x03) << 10));
+        }
+
+        // $2001: PPUMASK
+        public void WriteMask(byte value)
+        {
+            flagGrayscale = (value & 0x01) != 0;
+            flagShowLeftBackground = (value & 0x02) != 0;
+            flagShowLeftSprites = (value & 0x04) != 0;
+            flagShowBackground = (value & 0x08) != 0;
+            flagShowSprites = (value & 0x10) != 0;
+            flagRedTint = (value & 0x20) != 0;
+            flagGreenTint = (value & 0x40) != 0;
+            flagBlueTint = (value & 0x80) != 0;
+        }
+
+        // $2002: PPUSTATUS
+        public byte ReadStatus()
+        {
+            byte result = (byte)(register & 0x1F);
+            if (flagSpriteOverflow)
+                result |= 0x20;
+            if (flagSpriteZeroHit)
+                result |= 0x40;
+            if (nmiOccurred)
+                result |= 0x80;
+
+            nmiOccurred = false;
+            //nmiChange();
+            // w:                   = 0
+            w = 0;
+            return result;
+        }
+
+
+private byte ReadPalette(ushort address)
+        {
+            if (address >= 16 && address % 4 == 0)
+                address -= 16;
+            return paletteData[address];
+        }
+
+        private void WritePalette(ushort address, byte value)
+        {
+            if (address >= 16 && address % 4 == 0)
+                address -= 16;
+            paletteData[address] = value;
+        }
+
+
+        private int Cycle; // 0-340
+        private int ScanLine; // 0-261, 0-239=visible, 240=post, 241-260=vblank, 261=pre
+
+        // storage variables
+        private byte[] paletteData = new byte[32];
+        private byte[] nameTableData = new byte[2048];
+        private byte[] oamData = new byte[256];
+
+        // PPU registers
+        private short v; // current vram address (15 bit)
+        private short t; // temporary vram address (15 bit)
+        private byte x;  // fine x scroll (3 bit)
+        private byte w;  // write toggle (1 bit)
+
+        private byte register;
+
+        // NMI flags
+        private bool nmiOccurred;
+        private bool nmiOutput;
+        private bool nmiPrevious;
+        private byte nmiDelay;
+
+        // background temporary variables
+        private byte nameTableByte;
+        private byte attributeTableByte;
+        private byte lowTileByte;
+        private byte highTileByte;
+        private ulong tileData;
+
+        // sprite temporary variables
+        private int spriteCount;
+        private uint[] spritePatterns = new uint[8];
+        private byte[] spritePositions = new byte[8];
+        private byte[] spritePriorities = new byte[8];
+        private byte[] spriteIndexes = new byte[8];
+
+        // $2000 PPUCTRL
+        private byte flagNameTable;        // 0: $2000; 1: $2400; 2: $2800; 3: $2C00
+        private bool flagIncrement;        // 0: add 1; 1: add 32
+        private bool flagSpriteTable;      // 0: $0000; 1: $1000; ignored in 8x16 mode
+        private bool flagBackgroundTable;  // 0: $0000; 1: $1000
+        private bool flagSpriteSize;       // 0: 8x8; 1: 8x16
+        private bool flagMasterSlave;      // 0: read EXT; 1: write EXT
+
+        // $2001 PPUMASK
+        private bool flagGrayscale;          // 0: color; 1: grayscale
+        private bool flagShowLeftBackground; // 0: hide; 1: show
+        private bool flagShowLeftSprites;    // 0: hide; 1: show
+        private bool flagShowBackground;     // 0: hide; 1: show
+        private bool flagShowSprites;        // 0: hide; 1: show
+        private bool flagRedTint;            // 0: normal; 1: emphasized
+        private bool flagGreenTint;          // 0: normal; 1: emphasized
+        private bool flagBlueTint;           // 0: normal; 1: emphasized
+
+        // $2002 PPUSTATUS
+        private bool flagSpriteZeroHit;
+        private bool flagSpriteOverflow;
+
+        // $2003 OAMADDR
+        private byte oamAddress;
+
+        // $2007 PPUDATA
+        private byte bufferedData; // for buffered reads
     }
+
 }
 
 /*
@@ -210,88 +349,9 @@ func (ppu *PPU) Load(decoder *gob.Decoder) error {
 	return nil
 }
 
-func (ppu *PPU) Reset() {
-	ppu.Cycle = 340
-	ppu.ScanLine = 240
-	ppu.Frame = 0
-	ppu.writeControl(0)
-	ppu.writeMask(0)
-	ppu.writeOAMAddress(0)
-}
 
-func (ppu *PPU) readPalette(address uint16) byte {
-	if address >= 16 && address%4 == 0 {
-		address -= 16
-	}
-	return ppu.paletteData[address]
-}
 
-func (ppu *PPU) writePalette(address uint16, value byte) {
-	if address >= 16 && address%4 == 0 {
-		address -= 16
-	}
-	ppu.paletteData[address] = value
-}
 
-func (ppu *PPU) readRegister(address uint16) byte {
-	switch address {
-	case 0x2002:
-		return ppu.readStatus()
-	case 0x2004:
-		return ppu.readOAMData()
-	case 0x2007:
-		return ppu.readData()
-	}
-	return 0
-}
-
-func (ppu *PPU) writeRegister(address uint16, value byte) {
-	ppu.register = value
-	switch address {
-	case 0x2000:
-		ppu.writeControl(value)
-	case 0x2001:
-		ppu.writeMask(value)
-	case 0x2003:
-		ppu.writeOAMAddress(value)
-	case 0x2004:
-		ppu.writeOAMData(value)
-	case 0x2005:
-		ppu.writeScroll(value)
-	case 0x2006:
-		ppu.writeAddress(value)
-	case 0x2007:
-		ppu.writeData(value)
-	case 0x4014:
-		ppu.writeDMA(value)
-	}
-}
-
-// $2000: PPUCTRL
-func (ppu *PPU) writeControl(value byte) {
-	ppu.flagNameTable = (value >> 0) & 3
-	ppu.flagIncrement = (value >> 2) & 1
-	ppu.flagSpriteTable = (value >> 3) & 1
-	ppu.flagBackgroundTable = (value >> 4) & 1
-	ppu.flagSpriteSize = (value >> 5) & 1
-	ppu.flagMasterSlave = (value >> 6) & 1
-	ppu.nmiOutput = (value>>7)&1 == 1
-	ppu.nmiChange()
-	// t: ....BA.. ........ = d: ......BA
-	ppu.t = (ppu.t & 0xF3FF) | ((uint16(value) & 0x03) << 10)
-}
-
-// $2001: PPUMASK
-func (ppu *PPU) writeMask(value byte) {
-	ppu.flagGrayscale = (value >> 0) & 1
-	ppu.flagShowLeftBackground = (value >> 1) & 1
-	ppu.flagShowLeftSprites = (value >> 2) & 1
-	ppu.flagShowBackground = (value >> 3) & 1
-	ppu.flagShowSprites = (value >> 4) & 1
-	ppu.flagRedTint = (value >> 5) & 1
-	ppu.flagGreenTint = (value >> 6) & 1
-	ppu.flagBlueTint = (value >> 7) & 1
-}
 
 // $2002: PPUSTATUS
 func (ppu *PPU) readStatus() byte {

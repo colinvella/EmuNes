@@ -678,6 +678,44 @@ namespace NesCore.Video
             spriteCount = count;
         }
 
+        // tick updates Cycle, ScanLine and Frame counters
+        private void Tick()
+        {
+            if (nmiDelay > 0)
+            {
+                --nmiDelay;
+        
+                if (nmiDelay == 0 && nmiOutput && nmiOccurred)
+                {
+                    throw new NotImplementedException();
+                    /*ppu.console.CPU.triggerNMI()*/
+                }
+            }
+
+            if (flagShowBackground || flagShowSprites)
+            {
+                if (f == 1 && scanLine == 261 && cycle == 339)
+                {
+                    cycle = 0;
+                    scanLine = 0;
+                    f ^= 1;
+                    return;
+                }
+            }
+            ++cycle;
+
+            if (cycle > 340)
+            {
+                cycle = 0;
+                ++scanLine;
+
+                if (scanLine > 261)
+                {
+                    scanLine = 0;
+                    f ^= 1;
+                }
+            }
+        }
 
 
 
@@ -699,6 +737,7 @@ namespace NesCore.Video
         private ushort t; // temporary vram address (15 bit)
         private byte x;  // fine x scroll (3 bit)
         private byte w;  // write toggle (1 bit)
+        private byte f; // even/odd frame
 
         private byte register;
 
@@ -757,35 +796,6 @@ namespace NesCore.Video
  *package nes
 
 
-// tick updates Cycle, ScanLine and Frame counters
-func (ppu *PPU) tick() {
-	if ppu.nmiDelay > 0 {
-		ppu.nmiDelay--
-		if ppu.nmiDelay == 0 && ppu.nmiOutput && ppu.nmiOccurred {
-			ppu.console.CPU.triggerNMI()
-		}
-	}
-
-	if ppu.flagShowBackground != 0 || ppu.flagShowSprites != 0 {
-		if ppu.f == 1 && ppu.ScanLine == 261 && ppu.Cycle == 339 {
-			ppu.Cycle = 0
-			ppu.ScanLine = 0
-			ppu.Frame++
-			ppu.f ^= 1
-			return
-		}
-	}
-	ppu.Cycle++
-	if ppu.Cycle > 340 {
-		ppu.Cycle = 0
-		ppu.ScanLine++
-		if ppu.ScanLine > 261 {
-			ppu.ScanLine = 0
-			ppu.Frame++
-			ppu.f ^= 1
-		}
-	}
-}
 
 // Step executes a single PPU cycle
 func (ppu *PPU) Step() {

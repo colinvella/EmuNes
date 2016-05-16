@@ -440,6 +440,248 @@ namespace NesCore.Video
             attributeTableByte = (byte)(((ReadByte(address) >> shift) & 3) << 2);
         }
 
+        private void FetchLowTileByte()
+        {
+            int fineY = (v >> 12) & 7;
+
+            ushort address = (ushort)(flagBackgroundTable ? 0x1000 : 0x0000);
+
+            address += (ushort)(nameTableByte * 16 + fineY);
+
+            lowTileByte = ReadByte(address);
+        }
+
+        private void FetchHighTileByte()
+        {
+            int fineY = (v >> 12) & 7;
+
+            ushort address = (ushort)(flagBackgroundTable ? 0x1000 : 0x0000);
+
+            address += (ushort)(nameTableByte * 16 + fineY + 8);
+
+            highTileByte = ReadByte(address);
+        }
+
+        private void StoreTileData()
+        {
+            uint data = 0;
+
+            for (int i = 0; i < 8; i++)
+            {
+                int p1 = (lowTileByte & 0x80) >> 7;
+                int p2 = (highTileByte & 0x80) >> 6;
+
+                lowTileByte <<= 1;
+                highTileByte <<= 1;
+                data <<= 4;
+
+                data |= (uint)(attributeTableByte | p1 | p2);
+
+            }
+
+            tileData |= (ulong)(data);
+        }
+
+        private uint FetchTileData()
+        {
+            return (uint)(tileData >> 32);
+        }
+
+        private byte GetBackgroundPixel()
+        {
+	        if (flagShowBackground)
+                return 0;
+
+            uint data = FetchTileData() >> ((7 - x) * 4);
+            return (byte)(data & 0x0F);
+        }
+
+        private byte GetSpritePixel(out byte spriteIndex)
+        {
+            spriteIndex = 0;
+            if (!flagShowSprites)
+                return 0;
+
+	        for (int i = 0; i < spriteCount; i++)
+            {
+                int offset = (cycle - 1) - spritePositions[i];
+                if (offset < 0 || offset > 7)
+                    continue;
+
+                offset = 7 - offset;
+                byte colour = (byte)((spritePatterns[i] >> (offset * 4)) & 0x0F);
+                if (colour % 4 == 0)
+                    continue;
+
+                spriteIndex = (byte)i;
+		        return colour;
+            }
+
+            spriteIndex = 0;
+            return 0;
+        }
+
+        private void RenderPixel()
+        {
+            x = (byte)(cycle - 1);
+            byte y = (byte)scanLine;
+
+            byte backgroundPixel = GetBackgroundPixel();
+
+            byte spriteIndex = 0;
+            byte spritePixel = GetSpritePixel(out spriteIndex);
+
+            if (x < 8 && !flagBackgroundTable)
+                backgroundPixel = 0;
+
+            if (x < 8 && !flagShowLeftSprites)
+                spritePixel = 0;
+
+            bool opaqueBackground = backgroundPixel % 4 != 0;
+
+            bool opaqueSprite = spritePixel % 4 != 0;
+
+            byte paletteIndex = 0;
+
+            if (opaqueBackground)
+            {
+                // opaque background pixel
+                if (opaqueSprite)
+                {
+                    // opaque background and sprite pixels
+
+                    // check sprite 0 hit
+                    if (spriteIndexes[spriteIndex] == 0 && x < 255)
+                        flagSpriteZeroHit = true;
+
+                    // determine if sprite or backgroubnd pixel prevails
+                    if (spritePriorities[spriteIndex] == 0)
+                        paletteIndex = (byte)(spritePixel | 0x10);
+                    else
+                        paletteIndex = backgroundPixel;
+                }
+                else
+                {
+                    // opaque background and transparent sprite pixel
+                    paletteIndex = backgroundPixel;
+                }
+            }
+            else
+            {
+                // transparent backgorund
+                if (opaqueSprite)
+                {
+                    // transparent background and opaque sprite pixels
+                    paletteIndex = (byte)(spritePixel | 0x10);
+                }
+                else
+                {
+                    // transparent backgrounbd and sprite pixels
+                    paletteIndex = 0;
+                }
+            }
+            
+            // hook to write pixel
+            WritePixel(x, y, paletteIndex);
+        }
+
+        private uint FetchSpritePattern(int i, int row)
+        {
+            byte tile = oamData[i * 4 + 1];
+            byte attributes = oamData[i * 4 + 2];
+            ushort address = 0;
+            if (!flagSpriteSize)
+            {
+                if ((attributes & 0x80) == 0x80)
+                    row = 7 - row;
+
+                address = (ushort)(flagSpriteTable ? 0x1000 : 0x0000);
+            }
+            else
+            {
+		        if ((attributes & 0x80) == 0x80)
+                    row = 15 - row;
+
+                tile &= 0xFE;
+		        if (row > 7)
+                {
+                    ++tile;
+                    row -= 8;
+		        }
+                address = (ushort)(0x1000 * (tile % 1));
+            }
+            address += (ushort)(tile * 16 + row);
+
+            byte a = (byte)((attributes & 3) << 2);
+            lowTileByte = ReadByte(address);
+            highTileByte = ReadByte((ushort)(address + 8));
+
+            uint data = 0;
+
+            byte p1 = 0, p2 = 0;
+
+		    if ((attributes & 0x40) == 0x40)
+            {
+                p1 = (byte)((lowTileByte & 1) << 0);
+                p2 = (byte)((highTileByte & 1) << 1);
+                lowTileByte >>= 1;
+                highTileByte >>= 1;
+		    }
+            else
+            {
+                p1 = (byte)((lowTileByte & 0x80) >> 7);
+                p2 = (byte)((highTileByte & 0x80) >> 6);
+                lowTileByte <<= 1;
+                highTileByte <<= 1;
+		    }
+            data <<= 4;
+            data |= (uint)(a | p1 | p2);
+	        
+            return data;
+        }
+
+        private void EvaluateSprites()
+        {
+            int h = 0;
+
+            h = flagSpriteSize ? 16 : 8;
+
+            int count = 0;
+
+            for (int i = 0; i < 64; i++)
+            {
+                byte y = oamData[i * 4 + 0];
+                byte a = oamData[i * 4 + 2];
+                byte x = oamData[i * 4 + 3];
+
+                int row = scanLine - y;
+
+                if (row < 0 || row >= h)
+                    continue;
+
+
+                if (count < 8)
+                {
+                    spritePatterns[count] = FetchSpritePattern(i, row);
+                    spritePositions[count] = x;
+                    spritePriorities[count] = (byte)((a >> 5) & 1);
+                    spriteIndexes[count] = (byte)i;
+                }
+                ++count;
+            }
+
+            if (count > 8)
+            {
+                count = 8;
+                flagSpriteOverflow = true;
+            }
+            spriteCount = count;
+        }
+
+
+
+
+
 
 
 
@@ -514,177 +756,6 @@ namespace NesCore.Video
 /*
  *package nes
 
-
-func (ppu *PPU) fetchLowTileByte() {
-	fineY := (ppu.v >> 12) & 7
-	table := ppu.flagBackgroundTable
-	tile := ppu.nameTableByte
-	address := 0x1000*uint16(table) + uint16(tile)*16 + fineY
-	ppu.lowTileByte = ppu.Read(address)
-}
-
-func (ppu *PPU) fetchHighTileByte() {
-	fineY := (ppu.v >> 12) & 7
-	table := ppu.flagBackgroundTable
-	tile := ppu.nameTableByte
-	address := 0x1000*uint16(table) + uint16(tile)*16 + fineY
-	ppu.highTileByte = ppu.Read(address + 8)
-}
-
-func (ppu *PPU) storeTileData() {
-	var data uint32
-	for i := 0; i < 8; i++ {
-		a := ppu.attributeTableByte
-		p1 := (ppu.lowTileByte & 0x80) >> 7
-		p2 := (ppu.highTileByte & 0x80) >> 6
-		ppu.lowTileByte <<= 1
-		ppu.highTileByte <<= 1
-		data <<= 4
-		data |= uint32(a | p1 | p2)
-	}
-	ppu.tileData |= uint64(data)
-}
-
-func (ppu *PPU) fetchTileData() uint32 {
-	return uint32(ppu.tileData >> 32)
-}
-
-func (ppu *PPU) backgroundPixel() byte {
-	if ppu.flagShowBackground == 0 {
-		return 0
-	}
-	data := ppu.fetchTileData() >> ((7 - ppu.x) * 4)
-	return byte(data & 0x0F)
-}
-
-func (ppu *PPU) spritePixel() (byte, byte) {
-	if ppu.flagShowSprites == 0 {
-		return 0, 0
-	}
-	for i := 0; i < ppu.spriteCount; i++ {
-		offset := (ppu.Cycle - 1) - int(ppu.spritePositions[i])
-		if offset < 0 || offset > 7 {
-			continue
-		}
-		offset = 7 - offset
-		color := byte((ppu.spritePatterns[i] >> byte(offset*4)) & 0x0F)
-		if color%4 == 0 {
-			continue
-		}
-		return byte(i), color
-	}
-	return 0, 0
-}
-
-func (ppu *PPU) renderPixel() {
-	x := ppu.Cycle - 1
-	y := ppu.ScanLine
-	background := ppu.backgroundPixel()
-	i, sprite := ppu.spritePixel()
-	if x < 8 && ppu.flagShowLeftBackground == 0 {
-		background = 0
-	}
-	if x < 8 && ppu.flagShowLeftSprites == 0 {
-		sprite = 0
-	}
-	b := background%4 != 0
-	s := sprite%4 != 0
-	var color byte
-	if !b && !s {
-		color = 0
-	} else if !b && s {
-		color = sprite | 0x10
-	} else if b && !s {
-		color = background
-	} else {
-		if ppu.spriteIndexes[i] == 0 && x < 255 {
-			ppu.flagSpriteZeroHit = 1
-		}
-		if ppu.spritePriorities[i] == 0 {
-			color = sprite | 0x10
-		} else {
-			color = background
-		}
-	}
-	c := Palette[ppu.readPalette(uint16(color))%64]
-	ppu.back.SetRGBA(x, y, c)
-}
-
-func (ppu *PPU) fetchSpritePattern(i, row int) uint32 {
-	tile := ppu.oamData[i*4+1]
-	attributes := ppu.oamData[i*4+2]
-	var address uint16
-	if ppu.flagSpriteSize == 0 {
-		if attributes&0x80 == 0x80 {
-			row = 7 - row
-		}
-		table := ppu.flagSpriteTable
-		address = 0x1000*uint16(table) + uint16(tile)*16 + uint16(row)
-	} else {
-		if attributes&0x80 == 0x80 {
-			row = 15 - row
-		}
-		table := tile & 1
-		tile &= 0xFE
-		if row > 7 {
-			tile++
-			row -= 8
-		}
-		address = 0x1000*uint16(table) + uint16(tile)*16 + uint16(row)
-	}
-	a := (attributes & 3) << 2
-	lowTileByte := ppu.Read(address)
-	highTileByte := ppu.Read(address + 8)
-	var data uint32
-	for i := 0; i < 8; i++ {
-		var p1, p2 byte
-		if attributes&0x40 == 0x40 {
-			p1 = (lowTileByte & 1) << 0
-			p2 = (highTileByte & 1) << 1
-			lowTileByte >>= 1
-			highTileByte >>= 1
-		} else {
-			p1 = (lowTileByte & 0x80) >> 7
-			p2 = (highTileByte & 0x80) >> 6
-			lowTileByte <<= 1
-			highTileByte <<= 1
-		}
-		data <<= 4
-		data |= uint32(a | p1 | p2)
-	}
-	return data
-}
-
-func (ppu *PPU) evaluateSprites() {
-	var h int
-	if ppu.flagSpriteSize == 0 {
-		h = 8
-	} else {
-		h = 16
-	}
-	count := 0
-	for i := 0; i < 64; i++ {
-		y := ppu.oamData[i*4+0]
-		a := ppu.oamData[i*4+2]
-		x := ppu.oamData[i*4+3]
-		row := ppu.ScanLine - int(y)
-		if row < 0 || row >= h {
-			continue
-		}
-		if count < 8 {
-			ppu.spritePatterns[count] = ppu.fetchSpritePattern(i, row)
-			ppu.spritePositions[count] = x
-			ppu.spritePriorities[count] = (a >> 5) & 1
-			ppu.spriteIndexes[count] = byte(i)
-		}
-		count++
-	}
-	if count > 8 {
-		count = 8
-		ppu.flagSpriteOverflow = 1
-	}
-	ppu.spriteCount = count
-}
 
 // tick updates Cycle, ScanLine and Frame counters
 func (ppu *PPU) tick() {

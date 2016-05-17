@@ -41,12 +41,12 @@ namespace NesCore.Video
             set
             {
                 registerLatch = value;
-                flagNameTable = (byte)(value & 0x03);
+                nameTable = (byte)(value & 0x03);
                 flagIncrement = (value & 0x04) != 0;
                 flagSpriteTable = (value & 0x08) != 0;
                 flagBackgroundTable = (value & 0x10) != 0;
                 spriteSize = (value & 0x20) != 0 ? SpriteSize.Size8x16 : SpriteSize.Size8x8;
-                flagMasterSlave = (value & 0x40) != 0;
+                masterSlave = (value & 0x40) != 0;
                 nmiOutput = (value & 0x80) != 0;
 
                 NmiChange();
@@ -63,14 +63,14 @@ namespace NesCore.Video
             set
             {
                 registerLatch = value;
-                flagGrayscale = (value & 0x01) != 0;
-                flagShowLeftBackground = (value & 0x02) != 0;
-                flagShowLeftSprites = (value & 0x04) != 0;
-                flagShowBackground = (value & 0x08) != 0;
-                flagShowSprites = (value & 0x10) != 0;
-                flagRedTint = (value & 0x20) != 0;
-                flagGreenTint = (value & 0x40) != 0;
-                flagBlueTint = (value & 0x80) != 0;
+                grayscale = (value & 0x01) != 0;
+                showLeftBackground = (value & 0x02) != 0;
+                showLeftSprites = (value & 0x04) != 0;
+                showBackground = (value & 0x08) != 0;
+                showSprites = (value & 0x10) != 0;
+                redTint = (value & 0x20) != 0;
+                greenTint = (value & 0x40) != 0;
+                blueTint = (value & 0x80) != 0;
             }
         }
 
@@ -82,9 +82,9 @@ namespace NesCore.Video
             get
             {
                 byte result = (byte)(registerLatch & 0x1F);
-                if (flagSpriteOverflow)
+                if (spriteOverflow)
                     result |= 0x20;
-                if (flagSpriteZeroHit)
+                if (spriteZeroHit)
                     result |= 0x40;
                 if (nmiOccurred)
                     result |= 0x80;
@@ -259,7 +259,7 @@ namespace NesCore.Video
         {
             Tick();
 
-            bool renderingEnabled = flagShowBackground || flagShowSprites;
+            bool renderingEnabled = showBackground || showSprites;
             bool preLine = scanLine == 261;
             bool visibleLine = scanLine < 240;
             // postLine := ppu.ScanLine == 240
@@ -334,8 +334,8 @@ namespace NesCore.Video
             if (preLine && cycle == 1)
             {
                 ClearVerticalBlank();
-                flagSpriteZeroHit = false;
-                flagSpriteOverflow = false;
+                spriteZeroHit = false;
+                spriteOverflow = false;
             }
         }
 
@@ -369,22 +369,22 @@ namespace NesCore.Video
             streamWriter.Write(spritePositions);
             streamWriter.Write(spritePriorities);
             streamWriter.Write(spriteIndexes);
-            streamWriter.Write(flagNameTable);
+            streamWriter.Write(nameTable);
             streamWriter.Write(flagIncrement);
             streamWriter.Write(flagSpriteTable);
             streamWriter.Write(flagBackgroundTable);
             streamWriter.Write(spriteSize);
-            streamWriter.Write(flagMasterSlave);
-            streamWriter.Write(flagGrayscale);
-            streamWriter.Write(flagShowLeftBackground);
-            streamWriter.Write(flagShowLeftSprites);
-            streamWriter.Write(flagShowBackground);
-            streamWriter.Write(flagShowSprites);
-            streamWriter.Write(flagRedTint);
-            streamWriter.Write(flagGreenTint);
-            streamWriter.Write(flagBlueTint);
-            streamWriter.Write(flagSpriteZeroHit);
-            streamWriter.Write(flagSpriteOverflow);
+            streamWriter.Write(masterSlave);
+            streamWriter.Write(grayscale);
+            streamWriter.Write(showLeftBackground);
+            streamWriter.Write(showLeftSprites);
+            streamWriter.Write(showBackground);
+            streamWriter.Write(showSprites);
+            streamWriter.Write(redTint);
+            streamWriter.Write(greenTint);
+            streamWriter.Write(blueTint);
+            streamWriter.Write(spriteZeroHit);
+            streamWriter.Write(spriteOverflow);
 	        streamWriter.Write(oamAddress);
 	        streamWriter.Write(bufferedData);
         }
@@ -575,7 +575,7 @@ namespace NesCore.Video
 
         private byte GetBackgroundPixel()
         {
-	        if (flagShowBackground)
+	        if (showBackground)
                 return 0;
 
             uint data = FetchTileData() >> ((7 - x) * 4);
@@ -585,7 +585,7 @@ namespace NesCore.Video
         private byte GetSpritePixel(out byte spriteIndex)
         {
             spriteIndex = 0;
-            if (!flagShowSprites)
+            if (!showSprites)
                 return 0;
 
 	        for (int i = 0; i < spriteCount; i++)
@@ -620,7 +620,7 @@ namespace NesCore.Video
             if (x < 8 && !flagBackgroundTable)
                 backgroundPixel = 0;
 
-            if (x < 8 && !flagShowLeftSprites)
+            if (x < 8 && !showLeftSprites)
                 spritePixel = 0;
 
             bool opaqueBackground = backgroundPixel % 4 != 0;
@@ -638,7 +638,7 @@ namespace NesCore.Video
 
                     // check sprite 0 hit
                     if (spriteIndexes[spriteIndex] == 0 && x < 255)
-                        flagSpriteZeroHit = true;
+                        spriteZeroHit = true;
 
                     // determine if sprite or backgroubnd pixel prevails
                     if (spritePriorities[spriteIndex] == 0)
@@ -755,7 +755,7 @@ namespace NesCore.Video
             if (count > 8)
             {
                 count = 8;
-                flagSpriteOverflow = true;
+                spriteOverflow = true;
             }
             spriteCount = count;
         }
@@ -774,7 +774,7 @@ namespace NesCore.Video
                 }
             }
 
-            if (flagShowBackground || flagShowSprites)
+            if (showBackground || showSprites)
             {
                 if (evenFrame && scanLine == 261 && cycle == 339)
                 {
@@ -808,12 +808,12 @@ namespace NesCore.Video
         private byte[] oamData = new byte[256];
 
         // PPU registers
-        private ushort v; // current vram address (15 bit)
-        private ushort t; // temporary vram address (15 bit)
-        private byte x;  // fine x scroll (3 bit)
-        private WriteToggle writeToggle;  // write toggle (1 bit)
-        private bool evenFrame; // even/odd frame
-        private byte registerLatch; // status register
+        private ushort v;                   // current vram address (15 bit)
+        private ushort t;                   // temporary vram address (15 bit)
+        private byte x;                     // fine x scroll (3 bit)
+        private WriteToggle writeToggle;    // write toggle (1 bit)
+        private bool evenFrame;             // even/odd frame
+        private byte registerLatch;         // status register
         
         // NMI flags
         private bool nmiOccurred;
@@ -836,26 +836,26 @@ namespace NesCore.Video
         private byte[] spriteIndexes = new byte[8];
 
         // $2000 PPUCTRL
-        private byte flagNameTable;        // 0: $2000; 1: $2400; 2: $2800; 3: $2C00
-        private bool flagIncrement;        // 0: add 1; 1: add 32
-        private bool flagSpriteTable;      // 0: $0000; 1: $1000; ignored in 8x16 mode
-        private bool flagBackgroundTable;  // 0: $0000; 1: $1000
-        private SpriteSize spriteSize;     // 8x8 or 8x16 pixels
-        private bool flagMasterSlave;      // 0: read EXT; 1: write EXT
+        private byte nameTable;             // 0: $2000; 1: $2400; 2: $2800; 3: $2C00
+        private bool flagIncrement;         // 0: add 1; 1: add 32
+        private bool flagSpriteTable;       // 0: $0000; 1: $1000; ignored in 8x16 mode
+        private bool flagBackgroundTable;   // 0: $0000; 1: $1000
+        private SpriteSize spriteSize;      // 8x8 or 8x16 pixels
+        private bool masterSlave;           // false: read EXT; true: write EXT
 
         // $2001 PPUMASK
-        private bool flagGrayscale;          // 0: color; 1: grayscale
-        private bool flagShowLeftBackground; // 0: hide; 1: show
-        private bool flagShowLeftSprites;    // 0: hide; 1: show
-        private bool flagShowBackground;     // 0: hide; 1: show
-        private bool flagShowSprites;        // 0: hide; 1: show
-        private bool flagRedTint;            // 0: normal; 1: emphasized
-        private bool flagGreenTint;          // 0: normal; 1: emphasized
-        private bool flagBlueTint;           // 0: normal; 1: emphasized
+        private bool grayscale;             // true: gray scale mode; false: colour mode
+        private bool showLeftBackground;    // 0: hide; 1: show
+        private bool showLeftSprites;       // 0: hide; 1: show
+        private bool showBackground;        // 0: hide; 1: show
+        private bool showSprites;           // 0: hide; 1: show
+        private bool redTint;               // 0: normal; 1: emphasized
+        private bool greenTint;             // 0: normal; 1: emphasized
+        private bool blueTint;              // 0: normal; 1: emphasized
 
         // $2002 PPUSTATUS
-        private bool flagSpriteZeroHit;
-        private bool flagSpriteOverflow;
+        private bool spriteZeroHit;
+        private bool spriteOverflow;
 
         // $2003 OAMADDR
         private byte oamAddress;

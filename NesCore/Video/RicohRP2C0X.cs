@@ -45,7 +45,7 @@ namespace NesCore.Video
                 flagIncrement = (value & 0x04) != 0;
                 flagSpriteTable = (value & 0x08) != 0;
                 flagBackgroundTable = (value & 0x10) != 0;
-                flagSpriteSize = (value & 0x20) != 0;
+                spriteSize = (value & 0x20) != 0 ? SpriteSize.Size8x16 : SpriteSize.Size8x8;
                 flagMasterSlave = (value & 0x40) != 0;
                 nmiOutput = (value & 0x80) != 0;
 
@@ -56,7 +56,7 @@ namespace NesCore.Video
         }
 
         /// <summary>
-        /// Mask register (@001 PPUMASK(
+        /// Mask register ($2001 PPUMASK(
         /// </summary>
         public byte Mask
         {
@@ -91,11 +91,155 @@ namespace NesCore.Video
 
                 nmiOccurred = false;
                 NmiChange();
-                // w:                   = 0
-                w = 0;
+                writeToggle = WriteToggle.First;
                 return result;
             }
         }
+
+        /// <summary>
+        /// Object attribute memory address ($2003 OAMADDR)
+        /// </summary>
+        public byte OAMAddress
+        {
+            set
+            {
+                registerLatch = value;
+                oamAddress = value;
+            }
+        }
+
+        /// <summary>
+        /// Object attribute memory data ($2004 OAMDATA).
+        /// Reads from current OAM address, writes cause OAM address to advance
+        /// </summary>
+        public byte OAMData
+        {
+            get
+            {
+                return oamData[oamAddress];
+            }
+            set
+            {
+                registerLatch = value;
+                oamData[oamAddress++] = value;
+            }
+        }
+
+        /// <summary>
+        /// Scrolling position register ($2005 PPUSCROLL)
+        /// Accepts two sequential writes
+        /// </summary>
+        public byte Scroll
+        {
+            set
+            {
+                registerLatch = value;
+                if (writeToggle == WriteToggle.First)
+                {
+                    // t: ........ ...HGFED = d: HGFED...
+                    // x:               CBA = d: .....CBA
+                    t = (ushort)((t & 0xFFE0) | (value >> 3));
+                    x = (byte)(value & 0x07);
+                    writeToggle = WriteToggle.Second;
+                }
+                else
+                {
+                    // t: .CBA..HG FED..... = d: HGFEDCBA
+                    t = (ushort)((t & 0x8FFF) | ((value & 0x07) << 12));
+                    t = (ushort)((t & 0xFC1F) | ((value & 0xF8) << 2));
+                    writeToggle = WriteToggle.First;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Address register ($2006 PPUADDR)
+        /// Two writes required in high-low byte order
+        /// </summary>
+        public byte Address
+        {
+            set
+            {
+                registerLatch = value;
+                if (writeToggle == WriteToggle.First)
+                {
+                    // write high address byte
+                    // t: ..FEDCBA ........ = d: ..FEDCBA
+                    // t: .X...... ........ = 0
+                    t = (ushort)((t & 0x80FF) | ((value & 0x3F) << 8));
+                    writeToggle = WriteToggle.Second;
+                }
+                else
+                {
+                    // write low address byte
+                    // t: ........ HGFEDCBA = d: HGFEDCBA
+                    // v                    = t
+                    t = (ushort)((t & 0xFF00) | value);
+                    v = t;
+                    writeToggle = WriteToggle.First;
+                }
+            }
+        }
+
+        // $2007: PPUDATA (read)
+        private byte ReadData()
+        {
+            byte value = ReadByte(v);
+            // emulate buffered reads
+            if (v % 0x4000 < 0x3F00)
+            {
+                byte buffered = bufferedData;
+                bufferedData = value;
+                value = buffered;
+            }
+            else
+            {
+                bufferedData = ReadByte((ushort)(v - 0x1000));
+            }
+
+            // increment address
+            if (flagIncrement)
+                v += 0x20;
+            else
+                v += 0x01;
+
+            return value;
+        }
+
+        // $2007: PPUDATA (write)
+        private void WriteData(byte value)
+        {
+            registerLatch = value;
+            WriteByte(v, value);
+
+            // increment address
+            if (flagIncrement)
+                v += 0x20;
+            else
+                v += 0x01;
+        }
+
+        // $4014: OAMDMA
+        private void WriteDMA(byte value)
+        {
+            registerLatch = value;
+
+            ushort address = (ushort)(value << 8);
+
+            for (int i = 0; i < 256; i++)
+                oamData[oamAddress++] = ReadByte(address++);
+
+            //TODO: stall
+            /*
+            cpu.stall += 513
+
+            if cpu.Cycles % 2 == 1 {
+                cpu.stall++
+
+            }*/
+            throw new NotImplementedException();
+        }
+
 
         /// <summary>
         /// resets the PPU
@@ -195,6 +339,10 @@ namespace NesCore.Video
             }
         }
 
+        /// <summary>
+        /// Saves the state of the PPU
+        /// </summary>
+        /// <param name="streamWriter"></param>
         public void Save(StreamWriter streamWriter)
         {
             streamWriter.Write(cycle);
@@ -205,8 +353,8 @@ namespace NesCore.Video
             streamWriter.Write(v);
             streamWriter.Write(t);
             streamWriter.Write(x);
-            streamWriter.Write(w);
-            streamWriter.Write(f);
+            streamWriter.Write(writeToggle);
+            streamWriter.Write(evenFrame);
             streamWriter.Write(nmiOccurred);
             streamWriter.Write(nmiOutput);
             streamWriter.Write(nmiPrevious);
@@ -225,7 +373,7 @@ namespace NesCore.Video
             streamWriter.Write(flagIncrement);
             streamWriter.Write(flagSpriteTable);
             streamWriter.Write(flagBackgroundTable);
-            streamWriter.Write(flagSpriteSize);
+            streamWriter.Write(spriteSize);
             streamWriter.Write(flagMasterSlave);
             streamWriter.Write(flagGrayscale);
             streamWriter.Write(flagShowLeftBackground);
@@ -241,21 +389,13 @@ namespace NesCore.Video
 	        streamWriter.Write(bufferedData);
         }
 
+        /// <summary>
+        /// Restores the state of the PPU
+        /// </summary>
+        /// <param name="streamReader"></param>
         public void Load(StreamReader streamReader)
         {
             throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Object attribute memory address ($2003 OAMADDR)
-        /// </summary>
-        private byte OAMAddress
-        {
-            set
-            {
-                registerLatch = value;
-                oamAddress = value;
-            }
         }
 
         private byte ReadPalette(ushort address)
@@ -270,128 +410,6 @@ namespace NesCore.Video
             if (address >= 16 && address % 4 == 0)
                 address -= 16;
             paletteData[address] = value;
-        }
-
-        /// <summary>
-        /// Object attribute memory data ($2004 OAMDATA).
-        /// Reads from current OAM address, writes cause OAM address to advance
-        /// </summary>
-        private byte OAMData
-        {
-            get
-            {
-                return oamData[oamAddress];
-            }
-            set
-            {
-                registerLatch = value;
-                oamData[oamAddress++] = value;
-            }
-        }
-
-        // $2005: PPUSCROLL
-        private void WriteScroll(byte value)
-        {
-            registerLatch = value;
-            if (w == 0)
-            {
-                // t: ........ ...HGFED = d: HGFED...
-                // x:               CBA = d: .....CBA
-                // w:                   = 1
-                t = (ushort)((t & 0xFFE0) | (value >> 3));
-                x = (byte)(value & 0x07);
-                w = 1;
-            }
-            else
-            {
-                // t: .CBA..HG FED..... = d: HGFEDCBA
-                // w:                   = 0
-                t = (ushort)((t & 0x8FFF) | ((value & 0x07) << 12));
-                t = (ushort)((t & 0xFC1F) | ((value & 0xF8) << 2));
-                w = 0;
-            }
-        }
-
-        // $2006: PPUADDR
-        private void WriteAddress(byte value)
-        {
-            registerLatch = value;
-            if (w == 0)
-            {
-                // t: ..FEDCBA ........ = d: ..FEDCBA
-                // t: .X...... ........ = 0
-                // w:                   = 1
-                t = (ushort)((t & 0x80FF) | ((value & 0x3F) << 8));
-                w = 1;
-            }
-            else
-            {
-                // t: ........ HGFEDCBA = d: HGFEDCBA
-                // v                    = t
-                // w:                   = 0
-                t = (ushort)((t & 0xFF00) | value);
-                v = t;
-                w = 0;
-            }
-        }
-
-        // $2007: PPUDATA (read)
-        private byte ReadData()
-        {
-            byte value = ReadByte(v);
-	        // emulate buffered reads
-	        if (v % 0x4000 < 0x3F00)
-            {
-                byte buffered = bufferedData;
-                bufferedData = value;
-                value = buffered;
-            }
-            else
-            {
-                bufferedData = ReadByte((ushort)(v - 0x1000));
-	        }
-
-	        // increment address
-	        if (flagIncrement)
-                v += 0x20;
-	        else
-                v += 0x01;
-
-            return value;
-        }
-
-        // $2007: PPUDATA (write)
-        private void WriteData(byte value)
-        {
-            registerLatch = value;
-            WriteByte(v, value);
-
-            // increment address
-            if (flagIncrement)
-                v += 0x20;
-            else
-                v += 0x01;
-        }
-
-        // $4014: OAMDMA
-        private void WriteDMA(byte value)
-        {
-            registerLatch = value;
-
-            ushort address = (ushort)(value << 8);
-
-            for (int i = 0; i < 256; i++)
-                oamData[oamAddress++] = ReadByte(address++);
-
-            //TODO: stall
-            /*
-            cpu.stall += 513
-
-            if cpu.Cycles % 2 == 1 {
-                cpu.stall++
-
-            }*/
-            throw new NotImplementedException();
         }
         
         // NTSC Timing Helper Functions
@@ -413,7 +431,7 @@ namespace NesCore.Video
             }
         }
 
-        private void  IncrementY()
+        private void IncrementY()
         {
             // increment vert(v)
             // if fine Y < 7
@@ -658,14 +676,14 @@ namespace NesCore.Video
             byte tile = oamData[i * 4 + 1];
             byte attributes = oamData[i * 4 + 2];
             ushort address = 0;
-            if (!flagSpriteSize)
+            if (spriteSize == SpriteSize.Size8x8)
             {
                 if ((attributes & 0x80) == 0x80)
                     row = 7 - row;
 
                 address = (ushort)(flagSpriteTable ? 0x1000 : 0x0000);
             }
-            else
+            else // 8x16
             {
 		        if ((attributes & 0x80) == 0x80)
                     row = 15 - row;
@@ -710,30 +728,26 @@ namespace NesCore.Video
 
         private void EvaluateSprites()
         {
-            int h = 0;
-
-            h = flagSpriteSize ? 16 : 8;
+            int spriteHeight = spriteSize == SpriteSize.Size8x16 ? 16 : 8;
 
             int count = 0;
-
-            for (int i = 0; i < 64; i++)
+            for (int index = 0; index < 64; index++)
             {
-                byte y = oamData[i * 4 + 0];
-                byte a = oamData[i * 4 + 2];
-                byte x = oamData[i * 4 + 3];
+                byte spriteY = oamData[index * 4 + 0];
+                byte spriteAttributes = oamData[index * 4 + 2];
+                byte spriteX = oamData[index * 4 + 3];
 
-                int row = scanLine - y;
+                int row = scanLine - spriteY;
 
-                if (row < 0 || row >= h)
+                if (row < 0 || row >= spriteHeight)
                     continue;
-
 
                 if (count < 8)
                 {
-                    spritePatterns[count] = FetchSpritePattern(i, row);
-                    spritePositions[count] = x;
-                    spritePriorities[count] = (byte)((a >> 5) & 1);
-                    spriteIndexes[count] = (byte)i;
+                    spritePatterns[count] = FetchSpritePattern(index, row);
+                    spritePositions[count] = spriteX;
+                    spritePriorities[count] = (byte)((spriteAttributes >> 5) & 1);
+                    spriteIndexes[count] = (byte)index;
                 }
                 ++count;
             }
@@ -762,11 +776,11 @@ namespace NesCore.Video
 
             if (flagShowBackground || flagShowSprites)
             {
-                if (f == 1 && scanLine == 261 && cycle == 339)
+                if (evenFrame && scanLine == 261 && cycle == 339)
                 {
                     cycle = 0;
                     scanLine = 0;
-                    f ^= 1;
+                    evenFrame = false;
                     return;
                 }
             }
@@ -780,7 +794,7 @@ namespace NesCore.Video
                 if (scanLine > 261)
                 {
                     scanLine = 0;
-                    f ^= 1;
+                    evenFrame = !evenFrame;
                 }
             }
         }
@@ -797,8 +811,8 @@ namespace NesCore.Video
         private ushort v; // current vram address (15 bit)
         private ushort t; // temporary vram address (15 bit)
         private byte x;  // fine x scroll (3 bit)
-        private byte w;  // write toggle (1 bit)
-        private byte f; // even/odd frame
+        private WriteToggle writeToggle;  // write toggle (1 bit)
+        private bool evenFrame; // even/odd frame
         private byte registerLatch; // status register
         
         // NMI flags
@@ -826,7 +840,7 @@ namespace NesCore.Video
         private bool flagIncrement;        // 0: add 1; 1: add 32
         private bool flagSpriteTable;      // 0: $0000; 1: $1000; ignored in 8x16 mode
         private bool flagBackgroundTable;  // 0: $0000; 1: $1000
-        private bool flagSpriteSize;       // 0: 8x8; 1: 8x16
+        private SpriteSize spriteSize;     // 8x8 or 8x16 pixels
         private bool flagMasterSlave;      // 0: read EXT; 1: write EXT
 
         // $2001 PPUMASK
@@ -848,6 +862,18 @@ namespace NesCore.Video
 
         // $2007 PPUDATA
         private byte bufferedData; // for buffered reads
+
+        private enum WriteToggle
+        {
+            First,
+            Second
+        }
+
+        private enum SpriteSize
+        {
+            Size8x8,
+            Size8x16
+        }
     }
 
 }

@@ -7,10 +7,18 @@ using System.Threading.Tasks;
 
 namespace NesCore.Video
 {
-    // delegate for reading a byte from a givne memory address
+    /// <summary>
+    /// delegate for reading a byte from a givne memory address
+    /// </summary>
+    /// <param name="address">16bit memory address of the byte to read</param>
+    /// <returns></returns>
     public delegate byte ReadByte(ushort address);
 
-    // delegate for writing a byte from a given memory address
+    /// <summary>
+    /// delegate for writing a byte from a given memory address 
+    /// </summary>
+    /// <param name="address">16bit address of the byte to write</param>
+    /// <param name="value">byte value to write at the given address</param>
     public delegate void WriteByte(ushort address, byte value);
 
     // delegate for writing pixel in a frame buffer implementation
@@ -27,10 +35,25 @@ namespace NesCore.Video
         }
 
         // implementation hooks
+
+        /// <summary>
+        /// Memory read hook
+        /// </summary>
         public ReadByte ReadByte { get; set; }
+
+        /// <summary>
+        /// Memory write hook
+        /// </summary>
         public WriteByte WriteByte { get; set; }
 
+        /// <summary>
+        /// Pixel computation hoook
+        /// </summary>
         public WritePixel WritePixel { get; set; }
+
+        /// <summary>
+        /// Frame presentation hook
+        /// </summary>
         public PresentFrame PresentFrame { get; set; }
 
         /// <summary>
@@ -42,16 +65,16 @@ namespace NesCore.Video
             {
                 registerLatch = value;
                 nameTable = (byte)(value & 0x03);
-                flagIncrement = (value & 0x04) != 0;
-                flagSpriteTable = (value & 0x08) != 0;
-                flagBackgroundTable = (value & 0x10) != 0;
+                vramIncrement = (value & 0x04) != 0 ? VramIncrement.Down : VramIncrement.Across;
+                spritePatternTableAddress = (ushort)((value & 0x08) != 0 ? 0x1000 : 0x0000);
+                backgroundPatternTableAddress = (ushort)((value & 0x10) != 0 ? 0x1000 : 0x0000);
                 spriteSize = (value & 0x20) != 0 ? SpriteSize.Size8x16 : SpriteSize.Size8x8;
                 masterSlave = (value & 0x40) != 0;
                 nmiOutput = (value & 0x80) != 0;
 
                 NmiChange();
                 // t: ....BA.. ........ = d: ......BA
-                t = (ushort)((t & 0xF3FF) | ((value & 0x03) << 10));
+                tempAddress = (ushort)((tempAddress & 0xF3FF) | ((value & 0x03) << 10));
             }
         }
 
@@ -99,7 +122,7 @@ namespace NesCore.Video
         /// <summary>
         /// Object attribute memory address ($2003 OAMADDR)
         /// </summary>
-        public byte OAMAddress
+        public byte ObjectAttributeMemoryAddress
         {
             set
             {
@@ -112,7 +135,7 @@ namespace NesCore.Video
         /// Object attribute memory data ($2004 OAMDATA).
         /// Reads from current OAM address, writes cause OAM address to advance
         /// </summary>
-        public byte OAMData
+        public byte ObjectAttributeMemoryData
         {
             get
             {
@@ -138,15 +161,15 @@ namespace NesCore.Video
                 {
                     // t: ........ ...HGFED = d: HGFED...
                     // x:               CBA = d: .....CBA
-                    t = (ushort)((t & 0xFFE0) | (value >> 3));
-                    x = (byte)(value & 0x07);
+                    tempAddress = (ushort)((tempAddress & 0xFFE0) | (value >> 3));
+                    scrollX = (byte)(value & 0x07);
                     writeToggle = WriteToggle.Second;
                 }
                 else
                 {
                     // t: .CBA..HG FED..... = d: HGFEDCBA
-                    t = (ushort)((t & 0x8FFF) | ((value & 0x07) << 12));
-                    t = (ushort)((t & 0xFC1F) | ((value & 0xF8) << 2));
+                    tempAddress = (ushort)((tempAddress & 0x8FFF) | ((value & 0x07) << 12));
+                    tempAddress = (ushort)((tempAddress & 0xFC1F) | ((value & 0xF8) << 2));
                     writeToggle = WriteToggle.First;
                 }
             }
@@ -166,7 +189,7 @@ namespace NesCore.Video
                     // write high address byte
                     // t: ..FEDCBA ........ = d: ..FEDCBA
                     // t: .X...... ........ = 0
-                    t = (ushort)((t & 0x80FF) | ((value & 0x3F) << 8));
+                    tempAddress = (ushort)((tempAddress & 0x80FF) | ((value & 0x3F) << 8));
                     writeToggle = WriteToggle.Second;
                 }
                 else
@@ -174,49 +197,53 @@ namespace NesCore.Video
                     // write low address byte
                     // t: ........ HGFEDCBA = d: HGFEDCBA
                     // v                    = t
-                    t = (ushort)((t & 0xFF00) | value);
-                    v = t;
+                    tempAddress = (ushort)((tempAddress & 0xFF00) | value);
+                    vramAddress = tempAddress;
                     writeToggle = WriteToggle.First;
                 }
             }
         }
 
         // $2007: PPUDATA (read)
-        private byte ReadData()
+        /// <summary>
+        /// Data register ($2007 PPUDATA)
+        /// </summary>
+        public byte Data
         {
-            byte value = ReadByte(v);
-            // emulate buffered reads
-            if (v % 0x4000 < 0x3F00)
+            get
             {
-                byte buffered = bufferedData;
-                bufferedData = value;
-                value = buffered;
+                byte value = ReadByte(vramAddress);
+                // emulate buffered reads
+                if (vramAddress % 0x4000 < 0x3F00)
+                {
+                    byte buffered = bufferedData;
+                    bufferedData = value;
+                    value = buffered;
+                }
+                else
+                {
+                    bufferedData = ReadByte((ushort)(vramAddress - 0x1000));
+                }
+
+                // increment address
+                if (vramIncrement == VramIncrement.Down)
+                    vramAddress += 0x20;
+                else
+                    vramAddress += 0x01;
+
+                return value;
             }
-            else
+            set
             {
-                bufferedData = ReadByte((ushort)(v - 0x1000));
+                registerLatch = value;
+                WriteByte(vramAddress, value);
+
+                // increment address
+                if (vramIncrement == VramIncrement.Down)
+                    vramAddress += 0x20;
+                else
+                    vramAddress += 0x01;
             }
-
-            // increment address
-            if (flagIncrement)
-                v += 0x20;
-            else
-                v += 0x01;
-
-            return value;
-        }
-
-        // $2007: PPUDATA (write)
-        private void WriteData(byte value)
-        {
-            registerLatch = value;
-            WriteByte(v, value);
-
-            // increment address
-            if (flagIncrement)
-                v += 0x20;
-            else
-                v += 0x01;
         }
 
         // $4014: OAMDMA
@@ -251,7 +278,7 @@ namespace NesCore.Video
 
             Control = 0x00;
             Mask = 0x00;
-            OAMAddress = 0x00;
+            ObjectAttributeMemoryAddress = 0x00;
         }
 
         // Step executes a single PPU cycle
@@ -350,9 +377,9 @@ namespace NesCore.Video
             streamWriter.Write(paletteData);
             streamWriter.Write(nameTableData);
             streamWriter.Write(oamData);
-            streamWriter.Write(v);
-            streamWriter.Write(t);
-            streamWriter.Write(x);
+            streamWriter.Write(vramAddress);
+            streamWriter.Write(tempAddress);
+            streamWriter.Write(scrollX);
             streamWriter.Write(writeToggle);
             streamWriter.Write(evenFrame);
             streamWriter.Write(nmiOccurred);
@@ -370,9 +397,9 @@ namespace NesCore.Video
             streamWriter.Write(spritePriorities);
             streamWriter.Write(spriteIndexes);
             streamWriter.Write(nameTable);
-            streamWriter.Write(flagIncrement);
-            streamWriter.Write(flagSpriteTable);
-            streamWriter.Write(flagBackgroundTable);
+            streamWriter.Write(vramIncrement);
+            streamWriter.Write(spritePatternTableAddress);
+            streamWriter.Write(backgroundPatternTableAddress);
             streamWriter.Write(spriteSize);
             streamWriter.Write(masterSlave);
             streamWriter.Write(grayscale);
@@ -417,17 +444,17 @@ namespace NesCore.Video
         {
             // increment hori(v)
             // if coarse X == 31
-            if ((v & 0x001F) == 0x1F)
+            if ((vramAddress & 0x001F) == 0x1F)
             {
                 // coarse X = 0
-                v &= 0xFFE0;
+                vramAddress &= 0xFFE0;
                 // switch horizontal nametable
-                v ^= 0x0400;
+                vramAddress ^= 0x0400;
             }
             else
             {
                 // increment coarse X
-                ++v;
+                ++vramAddress;
             }
         }
 
@@ -435,24 +462,24 @@ namespace NesCore.Video
         {
             // increment vert(v)
             // if fine Y < 7
-            if ((v & 0x7000) != 0x7000)
+            if ((vramAddress & 0x7000) != 0x7000)
             {
                 // increment fine Y
-                v += 0x1000;
+                vramAddress += 0x1000;
             }
             else
             {
                 // fine Y = 0
-                v &= 0x8FFF;
+                vramAddress &= 0x8FFF;
                 // let y = coarse Y
-                int y = (v & 0x03E0) >> 5;
+                int y = (vramAddress & 0x03E0) >> 5;
                       
                 if (y == 29)
                 {
                     // coarse Y = 0
                     y = 0;
                     // switch vertical nametable
-                    v ^= 0x0800;
+                    vramAddress ^= 0x0800;
                 }
                 else if (y == 31)
                 {
@@ -466,7 +493,7 @@ namespace NesCore.Video
                 }
 
                 // put coarse Y back into v
-                v = (ushort)((v & 0xFC1F) | (y << 5));
+                vramAddress = (ushort)((vramAddress & 0xFC1F) | (y << 5));
             }
         }
 
@@ -474,14 +501,14 @@ namespace NesCore.Video
         {
             // hori(v) = hori(t)
             // v: .....F.. ...EDCBA = t: .....F.. ...EDCBA
-            v = (ushort)((v & 0xFBE0) | (t & 0x041F));
+            vramAddress = (ushort)((vramAddress & 0xFBE0) | (tempAddress & 0x041F));
         }
 
         private void CopyY()
         {
             // vert(v) = vert(t)
             // v: .IHGF.ED CBA..... = t: .IHGF.ED CBA.....
-            v = (ushort)((v & 0x841F) | (t & 0x7BE0));
+            vramAddress = (ushort)((vramAddress & 0x841F) | (tempAddress & 0x7BE0));
         }
 
         private void NmiChange()
@@ -516,35 +543,27 @@ namespace NesCore.Video
 
         private void FetchNameTableByte()
         {
-            nameTableByte = ReadByte(v);
+            nameTableByte = ReadByte(vramAddress);
         }
 
         private void FetchAttributeTableByte()
         {
-            ushort address = (ushort)(0x23C0 | (v & 0x0C00) | ((v >> 4) & 0x38) | ((v >> 2) & 0x07));
-            int shift = ((v >> 4) & 4) | (v & 2);
+            ushort address = (ushort)(0x23C0 | (vramAddress & 0x0C00) | ((vramAddress >> 4) & 0x38) | ((vramAddress >> 2) & 0x07));
+            int shift = ((vramAddress >> 4) & 4) | (vramAddress & 2);
             attributeTableByte = (byte)(((ReadByte(address) >> shift) & 3) << 2);
         }
 
         private void FetchLowTileByte()
         {
-            int fineY = (v >> 12) & 7;
-
-            ushort address = (ushort)(flagBackgroundTable ? 0x1000 : 0x0000);
-
-            address += (ushort)(nameTableByte * 16 + fineY);
-
+            int fineY = (vramAddress >> 12) & 7;
+            ushort address = (ushort)(backgroundPatternTableAddress + nameTableByte * 16 + fineY);
             lowTileByte = ReadByte(address);
         }
 
         private void FetchHighTileByte()
         {
-            int fineY = (v >> 12) & 7;
-
-            ushort address = (ushort)(flagBackgroundTable ? 0x1000 : 0x0000);
-
-            address += (ushort)(nameTableByte * 16 + fineY + 8);
-
+            int fineY = (vramAddress >> 12) & 7;
+            ushort address = (ushort)(backgroundPatternTableAddress + nameTableByte * 16 + fineY + 8);
             highTileByte = ReadByte(address);
         }
 
@@ -578,7 +597,7 @@ namespace NesCore.Video
 	        if (showBackground)
                 return 0;
 
-            uint data = FetchTileData() >> ((7 - x) * 4);
+            uint data = FetchTileData() >> ((7 - scrollX) * 4);
             return (byte)(data & 0x0F);
         }
 
@@ -609,7 +628,7 @@ namespace NesCore.Video
 
         private void RenderPixel()
         {
-            x = (byte)(cycle - 1);
+            scrollX = (byte)(cycle - 1);
             byte y = (byte)scanLine;
 
             byte backgroundPixel = GetBackgroundPixel();
@@ -617,10 +636,10 @@ namespace NesCore.Video
             byte spriteIndex = 0;
             byte spritePixel = GetSpritePixel(out spriteIndex);
 
-            if (x < 8 && !flagBackgroundTable)
+            if (scrollX < 8 && backgroundPatternTableAddress == 0x0000)
                 backgroundPixel = 0;
 
-            if (x < 8 && !showLeftSprites)
+            if (scrollX < 8 && !showLeftSprites)
                 spritePixel = 0;
 
             bool opaqueBackground = backgroundPixel % 4 != 0;
@@ -637,7 +656,7 @@ namespace NesCore.Video
                     // opaque background and sprite pixels
 
                     // check sprite 0 hit
-                    if (spriteIndexes[spriteIndex] == 0 && x < 255)
+                    if (spriteIndexes[spriteIndex] == 0 && scrollX < 255)
                         spriteZeroHit = true;
 
                     // determine if sprite or backgroubnd pixel prevails
@@ -668,7 +687,7 @@ namespace NesCore.Video
             }
             
             // hook to write pixel
-            WritePixel(x, y, paletteIndex);
+            WritePixel(scrollX, y, paletteIndex);
         }
 
         private uint FetchSpritePattern(int i, int row)
@@ -681,7 +700,7 @@ namespace NesCore.Video
                 if ((attributes & 0x80) == 0x80)
                     row = 7 - row;
 
-                address = (ushort)(flagSpriteTable ? 0x1000 : 0x0000);
+                address = spritePatternTableAddress;
             }
             else // 8x16
             {
@@ -808,9 +827,9 @@ namespace NesCore.Video
         private byte[] oamData = new byte[256];
 
         // PPU registers
-        private ushort v;                   // current vram address (15 bit)
-        private ushort t;                   // temporary vram address (15 bit)
-        private byte x;                     // fine x scroll (3 bit)
+        private ushort vramAddress;         // current vram address (15 bit)
+        private ushort tempAddress;         // temporary vram address (15 bit)
+        private byte scrollX;               // fine x scroll (3 bit)
         private WriteToggle writeToggle;    // write toggle (1 bit)
         private bool evenFrame;             // even/odd frame
         private byte registerLatch;         // status register
@@ -836,22 +855,22 @@ namespace NesCore.Video
         private byte[] spriteIndexes = new byte[8];
 
         // $2000 PPUCTRL
-        private byte nameTable;             // 0: $2000; 1: $2400; 2: $2800; 3: $2C00
-        private bool flagIncrement;         // 0: add 1; 1: add 32
-        private bool flagSpriteTable;       // 0: $0000; 1: $1000; ignored in 8x16 mode
-        private bool flagBackgroundTable;   // 0: $0000; 1: $1000
-        private SpriteSize spriteSize;      // 8x8 or 8x16 pixels
-        private bool masterSlave;           // false: read EXT; true: write EXT
+        private byte nameTable;                         // 0: $2000; 1: $2400; 2: $2800; 3: $2C00
+        private VramIncrement vramIncrement;            // Across: add 1; Down: add 32
+        private ushort spritePatternTableAddress;       // 0: $0000; 1: $1000; ignored in 8x16 mode
+        private ushort backgroundPatternTableAddress;   // 0: $0000; 1: $1000
+        private SpriteSize spriteSize;                  // 8x8 or 8x16 pixels
+        private bool masterSlave;                       // false: read EXT; true: write EXT
 
         // $2001 PPUMASK
         private bool grayscale;             // true: gray scale mode; false: colour mode
-        private bool showLeftBackground;    // 0: hide; 1: show
-        private bool showLeftSprites;       // 0: hide; 1: show
-        private bool showBackground;        // 0: hide; 1: show
-        private bool showSprites;           // 0: hide; 1: show
-        private bool redTint;               // 0: normal; 1: emphasized
-        private bool greenTint;             // 0: normal; 1: emphasized
-        private bool blueTint;              // 0: normal; 1: emphasized
+        private bool showLeftBackground;    // false: hide;   true: show
+        private bool showLeftSprites;       // false: hide;   true: show
+        private bool showBackground;        // false: hide;   true: show
+        private bool showSprites;           // false: hide;   true: show
+        private bool redTint;               // false: normal; true: emphasized
+        private bool greenTint;             // false: normal; true: emphasized
+        private bool blueTint;              // false: normal; true: emphasized
 
         // $2002 PPUSTATUS
         private bool spriteZeroHit;
@@ -873,6 +892,12 @@ namespace NesCore.Video
         {
             Size8x8,
             Size8x16
+        }
+
+        private enum VramIncrement
+        {
+            Across,
+            Down
         }
     }
 

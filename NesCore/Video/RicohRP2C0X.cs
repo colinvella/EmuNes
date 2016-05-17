@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,164 +33,229 @@ namespace NesCore.Video
         public WritePixel WritePixel { get; set; }
         public PresentFrame PresentFrame { get; set; }
 
+        /// <summary>
+        /// Control register ($2000 PPUCTRL)
+        /// </summary>
+        public byte Control
+        {
+            set
+            {
+                registerLatch = value;
+                flagNameTable = (byte)(value & 0x03);
+                flagIncrement = (value & 0x04) != 0;
+                flagSpriteTable = (value & 0x08) != 0;
+                flagBackgroundTable = (value & 0x10) != 0;
+                flagSpriteSize = (value & 0x20) != 0;
+                flagMasterSlave = (value & 0x40) != 0;
+                nmiOutput = (value & 0x80) != 0;
+
+                NmiChange();
+                // t: ....BA.. ........ = d: ......BA
+                t = (ushort)((t & 0xF3FF) | ((value & 0x03) << 10));
+            }
+        }
+
+        /// <summary>
+        /// Mask register (@001 PPUMASK(
+        /// </summary>
+        public byte Mask
+        {
+            set
+            {
+                registerLatch = value;
+                flagGrayscale = (value & 0x01) != 0;
+                flagShowLeftBackground = (value & 0x02) != 0;
+                flagShowLeftSprites = (value & 0x04) != 0;
+                flagShowBackground = (value & 0x08) != 0;
+                flagShowSprites = (value & 0x10) != 0;
+                flagRedTint = (value & 0x20) != 0;
+                flagGreenTint = (value & 0x40) != 0;
+                flagBlueTint = (value & 0x80) != 0;
+            }
+        }
+
+        /// <summary>
+        /// Status register ($2002 PPUSTATUS)
+        /// </summary>
+        public byte Status
+        {
+            get
+            {
+                byte result = (byte)(registerLatch & 0x1F);
+                if (flagSpriteOverflow)
+                    result |= 0x20;
+                if (flagSpriteZeroHit)
+                    result |= 0x40;
+                if (nmiOccurred)
+                    result |= 0x80;
+
+                nmiOccurred = false;
+                NmiChange();
+                // w:                   = 0
+                w = 0;
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// resets the PPU
+        /// </summary>
         public void Reset()
         {
             cycle = 340;
             scanLine = 240;
 
-            WriteControl(0);
-            WriteMask(0);
-            WriteOAMAddress(0);
+            Control = 0x00;
+            Mask = 0x00;
+            OAMAddress = 0x00;
         }
 
-        // $2000: PPUCTRL
-        public void WriteControl(byte value)
+        // Step executes a single PPU cycle
+        public void Step()
         {
-            flagNameTable = (byte)(value & 0x03);
-            flagIncrement = (value & 0x04) != 0;
-            flagSpriteTable = (value & 0x08) != 0;
-            flagBackgroundTable = (value & 0x10) != 0;
-            flagSpriteSize = (value & 0x20) != 0;
-            flagMasterSlave = (value & 0x40) != 0;
-            nmiOutput = (value & 0x80) != 0;
+            Tick();
 
-            NmiChange();
-            // t: ....BA.. ........ = d: ......BA
-            t = (ushort)((t & 0xF3FF) | ((value & 0x03) << 10));
+            bool renderingEnabled = flagShowBackground || flagShowSprites;
+            bool preLine = scanLine == 261;
+            bool visibleLine = scanLine < 240;
+            // postLine := ppu.ScanLine == 240
+            bool renderLine = preLine || visibleLine;
+
+            bool preFetchCycle = cycle >= 321 && cycle <= 336;
+            bool visibleCycle = cycle >= 1 && cycle <= 256;
+            bool fetchCycle = preFetchCycle || visibleCycle;
+
+            // background logic
+            if (renderingEnabled)
+            {
+                if (visibleLine && visibleCycle)
+                    RenderPixel();
+
+                if (renderLine && fetchCycle)
+                {
+                    tileData <<= 4;
+
+                    switch (cycle % 8)
+                    {
+                        case 1:
+                            FetchNameTableByte();
+                            break;
+                        case 3:
+                            FetchAttributeTableByte();
+                            break;
+                        case 5:
+                            FetchLowTileByte();
+                            break;
+                        case 7:
+                            FetchHighTileByte();
+                            break;
+                        case 0:
+                            StoreTileData();
+                            break;
+                    }
+                }
+
+                if (preLine && cycle >= 280 && cycle <= 304)
+                    CopyY();
+
+                if (renderLine)
+                {
+                    if (fetchCycle && cycle % 8 == 0)
+                        IncrementX();
+
+                    if (cycle == 256)
+                        IncrementY();
+
+                    if (cycle == 257)
+                        CopyX();
+                }
+            }
+
+            // sprite logic
+            if (renderingEnabled)
+            {
+                if (cycle == 257)
+                {
+                    if (visibleLine)
+                        EvaluateSprites();
+                    else
+                        spriteCount = 0;
+                }
+            }
+
+            // vblank logic
+            if (scanLine == 241 && cycle == 1)
+                SetVerticalBlank();
+
+            if (preLine && cycle == 1)
+            {
+                ClearVerticalBlank();
+                flagSpriteZeroHit = false;
+                flagSpriteOverflow = false;
+            }
         }
 
-        // $2001: PPUMASK
-        public void WriteMask(byte value)
+        public void Save(StreamWriter streamWriter)
         {
-            flagGrayscale = (value & 0x01) != 0;
-            flagShowLeftBackground = (value & 0x02) != 0;
-            flagShowLeftSprites = (value & 0x04) != 0;
-            flagShowBackground = (value & 0x08) != 0;
-            flagShowSprites = (value & 0x10) != 0;
-            flagRedTint = (value & 0x20) != 0;
-            flagGreenTint = (value & 0x40) != 0;
-            flagBlueTint = (value & 0x80) != 0;
+            streamWriter.Write(cycle);
+            streamWriter.Write(scanLine);
+            streamWriter.Write(paletteData);
+            streamWriter.Write(nameTableData);
+            streamWriter.Write(oamData);
+            streamWriter.Write(v);
+            streamWriter.Write(t);
+            streamWriter.Write(x);
+            streamWriter.Write(w);
+            streamWriter.Write(f);
+            streamWriter.Write(nmiOccurred);
+            streamWriter.Write(nmiOutput);
+            streamWriter.Write(nmiPrevious);
+            streamWriter.Write(nmiDelay);
+            streamWriter.Write(nameTableByte);
+            streamWriter.Write(attributeTableByte);
+            streamWriter.Write(lowTileByte);
+            streamWriter.Write(highTileByte);
+            streamWriter.Write(tileData);
+            streamWriter.Write(spriteCount);
+            streamWriter.Write(spritePatterns);
+            streamWriter.Write(spritePositions);
+            streamWriter.Write(spritePriorities);
+            streamWriter.Write(spriteIndexes);
+            streamWriter.Write(flagNameTable);
+            streamWriter.Write(flagIncrement);
+            streamWriter.Write(flagSpriteTable);
+            streamWriter.Write(flagBackgroundTable);
+            streamWriter.Write(flagSpriteSize);
+            streamWriter.Write(flagMasterSlave);
+            streamWriter.Write(flagGrayscale);
+            streamWriter.Write(flagShowLeftBackground);
+            streamWriter.Write(flagShowLeftSprites);
+            streamWriter.Write(flagShowBackground);
+            streamWriter.Write(flagShowSprites);
+            streamWriter.Write(flagRedTint);
+            streamWriter.Write(flagGreenTint);
+            streamWriter.Write(flagBlueTint);
+            streamWriter.Write(flagSpriteZeroHit);
+            streamWriter.Write(flagSpriteOverflow);
+	        streamWriter.Write(oamAddress);
+	        streamWriter.Write(bufferedData);
         }
 
-        // $2002: PPUSTATUS
-        public byte ReadStatus()
-        {
-            byte result = (byte)(register & 0x1F);
-            if (flagSpriteOverflow)
-                result |= 0x20;
-            if (flagSpriteZeroHit)
-                result |= 0x40;
-            if (nmiOccurred)
-                result |= 0x80;
-
-            nmiOccurred = false;
-            NmiChange();
-            // w:                   = 0
-            w = 0;
-            return result;
-        }
-
-        public void Save()
+        public void Load(StreamReader streamReader)
         {
             throw new NotImplementedException();
-            /*
-	        encoder.Encode(ppu.Cycle)
-	        encoder.Encode(ppu.ScanLine)
-	        encoder.Encode(ppu.Frame)
-	        encoder.Encode(ppu.paletteData)
-	        encoder.Encode(ppu.nameTableData)
-	        encoder.Encode(ppu.oamData)
-	        encoder.Encode(ppu.v)
-	        encoder.Encode(ppu.t)
-	        encoder.Encode(ppu.x)
-	        encoder.Encode(ppu.w)
-	        encoder.Encode(ppu.f)
-	        encoder.Encode(ppu.register)
-	        encoder.Encode(ppu.nmiOccurred)
-	        encoder.Encode(ppu.nmiOutput)
-	        encoder.Encode(ppu.nmiPrevious)
-	        encoder.Encode(ppu.nmiDelay)
-	        encoder.Encode(ppu.nameTableByte)
-	        encoder.Encode(ppu.attributeTableByte)
-	        encoder.Encode(ppu.lowTileByte)
-	        encoder.Encode(ppu.highTileByte)
-	        encoder.Encode(ppu.tileData)
-	        encoder.Encode(ppu.spriteCount)
-	        encoder.Encode(ppu.spritePatterns)
-	        encoder.Encode(ppu.spritePositions)
-	        encoder.Encode(ppu.spritePriorities)
-	        encoder.Encode(ppu.spriteIndexes)
-	        encoder.Encode(ppu.flagNameTable)
-	        encoder.Encode(ppu.flagIncrement)
-	        encoder.Encode(ppu.flagSpriteTable)
-	        encoder.Encode(ppu.flagBackgroundTable)
-	        encoder.Encode(ppu.flagSpriteSize)
-	        encoder.Encode(ppu.flagMasterSlave)
-	        encoder.Encode(ppu.flagGrayscale)
-	        encoder.Encode(ppu.flagShowLeftBackground)
-	        encoder.Encode(ppu.flagShowLeftSprites)
-	        encoder.Encode(ppu.flagShowBackground)
-	        encoder.Encode(ppu.flagShowSprites)
-	        encoder.Encode(ppu.flagRedTint)
-	        encoder.Encode(ppu.flagGreenTint)
-	        encoder.Encode(ppu.flagBlueTint)
-	        encoder.Encode(ppu.flagSpriteZeroHit)
-	        encoder.Encode(ppu.flagSpriteOverflow)
-	        encoder.Encode(ppu.oamAddress)
-	        encoder.Encode(ppu.bufferedData)
-            */
         }
 
-        public void Load()
+        /// <summary>
+        /// Object attribute memory address ($2003 OAMADDR)
+        /// </summary>
+        private byte OAMAddress
         {
-            throw new NotImplementedException();
-            /*
-            decoder.Decode(&ppu.Cycle)
-            decoder.Decode(&ppu.ScanLine)
-            decoder.Decode(&ppu.Frame)
-            decoder.Decode(&ppu.paletteData)
-            decoder.Decode(&ppu.nameTableData)
-            decoder.Decode(&ppu.oamData)
-            decoder.Decode(&ppu.v)
-            decoder.Decode(&ppu.t)
-            decoder.Decode(&ppu.x)
-            decoder.Decode(&ppu.w)
-            decoder.Decode(&ppu.f)
-            decoder.Decode(&ppu.register)
-            decoder.Decode(&ppu.nmiOccurred)
-            decoder.Decode(&ppu.nmiOutput)
-            decoder.Decode(&ppu.nmiPrevious)
-            decoder.Decode(&ppu.nmiDelay)
-            decoder.Decode(&ppu.nameTableByte)
-            decoder.Decode(&ppu.attributeTableByte)
-            decoder.Decode(&ppu.lowTileByte)
-            decoder.Decode(&ppu.highTileByte)
-            decoder.Decode(&ppu.tileData)
-            decoder.Decode(&ppu.spriteCount)
-            decoder.Decode(&ppu.spritePatterns)
-            decoder.Decode(&ppu.spritePositions)
-            decoder.Decode(&ppu.spritePriorities)
-            decoder.Decode(&ppu.spriteIndexes)
-            decoder.Decode(&ppu.flagNameTable)
-            decoder.Decode(&ppu.flagIncrement)
-            decoder.Decode(&ppu.flagSpriteTable)
-            decoder.Decode(&ppu.flagBackgroundTable)
-            decoder.Decode(&ppu.flagSpriteSize)
-            decoder.Decode(&ppu.flagMasterSlave)
-            decoder.Decode(&ppu.flagGrayscale)
-            decoder.Decode(&ppu.flagShowLeftBackground)
-            decoder.Decode(&ppu.flagShowLeftSprites)
-            decoder.Decode(&ppu.flagShowBackground)
-            decoder.Decode(&ppu.flagShowSprites)
-            decoder.Decode(&ppu.flagRedTint)
-            decoder.Decode(&ppu.flagGreenTint)
-            decoder.Decode(&ppu.flagBlueTint)
-            decoder.Decode(&ppu.flagSpriteZeroHit)
-            decoder.Decode(&ppu.flagSpriteOverflow)
-            decoder.Decode(&ppu.oamAddress)
-            decoder.Decode(&ppu.bufferedData)
-
-             */
+            set
+            {
+                registerLatch = value;
+                oamAddress = value;
+            }
         }
 
         private byte ReadPalette(ushort address)
@@ -206,27 +272,27 @@ namespace NesCore.Video
             paletteData[address] = value;
         }
 
-        // $2003: OAMADDR
-        private void WriteOAMAddress(byte value )
+        /// <summary>
+        /// Object attribute memory data ($2004 OAMDATA).
+        /// Reads from current OAM address, writes cause OAM address to advance
+        /// </summary>
+        private byte OAMData
         {
-            oamAddress = value;
-        }
-
-        // $2004: OAMDATA (read)
-        private byte ReadOAMData()
-        {
-            return oamData[oamAddress];
-        }
-
-        // $2004: OAMDATA (write)
-        private void WriteOAMData(byte value)
-        {
-            oamData[oamAddress++] = value;
+            get
+            {
+                return oamData[oamAddress];
+            }
+            set
+            {
+                registerLatch = value;
+                oamData[oamAddress++] = value;
+            }
         }
 
         // $2005: PPUSCROLL
         private void WriteScroll(byte value)
         {
+            registerLatch = value;
             if (w == 0)
             {
                 // t: ........ ...HGFED = d: HGFED...
@@ -249,6 +315,7 @@ namespace NesCore.Video
         // $2006: PPUADDR
         private void WriteAddress(byte value)
         {
+            registerLatch = value;
             if (w == 0)
             {
                 // t: ..FEDCBA ........ = d: ..FEDCBA
@@ -296,6 +363,7 @@ namespace NesCore.Video
         // $2007: PPUDATA (write)
         private void WriteData(byte value)
         {
+            registerLatch = value;
             WriteByte(v, value);
 
             // increment address
@@ -308,7 +376,7 @@ namespace NesCore.Video
         // $4014: OAMDMA
         private void WriteDMA(byte value)
         {
-            //cpu = ppu.console.CPU
+            registerLatch = value;
 
             ushort address = (ushort)(value << 8);
 
@@ -717,13 +785,6 @@ namespace NesCore.Video
             }
         }
 
-
-
-
-
-
-
-
         private int cycle; // 0-340
         private int scanLine; // 0-261, 0-239=visible, 240=post, 241-260=vblank, 261=pre
 
@@ -738,9 +799,8 @@ namespace NesCore.Video
         private byte x;  // fine x scroll (3 bit)
         private byte w;  // write toggle (1 bit)
         private byte f; // even/odd frame
-
-        private byte register;
-
+        private byte registerLatch; // status register
+        
         // NMI flags
         private bool nmiOccurred;
         private bool nmiOutput;
@@ -791,80 +851,3 @@ namespace NesCore.Video
     }
 
 }
-
-/*
- *package nes
-
-
-
-// Step executes a single PPU cycle
-func (ppu *PPU) Step() {
-	ppu.tick()
-
-	renderingEnabled := ppu.flagShowBackground != 0 || ppu.flagShowSprites != 0
-	preLine := ppu.ScanLine == 261
-	visibleLine := ppu.ScanLine < 240
-	// postLine := ppu.ScanLine == 240
-	renderLine := preLine || visibleLine
-	preFetchCycle := ppu.Cycle >= 321 && ppu.Cycle <= 336
-	visibleCycle := ppu.Cycle >= 1 && ppu.Cycle <= 256
-	fetchCycle := preFetchCycle || visibleCycle
-
-	// background logic
-	if renderingEnabled {
-		if visibleLine && visibleCycle {
-			ppu.renderPixel()
-		}
-		if renderLine && fetchCycle {
-			ppu.tileData <<= 4
-			switch ppu.Cycle % 8 {
-			case 1:
-				ppu.fetchNameTableByte()
-			case 3:
-				ppu.fetchAttributeTableByte()
-			case 5:
-				ppu.fetchLowTileByte()
-			case 7:
-				ppu.fetchHighTileByte()
-			case 0:
-				ppu.storeTileData()
-			}
-		}
-		if preLine && ppu.Cycle >= 280 && ppu.Cycle <= 304 {
-			ppu.copyY()
-		}
-		if renderLine {
-			if fetchCycle && ppu.Cycle%8 == 0 {
-				ppu.incrementX()
-			}
-			if ppu.Cycle == 256 {
-				ppu.incrementY()
-			}
-			if ppu.Cycle == 257 {
-				ppu.copyX()
-			}
-		}
-	}
-
-	// sprite logic
-	if renderingEnabled {
-		if ppu.Cycle == 257 {
-			if visibleLine {
-				ppu.evaluateSprites()
-			} else {
-				ppu.spriteCount = 0
-			}
-		}
-	}
-
-	// vblank logic
-	if ppu.ScanLine == 241 && ppu.Cycle == 1 {
-		ppu.setVerticalBlank()
-	}
-	if preLine && ppu.Cycle == 1 {
-		ppu.clearVerticalBlank()
-		ppu.flagSpriteZeroHit = 0
-		ppu.flagSpriteOverflow = 0
-	}
-}
- */

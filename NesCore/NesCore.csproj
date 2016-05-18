@@ -37,6 +37,8 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Input\Controller.cs" />
+    <Compile Include="Input\Joypad.cs" />
     <Compile Include="Memory\ConfigurableMemoryMap.cs" />
     <Compile Include="Console.cs" />
     <Compile Include="Memory\IMemoryMap.cs" />

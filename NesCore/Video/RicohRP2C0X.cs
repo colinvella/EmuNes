@@ -61,6 +61,10 @@ namespace NesCore.Video
         /// </summary>
         public byte Control
         {
+            get
+            {
+                return registerLatch;
+            }
             set
             {
                 registerLatch = value;
@@ -83,6 +87,10 @@ namespace NesCore.Video
         /// </summary>
         public byte Mask
         {
+            get
+            {
+                return registerLatch;
+            }
             set
             {
                 registerLatch = value;
@@ -117,6 +125,10 @@ namespace NesCore.Video
                 writeToggle = WriteToggle.First;
                 return result;
             }
+            set
+            {
+                registerLatch = value;
+            }
         }
 
         /// <summary>
@@ -124,6 +136,10 @@ namespace NesCore.Video
         /// </summary>
         public byte ObjectAttributeMemoryAddress
         {
+            get
+            {
+                return registerLatch;
+            }
             set
             {
                 registerLatch = value;
@@ -154,6 +170,10 @@ namespace NesCore.Video
         /// </summary>
         public byte Scroll
         {
+            get
+            {
+                return registerLatch;
+            }
             set
             {
                 registerLatch = value;
@@ -181,6 +201,10 @@ namespace NesCore.Video
         /// </summary>
         public byte Address
         {
+            get
+            {
+                return registerLatch;
+            }
             set
             {
                 registerLatch = value;
@@ -246,25 +270,25 @@ namespace NesCore.Video
             }
         }
 
-        // $4014: OAMDMA
-        private void WriteDMA(byte value)
+        /// <summary>
+        /// Direct memory access write for object attribute memory ($4014 OAMDMA)
+        /// Write-only high byte (page) address for data to copy into the OAM
+        /// </summary>
+        public byte ObjectAttributeDirectMemoryAccess
         {
-            registerLatch = value;
+            get
+            {
+                return registerLatch;
+            }
+            set
+            {
+                registerLatch = value;
 
-            ushort address = (ushort)(value << 8);
+                ushort address = (ushort)(value << 8);
 
-            for (int i = 0; i < 256; i++)
-                oamData[oamAddress++] = ReadByte(address++);
-
-            //TODO: stall
-            /*
-            cpu.stall += 513
-
-            if cpu.Cycles % 2 == 1 {
-                cpu.stall++
-
-            }*/
-            throw new NotImplementedException();
+                for (int i = 0; i < 256; i++)
+                    oamData[oamAddress++] = ReadByte(address++);
+            }
         }
 
 

@@ -51,6 +51,12 @@ namespace NesCore.Memory
             set { writeMemoryHandlers[address](address, value);  }
         }
 
+        /// <summary>
+        /// Configure memory mirroring for a given address range
+        /// </summary>
+        /// <param name="baseAddress">base address of the memory segment to be mirrored</param>
+        /// <param name="mirroredSegmentLength">length of the memory to be mirrored, starting at the base address</param>
+        /// <param name="range">length of the memory range to be mirrored (a multiple of the mirrored segment length)</param>
         public void ConfigureAddressMirroring(ushort baseAddress, ushort mirroredSegmentLength, ushort range)
         {
             if (baseAddress + range > Size)
@@ -75,11 +81,88 @@ namespace NesCore.Memory
             }
         }
 
+        /// <summary>
+        /// Configure memory read and write handlers for a given memory address range
+        /// </summary>
+        /// <param name="startAddress">starting address to configure</param>
+        /// <param name="length">length of the address range to configure</param>
+        /// <param name="readMemoryHandler">delegate to handle memory reads at the given address range</param>
+        /// <param name="writeMemoryHandler">delegate to handle memory writes at the given address range</param>
+        public void ConfigureMemoryAccessRange(ushort startAddress, ushort length, ReadMemoryHandler readMemoryHandler, WriteMemoryHandler writeMemoryHandler)
+        {
+            int endAddressExclusive = startAddress + length;
+
+            if (endAddressExclusive > Size)
+                throw new ArgumentOutOfRangeException("length");
+
+            for (ushort address = startAddress; address < endAddressExclusive; address++)
+            {
+                readMemoryHandlers[address] = readMemoryHandler;
+                writeMemoryHandlers[address] = writeMemoryHandler;
+            }
+        }
+
+        /// <summary>
+        /// Configure a memory read handler for a given memory address range
+        /// </summary>
+        /// <param name="startAddress">starting address to configure</param>
+        /// <param name="length">length of the address range to configure</param>
+        /// <param name="readMemoryHandler">delegate to handle memory reads at the given address range</param>
+        public void ConfigureMemoryReadRange(ushort startAddress, ushort length, ReadMemoryHandler readMemoryHandler)
+        {
+            int endAddressExclusive = startAddress + length;
+
+            if (endAddressExclusive > Size)
+                throw new ArgumentOutOfRangeException("length");
+
+            for (ushort address = startAddress; address < endAddressExclusive; address++)
+                readMemoryHandlers[address] = readMemoryHandler;
+        }
+
+        /// <summary>
+        /// Configure a memory write handler for a given memory address range
+        /// </summary>
+        /// <param name="startAddress">starting address to configure</param>
+        /// <param name="length">length of the address range to configure</param>
+        /// <param name="writeMemoryHandler">delegate to handle memory writes at the given address range</param>
+        public void ConfigureMemoryWriteRange(ushort startAddress, ushort length, WriteMemoryHandler writeMemoryHandler)
+        {
+            int endAddressExclusive = startAddress + length;
+
+            if (endAddressExclusive > Size)
+                throw new ArgumentOutOfRangeException("length");
+
+            for (ushort address = startAddress; address < endAddressExclusive; address++)
+                writeMemoryHandlers[address] = writeMemoryHandler;
+        }
+
+        /// <summary>
+        /// Configure memory read and write handlers for a given memory address
+        /// </summary>
+        /// <param name="address">Memory address to associate to the handlers</param>
+        /// <param name="readMemoryHandler">delegate to handle memory reads at the given address</param>
+        /// <param name="writeMemoryHandler">delegate to handle memory writes at the given address</param>
+        public void ConfigureMemoryAccess(ushort address, ReadMemoryHandler readMemoryHandler, WriteMemoryHandler writeMemoryHandler)
+        {
+            readMemoryHandlers[address] = readMemoryHandler;
+            writeMemoryHandlers[address] = writeMemoryHandler;
+        }
+
+        /// <summary>
+        /// Configure a memory read handler for a given memory address
+        /// </summary>
+        /// <param name="address">Memory address to associate to the read handler</param>
+        /// <param name="readMemoryHandler">delegate to handle memory reads at the given address</param>
         public void ConfigureMemoryRead(ushort address, ReadMemoryHandler readMemoryHandler)
         {
             readMemoryHandlers[address] = readMemoryHandler;
         }
 
+        /// <summary>
+        /// Configure a memory write handler for a given memory address
+        /// </summary>
+        /// <param name="address">Memory address to associate to the write handler</param>
+        /// <param name="writeMemoryHandler">delegate to handle memory writes at the given address</param>
         public void ConfigureMemoryWrite(ushort address, WriteMemoryHandler writeMemoryHandler)
         {
             writeMemoryHandlers[address] = writeMemoryHandler;

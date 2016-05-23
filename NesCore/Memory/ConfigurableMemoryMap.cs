@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NesCore.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,13 +9,30 @@ namespace NesCore.Memory
 {
     public class ConfigurableMemoryMap : IMemoryMap
     {
-        public const int Size = ushort.MaxValue + 1;
-
+        /// <summary>
+        /// Delegate for memory read handler
+        /// </summary>
+        /// <param name="address">Address from where to read value</param>
+        /// <returns>Byte value read from the given address</returns>
         public delegate byte ReadMemoryHandler(ushort address);
+
+        /// <summary>
+        /// Delegate for memory write handler
+        /// </summary>
+        /// <param name="address">Address where to write value</param>
+        /// <param name="value">Byte value written at the given address</param>
         public delegate void WriteMemoryHandler(ushort address, byte value);
 
-        public ConfigurableMemoryMap()
+        /// <summary>
+        /// Constructs a configurable memory map of the given size
+        /// </summary>
+        /// <param name="size">Size in bytes of the memory map (min: 0x0001, max: 0x10000</param>
+        public ConfigurableMemoryMap(uint size)
         {
+            if (size <= 0 || size > ushort.MaxValue + 1)
+                throw new ArgumentOutOfRangeException("size");
+            Size = size;
+
             readMemoryHandlers = new ReadMemoryHandler[Size];
             writeMemoryHandlers = new WriteMemoryHandler[Size];
             memory = new byte[Size];
@@ -22,6 +40,23 @@ namespace NesCore.Memory
             ResetConfiguration();
         }
 
+        /// <summary>
+        /// Constructs a configurable memory map of 0x10000 (64k bytes)
+        /// </summary>
+        public ConfigurableMemoryMap()
+            : this(ushort.MaxValue + 1)
+        {
+        }
+
+        /// <summary>
+        /// Size of the memory map
+        /// </summary>
+        public uint Size { get; private set; }
+
+        /// <summary>
+        /// Resets memory map's configuration to use default read and write handlers
+        /// that simple store and retrieve data from a byte array
+        /// </summary>
         public void ResetConfiguration()
         {
             for (int handlerIndex = 0; handlerIndex < Size; handlerIndex++)
@@ -47,8 +82,16 @@ namespace NesCore.Memory
         /// <returns></returns>
         public byte this[ushort address]
         {
-            get { return readMemoryHandlers[address](address); }
-            set { writeMemoryHandlers[address](address, value);  }
+            get
+            {
+                CheckAddressRange(address);
+                return readMemoryHandlers[address](address);
+            }
+            set
+            {
+                CheckAddressRange(address);
+                writeMemoryHandlers[address](address, value);
+            }
         }
 
         /// <summary>
@@ -166,6 +209,17 @@ namespace NesCore.Memory
         public void ConfigureMemoryWrite(ushort address, WriteMemoryHandler writeMemoryHandler)
         {
             writeMemoryHandlers[address] = writeMemoryHandler;
+        }
+
+        /// <summary>
+        /// Verify that the address is valid for the given memory map size and throw an
+        /// exception otherwise
+        /// </summary>
+        /// <param name="address"></param>
+        private void CheckAddressRange(ushort address)
+        {
+            if (address >= Size)
+                throw new IndexOutOfRangeException("address");
         }
 
         private byte[] memory;

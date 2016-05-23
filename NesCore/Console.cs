@@ -40,7 +40,7 @@ namespace NesCore
 
         private ConfigurableMemoryMap CreateConfiguredMemoryMap()
         {
-            ConfigurableMemoryMap memory = new ConfigurableMemoryMap();
+            ConfigurableMemoryMap memory = new ConfigurableMemoryMap(MemorySize);
 
             // work ram mirrored 4 times (4 x $800 segments)
             memory.ConfigureAddressMirroring(0x000, 0x0800, 0x2000);
@@ -108,5 +108,7 @@ namespace NesCore
             Memory.ConfigureMemoryRead(portAddress, (address) => controller.Port);
             Memory.ConfigureMemoryWrite(portAddress, (address, value) => controller.Port = value);
         }
+
+        private const uint MemorySize = ushort.MaxValue + 1;
     }
 }

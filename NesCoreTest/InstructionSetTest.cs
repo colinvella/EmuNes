@@ -9,7 +9,7 @@ namespace NesCoreTest
     public class InstructionSetTest
     {
         [TestMethod]
-        public void CheckDefinition()
+        public void TestInstructionDefinitions()
         {
             Mos6502 processor = new Mos6502();
             byte opCode = 0;

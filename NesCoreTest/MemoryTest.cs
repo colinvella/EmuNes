@@ -11,7 +11,29 @@ namespace NesCoreTest
     {
         public MemoryTest()
         {
-            memoryMap = new ConfigurableMemoryMap();
+            memoryMap = new ConfigurableMemoryMap(0x8000);
+        }
+
+        [TestMethod, TestCategory("Memory")]
+        public void TestMemoryRange()
+        {
+            try
+            {
+                byte value = memoryMap[0x7FFF];
+            }
+            catch (Exception exception)
+            {
+                Assert.Fail("Address $7FFF should be accessible. Exception message: " + exception.Message);
+            }
+
+            try
+            {
+                byte value = memoryMap[0x8000];
+                Assert.Fail("Address $8000 should not be accessible");
+            }
+            catch (Exception)
+            {
+            }
         }
 
         [TestMethod, TestCategory("Memory")]
@@ -49,7 +71,7 @@ namespace NesCoreTest
             while ((DateTime.Now - dateTimeStart).TotalSeconds < testDuration)
             {
                 byte value = (byte)random.Next();
-                ushort address = (ushort)random.Next();
+                ushort address = (ushort)(random.Next() % memoryMap.Size);
                 memoryMap[address] = value;
                 ++writes;
             }

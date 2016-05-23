@@ -6,6 +6,11 @@
     public interface IMemoryMap
     {
         /// <summary>
+        /// The size of the memory map
+        /// </summary>
+        uint Size { get; }
+
+        /// <summary>
         /// Initialises all the memory locations to zeroes
         /// </summary>
         void Wipe();

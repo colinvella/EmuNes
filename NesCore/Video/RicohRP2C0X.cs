@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NesCore.Memory;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,54 +8,48 @@ using System.Threading.Tasks;
 
 namespace NesCore.Video
 {
-    /// <summary>
-    /// delegate for reading a byte from a givne memory address
-    /// </summary>
-    /// <param name="address">16bit memory address of the byte to read</param>
-    /// <returns></returns>
-    public delegate byte ReadByte(ushort address);
-
-    /// <summary>
-    /// delegate for writing a byte from a given memory address 
-    /// </summary>
-    /// <param name="address">16bit address of the byte to write</param>
-    /// <param name="value">byte value to write at the given address</param>
-    public delegate void WriteByte(ushort address, byte value);
-
-    // delegate for writing pixel in a frame buffer implementation
-    public delegate void WritePixel(byte x, byte y, byte paletteIndex);
-
-    // delegate for presenting the frame on vblank
-    public delegate void PresentFrame();
-
     public class RicohRP2C0X
     {
+        /// <summary>
+        /// delegate for reading a byte from a given address within main memory
+        /// </summary>
+        /// <param name="address">16bit main memory address of the byte to read</param>
+        /// <returns></returns>
+        public delegate byte ReadByteHandler(ushort address);
+
+        // delegate for writing pixel in a frame buffer implementation
+        public delegate void WritePixelHandler(byte x, byte y, byte paletteIndex);
+
+        // delegate for presenting the frame on vblank
+        public delegate void PresentFrameHandler();
+
+        /// <summary>
+        /// Constructs a new PPU
+        /// </summary>
         public RicohRP2C0X()
         {
+            Memory = new ConfigurableMemoryMap(0x4000);
             Reset();
         }
+
+        public IMemoryMap Memory { get; private set; }
 
         // implementation hooks
 
         /// <summary>
-        /// Memory read hook
+        /// Main memory read hook
         /// </summary>
-        public ReadByte ReadByte { get; set; }
-
-        /// <summary>
-        /// Memory write hook
-        /// </summary>
-        public WriteByte WriteByte { get; set; }
+        public ReadByteHandler ReadByte { get; set; }
 
         /// <summary>
         /// Pixel computation hoook
         /// </summary>
-        public WritePixel WritePixel { get; set; }
+        public WritePixelHandler WritePixel { get; set; }
 
         /// <summary>
         /// Frame presentation hook
         /// </summary>
-        public PresentFrame PresentFrame { get; set; }
+        public PresentFrameHandler PresentFrame { get; set; }
 
         /// <summary>
         /// Control register ($2000 PPUCTRL)
@@ -236,7 +231,7 @@ namespace NesCore.Video
         {
             get
             {
-                byte value = ReadByte(vramAddress);
+                byte value = Memory[vramAddress];
                 // emulate buffered reads
                 if (vramAddress % 0x4000 < 0x3F00)
                 {
@@ -246,7 +241,7 @@ namespace NesCore.Video
                 }
                 else
                 {
-                    bufferedData = ReadByte((ushort)(vramAddress - 0x1000));
+                    bufferedData = Memory[(ushort)(vramAddress - 0x1000)];
                 }
 
                 // increment address
@@ -260,7 +255,7 @@ namespace NesCore.Video
             set
             {
                 registerLatch = value;
-                WriteByte(vramAddress, value);
+                Memory[vramAddress]  = value;
 
                 // increment address
                 if (vramIncrement == VramIncrement.Down)
@@ -567,28 +562,28 @@ namespace NesCore.Video
 
         private void FetchNameTableByte()
         {
-            nameTableByte = ReadByte(vramAddress);
+            nameTableByte = Memory[vramAddress];
         }
 
         private void FetchAttributeTableByte()
         {
             ushort address = (ushort)(0x23C0 | (vramAddress & 0x0C00) | ((vramAddress >> 4) & 0x38) | ((vramAddress >> 2) & 0x07));
             int shift = ((vramAddress >> 4) & 4) | (vramAddress & 2);
-            attributeTableByte = (byte)(((ReadByte(address) >> shift) & 3) << 2);
+            attributeTableByte = (byte)(((Memory[address] >> shift) & 3) << 2);
         }
 
         private void FetchLowTileByte()
         {
             int fineY = (vramAddress >> 12) & 7;
             ushort address = (ushort)(backgroundPatternTableAddress + nameTableByte * 16 + fineY);
-            lowTileByte = ReadByte(address);
+            lowTileByte = Memory[address];
         }
 
         private void FetchHighTileByte()
         {
             int fineY = (vramAddress >> 12) & 7;
             ushort address = (ushort)(backgroundPatternTableAddress + nameTableByte * 16 + fineY + 8);
-            highTileByte = ReadByte(address);
+            highTileByte = Memory[address];
         }
 
         private void StoreTileData()
@@ -742,8 +737,8 @@ namespace NesCore.Video
             address += (ushort)(tile * 16 + row);
 
             byte a = (byte)((attributes & 3) << 2);
-            lowTileByte = ReadByte(address);
-            highTileByte = ReadByte((ushort)(address + 8));
+            lowTileByte = Memory[address];
+            highTileByte = Memory[(ushort)(address + 8)];
 
             uint data = 0;
 

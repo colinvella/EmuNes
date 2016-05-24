@@ -32,7 +32,7 @@ namespace NesCore.Video
             Reset();
         }
 
-        public IMemoryMap Memory { get; private set; }
+        public MemoryMap Memory { get; private set; }
 
         // implementation hooks
 

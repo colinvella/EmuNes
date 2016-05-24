@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents an addressable byte store with an address range of $0000-$FFFF
     /// </summary>
-    public interface IMemoryMap
+    public interface MemoryMap
     {
         /// <summary>
         /// The size of the memory map

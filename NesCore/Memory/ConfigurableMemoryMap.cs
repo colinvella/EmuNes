@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NesCore.Memory
 {
-    public class ConfigurableMemoryMap : IMemoryMap
+    public class ConfigurableMemoryMap : MemoryMap
     {
         /// <summary>
         /// Delegate for memory read handler

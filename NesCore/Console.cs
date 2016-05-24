@@ -8,6 +8,7 @@ using NesCore.Processor;
 using NesCore.Video;
 using NesCore.Memory;
 using NesCore.Input;
+using NesCore.Storage;
 
 namespace NesCore
 {
@@ -46,6 +47,18 @@ namespace NesCore
         public void ConnectControllerTwo(Controller controller)
         {
             ConnectController(0x4017, controller);
+        }
+
+        public void LoadCartridge(Cartridge cartridge)
+        {
+            Memory.ConfigureMemoryAccessRange(0x6000, 0xA000,
+                (address) => cartridge.Map[address],
+                (address, value) => cartridge.Map[address] = value);
+        }
+
+        public void Reset()
+        {
+            Processor.Reset();
         }
 
         private void ConfigureMemoryMap()

@@ -39,16 +39,28 @@ namespace NesCore
         public RicohRP2C0X Video { get; private set; }
         public ConfigurableMemoryMap Memory { get; private set; }
 
+        /// <summary>
+        /// Connect a controller to the first port
+        /// </summary>
+        /// <param name="controller"></param>
         public void ConnectControllerOne(Controller controller)
         {
             ConnectController(0x4016, controller);
         }
 
+        /// <summary>
+        /// Connect a controller to the second port
+        /// </summary>
+        /// <param name="controller"></param>
         public void ConnectControllerTwo(Controller controller)
         {
             ConnectController(0x4017, controller);
         }
 
+        /// <summary>
+        /// Maps the cartridge into the address range $6000-$FFFF
+        /// </summary>
+        /// <param name="cartridge"></param>
         public void LoadCartridge(Cartridge cartridge)
         {
             Memory.ConfigureMemoryAccessRange(0x6000, 0xA000,
@@ -56,9 +68,32 @@ namespace NesCore
                 (address, value) => cartridge.Map[address] = value);
         }
 
+        /// <summary>
+        /// Resets the console
+        /// </summary>
         public void Reset()
         {
             Processor.Reset();
+        }
+
+        /// <summary>
+        /// Steps through one CPU instruction and corresponding video and audio cycles
+        /// </summary>
+        /// <returns>cycles consumed</returns>
+        public ulong Step()
+        {
+            ulong cpuCycles = Processor.ExecuteInstruction();
+            ulong ppuCycles = cpuCycles * 3;
+	        for (ulong i = 0; i < ppuCycles; i++)
+            {
+                Video.Step();
+		        // cartridge map step goes here
+	        }
+	        for (ulong i = 0; i < cpuCycles; i++)
+            {
+                // audo step goes here
+	        }
+            return cpuCycles;
         }
 
         private void ConfigureMemoryMap()

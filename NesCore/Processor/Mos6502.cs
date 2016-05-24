@@ -64,7 +64,7 @@ namespace NesCore.Processor
             return consumedCycles;
         }
 
-        public UInt64 ExecuteInstruction()
+        public byte ExecuteInstruction()
         {
             // consume 1 cycle and do nothing if there are pending stall cycles
             if (State.StallCycles > 0)
@@ -111,10 +111,9 @@ namespace NesCore.Processor
             instruction.Exceute(address);
 
             // determine and return cycles consumed by this instruction
-            UInt64 consumedCycles = State.Cycles - cycles;
+            byte consumedCycles = (byte)(State.Cycles - cycles);
             return consumedCycles;
         }
-
 
         // reads 16-bit value from the system bus in little-endian order
         public ushort ReadWord(ushort address)

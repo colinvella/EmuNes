@@ -54,14 +54,23 @@ namespace NesCore.Storage
                 ? new byte[0x2000] // at least one default empty bank if there are none
                 : romBinaryReader.ReadBytes(characterBankCount * 0x2000);
             CharacterRom = new List<byte>(characterData);
+
+            // instantiate appropriate mapper
+            switch (MapperType)
+            {
+                case 1: Map = new CartridgeMapMmc1(this); break;
+                default: throw new NotSupportedException("Mapper Type " + Utility.Hex.Format(MapperType) + " not supported");
+            }
         }
 
         public IReadOnlyList<byte> ProgramRom { get; private set; }
         public IReadOnlyList<byte> CharacterRom { get; private set; }
         public byte[] SaveRam { get; private set; }
         public byte MapperType { get; private set; }
-        public byte MirrorMode { get; private set; }
+        public byte MirrorMode { get; set; }
         public bool BatteryPresent { get; private set; }
+
+        public CartridgeMap Map { get; private set; }
 
         private const uint InesMagicNumber = 0x1a53454e;
     }

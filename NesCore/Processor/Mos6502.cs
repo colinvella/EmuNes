@@ -38,7 +38,7 @@ namespace NesCore.Processor
         // resets the processor state
         public void Reset()
         {
-            State.ProgramCounter = ResetVector;
+            State.ProgramCounter = ReadWord(ResetVector);
             State.StackPointer = StackBase;
             State.InterruptDisableFlag = true;
         }

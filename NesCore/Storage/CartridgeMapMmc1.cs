@@ -14,6 +14,9 @@ namespace NesCore.Storage
             Cartridge = cartridge;
             programBankOffsets = new int[2];
             characterBankOffsets = new int[2];
+
+            shiftRegister = 0x10;
+            programBankOffsets[1] = GetProgramBankOffset(-1);
         }
 
         public Cartridge Cartridge { get; private set; }
@@ -150,7 +153,7 @@ namespace NesCore.Storage
             if (index >= 0x80)
                 index -= 0x100;
 
-            index %= Cartridge.CharacterRom.Count / 0x4000;
+            index %= Cartridge.CharacterRom.Count / 0x1000;
             int offset = index * 0x4000;
             if (offset < 0)
                 offset += Cartridge.CharacterRom.Count;

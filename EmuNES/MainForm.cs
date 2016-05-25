@@ -69,7 +69,7 @@ namespace EmuNES
                 bitmapBuffer.SetPixel(x, y, Color.FromArgb(gameColour.Red, gameColour.Green, gameColour.Blue));
             };
 
-            Console.Video.PresentFrame = () => { };
+            Console.Video.PresentFrame = () => videoPanel.Invalidate();
         }
 
         private void ConfigureDefaultController()

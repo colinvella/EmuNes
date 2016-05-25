@@ -84,6 +84,8 @@
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "EmuNES";
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OnKeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnKeyUp);
             this.mainMenuStrip.ResumeLayout(false);
             this.mainMenuStrip.PerformLayout();
             this.ResumeLayout(false);

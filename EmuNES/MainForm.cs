@@ -1,4 +1,5 @@
-﻿using NesCore.Storage;
+﻿using NesCore.Input;
+using NesCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,7 +20,11 @@ namespace EmuNES
             InitializeComponent();
             this.FormClosing += OnApplicationClosing;
 
+            keyPressed = new Dictionary<Keys, bool>();
+
             Console = new NesCore.Console();
+
+            ConfigureDefaultController();
         }
 
         private void OnApplicationClosing(object sender, CancelEventArgs cancelEventArgs)
@@ -48,6 +53,21 @@ namespace EmuNES
             Application.Exit();
         }
 
+        private void ConfigureDefaultController()
+        {
+            Joypad joypad = new Joypad();
+            joypad.Start = () => keyPressed[Keys.F1];
+            joypad.Select = () => keyPressed[Keys.F2];
+            joypad.A = () => keyPressed[Keys.Z];
+            joypad.B = () => keyPressed[Keys.X];
+            joypad.Up = () => keyPressed[Keys.Up];
+            joypad.Down = () => keyPressed[Keys.Down];
+            joypad.Left = () => keyPressed[Keys.Left];
+            joypad.Right = () => keyPressed[Keys.Right];
+
+            Console.ConnectControllerOne(joypad);
+        }
+
         private void LoadCartridgeRom(string cartridgeRomPath)
         {
             try
@@ -62,9 +82,21 @@ namespace EmuNES
             {
                 MessageBox.Show(this, "Unable to load cartridge rom. Reason: " + exception.Message, "Open Game ROM", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
 
+        private void OnKeyDown(object sender, KeyEventArgs keyEventArgs)
+        {
+            keyPressed[keyEventArgs.KeyCode] = true;
+        }
+
+        private void OnKeyUp(object sender, KeyEventArgs keyEventArgs)
+        {
+            keyPressed[keyEventArgs.KeyCode] = false;
         }
 
         public NesCore.Console Console { get; private set; }
+
+        private Dictionary<Keys, bool> keyPressed;
+
     }
 }

@@ -25,7 +25,7 @@ namespace NesCore.Storage
             byte controlBits1 = romBinaryReader.ReadByte();
             byte controlBits2 = romBinaryReader.ReadByte();
             byte programRamSize = romBinaryReader.ReadByte();
-            romBinaryReader.ReadByte(); // unused byte
+            romBinaryReader.ReadBytes(7); // unused 7 bytes
 
             // determine mapper type from control bits
             int mapperTypeLowerNybble = controlBits1 >> 4;

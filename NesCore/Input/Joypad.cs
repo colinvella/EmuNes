@@ -12,19 +12,19 @@ namespace NesCore.Input
     {
         public Joypad()
         {
-            buttonPressed = new bool[8];
+            buttonPressed = new ButtonPressed[8];
             buttonIndex = 0x00;
             A = B = Start = Select = Up = Down = Left = Right = () => false;
         }
 
-        public ButtonPressed A { get; set; }
-        public ButtonPressed B { get; set; }
-        public ButtonPressed Start { get; set; }
-        public ButtonPressed Select { get; set; }
-        public ButtonPressed Up { get; set; }
-        public ButtonPressed Down { get; set; }
-        public ButtonPressed Left { get; set; }
-        public ButtonPressed Right { get; set; }
+        public ButtonPressed A { get { return buttonPressed[0]; } set { buttonPressed[0] = value; } }
+        public ButtonPressed B { get { return buttonPressed[1]; } set { buttonPressed[1] = value; } }
+        public ButtonPressed Start { get { return buttonPressed[2]; } set { buttonPressed[2] = value; } }
+        public ButtonPressed Select { get { return buttonPressed[3]; } set { buttonPressed[3] = value; } }
+        public ButtonPressed Up { get { return buttonPressed[4]; } set { buttonPressed[4] = value; } }
+        public ButtonPressed Down { get { return buttonPressed[5]; } set { buttonPressed[5] = value; } }
+        public ButtonPressed Left { get { return buttonPressed[6]; } set { buttonPressed[6] = value; } }
+        public ButtonPressed Right { get { return buttonPressed[7]; } set { buttonPressed[7] = value; } }
 
         public byte Port
         {
@@ -32,7 +32,7 @@ namespace NesCore.Input
             {
                 byte value = 0x00;
 
-                if (buttonIndex < 8 && buttonPressed[buttonIndex])
+                if (buttonIndex < 8 && buttonPressed[buttonIndex]())
                     value = 0x01;
                 ++buttonIndex;
 
@@ -49,20 +49,7 @@ namespace NesCore.Input
             }
         }
 
-        public void Step()
-        {                              
-            buttonPressed[0] = A();
-            buttonPressed[1] = B();
-            buttonPressed[2] = Start();
-            buttonPressed[3] = Select();
-            buttonPressed[4] = Up();
-            buttonPressed[5] = Down();
-            buttonPressed[6] = Left();
-            buttonPressed[7] = Right();
-        }
-
-
-        private bool[] buttonPressed;
+        private ButtonPressed[] buttonPressed;
         private byte buttonIndex;
         private byte strobe;
     }

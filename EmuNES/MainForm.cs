@@ -32,6 +32,8 @@ namespace EmuNES
 
             // map for key states to help controller mapping
             keyPressed = new Dictionary<Keys, bool>();
+            foreach (Keys key in Enum.GetValues(typeof(Keys)))
+                keyPressed[key] = false;
 
             Console = new NesCore.Console();
 

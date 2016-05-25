@@ -66,9 +66,18 @@ namespace NesCore
         /// <param name="cartridge"></param>
         public void LoadCartridge(Cartridge cartridge)
         {
+            // connect $6000 upwards to main memory
             Memory.ConfigureMemoryAccessRange(0x6000, 0xA000,
                 (address) => cartridge.Map[address],
                 (address, value) => cartridge.Map[address] = value);
+
+            // connect $0000-$1FFF to ROM CHR
+            Video.Memory.ConfigureMemoryAccessRange(0x0000, 0x2000,
+                (address) => cartridge.Map[address],
+                (address, value) => cartridge.Map[address] = value);
+
+            // name table mirroring mode determined from cartridge rom
+            Video.ConfigureNameTableMirroringMode(cartridge.MirrorMode);
         }
 
         /// <summary>
@@ -186,6 +195,22 @@ namespace NesCore
             Memory.ConfigureMemoryWrite(portAddress, (address, value) => controller.Port = value);
         }
 
+        private ushort MirrorAddress(byte mode, ushort address)
+        {
+            address = (ushort)((address - 0x2000) % 0x1000);
+            int table = address / 0x0400;
+            int offset = address % 0x0400;
+            return (ushort)(0x2000 + mirrorLookup[mode][table] * 0x0400 + offset);
+        }
+
         private const uint MemorySize = ushort.MaxValue + 1;
+
+        private static readonly ushort[][] mirrorLookup = {
+            new ushort[]{0, 0, 1, 1},
+            new ushort[]{0, 1, 0, 1},
+            new ushort[]{0, 0, 0, 0},
+            new ushort[]{1, 1, 1, 1},
+            new ushort[]{0, 1, 2, 3}
+        };
     }
 }

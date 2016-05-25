@@ -29,10 +29,20 @@ namespace NesCore.Video
         public RicohRP2C0X()
         {
             Memory = new ConfigurableMemoryMap(0x4000);
+
+            // $0000 - $1FFF mapped to CHR when cartridge loaded
+
+            // $2000 - $3EFF mirroring configured when cartridge loaded
+
+            // $3F00 - $3FFF - palette
+            Memory.ConfigureMemoryAccessRange(0x3F00, 0x0100,
+                (address) => ReadPalette((ushort)(address % 0x20)),
+                (address, value) => WritePalette((ushort)(address % 0x20), value));
+
             Reset();
         }
 
-        public MemoryMap Memory { get; private set; }
+        public ConfigurableMemoryMap Memory { get; private set; }
 
         // implementation hooks
 
@@ -288,6 +298,17 @@ namespace NesCore.Video
             }
         }
 
+        /// <summary>
+        /// Configures name table data mirroring mode
+        /// </summary>
+        /// <param name="mirrorMode">mirroring mode from cartridge ROM</param>
+        public void ConfigureNameTableMirroringMode(byte mirrorMode)
+        {
+            // $2000-$3EFF
+            Memory.ConfigureMemoryAccessRange(0x2000, 0x1F00,
+                (address) => nameTableData[MirrorAddress(mirrorMode, address) % 2048],
+                (address, value) => nameTableData[MirrorAddress(mirrorMode, address) % 2048] = value);
+        }
 
         /// <summary>
         /// resets the PPU
@@ -838,6 +859,14 @@ namespace NesCore.Video
             }
         }
 
+        private ushort MirrorAddress(byte mode, ushort address)
+        {
+            address = (ushort)((address - 0x2000) % 0x1000);
+            int table = address / 0x0400;
+            int offset = address % 0x0400;
+            return (ushort)(0x2000 + mirrorLookup[mode][table] * 0x0400 + offset);
+        }
+
         private int cycle; // 0-340
         private int scanLine; // 0-261, 0-239=visible, 240=post, 241-260=vblank, 261=pre
 
@@ -901,6 +930,14 @@ namespace NesCore.Video
 
         // $2007 PPUDATA
         private byte bufferedData; // for buffered reads
+
+        private static readonly ushort[][] mirrorLookup = {
+            new ushort[]{0, 0, 1, 1},
+            new ushort[]{0, 1, 0, 1},
+            new ushort[]{0, 0, 0, 0},
+            new ushort[]{1, 1, 1, 1},
+            new ushort[]{0, 1, 2, 3}
+        };
 
         private enum WriteToggle
         {

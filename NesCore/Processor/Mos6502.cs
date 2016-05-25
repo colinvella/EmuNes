@@ -162,13 +162,17 @@ namespace NesCore.Processor
             return (ushort)((hi << 8) | lo);
         }
 
-        public void HandleInterrupt(ushort interruptVector)
+        // causes a non-maskable interrupt to occur on the next cycle
+        public void TriggerNonMaskableInterrupt()
         {
-            PushWord(State.ProgramCounter);
-            InstructionSet.PushProcessorStatus(0x0000);
-            State.ProgramCounter = ReadWord(interruptVector);
-            State.InterruptDisableFlag = true;
-            State.Cycles += 7;
+            State.InterruptType = InterruptType.NonMaskable;
+        }
+
+        // causes an IRQ interrupt to occur on the next cycle
+        public void TriggerInterruptRequest()
+        {
+            if (!State.InterruptDisableFlag)
+                State.InterruptType = InterruptType.Request;
         }
         
         // returns true if address pages differ (differ by high byte)
@@ -191,5 +195,15 @@ namespace NesCore.Processor
             byte valueHiByte = ReadByte(nextAddress);
             return (ushort)(valueHiByte << 8 | valueLoByte);
         }
+
+        private void HandleInterrupt(ushort interruptVector)
+        {
+            PushWord(State.ProgramCounter);
+            InstructionSet.PushProcessorStatus(0x0000);
+            State.ProgramCounter = ReadWord(interruptVector);
+            State.InterruptDisableFlag = true;
+            State.Cycles += 7;
+        }
+
     }
 }

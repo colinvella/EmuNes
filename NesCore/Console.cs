@@ -28,6 +28,9 @@ namespace NesCore
             Processor.ReadByte = (ushort address) => { return Memory[address]; };
             Processor.WriteByte = (ushort address, byte value) => { Memory[address] = value; };
 
+            // wire NMI between video and processor
+            Video.TriggerNonMaskableInterupt = () => Processor.TriggerNonMaskableInterrupt();
+
             // connect video to memory for DMA operations
             Video.ReadByte = (ushort address) => { return Memory[address]; };
 

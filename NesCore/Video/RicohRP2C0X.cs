@@ -36,6 +36,8 @@ namespace NesCore.Video
 
         // implementation hooks
 
+        public Action TriggerNonMaskableInterupt { get; set; }
+
         /// <summary>
         /// Main memory read hook
         /// </summary>
@@ -807,8 +809,7 @@ namespace NesCore.Video
         
                 if (nmiDelay == 0 && nmiOutput && nmiOccurred)
                 {
-                    throw new NotImplementedException();
-                    /*ppu.console.CPU.triggerNMI()*/
+                    TriggerNonMaskableInterupt();
                 }
             }
 

@@ -154,7 +154,7 @@ namespace NesCore.Storage
                 index -= 0x100;
 
             index %= Cartridge.CharacterRom.Count / 0x1000;
-            int offset = index * 0x4000;
+            int offset = index * 0x1000;
             if (offset < 0)
                 offset += Cartridge.CharacterRom.Count;
             return offset;

@@ -96,6 +96,26 @@ namespace NesCore
             return cpuCycles;
         }
 
+        /// <summary>
+        /// Execute for the given time frame
+        /// </summary>
+        /// <param name="deltaTime">Time frame for which to execute</param>
+        /// <returns></returns>
+        public ulong Run(double deltaTime)
+        {
+            long pendingCycles = (long)(deltaTime * Mos6502.Frequency);
+
+            ulong consumedCycles = 0;
+            while (pendingCycles > 0)
+            {
+                ulong stepCycles = Step();
+                pendingCycles -= (long)stepCycles;
+                consumedCycles += stepCycles;
+            }
+
+            return consumedCycles;
+        }
+
         private void ConfigureMemoryMap()
         {
             // work ram mirrored 4 times (4 x $800 segments)

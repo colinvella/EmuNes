@@ -28,53 +28,104 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
+            this.fileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileOpenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.videoPanel = new System.Windows.Forms.Panel();
+            this.gameTimer = new System.Windows.Forms.Timer(this.components);
             this.gameMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.gameOpenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.gameExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gameRunMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // mainMenuStrip
             // 
             this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileMenuItem,
             this.gameMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
-            this.mainMenuStrip.Size = new System.Drawing.Size(496, 24);
+            this.mainMenuStrip.Size = new System.Drawing.Size(512, 24);
             this.mainMenuStrip.TabIndex = 0;
             this.mainMenuStrip.Text = "Main Menu Strip";
+            // 
+            // fileMenuItem
+            // 
+            this.fileMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileOpenMenuItem,
+            this.fileExitMenuItem});
+            this.fileMenuItem.Name = "fileMenuItem";
+            this.fileMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileMenuItem.Text = "&File";
+            // 
+            // fileOpenMenuItem
+            // 
+            this.fileOpenMenuItem.Name = "fileOpenMenuItem";
+            this.fileOpenMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.fileOpenMenuItem.Text = "&Open";
+            this.fileOpenMenuItem.Click += new System.EventHandler(this.OnFileOpen);
+            // 
+            // fileExitMenuItem
+            // 
+            this.fileExitMenuItem.Name = "fileExitMenuItem";
+            this.fileExitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
+            this.fileExitMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.fileExitMenuItem.Text = "Exit";
+            this.fileExitMenuItem.Click += new System.EventHandler(this.OnFileExit);
+            // 
+            // videoPanel
+            // 
+            this.videoPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.videoPanel.Location = new System.Drawing.Point(0, 24);
+            this.videoPanel.Margin = new System.Windows.Forms.Padding(0);
+            this.videoPanel.Name = "videoPanel";
+            this.videoPanel.Size = new System.Drawing.Size(512, 480);
+            this.videoPanel.TabIndex = 1;
+            // 
+            // gameTimer
+            // 
+            this.gameTimer.Interval = 20;
+            this.gameTimer.Tick += new System.EventHandler(this.OnGameTick);
             // 
             // gameMenuItem
             // 
             this.gameMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.gameOpenMenuItem,
-            this.gameExitMenuItem});
+            this.gameRunMenuItem,
+            this.pauseToolStripMenuItem,
+            this.resetToolStripMenuItem});
             this.gameMenuItem.Name = "gameMenuItem";
             this.gameMenuItem.Size = new System.Drawing.Size(50, 20);
             this.gameMenuItem.Text = "&Game";
             // 
-            // gameOpenMenuItem
+            // gameRunMenuItem
             // 
-            this.gameOpenMenuItem.Name = "gameOpenMenuItem";
-            this.gameOpenMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.gameOpenMenuItem.Text = "&Open";
-            this.gameOpenMenuItem.Click += new System.EventHandler(this.OnGameOpen);
+            this.gameRunMenuItem.Name = "gameRunMenuItem";
+            this.gameRunMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.gameRunMenuItem.Text = "&Run";
             // 
-            // gameExitMenuItem
+            // pauseToolStripMenuItem
             // 
-            this.gameExitMenuItem.Name = "gameExitMenuItem";
-            this.gameExitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.gameExitMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.gameExitMenuItem.Text = "Exit";
-            this.gameExitMenuItem.Click += new System.EventHandler(this.OnGameExit);
+            this.pauseToolStripMenuItem.Name = "pauseToolStripMenuItem";
+            this.pauseToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.pauseToolStripMenuItem.Text = "&Pause";
+            // 
+            // resetToolStripMenuItem
+            // 
+            this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.resetToolStripMenuItem.Text = "Reset";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(496, 441);
+            this.ClientSize = new System.Drawing.Size(512, 504);
+            this.Controls.Add(this.videoPanel);
             this.Controls.Add(this.mainMenuStrip);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -96,9 +147,15 @@
         #endregion
 
         private System.Windows.Forms.MenuStrip mainMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem fileMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fileOpenMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fileExitMenuItem;
+        private System.Windows.Forms.Panel videoPanel;
+        private System.Windows.Forms.Timer gameTimer;
         private System.Windows.Forms.ToolStripMenuItem gameMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem gameOpenMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem gameExitMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gameRunMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pauseToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resetToolStripMenuItem;
     }
 }
 

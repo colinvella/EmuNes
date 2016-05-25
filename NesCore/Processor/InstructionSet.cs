@@ -785,7 +785,7 @@ namespace NesCore.Processor
             instructions[0x48] = new Instruction(0x48, "PHA", AddressingMode.Implied, 3, FetchNone, PushAccumulator);
             instructions[0x49] = new Instruction(0x49, "EOR", AddressingMode.Immediate, 2, FetchImmediate, LogicalExclusiveOr);
             instructions[0x4A] = new Instruction(0x4A, "LSR", AddressingMode.Accumulator, 2, FetchNone, LogicalShiftRightAccumulator);
-            instructions[0x4B] = new Instruction(0x4B, "LSR", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
+            instructions[0x4B] = new Instruction(0x4B, "ALR", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
             instructions[0x4C] = new Instruction(0x4C, "JMP", AddressingMode.Absolute, 3, FetchAbsolute, Jump);
             instructions[0x4D] = new Instruction(0x4D, "EOR", AddressingMode.Absolute, 4, FetchAbsolute, LogicalExclusiveOr);
             instructions[0x4E] = new Instruction(0x4E, "LSR", AddressingMode.Absolute, 6, FetchAbsolute, LogicalShiftRightMemory);

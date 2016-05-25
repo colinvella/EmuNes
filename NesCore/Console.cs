@@ -103,7 +103,7 @@ namespace NesCore
 	        }
 	        for (ulong i = 0; i < cpuCycles; i++)
             {
-                // audo step goes here
+                // audio step goes here
 	        }
             return cpuCycles;
         }

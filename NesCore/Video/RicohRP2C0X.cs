@@ -28,7 +28,10 @@ namespace NesCore.Video
         /// </summary>
         public RicohRP2C0X()
         {
-            Memory = new ConfigurableMemoryMap(0x4000);
+            Memory = new ConfigurableMemoryMap(0x10000);
+
+            // VRM is actually $4000, but is configured to wrap around whole addressable space
+            Memory.ConfigureAddressMirroring(0x000, 0x4000, 0x10000);
 
             // $0000 - $1FFF mapped to CHR when cartridge loaded
 

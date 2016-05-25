@@ -100,14 +100,14 @@ namespace NesCore.Memory
         /// <param name="baseAddress">base address of the memory segment to be mirrored</param>
         /// <param name="mirroredSegmentLength">length of the memory to be mirrored, starting at the base address</param>
         /// <param name="range">length of the memory range to be mirrored (a multiple of the mirrored segment length)</param>
-        public void ConfigureAddressMirroring(ushort baseAddress, ushort mirroredSegmentLength, ushort range)
+        public void ConfigureAddressMirroring(ushort baseAddress, ushort mirroredSegmentLength, uint range)
         {
             if (baseAddress + range > Size)
                 throw new ArgumentException("Mirrored address range exceeds memory limit", "range");
             if (range % mirroredSegmentLength != 0)
                 throw new ArgumentException("The range is not divisible by the mirrored segment length", "mirroredSegmentLength");
 
-            int endAddressExclusive = baseAddress + range;
+            uint endAddressExclusive = baseAddress + range;
             for (int handlerIndex = baseAddress + mirroredSegmentLength; handlerIndex < endAddressExclusive; handlerIndex++)
             {
                 readMemoryHandlers[handlerIndex] = (address) =>

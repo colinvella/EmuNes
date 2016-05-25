@@ -22,6 +22,15 @@ namespace EmuNES
             this.FormClosing += OnApplicationClosing;
             videoPanel.Paint += OnVideoPanelPaint;
 
+            // enabled DoubleBuffered property (protected)
+            System.Reflection.PropertyInfo aProp =
+               typeof(System.Windows.Forms.Control).GetProperty(
+                 "DoubleBuffered",
+                 System.Reflection.BindingFlags.NonPublic |
+                 System.Reflection.BindingFlags.Instance);
+            aProp.SetValue(videoPanel, true, null);
+
+            // map for key states to help controller mapping
             keyPressed = new Dictionary<Keys, bool>();
 
             Console = new NesCore.Console();
@@ -61,6 +70,39 @@ namespace EmuNES
             Application.Exit();
         }
 
+        private void OnGameRun(object sender, EventArgs e)
+        {
+            if (gameIsRunning)
+                return;
+
+            gameIsRunning = true;
+
+            gameRunMenuItem.Enabled = false;
+            gamePauseMenuItem.Enabled = true;
+            gameResetMenuItem.Enabled = true;
+            gameTimer.Enabled = true;
+        }
+
+        private void OnGamePause(object sender, EventArgs e)
+        {
+            if (!gameIsRunning)
+                return;
+
+            gameIsRunning = false;
+
+            gameTimer.Enabled = false;
+            gameRunMenuItem.Enabled = true;
+            gamePauseMenuItem.Enabled = false;
+            gameResetMenuItem.Enabled = true;
+        }
+
+        private void OnGameReset(object sender, EventArgs e)
+        {
+            OnGamePause(this, EventArgs.Empty);
+            Console.Reset();
+            OnGameRun(this, EventArgs.Empty);
+        }
+
         private void ConfigureVideoBuffer()
         {
             Console.Video.WritePixel = (x, y, paletteIndex) =>
@@ -97,37 +139,12 @@ namespace EmuNES
                 Console.LoadCartridge(cartridge);
                 MessageBox.Show(this, cartridge.ToString(), "Open Game ROM", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                ResetGame();
+                OnGameReset(this, EventArgs.Empty);
             }
             catch (Exception exception)
             {
                 MessageBox.Show(this, "Unable to load cartridge rom. Reason: " + exception.Message, "Open Game ROM", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void RunGame()
-        {
-            if (gameIsRunning)
-                return;
-
-            gameIsRunning = true;
-            gameTimer.Enabled = true;
-        }
-
-        private void PauseGame()
-        {
-            if (!gameIsRunning)
-                return;
-
-            gameTimer.Enabled = false;
-            gameIsRunning = false;
-        }
-
-        private void ResetGame()
-        {
-            PauseGame();
-            Console.Reset();
-            RunGame();
         }
 
         private void OnKeyDown(object sender, KeyEventArgs keyEventArgs)

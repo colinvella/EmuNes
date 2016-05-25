@@ -138,7 +138,7 @@ namespace NesCore.Memory
             if (endAddressExclusive > Size)
                 throw new ArgumentOutOfRangeException("length");
 
-            for (ushort address = startAddress; address < endAddressExclusive; address++)
+            for (int address = startAddress; address < endAddressExclusive; address++)
             {
                 readMemoryHandlers[address] = readMemoryHandler;
                 writeMemoryHandlers[address] = writeMemoryHandler;

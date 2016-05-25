@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NesCore.Utility;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -71,6 +72,15 @@ namespace NesCore.Storage
         public bool BatteryPresent { get; private set; }
 
         public CartridgeMap Map { get; private set; }
+
+        public override string ToString()
+        {
+            return "PRG: " + Hex.Format((uint)ProgramRom.Count)
+                + "b, CHR: " + Hex.Format((uint)CharacterRom.Count)
+                + "b, Mapper Type: " + Hex.Format(MapperType)
+                + ", Mirror Mode:" + Hex.Format(MirrorMode)
+                + ", Battery: " + (BatteryPresent ? "Yes" : "No");
+        }
 
         private const uint InesMagicNumber = 0x1a53454e;
     }

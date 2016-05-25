@@ -60,6 +60,7 @@
             this.gameOpenMenuItem.Name = "gameOpenMenuItem";
             this.gameOpenMenuItem.Size = new System.Drawing.Size(152, 22);
             this.gameOpenMenuItem.Text = "&Open";
+            this.gameOpenMenuItem.Click += new System.EventHandler(this.OnGameOpen);
             // 
             // gameExitMenuItem
             // 
@@ -67,6 +68,7 @@
             this.gameExitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
             this.gameExitMenuItem.Size = new System.Drawing.Size(152, 22);
             this.gameExitMenuItem.Text = "Exit";
+            this.gameExitMenuItem.Click += new System.EventHandler(this.OnGameExit);
             // 
             // MainForm
             // 

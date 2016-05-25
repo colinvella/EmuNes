@@ -88,6 +88,12 @@
   <ItemGroup>
     <Content Include="Nes.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NesCore\NesCore.csproj">
+      <Project>{d0bb9378-43c2-4b6d-a13c-cad4f7739785}</Project>
+      <Name>NesCore</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

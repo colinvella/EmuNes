@@ -17,5 +17,15 @@ namespace NesCore.Utility
         {
             return "$" + value.ToString("X4");
         }
+
+        public static string Format(uint value)
+        {
+            return "$" + value.ToString("X8");
+        }
+
+        public static string Format(ulong value)
+        {
+            return "$" + value.ToString("X16");
+        }
     }
 }

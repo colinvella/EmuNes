@@ -19,8 +19,8 @@ namespace NesCore.Input
 
         public ButtonPressed A { get { return buttonPressed[0]; } set { buttonPressed[0] = value; } }
         public ButtonPressed B { get { return buttonPressed[1]; } set { buttonPressed[1] = value; } }
-        public ButtonPressed Start { get { return buttonPressed[2]; } set { buttonPressed[2] = value; } }
-        public ButtonPressed Select { get { return buttonPressed[3]; } set { buttonPressed[3] = value; } }
+        public ButtonPressed Select { get { return buttonPressed[2]; } set { buttonPressed[2] = value; } }
+        public ButtonPressed Start { get { return buttonPressed[3]; } set { buttonPressed[3] = value; } }
         public ButtonPressed Up { get { return buttonPressed[4]; } set { buttonPressed[4] = value; } }
         public ButtonPressed Down { get { return buttonPressed[5]; } set { buttonPressed[5] = value; } }
         public ButtonPressed Left { get { return buttonPressed[6]; } set { buttonPressed[6] = value; } }

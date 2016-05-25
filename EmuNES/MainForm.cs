@@ -119,8 +119,8 @@ namespace EmuNES
         private void ConfigureDefaultController()
         {
             Joypad joypad = new Joypad();
-            joypad.Start = () => keyPressed[Keys.F1];
-            joypad.Select = () => keyPressed[Keys.F2];
+            joypad.Start = () => keyPressed[Keys.Enter];
+            joypad.Select = () => keyPressed[Keys.ShiftKey];
             joypad.A = () => keyPressed[Keys.Z];
             joypad.B = () => keyPressed[Keys.X];
             joypad.Up = () => keyPressed[Keys.Up];

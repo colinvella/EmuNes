@@ -639,7 +639,7 @@ namespace NesCore.Video
 
         private byte GetBackgroundPixel()
         {
-	        if (showBackground)
+	        if (!showBackground)
                 return 0;
 
             uint data = FetchTileData() >> ((7 - scrollX) * 4);

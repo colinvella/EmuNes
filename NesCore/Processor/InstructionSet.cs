@@ -742,6 +742,13 @@ namespace NesCore.Processor
                 Processor.WriteByte(address, highByte);
             };
 
+            // ARR - AND and ROR
+            Execute AndAndRorateRight = (address) =>
+            {
+                LogicalAnd(address);
+                RotateRightAccumulator(address);
+            };
+
             // TOP - tripple NOP
             Execute TrippleNop = (address) => { };
 
@@ -867,7 +874,7 @@ namespace NesCore.Processor
             instructions[0x68] = new Instruction(0x68, "PLA", AddressingMode.Implied, 4, FetchNone, PullAccumulator);
             instructions[0x69] = new Instruction(0x69, "ADC", AddressingMode.Immediate, 2, FetchImmediate, AddWithCarry);
             instructions[0x6A] = new Instruction(0x6A, "ROR", AddressingMode.Accumulator, 2, FetchNone, RotateRightAccumulator);
-            instructions[0x6B] = new Instruction(0x6B, "ARR", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
+            instructions[0x6B] = new Instruction(0x6B, "ARR", AddressingMode.Immediate, 2, FetchImmediate, AndAndRorateRight);
             instructions[0x6C] = new Instruction(0x6C, "JMP", AddressingMode.Indirect, 5, FetchIndirect, Jump);
             instructions[0x6D] = new Instruction(0x6D, "ADC", AddressingMode.Absolute, 4, FetchAbsolute, AddWithCarry);
             instructions[0x6E] = new Instruction(0x6E, "ROR", AddressingMode.Absolute, 6, FetchAbsolute, RotateRightMemory);

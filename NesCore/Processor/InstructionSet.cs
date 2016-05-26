@@ -131,13 +131,13 @@ namespace NesCore.Processor
             Fetch FetchZeroPageX = (ushort operandAddress, out bool pageCrossed) =>
             {
                 pageCrossed = false;
-                return (ushort)(Processor.ReadByte(operandAddress) + Processor.State.RegisterX);
+                return (ushort)(byte)(Processor.ReadByte(operandAddress) + Processor.State.RegisterX);
             };
 
             Fetch FetchZeroPageY = (ushort operandAddress, out bool pageCrossed) =>
             {
                 pageCrossed = false;
-                return (ushort)(Processor.ReadByte(operandAddress) + Processor.State.RegisterY);
+                return (ushort)(byte)(Processor.ReadByte(operandAddress) + Processor.State.RegisterY);
             };
 
             // general instruction operations

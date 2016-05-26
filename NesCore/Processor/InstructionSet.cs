@@ -277,7 +277,7 @@ namespace NesCore.Processor
                 byte value = Processor.ReadByte(address);
                 state.OverflowFlag = (value & 0x40) != 0; // bit 6
                 state.NegativeFlag = (value & 0x80) != 0; // bit 7
-                state.ZeroFlag = (value & state.Accumulator) != 0;
+                state.ZeroFlag = (value & state.Accumulator) == 0;
             };
 
             // shift instructions

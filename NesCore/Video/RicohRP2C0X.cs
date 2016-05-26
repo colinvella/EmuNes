@@ -689,7 +689,7 @@ namespace NesCore.Video
 
             bool opaqueSprite = spritePixel % 4 != 0;
 
-            byte paletteIndex = 0;
+            byte colourIndex = 0;
 
             if (opaqueBackground)
             {
@@ -704,14 +704,14 @@ namespace NesCore.Video
 
                     // determine if sprite or backgroubnd pixel prevails
                     if (spritePriorities[spriteIndex] == 0)
-                        paletteIndex = (byte)(spritePixel | 0x10);
+                        colourIndex = (byte)(spritePixel | 0x10);
                     else
-                        paletteIndex = backgroundPixel;
+                        colourIndex = backgroundPixel;
                 }
                 else
                 {
                     // opaque background and transparent sprite pixel
-                    paletteIndex = backgroundPixel;
+                    colourIndex = backgroundPixel;
                 }
             }
             else
@@ -720,15 +720,18 @@ namespace NesCore.Video
                 if (opaqueSprite)
                 {
                     // transparent background and opaque sprite pixels
-                    paletteIndex = (byte)(spritePixel | 0x10);
+                    colourIndex = (byte)(spritePixel | 0x10);
                 }
                 else
                 {
-                    // transparent backgrounbd and sprite pixels
-                    paletteIndex = 0;
+                    // transparent background and sprite pixels
+                    colourIndex = 0;
                 }
             }
-            
+
+            // get palette index from colour index
+            byte paletteIndex = ReadPalette((ushort)(colourIndex % 64));
+
             // hook to write pixel
             WritePixel(x, y, paletteIndex);
         }

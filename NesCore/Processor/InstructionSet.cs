@@ -742,6 +742,9 @@ namespace NesCore.Processor
                 Processor.WriteByte(address, highByte);
             };
 
+            // TOP - tripple NOP
+            Execute TrippleNop = (address) => { };
+
             // Op Codes
 
             // 0x00 - 0x0F
@@ -757,7 +760,7 @@ namespace NesCore.Processor
             instructions[0x09] = new Instruction(0x09, "ORA", AddressingMode.Immediate, 2, FetchImmediate, LogicalInclusiveOr);
             instructions[0x0A] = new Instruction(0x0A, "ASL", AddressingMode.Accumulator, 2, FetchNone, ArithmeticShiftLeftAccumulator);
             instructions[0x0B] = new Instruction(0x0B, "ANC", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
-            instructions[0x0C] = new Instruction(0x0C, "NOPx", AddressingMode.Absolute, 4, FetchAbsolute, IllegalOpCode);
+            instructions[0x0C] = new Instruction(0x0C, "TOP", AddressingMode.Absolute, 4, FetchAbsolute, TrippleNop);
             instructions[0x0D] = new Instruction(0x0D, "ORA", AddressingMode.Absolute, 4, FetchAbsolute, LogicalInclusiveOr);
             instructions[0x0E] = new Instruction(0x0E, "ASL", AddressingMode.Absolute, 6, FetchAbsolute, ArithmeticShiftLeftMemory);
             instructions[0x0F] = new Instruction(0x0F, "SLO", AddressingMode.Absolute, 6, FetchAbsolute, IllegalOpCode);
@@ -775,7 +778,7 @@ namespace NesCore.Processor
             instructions[0x19] = new Instruction(0x19, "ORA", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, LogicalInclusiveOr);
             instructions[0x1A] = new Instruction(0x1A, "NOPx", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
             instructions[0x1B] = new Instruction(0x1B, "SLO", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, IllegalOpCode);
-            instructions[0x1C] = new Instruction(0x1C, "NOPx", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, IllegalOpCode);
+            instructions[0x1C] = new Instruction(0x1C, "TOP", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, TrippleNop);
             instructions[0x1D] = new Instruction(0x1D, "ORA", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, LogicalInclusiveOr);
             instructions[0x1E] = new Instruction(0x1E, "ASL", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, ArithmeticShiftLeftMemory);
             instructions[0x1F] = new Instruction(0x1F, "SLO", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IllegalOpCode);
@@ -811,7 +814,7 @@ namespace NesCore.Processor
             instructions[0x39] = new Instruction(0x39, "AND", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, LogicalAnd);
             instructions[0x3A] = new Instruction(0x3A, "NOPx", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
             instructions[0x3B] = new Instruction(0x3B, "RLA", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, IllegalOpCode);
-            instructions[0x3C] = new Instruction(0x3C, "NOPx", AddressingMode.AbsoluteX, 3, FetchAbsoluteX, IllegalOpCode);
+            instructions[0x3C] = new Instruction(0x3C, "TOP", AddressingMode.AbsoluteX, 3, FetchAbsoluteX, TrippleNop);
             instructions[0x3D] = new Instruction(0x3D, "AND", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, LogicalAnd);
             instructions[0x3E] = new Instruction(0x3E, "ROL", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, RotateLeftMemory);
             instructions[0x3F] = new Instruction(0x3F, "RLA", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IllegalOpCode);
@@ -847,7 +850,7 @@ namespace NesCore.Processor
             instructions[0x59] = new Instruction(0x59, "EOR", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, LogicalExclusiveOr);
             instructions[0x5A] = new Instruction(0x5A, "NOPx", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
             instructions[0x5B] = new Instruction(0x5B, "SRE", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, IllegalOpCode);
-            instructions[0x5C] = new Instruction(0x5C, "NOPx", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, IllegalOpCode);
+            instructions[0x5C] = new Instruction(0x5C, "TOP", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, TrippleNop);
             instructions[0x5D] = new Instruction(0x5D, "EOR", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, LogicalExclusiveOr);
             instructions[0x5E] = new Instruction(0x5E, "LSR", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, LogicalShiftRightMemory);
             instructions[0x5F] = new Instruction(0x5F, "SRE", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IllegalOpCode);
@@ -883,7 +886,7 @@ namespace NesCore.Processor
             instructions[0x79] = new Instruction(0x79, "ADC", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, AddWithCarry);
             instructions[0x7A] = new Instruction(0x7A, "NOPx", AddressingMode.Absolute, 2, FetchAbsolute, IllegalOpCode);
             instructions[0x7B] = new Instruction(0x7B, "RRA", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, IllegalOpCode);
-            instructions[0x7C] = new Instruction(0x7C, "NOPx", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, IllegalOpCode);
+            instructions[0x7C] = new Instruction(0x7C, "TOP", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, TrippleNop);
             instructions[0x7D] = new Instruction(0x7D, "ADC", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, AddWithCarry);
             instructions[0x7E] = new Instruction(0x7E, "ROR", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, RotateRightMemory);
             instructions[0x7F] = new Instruction(0x7F, "RRA", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IllegalOpCode);
@@ -991,7 +994,7 @@ namespace NesCore.Processor
             instructions[0xD9] = new Instruction(0xD9, "CMP", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, CompareAccumulator);
             instructions[0xDA] = new Instruction(0xDA, "NOPx", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
             instructions[0xDB] = new Instruction(0xDB, "DCP", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, IllegalOpCode);
-            instructions[0xDC] = new Instruction(0xDC, "NOPx", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, IllegalOpCode);
+            instructions[0xDC] = new Instruction(0xDC, "TOP", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, TrippleNop);
             instructions[0xDD] = new Instruction(0xDD, "CMP", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, CompareAccumulator);
             instructions[0xDE] = new Instruction(0xDE, "DEC", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, DecrementMemory);
             instructions[0xDF] = new Instruction(0xDF, "DCP", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IllegalOpCode);
@@ -1027,7 +1030,7 @@ namespace NesCore.Processor
             instructions[0xF9] = new Instruction(0xF9, "SBC", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, SubtractWithCarry);
             instructions[0xFA] = new Instruction(0xFA, "NOPx", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
             instructions[0xFB] = new Instruction(0xFB, "ISC", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, IllegalOpCode);
-            instructions[0xFC] = new Instruction(0xFC, "NOPx", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, IllegalOpCode);
+            instructions[0xFC] = new Instruction(0xFC, "TOP", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, TrippleNop);
             instructions[0xFD] = new Instruction(0xFD, "SBC", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, SubtractWithCarry);
             instructions[0xFE] = new Instruction(0xFE, "INC", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IncrementMemory);
             instructions[0xFF] = new Instruction(0xFF, "ISC", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IllegalOpCode);

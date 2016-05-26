@@ -984,7 +984,7 @@ namespace NesCore.Processor
             instructions[0xE8] = new Instruction(0xE8, "INX", AddressingMode.Implied, 2, FetchNone, IncrementRegisterX);
             instructions[0xE9] = new Instruction(0xE9, "SBC", AddressingMode.Immediate, 2, FetchImmediate, SubtractWithCarry);
             instructions[0xEA] = new Instruction(0xEA, "NOP", AddressingMode.Implied, 2, FetchNone, NoOperation); // legal NOP
-            instructions[0xEB] = new Instruction(0xEB, "SBC", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
+            instructions[0xEB] = new Instruction(0xEB, "SBC", AddressingMode.Immediate, 2, FetchImmediate, SubtractWithCarry); // undocumented, but like $E9
             instructions[0xEC] = new Instruction(0xEC, "CPX", AddressingMode.Absolute, 4, FetchAbsolute, CompareRegisterX);
             instructions[0xED] = new Instruction(0xED, "SBC", AddressingMode.Absolute, 4, FetchAbsolute, SubtractWithCarry);
             instructions[0xEE] = new Instruction(0xEE, "INC", AddressingMode.Absolute, 6, FetchAbsolute, IncrementMemory);

@@ -120,7 +120,7 @@ namespace EmuNES
         {
             Joypad joypad = new Joypad();
             joypad.Start = () => keyPressed[Keys.Enter];
-            joypad.Select = () => keyPressed[Keys.ShiftKey];
+            joypad.Select = () => keyPressed[Keys.Tab];
             joypad.A = () => keyPressed[Keys.Z];
             joypad.B = () => keyPressed[Keys.X];
             joypad.Up = () => keyPressed[Keys.Up];

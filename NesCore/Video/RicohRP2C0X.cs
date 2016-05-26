@@ -20,9 +20,6 @@ namespace NesCore.Video
         // delegate for writing pixel in a frame buffer implementation
         public delegate void WritePixelHandler(byte x, byte y, byte paletteIndex);
 
-        // delegate for presenting the frame on vblank
-        public delegate void PresentFrameHandler();
-
         /// <summary>
         /// Constructs a new PPU
         /// </summary>
@@ -64,7 +61,7 @@ namespace NesCore.Video
         /// <summary>
         /// Frame presentation hook
         /// </summary>
-        public PresentFrameHandler PresentFrame { get; set; }
+        public Action PresentFrame { get; set; }
 
         /// <summary>
         /// Control register ($2000 PPUCTRL)

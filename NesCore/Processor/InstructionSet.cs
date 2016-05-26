@@ -762,6 +762,13 @@ namespace NesCore.Processor
                 SubtractWithCarry(address);
             };
 
+            // SLO - arithmetic shift left and OR
+            Execute ArithmeticShiftLeftThenOr = (address) =>
+            {
+                ArithmeticShiftLeftAccumulator(address);
+                LogicalInclusiveOr(address);
+            };
+
             // DOP - double NOP
             Execute DoubleNop = (address) => { };
 
@@ -774,11 +781,11 @@ namespace NesCore.Processor
             instructions[0x00] = new Instruction(0x00, "BRK", AddressingMode.Implied, 7, FetchNone, Break);
             instructions[0x01] = new Instruction(0x01, "ORA", AddressingMode.IndexedIndirect, 6, FetchIndexedIndirect,LogicalInclusiveOr);
             instructions[0x02] = new Instruction(0x02, "KIL", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
-            instructions[0x03] = new Instruction(0x03, "SLO", AddressingMode.IndexedIndirect, 8, FetchIndexedIndirect, IllegalOpCode);
+            instructions[0x03] = new Instruction(0x03, "SLO", AddressingMode.IndexedIndirect, 8, FetchIndexedIndirect, ArithmeticShiftLeftThenOr);
             instructions[0x04] = new Instruction(0x04, "DOP", AddressingMode.ZeroPage, 3, FetchZeroPage, DoubleNop);
             instructions[0x05] = new Instruction(0x05, "ORA", AddressingMode.ZeroPage, 3, FetchZeroPage, LogicalInclusiveOr);
             instructions[0x06] = new Instruction(0x06, "ASL", AddressingMode.ZeroPage, 5, FetchZeroPage, ArithmeticShiftLeftMemory);
-            instructions[0x07] = new Instruction(0x07, "SLO", AddressingMode.ZeroPage, 5, FetchZeroPage, IllegalOpCode);
+            instructions[0x07] = new Instruction(0x07, "SLO", AddressingMode.ZeroPage, 5, FetchZeroPage, ArithmeticShiftLeftThenOr);
             instructions[0x08] = new Instruction(0x08, "PHP", AddressingMode.Implied, 3, FetchNone, PushProcessorStatus);
             instructions[0x09] = new Instruction(0x09, "ORA", AddressingMode.Immediate, 2, FetchImmediate, LogicalInclusiveOr);
             instructions[0x0A] = new Instruction(0x0A, "ASL", AddressingMode.Accumulator, 2, FetchNone, ArithmeticShiftLeftAccumulator);
@@ -786,25 +793,25 @@ namespace NesCore.Processor
             instructions[0x0C] = new Instruction(0x0C, "TOP", AddressingMode.Absolute, 4, FetchAbsolute, TrippleNop);
             instructions[0x0D] = new Instruction(0x0D, "ORA", AddressingMode.Absolute, 4, FetchAbsolute, LogicalInclusiveOr);
             instructions[0x0E] = new Instruction(0x0E, "ASL", AddressingMode.Absolute, 6, FetchAbsolute, ArithmeticShiftLeftMemory);
-            instructions[0x0F] = new Instruction(0x0F, "SLO", AddressingMode.Absolute, 6, FetchAbsolute, IllegalOpCode);
+            instructions[0x0F] = new Instruction(0x0F, "SLO", AddressingMode.Absolute, 6, FetchAbsolute, ArithmeticShiftLeftThenOr);
 
             // 0x10 - 0x1F
             instructions[0x10] = new Instruction(0x10, "BPL", AddressingMode.Relative, 2, FetchRelative, BranchIfPlus);
             instructions[0x11] = new Instruction(0x11, "ORA", AddressingMode.IndirectIndexed, 5, FetchIndirectIndexed, LogicalInclusiveOr);
             instructions[0x12] = new Instruction(0x12, "KIL", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
-            instructions[0x13] = new Instruction(0x13, "SLO", AddressingMode.IndirectIndexed, 8, FetchIndirectIndexed, IllegalOpCode);
+            instructions[0x13] = new Instruction(0x13, "SLO", AddressingMode.IndirectIndexed, 8, FetchIndirectIndexed, ArithmeticShiftLeftThenOr);
             instructions[0x14] = new Instruction(0x14, "DOP", AddressingMode.ZeroPageX, 4, FetchZeroPageX, DoubleNop);
             instructions[0x15] = new Instruction(0x15, "ORA", AddressingMode.ZeroPageX, 4, FetchZeroPageX, LogicalInclusiveOr);
             instructions[0x16] = new Instruction(0x16, "ASL", AddressingMode.ZeroPageX, 6, FetchZeroPageX, ArithmeticShiftLeftMemory);
-            instructions[0x17] = new Instruction(0x17, "SLO", AddressingMode.ZeroPageX, 6, FetchZeroPageX, IllegalOpCode);
+            instructions[0x17] = new Instruction(0x17, "SLO", AddressingMode.ZeroPageX, 6, FetchZeroPageX, ArithmeticShiftLeftThenOr);
             instructions[0x18] = new Instruction(0x18, "CLC", AddressingMode.Implied, 2, FetchNone, ClearCarryFlag);
             instructions[0x19] = new Instruction(0x19, "ORA", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, LogicalInclusiveOr);
             instructions[0x1A] = new Instruction(0x1A, "NOPx", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
-            instructions[0x1B] = new Instruction(0x1B, "SLO", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, IllegalOpCode);
+            instructions[0x1B] = new Instruction(0x1B, "SLO", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, ArithmeticShiftLeftThenOr);
             instructions[0x1C] = new Instruction(0x1C, "TOP", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, TrippleNop);
             instructions[0x1D] = new Instruction(0x1D, "ORA", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, LogicalInclusiveOr);
             instructions[0x1E] = new Instruction(0x1E, "ASL", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, ArithmeticShiftLeftMemory);
-            instructions[0x1F] = new Instruction(0x1F, "SLO", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IllegalOpCode);
+            instructions[0x1F] = new Instruction(0x1F, "SLO", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, ArithmeticShiftLeftThenOr);
 
             // 0x20 - 0x2F
             instructions[0x20] = new Instruction(0x20, "JSR", AddressingMode.Absolute, 6, FetchAbsolute, JumpToSubroutine);

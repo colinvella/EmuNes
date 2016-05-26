@@ -706,7 +706,6 @@ namespace NesCore.Processor
                 State state = Processor.State;
                 byte result = (byte)(state.RegisterX & state.Accumulator);
                 Processor.WriteByte(address, result);
-                SetZeroAndNegativeFlags(result);
             };
 
             // LAX - load both X and A from memory

@@ -730,6 +730,18 @@ namespace NesCore.Processor
                 Processor.WriteByte(address, highByte);
             };
 
+            // SHY - AND Y register with high byte of the target address of the argument + 1
+            // and store result in memory.
+            Execute UndocumentedShy = (address) =>
+            {
+                State state = Processor.State;
+                ushort value = Processor.ReadWord(address);
+                byte highByte = (byte)(value >> 8);
+                highByte &= state.RegisterY;
+                ++highByte;
+                Processor.WriteByte(address, highByte);
+            };
+
             // Op Codes
 
             // 0x00 - 0x0F
@@ -907,7 +919,7 @@ namespace NesCore.Processor
             instructions[0x99] = new Instruction(0x99, "STA", AddressingMode.AbsoluteY, 5, FetchAbsoluteY, StoreAccumulator);
             instructions[0x9A] = new Instruction(0x9A, "TXS", AddressingMode.Implied, 2, FetchNone, TransferXToStackPointer);
             instructions[0x9B] = new Instruction(0x9B, "TAS", AddressingMode.AbsoluteY, 5, FetchAbsoluteY, IllegalOpCode);
-            instructions[0x9C] = new Instruction(0x9C, "SHY", AddressingMode.AbsoluteX, 5, FetchAbsoluteX, IllegalOpCode);
+            instructions[0x9C] = new Instruction(0x9C, "SHY", AddressingMode.AbsoluteX, 5, FetchAbsoluteX, UndocumentedShy);
             instructions[0x9D] = new Instruction(0x9D, "STA", AddressingMode.AbsoluteX, 5, FetchAbsoluteX, StoreAccumulator);
             instructions[0x9E] = new Instruction(0x9E, "SHX", AddressingMode.AbsoluteY, 5, FetchAbsoluteY, UndocumentedShx);
             instructions[0x9F] = new Instruction(0x9F, "AHX", AddressingMode.AbsoluteY, 5, FetchAbsoluteY, IllegalOpCode);

@@ -749,6 +749,20 @@ namespace NesCore.Processor
                 RotateRightAccumulator(address);
             };
 
+            // DCP - Decrement memory without borrow
+            Execute DecrementMemoryWithoutBorrow = (address) =>
+            {
+                DecrementMemory(address);
+                CompareAccumulator(address);
+            };
+
+            // ISC - increment memory, then subtract memory from accu-mulator (with borrow)
+            Execute IncrementThenSubtract = (address) =>
+            {
+                IncrementMemory(address);
+                SubtractWithCarry(address);
+            };
+
             // TOP - tripple NOP
             Execute TrippleNop = (address) => { };
 
@@ -974,11 +988,11 @@ namespace NesCore.Processor
             instructions[0xC0] = new Instruction(0xC0, "CPY", AddressingMode.Immediate, 2, FetchImmediate, CompareRegisterY);
             instructions[0xC1] = new Instruction(0xC1, "CMP", AddressingMode.IndexedIndirect, 6, FetchIndexedIndirect, CompareAccumulator);
             instructions[0xC2] = new Instruction(0xC2, "NOPx", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
-            instructions[0xC3] = new Instruction(0xC3, "DCP", AddressingMode.IndexedIndirect, 8, FetchIndexedIndirect, IllegalOpCode);
+            instructions[0xC3] = new Instruction(0xC3, "DCP", AddressingMode.IndexedIndirect, 8, FetchIndexedIndirect, DecrementMemoryWithoutBorrow);
             instructions[0xC4] = new Instruction(0xC4, "CPY", AddressingMode.ZeroPage, 3, FetchZeroPage, CompareRegisterY);
             instructions[0xC5] = new Instruction(0xC5, "CMP", AddressingMode.ZeroPage, 3, FetchZeroPage, CompareAccumulator);
             instructions[0xC6] = new Instruction(0xC6, "DEC", AddressingMode.ZeroPage, 5, FetchZeroPage, DecrementMemory);
-            instructions[0xC7] = new Instruction(0xC7, "DCP", AddressingMode.ZeroPage, 5, FetchZeroPage, IllegalOpCode);
+            instructions[0xC7] = new Instruction(0xC7, "DCP", AddressingMode.ZeroPage, 5, FetchZeroPage, DecrementMemoryWithoutBorrow);
             instructions[0xC8] = new Instruction(0xC8, "INY", AddressingMode.Implied, 2, FetchNone, IncrementRegisterY);
             instructions[0xC9] = new Instruction(0xC9, "CMP", AddressingMode.Immediate, 2, FetchImmediate, CompareAccumulator);
             instructions[0xCA] = new Instruction(0xCA, "DEX", AddressingMode.Implied, 2, FetchNone, DecrementRegisterX);
@@ -986,35 +1000,35 @@ namespace NesCore.Processor
             instructions[0xCC] = new Instruction(0xCC, "CPY", AddressingMode.Absolute, 4, FetchAbsolute, CompareRegisterY);
             instructions[0xCD] = new Instruction(0xCD, "CMP", AddressingMode.Absolute, 4, FetchAbsolute, CompareAccumulator);
             instructions[0xCE] = new Instruction(0xCE, "DEC", AddressingMode.Absolute, 6, FetchAbsolute, DecrementMemory);
-            instructions[0xCF] = new Instruction(0xCF, "DCP", AddressingMode.Absolute, 6, FetchAbsolute, IllegalOpCode);
+            instructions[0xCF] = new Instruction(0xCF, "DCP", AddressingMode.Absolute, 6, FetchAbsolute, DecrementMemoryWithoutBorrow);
 
             // 0xD0 - 0xDF
             instructions[0xD0] = new Instruction(0xD0, "BNE", AddressingMode.Relative, 2, FetchRelative, BranchIfNotEqual);
             instructions[0xD1] = new Instruction(0xD1, "CMP", AddressingMode.IndirectIndexed, 5, FetchIndirectIndexed, CompareAccumulator);
             instructions[0xD2] = new Instruction(0xD2, "KIL", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
-            instructions[0xD3] = new Instruction(0xD3, "DCP", AddressingMode.IndirectIndexed, 8, FetchIndirectIndexed, IllegalOpCode);
+            instructions[0xD3] = new Instruction(0xD3, "DCP", AddressingMode.IndirectIndexed, 8, FetchIndirectIndexed, DecrementMemoryWithoutBorrow);
             instructions[0xD4] = new Instruction(0xD4, "NOPx", AddressingMode.ZeroPageX, 4, FetchZeroPageX, IllegalOpCode);
             instructions[0xD5] = new Instruction(0xD5, "CMP", AddressingMode.ZeroPageX, 4, FetchZeroPageX, CompareAccumulator);
             instructions[0xD6] = new Instruction(0xD6, "DEC", AddressingMode.ZeroPageX, 6, FetchZeroPageX, DecrementMemory);
-            instructions[0xD7] = new Instruction(0xD7, "DCP", AddressingMode.ZeroPageX, 6, FetchZeroPageX, IllegalOpCode);
+            instructions[0xD7] = new Instruction(0xD7, "DCP", AddressingMode.ZeroPageX, 6, FetchZeroPageX, DecrementMemoryWithoutBorrow);
             instructions[0xD8] = new Instruction(0xD8, "CLD", AddressingMode.Implied, 2, FetchNone, ClearDecimalModeFlag);
             instructions[0xD9] = new Instruction(0xD9, "CMP", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, CompareAccumulator);
             instructions[0xDA] = new Instruction(0xDA, "NOPx", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
-            instructions[0xDB] = new Instruction(0xDB, "DCP", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, IllegalOpCode);
+            instructions[0xDB] = new Instruction(0xDB, "DCP", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, DecrementMemoryWithoutBorrow);
             instructions[0xDC] = new Instruction(0xDC, "TOP", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, TrippleNop);
             instructions[0xDD] = new Instruction(0xDD, "CMP", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, CompareAccumulator);
             instructions[0xDE] = new Instruction(0xDE, "DEC", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, DecrementMemory);
-            instructions[0xDF] = new Instruction(0xDF, "DCP", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IllegalOpCode);
+            instructions[0xDF] = new Instruction(0xDF, "DCP", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, DecrementMemoryWithoutBorrow);
 
             // 0xE0 - 0xEF
             instructions[0xE0] = new Instruction(0xE0, "CPX", AddressingMode.Immediate, 2, FetchImmediate, CompareRegisterX);
             instructions[0xE1] = new Instruction(0xE1, "SBC", AddressingMode.IndexedIndirect, 6, FetchIndexedIndirect, SubtractWithCarry);
             instructions[0xE2] = new Instruction(0xE2, "NOPx", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
-            instructions[0xE3] = new Instruction(0xE3, "ISC", AddressingMode.IndexedIndirect, 8, FetchIndexedIndirect, IllegalOpCode);
+            instructions[0xE3] = new Instruction(0xE3, "ISC", AddressingMode.IndexedIndirect, 8, FetchIndexedIndirect, IncrementThenSubtract);
             instructions[0xE4] = new Instruction(0xE4, "CPX", AddressingMode.ZeroPage, 3, FetchZeroPage, CompareRegisterX);
             instructions[0xE5] = new Instruction(0xE5, "SBC", AddressingMode.ZeroPage, 3, FetchZeroPage, SubtractWithCarry);
             instructions[0xE6] = new Instruction(0xE6, "INC", AddressingMode.ZeroPage, 5, FetchZeroPage, IncrementMemory);
-            instructions[0xE7] = new Instruction(0xE7, "ISC", AddressingMode.ZeroPage, 5, FetchZeroPage, IllegalOpCode);
+            instructions[0xE7] = new Instruction(0xE7, "ISC", AddressingMode.ZeroPage, 5, FetchZeroPage, IncrementThenSubtract);
             instructions[0xE8] = new Instruction(0xE8, "INX", AddressingMode.Implied, 2, FetchNone, IncrementRegisterX);
             instructions[0xE9] = new Instruction(0xE9, "SBC", AddressingMode.Immediate, 2, FetchImmediate, SubtractWithCarry);
             instructions[0xEA] = new Instruction(0xEA, "NOP", AddressingMode.Implied, 2, FetchNone, NoOperation); // legal NOP
@@ -1022,25 +1036,25 @@ namespace NesCore.Processor
             instructions[0xEC] = new Instruction(0xEC, "CPX", AddressingMode.Absolute, 4, FetchAbsolute, CompareRegisterX);
             instructions[0xED] = new Instruction(0xED, "SBC", AddressingMode.Absolute, 4, FetchAbsolute, SubtractWithCarry);
             instructions[0xEE] = new Instruction(0xEE, "INC", AddressingMode.Absolute, 6, FetchAbsolute, IncrementMemory);
-            instructions[0xEF] = new Instruction(0xEF, "ISC", AddressingMode.Absolute, 6, FetchAbsolute, IllegalOpCode);
+            instructions[0xEF] = new Instruction(0xEF, "ISC", AddressingMode.Absolute, 6, FetchAbsolute, IncrementThenSubtract);
 
             // 0xF0 - 0xFF
             instructions[0xF0] = new Instruction(0xF0, "BEQ", AddressingMode.Relative, 2, FetchRelative, BranchIfEqual);
             instructions[0xF1] = new Instruction(0xF1, "SBC", AddressingMode.IndirectIndexed, 5, FetchIndirectIndexed, SubtractWithCarry);
             instructions[0xF2] = new Instruction(0xF2, "KIL", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
-            instructions[0xF3] = new Instruction(0xF3, "ISC", AddressingMode.IndirectIndexed, 8, FetchIndirectIndexed, IllegalOpCode);
+            instructions[0xF3] = new Instruction(0xF3, "ISC", AddressingMode.IndirectIndexed, 8, FetchIndirectIndexed, IncrementThenSubtract);
             instructions[0xF4] = new Instruction(0xF4, "NOPx", AddressingMode.ZeroPageX, 4, FetchZeroPageX, IllegalOpCode);
             instructions[0xF5] = new Instruction(0xF5, "SBC", AddressingMode.ZeroPageX, 4, FetchZeroPageX, SubtractWithCarry);
             instructions[0xF6] = new Instruction(0xF6, "INC", AddressingMode.ZeroPageX, 6, FetchZeroPageX, IncrementMemory);
-            instructions[0xF7] = new Instruction(0xF7, "ISC", AddressingMode.ZeroPageX, 6, FetchZeroPageX, IllegalOpCode);
+            instructions[0xF7] = new Instruction(0xF7, "ISC", AddressingMode.ZeroPageX, 6, FetchZeroPageX, IncrementThenSubtract);
             instructions[0xF8] = new Instruction(0xF8, "SED", AddressingMode.Implied, 2, FetchNone, SetDecimalModeFlag);
             instructions[0xF9] = new Instruction(0xF9, "SBC", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, SubtractWithCarry);
             instructions[0xFA] = new Instruction(0xFA, "NOPx", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
-            instructions[0xFB] = new Instruction(0xFB, "ISC", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, IllegalOpCode);
+            instructions[0xFB] = new Instruction(0xFB, "ISC", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, IncrementThenSubtract);
             instructions[0xFC] = new Instruction(0xFC, "TOP", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, TrippleNop);
             instructions[0xFD] = new Instruction(0xFD, "SBC", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, SubtractWithCarry);
             instructions[0xFE] = new Instruction(0xFE, "INC", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IncrementMemory);
-            instructions[0xFF] = new Instruction(0xFF, "ISC", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IllegalOpCode);
+            instructions[0xFF] = new Instruction(0xFF, "ISC", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IncrementThenSubtract);
 
             // set up instruction variants
             foreach (Instruction instruction in instructions)

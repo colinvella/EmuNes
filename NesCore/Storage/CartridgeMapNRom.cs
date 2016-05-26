@@ -48,13 +48,11 @@ namespace NesCore.Storage
             {
                 if (address < 0x2000)
                 {
-                    throw new InvalidOperationException();
-                    //Cartridge.CharacterRom[address] = value;
+                    Cartridge.CharacterRom[address] = value;
                 }
                 else if (address >= 0x8000)
                 {
-                    throw new InvalidOperationException();
-                    //m.prgBank1 = int(value) % m.prgBanks
+                    prgBank1 = value % prgBanks;
                 }
                 else if (address >= 0x6000)
                 { 

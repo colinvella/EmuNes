@@ -153,10 +153,10 @@ namespace NesCore.Storage
             if (index >= 0x80)
                 index -= 0x100;
 
-            index %= Cartridge.CharacterRom.Count / 0x1000;
+            index %= Cartridge.CharacterRom.Length / 0x1000;
             int offset = index * 0x1000;
             if (offset < 0)
-                offset += Cartridge.CharacterRom.Count;
+                offset += Cartridge.CharacterRom.Length;
             return offset;
         }
 

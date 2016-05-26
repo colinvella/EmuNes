@@ -51,10 +51,9 @@ namespace NesCore.Storage
             ProgramRom = new List<byte>(programData);
 
             // read chr-rom bank(s)
-            byte[] characterData = characterBankCount == 0
+            CharacterRom = characterBankCount == 0
                 ? new byte[0x2000] // at least one default empty bank if there are none
                 : romBinaryReader.ReadBytes(characterBankCount * 0x2000);
-            CharacterRom = new List<byte>(characterData);
 
             // instantiate appropriate mapper
             switch (MapperType)
@@ -66,7 +65,7 @@ namespace NesCore.Storage
         }
 
         public IReadOnlyList<byte> ProgramRom { get; private set; }
-        public IReadOnlyList<byte> CharacterRom { get; private set; }
+        public byte[] CharacterRom { get; private set; }
         public byte[] SaveRam { get; private set; }
         public byte MapperType { get; private set; }
         public byte MirrorMode { get; set; }
@@ -77,7 +76,7 @@ namespace NesCore.Storage
         public override string ToString()
         {
             return "PRG: " + Hex.Format((uint)ProgramRom.Count)
-                + "b, CHR: " + Hex.Format((uint)CharacterRom.Count)
+                + "b, CHR: " + Hex.Format((uint)CharacterRom.Length)
                 + "b, Mapper Type: " + Hex.Format(MapperType)
                 + ", Mirror Mode:" + Hex.Format(MirrorMode)
                 + ", Battery: " + (BatteryPresent ? "Yes" : "No");

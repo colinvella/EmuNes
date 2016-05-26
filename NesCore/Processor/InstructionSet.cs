@@ -92,7 +92,7 @@ namespace NesCore.Processor
             {
                 pageCrossed = false;
                 // indexed indirect is address located at the x register, offset by the byte immediately following the op code
-                return Processor.ReadWordWrap((ushort)(Processor.ReadByte(operandAddress) + Processor.State.RegisterX));
+                return Processor.ReadWordWrap((ushort)(byte)(Processor.ReadByte(operandAddress) + Processor.State.RegisterX));
             };
 
 

@@ -585,7 +585,8 @@ namespace NesCore.Video
 
         private void FetchNameTableByte()
         {
-            nameTableByte = Memory[vramAddress];
+            ushort address = (ushort)(0x2000 | (vramAddress & 0x0FFF));
+            nameTableByte = Memory[address];
         }
 
         private void FetchAttributeTableByte()
@@ -670,7 +671,7 @@ namespace NesCore.Video
 
         private void RenderPixel()
         {
-            scrollX = (byte)(cycle - 1);
+            byte x = (byte)(cycle - 1);
             byte y = (byte)scanLine;
 
             byte backgroundPixel = GetBackgroundPixel();
@@ -678,10 +679,10 @@ namespace NesCore.Video
             byte spriteIndex = 0;
             byte spritePixel = GetSpritePixel(out spriteIndex);
 
-            if (scrollX < 8 && backgroundPatternTableAddress == 0x0000)
+            if (x < 8 && backgroundPatternTableAddress == 0x0000)
                 backgroundPixel = 0;
 
-            if (scrollX < 8 && !showLeftSprites)
+            if (x < 8 && !showLeftSprites)
                 spritePixel = 0;
 
             bool opaqueBackground = backgroundPixel % 4 != 0;
@@ -698,7 +699,7 @@ namespace NesCore.Video
                     // opaque background and sprite pixels
 
                     // check sprite 0 hit
-                    if (spriteIndexes[spriteIndex] == 0 && scrollX < 255)
+                    if (spriteIndexes[spriteIndex] == 0 && x < 255)
                         spriteZeroHit = true;
 
                     // determine if sprite or backgroubnd pixel prevails
@@ -729,7 +730,7 @@ namespace NesCore.Video
             }
             
             // hook to write pixel
-            WritePixel(scrollX, y, paletteIndex);
+            WritePixel(x, y, paletteIndex);
         }
 
         private uint FetchSpritePattern(int i, int row)

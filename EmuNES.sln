@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Roms", "Roms", "{012C7D28-9
 	ProjectSection(SolutionItems) = preProject
 		Roms\Mega Man 2 (USA).nes = Roms\Mega Man 2 (USA).nes
 		Roms\nestest.nes = Roms\nestest.nes
+		Roms\nestest.txt = Roms\nestest.txt
 	EndProjectSection
 EndProject
 Global

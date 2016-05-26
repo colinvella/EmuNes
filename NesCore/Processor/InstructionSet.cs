@@ -527,6 +527,7 @@ namespace NesCore.Processor
             Execute PullAccumulator = (address) =>
             {
                 Processor.State.Accumulator = Processor.PullByte();
+                SetZeroAndNegativeFlags(Processor.State.Accumulator);
             };
 
             // PHP - push processor status

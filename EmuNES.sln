@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Roms", "Roms", "{012C7D28-9
 		Roms\nestest.log = Roms\nestest.log
 		Roms\nestest.nes = Roms\nestest.nes
 		Roms\nestest.txt = Roms\nestest.txt
+		Roms\palette.nes = Roms\palette.nes
 	EndProjectSection
 EndProject
 Global

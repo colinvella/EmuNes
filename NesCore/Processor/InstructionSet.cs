@@ -709,6 +709,15 @@ namespace NesCore.Processor
                 SetZeroAndNegativeFlags(result);
             };
 
+            // LAX - load both X and A from memory
+            Execute LoadAandX = (address) =>
+            {
+                State state = Processor.State;
+                byte value = Processor.ReadByte(address);
+                state.Accumulator = state.RegisterX = value;
+                SetZeroAndNegativeFlags(value);
+            };
+
             // Op Codes
 
             // 0x00 - 0x0F
@@ -895,29 +904,29 @@ namespace NesCore.Processor
             instructions[0xA0] = new Instruction(0xA0, "LDY", AddressingMode.Immediate, 2, FetchImmediate, LoadRegisterY);
             instructions[0xA1] = new Instruction(0xA1, "LDA", AddressingMode.IndexedIndirect, 6, FetchIndexedIndirect, LoadAccumulator);
             instructions[0xA2] = new Instruction(0xA2, "LDX", AddressingMode.Immediate, 2, FetchImmediate, LoadRegisterX);
-            instructions[0xA3] = new Instruction(0xA3, "LAX", AddressingMode.IndexedIndirect, 6, FetchIndexedIndirect, IllegalOpCode);
+            instructions[0xA3] = new Instruction(0xA3, "LAX", AddressingMode.IndexedIndirect, 6, FetchIndexedIndirect, LoadAandX);
             instructions[0xA4] = new Instruction(0xA4, "LDY", AddressingMode.ZeroPage, 3, FetchZeroPage, LoadRegisterY);
             instructions[0xA5] = new Instruction(0xA5, "LDA", AddressingMode.ZeroPage, 3, FetchZeroPage, LoadAccumulator);
             instructions[0xA6] = new Instruction(0xA6, "LDX", AddressingMode.ZeroPage, 3, FetchZeroPage, LoadRegisterX);
-            instructions[0xA7] = new Instruction(0xA7, "LAX", AddressingMode.ZeroPage, 3, FetchZeroPage, IllegalOpCode);
+            instructions[0xA7] = new Instruction(0xA7, "LAX", AddressingMode.ZeroPage, 3, FetchZeroPage, LoadAandX);
             instructions[0xA8] = new Instruction(0xA8, "TAY", AddressingMode.Implied, 2, FetchNone, TransferAccumulatorToY);
             instructions[0xA9] = new Instruction(0xA9, "LDA", AddressingMode.Immediate, 2, FetchImmediate, LoadAccumulator);
             instructions[0xAA] = new Instruction(0xAA, "TAX", AddressingMode.Implied, 2, FetchNone, TransferAccumulatorToX);
-            instructions[0xAB] = new Instruction(0xAB, "LAX", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
+            instructions[0xAB] = new Instruction(0xAB, "ATX", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
             instructions[0xAC] = new Instruction(0xAC, "LDY", AddressingMode.Absolute, 4, FetchAbsolute, LoadRegisterY);
             instructions[0xAD] = new Instruction(0xAD, "LDA", AddressingMode.Absolute, 4, FetchAbsolute, LoadAccumulator);
             instructions[0xAE] = new Instruction(0xAE, "LDX", AddressingMode.Absolute, 4, FetchAbsolute, LoadRegisterX);
-            instructions[0xAF] = new Instruction(0xAF, "LAX", AddressingMode.Absolute, 4, FetchAbsolute, IllegalOpCode);
+            instructions[0xAF] = new Instruction(0xAF, "LAX", AddressingMode.Absolute, 4, FetchAbsolute, LoadAandX);
 
             // 0xB0 - 0xBF
             instructions[0xB0] = new Instruction(0xB0, "BCS", AddressingMode.Relative, 2, FetchRelative, BranchIfCarrySet);
             instructions[0xB1] = new Instruction(0xB1, "LDA", AddressingMode.IndirectIndexed, 5, FetchIndirectIndexed, LoadAccumulator);
             instructions[0xB2] = new Instruction(0xB2, "KIL", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
-            instructions[0xB3] = new Instruction(0xB3, "LAX", AddressingMode.IndirectIndexed, 5, FetchIndirectIndexed, IllegalOpCode);
+            instructions[0xB3] = new Instruction(0xB3, "LAX", AddressingMode.IndirectIndexed, 5, FetchIndirectIndexed, LoadAandX);
             instructions[0xB4] = new Instruction(0xB4, "LDY", AddressingMode.ZeroPageX, 4, FetchZeroPageX, LoadRegisterY);
             instructions[0xB5] = new Instruction(0xB5, "LDA", AddressingMode.ZeroPageX, 4, FetchZeroPageX, LoadAccumulator);
             instructions[0xB6] = new Instruction(0xB6, "LDX", AddressingMode.ZeroPageY, 4, FetchZeroPageY, LoadRegisterX);
-            instructions[0xB7] = new Instruction(0xB7, "LAX", AddressingMode.ZeroPageY, 4, FetchZeroPageY, IllegalOpCode);
+            instructions[0xB7] = new Instruction(0xB7, "LAX", AddressingMode.ZeroPageY, 4, FetchZeroPageY, LoadAandX);
             instructions[0xB8] = new Instruction(0xB8, "CLV", AddressingMode.Implied, 2, FetchNone, ClearOverflowFlag);
             instructions[0xB9] = new Instruction(0xB9, "LDA", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, LoadAccumulator);
             instructions[0xBA] = new Instruction(0xBA, "TSX", AddressingMode.Implied, 2, FetchNone, TransferStackPointerToX);
@@ -925,7 +934,7 @@ namespace NesCore.Processor
             instructions[0xBC] = new Instruction(0xBC, "LDY", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, LoadRegisterY);
             instructions[0xBD] = new Instruction(0xBD, "LDA", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, LoadAccumulator);
             instructions[0xBE] = new Instruction(0xBE, "LDX", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, LoadRegisterX);
-            instructions[0xBF] = new Instruction(0xBF, "LAX", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, IllegalOpCode);
+            instructions[0xBF] = new Instruction(0xBF, "LAX", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, LoadAandX);
 
             // 0xC0 - 0xCF
             instructions[0xC0] = new Instruction(0xC0, "CPY", AddressingMode.Immediate, 2, FetchImmediate, CompareRegisterY);

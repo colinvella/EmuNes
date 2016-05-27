@@ -78,7 +78,7 @@ namespace NesCore.Video
                 registerLatch = value;
                 nameTable = (byte)(value & 0x03);
                 vramIncrement = (value & 0x04) != 0 ? VramIncrement.Down : VramIncrement.Across;
-                spritePatternTableAddress = (ushort)((value & 0x08) != 0 ? 0x1000 : 0x0000);
+                spritePatternTable = (byte)((value & 0x08) != 0 ? 1 : 0);
                 backgroundPatternTableAddress = (ushort)((value & 0x10) != 0 ? 0x1000 : 0x0000);
                 spriteSize = (value & 0x20) != 0 ? SpriteSize.Size8x16 : SpriteSize.Size8x8;
                 masterSlave = (value & 0x40) != 0;
@@ -441,7 +441,7 @@ namespace NesCore.Video
             streamWriter.Write(spriteIndexes);
             streamWriter.Write(nameTable);
             streamWriter.Write(vramIncrement);
-            streamWriter.Write(spritePatternTableAddress);
+            streamWriter.Write(spritePatternTable);
             streamWriter.Write(backgroundPatternTableAddress);
             streamWriter.Write(spriteSize);
             streamWriter.Write(masterSlave);
@@ -748,22 +748,24 @@ namespace NesCore.Video
             WritePixel(x, y, colour);
         }
 
-        private uint FetchSpritePattern(int i, int row)
+        private uint FetchSpritePattern(int spriteIndex, int row)
         {
-            byte tile = oamData[i * 4 + 1];
-            byte attributes = oamData[i * 4 + 2];
+            byte tile = oamData[spriteIndex * 4 + 1];
+            byte attributes = oamData[spriteIndex * 4 + 2];
             ushort address = 0;
             if (spriteSize == SpriteSize.Size8x8)
             {
                 if ((attributes & 0x80) == 0x80)
                     row = 7 - row;
 
-                address = spritePatternTableAddress;
+                address = (ushort)(0x1000 * spritePatternTable + tile * 16 + row);
             }
             else // 8x16
             {
 		        if ((attributes & 0x80) == 0x80)
                     row = 15 - row;
+
+                int table = tile & 1;
 
                 tile &= 0xFE;
 		        if (row > 7)
@@ -771,9 +773,8 @@ namespace NesCore.Video
                     ++tile;
                     row -= 8;
 		        }
-                address = (ushort)(0x1000 * (tile % 1));
+                address = (ushort)(0x1000 * table + tile * 16 + row);
             }
-            address += (ushort)(tile * 16 + row);
 
             byte a = (byte)((attributes & 3) << 2);
             lowTileByte = Memory[address];
@@ -782,24 +783,25 @@ namespace NesCore.Video
             uint data = 0;
 
             byte p1 = 0, p2 = 0;
-
-		    if ((attributes & 0x40) == 0x40)
+            for (int spriteRow = 0; spriteRow < 8; spriteRow++)
             {
-                p1 = (byte)((lowTileByte & 1) << 0);
-                p2 = (byte)((highTileByte & 1) << 1);
-                lowTileByte >>= 1;
-                highTileByte >>= 1;
-		    }
-            else
-            {
-                p1 = (byte)((lowTileByte & 0x80) >> 7);
-                p2 = (byte)((highTileByte & 0x80) >> 6);
-                lowTileByte <<= 1;
-                highTileByte <<= 1;
-		    }
-            data <<= 4;
-            data |= (uint)(a | p1 | p2);
-	        
+                if ((attributes & 0x40) == 0x40)
+                {
+                    p1 = (byte)((lowTileByte & 1) << 0);
+                    p2 = (byte)((highTileByte & 1) << 1);
+                    lowTileByte >>= 1;
+                    highTileByte >>= 1;
+                }
+                else
+                {
+                    p1 = (byte)((lowTileByte & 0x80) >> 7);
+                    p2 = (byte)((highTileByte & 0x80) >> 6);
+                    lowTileByte <<= 1;
+                    highTileByte <<= 1;
+                }
+                data <<= 4;
+                data |= (uint)(a | p1 | p2);
+            }
             return data;
         }
 
@@ -922,7 +924,7 @@ namespace NesCore.Video
         // $2000 PPUCTRL
         private byte nameTable;                         // 0: $2000; 1: $2400; 2: $2800; 3: $2C00
         private VramIncrement vramIncrement;            // Across: add 1; Down: add 32
-        private ushort spritePatternTableAddress;       // 0: $0000; 1: $1000; ignored in 8x16 mode
+        private byte spritePatternTable;                // 0: $0000; 1: $1000; ignored in 8x16 mode
         private ushort backgroundPatternTableAddress;   // 0: $0000; 1: $1000
         private SpriteSize spriteSize;                  // 8x8 or 8x16 pixels
         private bool masterSlave;                       // false: read EXT; true: write EXT

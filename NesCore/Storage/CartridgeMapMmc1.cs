@@ -50,8 +50,7 @@ namespace NesCore.Storage
                 {
                     int bank = address / 0x1000;
                     int offset = address % 0x1000;
-                    throw new InvalidOperationException("Attempted write at cartridge address: " + Hex.Format(address));
-                    //Cartridge.CharacterRom[characterBankOffsets[bank] + offset] = value;
+                    Cartridge.CharacterRom[characterBankOffsets[bank] + offset] = value;
                 }
                 else if (address >= 0x8000)
                 {

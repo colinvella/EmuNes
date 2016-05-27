@@ -858,6 +858,17 @@ namespace NesCore.Processor
                 SetZeroAndNegativeFlags(state.Accumulator);
             };
 
+            // AXS - AND X with A, store in X, subtract byte from X (without borrow)
+            // probably not correctly implemented - but not used
+            Execute UndocumentedAxs = (address) =>
+            {
+                State state = Processor.State;
+                state.RegisterX &= state.Accumulator;
+                byte value = Processor.ReadByte(address);
+                state.RegisterX -= value;
+                SetZeroAndNegativeFlags(state.RegisterX);
+            };
+
             // DOP - double NOP
             Execute DoubleNop = (address) => { };
 
@@ -1094,7 +1105,7 @@ namespace NesCore.Processor
             instructions[0xC8] = new Instruction(0xC8, "INY", AddressingMode.Implied, 2, FetchNone, IncrementRegisterY);
             instructions[0xC9] = new Instruction(0xC9, "CMP", AddressingMode.Immediate, 2, FetchImmediate, CompareAccumulator);
             instructions[0xCA] = new Instruction(0xCA, "DEX", AddressingMode.Implied, 2, FetchNone, DecrementRegisterX);
-            instructions[0xCB] = new Instruction(0xCB, "AXS", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
+            instructions[0xCB] = new Instruction(0xCB, "AXS", AddressingMode.Immediate, 2, FetchImmediate, UndocumentedAxs);
             instructions[0xCC] = new Instruction(0xCC, "CPY", AddressingMode.Absolute, 4, FetchAbsolute, CompareRegisterY);
             instructions[0xCD] = new Instruction(0xCD, "CMP", AddressingMode.Absolute, 4, FetchAbsolute, CompareAccumulator);
             instructions[0xCE] = new Instruction(0xCE, "DEC", AddressingMode.Absolute, 6, FetchAbsolute, DecrementMemory);

@@ -734,12 +734,20 @@ namespace NesCore.Video
             byte paletteIndex = ReadPalette((ushort)(colourIndex % 64));
 
             // check if grayscale bit applies
-            // note that palette index encodes luminance (4 levels - high nibble 0000-0011) and hue (low nibble 0001-1100, 0000 darker gray, 1101 lightyer gray)
+            // note that palette index encodes luminance (4 levels - high nibble 0000-0011) and hue (low nibble 0001-1100, 0000 lighter gray, 1101 darker gray)
+            // therefore grayscale can be obtained by masking out low nibble, mapping $00-0F to $00, $10-$1F to $10, etc.
             if (grayscale)
                 paletteIndex &= 0xF0;
 
+            // get colour
+            Colour colour = palette[paletteIndex];
+
+            // apply tinting if needed
+            if (redTint || greenTint || blueTint)
+                colour = colour.Emphasise(redTint, greenTint, blueTint);
+
             // hook to write pixel
-            WritePixel(x, y, palette[paletteIndex]);
+            WritePixel(x, y, colour);
         }
 
         private uint FetchSpritePattern(int i, int row)

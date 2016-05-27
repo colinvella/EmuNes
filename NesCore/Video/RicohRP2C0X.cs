@@ -320,6 +320,8 @@ namespace NesCore.Video
             Control = 0x00;
             Mask = 0x00;
             ObjectAttributeMemoryAddress = 0x00;
+
+            Memory.Wipe(0x2000, 0x1000);
         }
 
         // Step executes a single PPU cycle

@@ -21,6 +21,8 @@ namespace NesCore
             Video = new RicohRP2C0X();
             Memory = new ConfigurableMemoryMap();
 
+            allocatedCycles = 0;
+
             // configure hardware and connect components
             ConfigureMemoryMap();
 
@@ -116,13 +118,13 @@ namespace NesCore
         /// <returns></returns>
         public ulong Run(double deltaTime)
         {
-            long pendingCycles = (long)(deltaTime * Mos6502.Frequency);
+            allocatedCycles += (long)(deltaTime * Mos6502.Frequency);
 
             ulong consumedCycles = 0;
-            while (pendingCycles > 0)
+            while (allocatedCycles > 0)
             {
                 ulong stepCycles = Step();
-                pendingCycles -= (long)stepCycles;
+                allocatedCycles -= (long)stepCycles;
                 consumedCycles += stepCycles;
             }
 
@@ -203,6 +205,8 @@ namespace NesCore
             int offset = address % 0x0400;
             return (ushort)(0x2000 + mirrorLookup[mode][table] * 0x0400 + offset);
         }
+
+        private long allocatedCycles;
 
         private const uint MemorySize = ushort.MaxValue + 1;
 

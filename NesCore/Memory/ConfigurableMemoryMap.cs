@@ -71,7 +71,18 @@ namespace NesCore.Memory
         /// </summary>
         public void Wipe()
         {
-            for (int address = 0; address < Size; address++)
+            Wipe(0x000, Size);
+        }
+
+        /// <summary>
+        /// Initialises the given address range to zeroes
+        /// </summary>
+        /// <param name="startAddress">start address</param>
+        /// <param name="length">length of address range to wipe</param>
+        public void Wipe(ushort startAddress, uint length)
+        {
+            uint endAddressExclusive = startAddress + length;
+            for (int address = startAddress; address < endAddressExclusive; address++)
                 this[(ushort)address] = 0;
         }
 

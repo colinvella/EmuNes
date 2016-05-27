@@ -18,7 +18,7 @@ namespace NesCore.Video
         public delegate byte ReadByteHandler(ushort address);
 
         // delegate for writing pixel in a frame buffer implementation
-        public delegate void WritePixelHandler(byte x, byte y, byte paletteIndex);
+        public delegate void WritePixelHandler(byte x, byte y, Colour colour);
 
         /// <summary>
         /// Constructs a new PPU
@@ -26,6 +26,7 @@ namespace NesCore.Video
         public RicohRP2C0X()
         {
             Memory = new ConfigurableMemoryMap(0x10000);
+            palette = new Palette();
 
             // VRM is actually $4000, but is configured to wrap around whole addressable space
             Memory.ConfigureAddressMirroring(0x000, 0x4000, 0x10000);
@@ -61,7 +62,7 @@ namespace NesCore.Video
         /// <summary>
         /// Frame presentation hook
         /// </summary>
-        public Action PresentFrame { get; set; }
+        public Action ShowFrame { get; set; }
 
         /// <summary>
         /// Control register ($2000 PPUCTRL)
@@ -574,7 +575,7 @@ namespace NesCore.Video
             NmiChange();
 
             // call hook to present frame on vblank
-            PresentFrame();
+            ShowFrame();
         }
 
         private void ClearVerticalBlank()
@@ -733,7 +734,7 @@ namespace NesCore.Video
             byte paletteIndex = ReadPalette((ushort)(colourIndex % 64));
 
             // hook to write pixel
-            WritePixel(x, y, paletteIndex);
+            WritePixel(x, y, palette[paletteIndex]);
         }
 
         private uint FetchSpritePattern(int i, int row)
@@ -934,6 +935,8 @@ namespace NesCore.Video
 
         // $2007 PPUDATA
         private byte bufferedData; // for buffered reads
+
+        private Palette palette;
 
         private static readonly ushort[][] mirrorLookup = {
             new ushort[]{0, 0, 1, 1},

@@ -107,13 +107,12 @@ namespace EmuNES
 
         private void ConfigureVideoBuffer()
         {
-            Console.Video.WritePixel = (x, y, paletteIndex) =>
+            Console.Video.WritePixel = (x, y, colour) =>
             {
-                Colour gameColour = palette[paletteIndex];
-                bitmapBuffer.SetPixel(x, y, Color.FromArgb(gameColour.Red, gameColour.Green, gameColour.Blue));
+                bitmapBuffer.SetPixel(x, y, Color.FromArgb(colour.Red, colour.Green, colour.Blue));
             };
 
-            Console.Video.PresentFrame = () => videoPanel.Invalidate();
+            Console.Video.ShowFrame = () => videoPanel.Invalidate();
         }
 
         private void ConfigureDefaultController()
@@ -139,7 +138,6 @@ namespace EmuNES
                 Cartridge cartridge = new Cartridge(romBinaryReader);
                 romBinaryReader.Close();
                 Console.LoadCartridge(cartridge);
-                MessageBox.Show(this, cartridge.ToString(), "Open Game ROM", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 OnGameReset(this, EventArgs.Empty);
             }
@@ -178,8 +176,5 @@ namespace EmuNES
         private Dictionary<Keys, bool> keyPressed;
         private Bitmap bitmapBuffer;
         private bool gameIsRunning;
-
-        // temp
-        private Palette palette = new Palette();
     }
 }

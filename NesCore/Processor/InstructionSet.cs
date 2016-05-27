@@ -790,6 +790,15 @@ namespace NesCore.Processor
                 AddWithCarry(address);
             };
 
+            // ANC - and with carry
+            Execute AndWithCarry = (address) =>
+            {
+                State state = Processor.State;
+                state.Accumulator &= Processor.ReadByte(address);
+                SetZeroAndNegativeFlags(state.Accumulator);
+                state.CarryFlag = (state.Accumulator & 0x80) != 0;
+            };
+
             // DOP - double NOP
             Execute DoubleNop = (address) => { };
 
@@ -810,7 +819,7 @@ namespace NesCore.Processor
             instructions[0x08] = new Instruction(0x08, "PHP", AddressingMode.Implied, 3, FetchNone, PushProcessorStatus);
             instructions[0x09] = new Instruction(0x09, "ORA", AddressingMode.Immediate, 2, FetchImmediate, LogicalInclusiveOr);
             instructions[0x0A] = new Instruction(0x0A, "ASL", AddressingMode.Accumulator, 2, FetchNone, ArithmeticShiftLeftAccumulator);
-            instructions[0x0B] = new Instruction(0x0B, "ANC", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
+            instructions[0x0B] = new Instruction(0x0B, "ANC", AddressingMode.Immediate, 2, FetchImmediate, AndWithCarry);
             instructions[0x0C] = new Instruction(0x0C, "TOP", AddressingMode.Absolute, 4, FetchAbsolute, TrippleNop);
             instructions[0x0D] = new Instruction(0x0D, "ORA", AddressingMode.Absolute, 4, FetchAbsolute, LogicalInclusiveOr);
             instructions[0x0E] = new Instruction(0x0E, "ASL", AddressingMode.Absolute, 6, FetchAbsolute, ArithmeticShiftLeftMemory);
@@ -846,7 +855,7 @@ namespace NesCore.Processor
             instructions[0x28] = new Instruction(0x28, "PLP", AddressingMode.Implied, 4, FetchNone, PullProcessorStatus);
             instructions[0x29] = new Instruction(0x29, "AND", AddressingMode.Immediate, 2, FetchImmediate, LogicalAnd);
             instructions[0x2A] = new Instruction(0x2A, "ROL", AddressingMode.Accumulator, 2, FetchNone, RotateLeftAccumulator);
-            instructions[0x2B] = new Instruction(0x2B, "ANC", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
+            instructions[0x2B] = new Instruction(0x2B, "ANC", AddressingMode.Immediate, 2, FetchImmediate, AndWithCarry);
             instructions[0x2C] = new Instruction(0x2C, "BIT", AddressingMode.Absolute, 4, FetchAbsolute, BitTest);
             instructions[0x2D] = new Instruction(0x2D, "AND", AddressingMode.Absolute, 4, FetchAbsolute, LogicalAnd);
             instructions[0x2E] = new Instruction(0x2E, "ROL", AddressingMode.Absolute, 6, FetchAbsolute, RotateLeftMemory);

@@ -17,11 +17,21 @@ namespace NesCore.Processor
         public const int Frequency = 1789773;
         public const byte StackBase = 0xFD;
 
+        /// <summary>
+        /// Non-maskable interrupt vector
+        /// </summary>
         public const ushort NmiVector = 0xFFFA;
+
+        /// <summary>
+        /// Reset vector
+        /// </summary>
         public const ushort ResetVector = 0xFFFC;
+
+        /// <summary>
+        /// Interrupt request vector
+        /// </summary>
         public const ushort IrqVector = 0xFFFE;
-
-
+        
         public Mos6502()
         {
             State = new State();
@@ -30,12 +40,29 @@ namespace NesCore.Processor
 
         public State State { get; private set; }
 
+        /// <summary>
+        /// Hook for reading a byte from a given memory address
+        /// </summary>
         public ReadByte ReadByte { get; set; }
+
+        /// <summary>
+        /// Hook for writing a byte to a given memory address
+        /// </summary>
         public WriteByte WriteByte { get; set; }
 
+        /// <summary>
+        /// Action triggered when a KIL opcode is encountered
+        /// </summary>
+        public Action Lockup { get; set; }
+
+        /// <summary>
+        /// Processor's instruction set
+        /// </summary>
         public InstructionSet InstructionSet { get; private set; }
 
-        // resets the processor state
+        /// <summary>
+        /// resets the processor state
+        /// </summary>
         public void Reset()
         {
             State.ProgramCounter = ReadWord(ResetVector);
@@ -43,6 +70,11 @@ namespace NesCore.Processor
             State.InterruptDisableFlag = true;
         }
 
+        /// <summary>
+        /// Execute a given number of instructions
+        /// </summary>
+        /// <param name="count">number of instructions to execute</param>
+        /// <returns>total cycles consumed by the instructions</returns>
         public UInt64 ExecuteInstructions(ushort count)
         {
             UInt64 consumedCycles = 0;
@@ -51,6 +83,10 @@ namespace NesCore.Processor
             return consumedCycles;
         }
 
+        /// <summary>
+        /// Execute until BRK opcode is executed
+        /// </summary>
+        /// <returns>total cycles consumed by the instructions</returns>
         public UInt64 ExecuteUntilBreak()
         {
             UInt64 consumedCycles = 0;
@@ -64,6 +100,10 @@ namespace NesCore.Processor
             return consumedCycles;
         }
 
+        /// <summary>
+        /// Executes the next instruction referenced by the program counter
+        /// </summary>
+        /// <returns>Cycles consumed by the instruction</returns>
         public byte ExecuteInstruction()
         {
             // consume 1 cycle and do nothing if there are pending stall cycles

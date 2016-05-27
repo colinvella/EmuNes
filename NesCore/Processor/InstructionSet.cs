@@ -846,8 +846,17 @@ namespace NesCore.Processor
             {
                 LogicalAnd(address);
                 TransferAccumulatorToX(address);
-            }; 
+            };
 
+            // LAS - AND memory with SP, store in SP, X, A
+            Execute UndocumentedLas = (address) =>
+            {
+                State state = Processor.State;
+                byte value = Processor.ReadByte(address);
+                state.StackPointer &= value;
+                state.RegisterX = state.Accumulator = state.StackPointer;
+                SetZeroAndNegativeFlags(state.Accumulator);
+            };
 
             // DOP - double NOP
             Execute DoubleNop = (address) => { };
@@ -1067,7 +1076,7 @@ namespace NesCore.Processor
             instructions[0xB8] = new Instruction(0xB8, "CLV", AddressingMode.Implied, 2, FetchNone, ClearOverflowFlag);
             instructions[0xB9] = new Instruction(0xB9, "LDA", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, LoadAccumulator);
             instructions[0xBA] = new Instruction(0xBA, "TSX", AddressingMode.Implied, 2, FetchNone, TransferStackPointerToX);
-            instructions[0xBB] = new Instruction(0xBB, "LAS", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, IllegalOpCode);
+            instructions[0xBB] = new Instruction(0xBB, "LAS", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, UndocumentedLas);
             instructions[0xBC] = new Instruction(0xBC, "LDY", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, LoadRegisterY);
             instructions[0xBD] = new Instruction(0xBD, "LDA", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, LoadAccumulator);
             instructions[0xBE] = new Instruction(0xBE, "LDX", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, LoadRegisterX);

@@ -817,6 +817,17 @@ namespace NesCore.Processor
                 state.Accumulator &= Processor.ReadByte(address);
             };
 
+            // AXH - And X and A and 0x07 and store result
+            Execute UndocumentedAxa = (address) =>
+            {
+                State state = Processor.State;
+                byte result = state.RegisterX;
+                result &= state.Accumulator;
+                result &= 0x07;
+                Processor.WriteByte(address, result);
+            };
+
+
             // DOP - double NOP
             Execute DoubleNop = (address) => { };
 
@@ -991,7 +1002,7 @@ namespace NesCore.Processor
             instructions[0x90] = new Instruction(0x90, "BCC", AddressingMode.Relative, 2, FetchRelative, BranchIfCarryClear);
             instructions[0x91] = new Instruction(0x91, "STA", AddressingMode.IndirectIndexed, 6, FetchIndirectIndexed, StoreAccumulator);
             instructions[0x92] = new Instruction(0x92, "KIL", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
-            instructions[0x93] = new Instruction(0x93, "AHX", AddressingMode.IndirectIndexed, 6, FetchIndirectIndexed, IllegalOpCode);
+            instructions[0x93] = new Instruction(0x93, "AXA", AddressingMode.IndirectIndexed, 6, FetchIndirectIndexed, UndocumentedAxa);
             instructions[0x94] = new Instruction(0x94, "STY", AddressingMode.ZeroPageX, 4, FetchZeroPageX, StoreRegisterY);
             instructions[0x95] = new Instruction(0x95, "STA", AddressingMode.ZeroPageX, 4, FetchZeroPageX, StoreAccumulator);
             instructions[0x96] = new Instruction(0x96, "STX", AddressingMode.ZeroPageY, 4, FetchZeroPageY, StoreRegisterX);
@@ -1003,7 +1014,7 @@ namespace NesCore.Processor
             instructions[0x9C] = new Instruction(0x9C, "SHY", AddressingMode.AbsoluteX, 5, FetchAbsoluteX, UndocumentedShy);
             instructions[0x9D] = new Instruction(0x9D, "STA", AddressingMode.AbsoluteX, 5, FetchAbsoluteX, StoreAccumulator);
             instructions[0x9E] = new Instruction(0x9E, "SHX", AddressingMode.AbsoluteY, 5, FetchAbsoluteY, UndocumentedShx);
-            instructions[0x9F] = new Instruction(0x9F, "AHX", AddressingMode.AbsoluteY, 5, FetchAbsoluteY, IllegalOpCode);
+            instructions[0x9F] = new Instruction(0x9F, "AXA", AddressingMode.AbsoluteY, 5, FetchAbsoluteY, UndocumentedAxa);
 
             // 0xA0 - 0xAF
             instructions[0xA0] = new Instruction(0xA0, "LDY", AddressingMode.Immediate, 2, FetchImmediate, LoadRegisterY);

@@ -450,6 +450,7 @@ namespace NesCoreTest
             processor.State.ZeroFlag = true;
             processor.State.NegativeFlag = false;
             processor.State.OverflowFlag = false;
+            processor.State.Accumulator = 0xFF;
             WriteByte(0x0010, 0xC0); // $C0 = b11000000
 
             processor.ExecuteInstruction();
@@ -576,6 +577,7 @@ namespace NesCoreTest
             processor.State.ZeroFlag = true;
             processor.State.NegativeFlag = false;
             processor.State.OverflowFlag = false;
+            processor.State.Accumulator = 0xFF;
             WriteByte(0x2000, 0xC0); // $C0 = b11000000
 
             processor.ExecuteInstruction();

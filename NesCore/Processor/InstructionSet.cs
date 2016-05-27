@@ -841,8 +841,15 @@ namespace NesCore.Processor
                 Processor.WriteByte(address, result);
             };
 
+            // ATX - AND byte with A, then transfer A to X
+            Execute LogicalAndThenTransferToX = (address) =>
+            {
+                LogicalAnd(address);
+                TransferAccumulatorToX(address);
+            }; 
 
-           // DOP - double NOP
+
+            // DOP - double NOP
             Execute DoubleNop = (address) => { };
 
             // TOP - tripple NOP
@@ -1042,7 +1049,7 @@ namespace NesCore.Processor
             instructions[0xA8] = new Instruction(0xA8, "TAY", AddressingMode.Implied, 2, FetchNone, TransferAccumulatorToY);
             instructions[0xA9] = new Instruction(0xA9, "LDA", AddressingMode.Immediate, 2, FetchImmediate, LoadAccumulator);
             instructions[0xAA] = new Instruction(0xAA, "TAX", AddressingMode.Implied, 2, FetchNone, TransferAccumulatorToX);
-            instructions[0xAB] = new Instruction(0xAB, "ATX", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
+            instructions[0xAB] = new Instruction(0xAB, "ATX", AddressingMode.Immediate, 2, FetchImmediate, LogicalAndThenTransferToX);
             instructions[0xAC] = new Instruction(0xAC, "LDY", AddressingMode.Absolute, 4, FetchAbsolute, LoadRegisterY);
             instructions[0xAD] = new Instruction(0xAD, "LDA", AddressingMode.Absolute, 4, FetchAbsolute, LoadAccumulator);
             instructions[0xAE] = new Instruction(0xAE, "LDX", AddressingMode.Absolute, 4, FetchAbsolute, LoadRegisterX);

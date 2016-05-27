@@ -776,6 +776,13 @@ namespace NesCore.Processor
                 LogicalExclusiveOr(address);
             };
 
+            // RLA - Rotate left then And
+            Execute RotateLeftThenAnd = (address) =>
+            {
+                RotateLeftMemory(address);
+                LogicalAnd(address);
+            };
+
             // DOP - double NOP
             Execute DoubleNop = (address) => { };
 
@@ -824,11 +831,11 @@ namespace NesCore.Processor
             instructions[0x20] = new Instruction(0x20, "JSR", AddressingMode.Absolute, 6, FetchAbsolute, JumpToSubroutine);
             instructions[0x21] = new Instruction(0x21, "AND", AddressingMode.IndexedIndirect, 6, FetchIndexedIndirect, LogicalAnd);
             instructions[0x22] = new Instruction(0x22, "KIL", AddressingMode.Implied, 2, FetchNone,  IllegalOpCode);
-            instructions[0x23] = new Instruction(0x23, "RLA", AddressingMode.IndexedIndirect, 8, FetchIndexedIndirect, IllegalOpCode);
+            instructions[0x23] = new Instruction(0x23, "RLA", AddressingMode.IndexedIndirect, 8, FetchIndexedIndirect, RotateLeftThenAnd);
             instructions[0x24] = new Instruction(0x24, "BIT", AddressingMode.ZeroPage, 3, FetchZeroPage, BitTest);
             instructions[0x25] = new Instruction(0x25, "AND", AddressingMode.ZeroPage, 3, FetchZeroPage, LogicalAnd);
             instructions[0x26] = new Instruction(0x26, "ROL", AddressingMode.ZeroPage, 5, FetchZeroPage, RotateLeftMemory);
-            instructions[0x27] = new Instruction(0x27, "RLA", AddressingMode.ZeroPage, 5, FetchZeroPage, IllegalOpCode);
+            instructions[0x27] = new Instruction(0x27, "RLA", AddressingMode.ZeroPage, 5, FetchZeroPage, RotateLeftThenAnd);
             instructions[0x28] = new Instruction(0x28, "PLP", AddressingMode.Implied, 4, FetchNone, PullProcessorStatus);
             instructions[0x29] = new Instruction(0x29, "AND", AddressingMode.Immediate, 2, FetchImmediate, LogicalAnd);
             instructions[0x2A] = new Instruction(0x2A, "ROL", AddressingMode.Accumulator, 2, FetchNone, RotateLeftAccumulator);
@@ -836,25 +843,25 @@ namespace NesCore.Processor
             instructions[0x2C] = new Instruction(0x2C, "BIT", AddressingMode.Absolute, 4, FetchAbsolute, BitTest);
             instructions[0x2D] = new Instruction(0x2D, "AND", AddressingMode.Absolute, 4, FetchAbsolute, LogicalAnd);
             instructions[0x2E] = new Instruction(0x2E, "ROL", AddressingMode.Absolute, 6, FetchAbsolute, RotateLeftMemory);
-            instructions[0x2F] = new Instruction(0x2F, "RLA", AddressingMode.Absolute, 6, FetchAbsolute, IllegalOpCode);
+            instructions[0x2F] = new Instruction(0x2F, "RLA", AddressingMode.Absolute, 6, FetchAbsolute, RotateLeftThenAnd);
 
             // 0x30 - 0x3F
             instructions[0x30] = new Instruction(0x30, "BMI", AddressingMode.Relative, 2, FetchRelative, BranchIfMinus);
             instructions[0x31] = new Instruction(0x31, "AND", AddressingMode.IndirectIndexed, 5, FetchIndirectIndexed, LogicalAnd);
             instructions[0x32] = new Instruction(0x32, "KIL", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
-            instructions[0x33] = new Instruction(0x33, "RLA", AddressingMode.IndirectIndexed, 8, FetchIndirectIndexed, IllegalOpCode);
+            instructions[0x33] = new Instruction(0x33, "RLA", AddressingMode.IndirectIndexed, 8, FetchIndirectIndexed, RotateLeftThenAnd);
             instructions[0x34] = new Instruction(0x34, "DOP", AddressingMode.ZeroPageX, 4, FetchZeroPageX, DoubleNop);
             instructions[0x35] = new Instruction(0x35, "AND", AddressingMode.ZeroPageX, 4, FetchZeroPageX, LogicalAnd);
             instructions[0x36] = new Instruction(0x36, "ROL", AddressingMode.ZeroPageX, 6, FetchZeroPageX, RotateLeftMemory);
-            instructions[0x37] = new Instruction(0x37, "RLA", AddressingMode.ZeroPageX, 6, FetchZeroPageX, IllegalOpCode);
+            instructions[0x37] = new Instruction(0x37, "RLA", AddressingMode.ZeroPageX, 6, FetchZeroPageX, RotateLeftThenAnd);
             instructions[0x38] = new Instruction(0x38, "SEC", AddressingMode.Implied, 2, FetchNone, SetCarryFlag);
             instructions[0x39] = new Instruction(0x39, "AND", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, LogicalAnd);
             instructions[0x3A] = new Instruction(0x3A, "NOPx", AddressingMode.Implied, 2, FetchNone, IllegalOpCode);
-            instructions[0x3B] = new Instruction(0x3B, "RLA", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, IllegalOpCode);
+            instructions[0x3B] = new Instruction(0x3B, "RLA", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, RotateLeftThenAnd);
             instructions[0x3C] = new Instruction(0x3C, "TOP", AddressingMode.AbsoluteX, 3, FetchAbsoluteX, TrippleNop);
             instructions[0x3D] = new Instruction(0x3D, "AND", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, LogicalAnd);
             instructions[0x3E] = new Instruction(0x3E, "ROL", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, RotateLeftMemory);
-            instructions[0x3F] = new Instruction(0x3F, "RLA", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, IllegalOpCode);
+            instructions[0x3F] = new Instruction(0x3F, "RLA", AddressingMode.AbsoluteX, 7, FetchAbsoluteX, RotateLeftThenAnd);
 
             // 0x40 - 0x4F
             instructions[0x40] = new Instruction(0x40, "RTI", AddressingMode.Implied, 6, FetchNone, ReturnFromInterrupt);

@@ -8,19 +8,50 @@ namespace NesCore.Video
 {
     public class Palette
     {
-        public Palette()
+        public Palette(byte tint)
         {
-            colours = new Colour[colourValues.Length];
-            for (int index = 0; index < colourValues.Length; index++)
-                colours[index] = new Colour(colourValues[index]);
+            tint &= 0x07;
+            colours = new Colour[baseColourValues.Length];
+            for (int index = 0; index < baseColourValues.Length; index++)
+            {
+                ulong colourValue = baseColourValues[index];
+
+                byte red = (byte)(colourValue >> 16);
+                byte green = (byte)(colourValue >> 8);
+                byte blue = (byte)colourValue;
+
+                // red tint
+                if ((tint & 0x01) != 0)
+                {
+                    green = (byte)(green * 0.8);
+                    blue = (byte)(blue * 0.8);
+                }
+
+                // green tint
+                if ((tint & 0x02) != 0)
+                {
+                    red = (byte)(red * 0.8);
+                    blue = (byte)(blue * 0.8);
+                }
+
+                // blue tint
+                if ((tint & 0x04) != 0)
+                {
+                    red = (byte)(red * 0.8);
+                    green = (byte)(green * 0.8);
+                }
+
+                colours[index] = new Colour(red, green, blue);
+            }
         }
+
 
         public Colour this[byte index]
         {
             get { return colours[index];  }
         }
 
-        private readonly ulong[] colourValues =
+        private static readonly ulong[] baseColourValues =
         {
             0x666666, 0x002A88, 0x1412A7, 0x3B00A4, 0x5C007E, 0x6E0040, 0x6C0600, 0x561D00,
             0x333500, 0x0B4800, 0x005200, 0x004F08, 0x00404D, 0x000000, 0x000000, 0x000000,

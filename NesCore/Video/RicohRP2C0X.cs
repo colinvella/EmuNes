@@ -26,7 +26,7 @@ namespace NesCore.Video
         public RicohRP2C0X()
         {
             Memory = new ConfigurableMemoryMap(0x10000);
-            palette = new Palette();
+            paletteTints = new PaletteTints();
 
             // VRM is actually $4000, but is configured to wrap around whole addressable space
             Memory.ConfigureAddressMirroring(0x000, 0x4000, 0x10000);
@@ -107,9 +107,7 @@ namespace NesCore.Video
                 showLeftSprites = (value & 0x04) != 0;
                 showBackground = (value & 0x08) != 0;
                 showSprites = (value & 0x10) != 0;
-                redTint = (value & 0x20) != 0;
-                greenTint = (value & 0x40) != 0;
-                blueTint = (value & 0x80) != 0;
+                tint = (byte)(value >> 5);
             }
         }
 
@@ -450,9 +448,7 @@ namespace NesCore.Video
             streamWriter.Write(showLeftSprites);
             streamWriter.Write(showBackground);
             streamWriter.Write(showSprites);
-            streamWriter.Write(redTint);
-            streamWriter.Write(greenTint);
-            streamWriter.Write(blueTint);
+            streamWriter.Write(tint);
             streamWriter.Write(spriteZeroHit);
             streamWriter.Write(spriteOverflow);
 	        streamWriter.Write(oamAddress);
@@ -740,11 +736,11 @@ namespace NesCore.Video
                 paletteIndex &= 0xF0;
 
             // get colour
-            Colour colour = palette[paletteIndex];
+            Colour colour = paletteTints[tint][paletteIndex];
 
             // apply tinting if needed
-            if (redTint || greenTint || blueTint)
-                colour = colour.Emphasise(redTint, greenTint, blueTint);
+            //if (redTint || greenTint || blueTint)
+            //    colour = colour.Emphasise(redTint, greenTint, blueTint);
 
             // hook to write pixel
             WritePixel(x, y, colour);
@@ -935,9 +931,7 @@ namespace NesCore.Video
         private bool showLeftSprites;       // false: hide;   true: show
         private bool showBackground;        // false: hide;   true: show
         private bool showSprites;           // false: hide;   true: show
-        private bool redTint;               // false: normal; true: emphasized
-        private bool greenTint;             // false: normal; true: emphasized
-        private bool blueTint;              // false: normal; true: emphasized
+        private byte tint;                  // 000 - 111 binary showing colour emphasis in BGR order 
 
         // $2002 PPUSTATUS
         private bool spriteZeroHit;
@@ -949,7 +943,7 @@ namespace NesCore.Video
         // $2007 PPUDATA
         private byte bufferedData; // for buffered reads
 
-        private Palette palette;
+        private PaletteTints paletteTints;
 
         private static readonly ushort[][] mirrorLookup = {
             new ushort[]{0, 0, 1, 1},

@@ -169,6 +169,8 @@ namespace EmuNES
         {
             Graphics graphics = paintEventArgs.Graphics;
             graphics.DrawImage(bitmapBuffer, 0, 0, 512, 480);
+            //graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
+            graphics.DrawImage(Properties.Resources.Filter, 0, 0, 512, 480);
         }
 
         public NesCore.Console Console { get; private set; }

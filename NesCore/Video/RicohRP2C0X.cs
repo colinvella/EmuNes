@@ -733,6 +733,11 @@ namespace NesCore.Video
             // get palette index from colour index
             byte paletteIndex = ReadPalette((ushort)(colourIndex % 64));
 
+            // check if grayscale bit applies
+            // note that palette index encodes luminance (4 levels - high nibble 0000-0011) and hue (low nibble 0001-1100, 0000 darker gray, 1101 lightyer gray)
+            if (grayscale)
+                paletteIndex &= 0xF0;
+
             // hook to write pixel
             WritePixel(x, y, palette[paletteIndex]);
         }

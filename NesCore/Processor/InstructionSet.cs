@@ -807,6 +807,16 @@ namespace NesCore.Processor
                 LogicalShiftRightMemory(address);
             };
 
+            // XAA - undocumented A = (A | #$EE) & X & #byte
+            // very vague documentation found
+            Execute UndocumentedXaa = (address) =>
+            {
+                State state = Processor.State;
+                state.Accumulator |= 0xEE;
+                state.Accumulator &= state.RegisterX;
+                state.Accumulator &= Processor.ReadByte(address);
+            };
+
             // DOP - double NOP
             Execute DoubleNop = (address) => { };
 
@@ -971,7 +981,7 @@ namespace NesCore.Processor
             instructions[0x88] = new Instruction(0x88, "DEY", AddressingMode.Implied, 2, FetchNone, DecrementRegisterY);
             instructions[0x89] = new Instruction(0x89, "DOP", AddressingMode.Immediate, 2, FetchImmediate, DoubleNop);
             instructions[0x8A] = new Instruction(0x8A, "TXA", AddressingMode.Implied, 2, FetchNone, TransferXToAccumulator);
-            instructions[0x8B] = new Instruction(0x8B, "XAA", AddressingMode.Immediate, 2, FetchImmediate, IllegalOpCode);
+            instructions[0x8B] = new Instruction(0x8B, "XAA", AddressingMode.Immediate, 2, FetchImmediate, UndocumentedXaa);
             instructions[0x8C] = new Instruction(0x8C, "STY", AddressingMode.Absolute, 4, FetchAbsolute, StoreRegisterY);
             instructions[0x8D] = new Instruction(0x8D, "STA", AddressingMode.Absolute, 5, FetchAbsolute, StoreAccumulator);
             instructions[0x8E] = new Instruction(0x8E, "STX", AddressingMode.Absolute, 4, FetchAbsolute, StoreRegisterX);

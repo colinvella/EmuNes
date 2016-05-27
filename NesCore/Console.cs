@@ -86,6 +86,7 @@ namespace NesCore
         public void Reset()
         {
             Processor.Reset();
+            Video.Reset();
         }
 
         /// <summary>

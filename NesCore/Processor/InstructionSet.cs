@@ -827,8 +827,22 @@ namespace NesCore.Processor
                 Processor.WriteByte(address, result);
             };
 
+            // TAS - AND X with A, store result in SP, AND SP with the high byte of word at address + 1. store result
+            // note: probably incorrectly implemented - but this opcode is practically unused
+            Execute UndocumentedTas = (address) =>
+            {
+                State state = Processor.State;
+                state.StackPointer = state.RegisterX;
+                state.StackPointer &= state.Accumulator;
 
-            // DOP - double NOP
+                ushort value = Processor.ReadWord((ushort)(address + 1));
+                byte result = state.StackPointer;
+                result &= (byte)(value >> 8); ;
+                Processor.WriteByte(address, result);
+            };
+
+
+           // DOP - double NOP
             Execute DoubleNop = (address) => { };
 
             // TOP - tripple NOP
@@ -1010,7 +1024,7 @@ namespace NesCore.Processor
             instructions[0x98] = new Instruction(0x98, "TYA", AddressingMode.Implied, 2, FetchNone, TransferYToAccumulator);
             instructions[0x99] = new Instruction(0x99, "STA", AddressingMode.AbsoluteY, 5, FetchAbsoluteY, StoreAccumulator);
             instructions[0x9A] = new Instruction(0x9A, "TXS", AddressingMode.Implied, 2, FetchNone, TransferXToStackPointer);
-            instructions[0x9B] = new Instruction(0x9B, "TAS", AddressingMode.AbsoluteY, 5, FetchAbsoluteY, IllegalOpCode);
+            instructions[0x9B] = new Instruction(0x9B, "TAS", AddressingMode.AbsoluteY, 5, FetchAbsoluteY, UndocumentedTas);
             instructions[0x9C] = new Instruction(0x9C, "SHY", AddressingMode.AbsoluteX, 5, FetchAbsoluteX, UndocumentedShy);
             instructions[0x9D] = new Instruction(0x9D, "STA", AddressingMode.AbsoluteX, 5, FetchAbsoluteX, StoreAccumulator);
             instructions[0x9E] = new Instruction(0x9E, "SHX", AddressingMode.AbsoluteY, 5, FetchAbsoluteY, UndocumentedShx);

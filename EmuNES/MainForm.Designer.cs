@@ -38,6 +38,7 @@
             this.gameRunMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gamePauseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameResetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gameStopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.videoPanel = new System.Windows.Forms.Panel();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.emulatorStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -90,7 +91,8 @@
             this.gameMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.gameRunMenuItem,
             this.gamePauseMenuItem,
-            this.gameResetMenuItem});
+            this.gameResetMenuItem,
+            this.gameStopMenuItem});
             this.gameMenuItem.Name = "gameMenuItem";
             this.gameMenuItem.Size = new System.Drawing.Size(60, 24);
             this.gameMenuItem.Text = "&Game";
@@ -99,7 +101,7 @@
             // 
             this.gameRunMenuItem.Enabled = false;
             this.gameRunMenuItem.Name = "gameRunMenuItem";
-            this.gameRunMenuItem.Size = new System.Drawing.Size(121, 26);
+            this.gameRunMenuItem.Size = new System.Drawing.Size(181, 26);
             this.gameRunMenuItem.Text = "&Run";
             this.gameRunMenuItem.Click += new System.EventHandler(this.OnGameRun);
             // 
@@ -107,7 +109,7 @@
             // 
             this.gamePauseMenuItem.Enabled = false;
             this.gamePauseMenuItem.Name = "gamePauseMenuItem";
-            this.gamePauseMenuItem.Size = new System.Drawing.Size(121, 26);
+            this.gamePauseMenuItem.Size = new System.Drawing.Size(181, 26);
             this.gamePauseMenuItem.Text = "&Pause";
             this.gamePauseMenuItem.Click += new System.EventHandler(this.OnGamePause);
             // 
@@ -115,9 +117,17 @@
             // 
             this.gameResetMenuItem.Enabled = false;
             this.gameResetMenuItem.Name = "gameResetMenuItem";
-            this.gameResetMenuItem.Size = new System.Drawing.Size(121, 26);
+            this.gameResetMenuItem.Size = new System.Drawing.Size(181, 26);
             this.gameResetMenuItem.Text = "Reset";
             this.gameResetMenuItem.Click += new System.EventHandler(this.OnGameReset);
+            // 
+            // gameStopMenuItem
+            // 
+            this.gameStopMenuItem.Enabled = false;
+            this.gameStopMenuItem.Name = "gameStopMenuItem";
+            this.gameStopMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.gameStopMenuItem.Text = "Stop";
+            this.gameStopMenuItem.Click += new System.EventHandler(this.OnGameStop);
             // 
             // videoPanel
             // 
@@ -206,6 +216,7 @@
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel emulatorStatusLabel;
         private System.Windows.Forms.ToolStripStatusLabel frameRateStatusLabel;
+        private System.Windows.Forms.ToolStripMenuItem gameStopMenuItem;
     }
 }
 

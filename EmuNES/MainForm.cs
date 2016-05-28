@@ -40,7 +40,7 @@ namespace EmuNES
             ConfigureVideoBuffer();
             ConfigureDefaultController();
 
-            gameIsRunning = false;
+            gameState = GameState.Stopped;
 
             bitmapBuffer = new FastBitmap(256, 240);
         }
@@ -52,7 +52,7 @@ namespace EmuNES
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No;
         }
 
-        private void OnFileOpen(object sender, EventArgs e)
+        private void OnFileOpen(object sender, EventArgs eventArgs)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = Application.ExecutablePath;
@@ -66,43 +66,63 @@ namespace EmuNES
             LoadCartridgeRom(openFileDialog.FileName);
         }
 
-        private void OnFileExit(object sender, EventArgs e)
+        private void OnFileExit(object sender, EventArgs eventArgs)
         {
             Application.Exit();
         }
 
-        private void OnGameRun(object sender, EventArgs e)
+        private void OnGameRun(object sender, EventArgs eventArgs)
         {
-            if (gameIsRunning)
+            if (gameState == GameState.Running)
                 return;
 
-            gameIsRunning = true;
+            if (gameState == GameState.Stopped)
+                Console.Reset();
+
+            gameState = GameState.Running;
             frameDateTime = gameTickDateTime = DateTime.Now;
 
             gameRunMenuItem.Enabled = false;
             gamePauseMenuItem.Enabled = true;
             gameResetMenuItem.Enabled = true;
+            gameStopMenuItem.Enabled = true;
             gameTimer.Enabled = true;
         }
 
-        private void OnGamePause(object sender, EventArgs e)
+        private void OnGamePause(object sender, EventArgs eventArgs)
         {
-            if (!gameIsRunning)
+            if (gameState != GameState.Running)
                 return;
 
-            gameIsRunning = false;
+            gameState = GameState.Paused;
+            videoPanel.Invalidate();
 
             gameTimer.Enabled = false;
             gameRunMenuItem.Enabled = true;
             gamePauseMenuItem.Enabled = false;
             gameResetMenuItem.Enabled = true;
+            gameStopMenuItem.Enabled = true;
         }
 
-        private void OnGameReset(object sender, EventArgs e)
+        private void OnGameReset(object sender, EventArgs eventArgs)
         {
-            OnGamePause(this, EventArgs.Empty);
-            Console.Reset();
+            OnGameStop(this, EventArgs.Empty);
             OnGameRun(this, EventArgs.Empty);
+        }
+
+        private void OnGameStop(object sender, EventArgs eventArgs)
+        {
+            if (gameState == GameState.Stopped)
+                return;
+
+            gameTimer.Enabled = false;
+            videoPanel.Invalidate();
+            gameState = GameState.Stopped;
+
+            gameRunMenuItem.Enabled = true;
+            gamePauseMenuItem.Enabled = false;
+            gameResetMenuItem.Enabled = false;
+            gameStopMenuItem.Enabled = false;
         }
 
         private void ConfigureVideoBuffer()
@@ -153,7 +173,10 @@ namespace EmuNES
                 romBinaryReader.Close();
                 Console.LoadCartridge(cartridge);
 
-                OnGameReset(this, EventArgs.Empty);
+                string cartridgeRomFilename = Path.GetFileNameWithoutExtension(cartridgeRomPath);
+                this.Text = cartridgeRomFilename + " - " + Application.ProductName;
+
+                OnGameRun(this, EventArgs.Empty);
             }
             catch (Exception exception)
             {
@@ -173,7 +196,7 @@ namespace EmuNES
 
         private void OnGameTick(object sender, EventArgs eventArgs)
         {
-            if (!gameIsRunning)
+            if (gameState != GameState.Running)
                 return;
 
             DateTime currentTickDateTime = DateTime.Now;
@@ -186,7 +209,20 @@ namespace EmuNES
         private void OnVideoPanelPaint(object sender, PaintEventArgs paintEventArgs)
         {
             Graphics graphics = paintEventArgs.Graphics;
-            graphics.DrawImage(bitmapBuffer.Bitmap, 0, 0, 512, 480);
+            switch (gameState)
+            {
+                case GameState.Stopped:
+                    graphics.DrawImage(Properties.Resources.Background, 0, 0, 512, 480);
+                    break;
+                case GameState.Paused:
+                    graphics.DrawImage(Properties.Resources.Background, 0, 0, 512, 480);
+                    graphics.DrawImage(bitmapBuffer.Bitmap, 0, 240, 256, 240);
+                    break;
+                case GameState.Running:
+                    graphics.DrawImage(bitmapBuffer.Bitmap, 0, 0, 512, 480);
+                    break;
+
+            }
             //graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
             //graphics.DrawImage(Properties.Resources.Filter, 0, 0, 512, 480);
         }
@@ -195,7 +231,7 @@ namespace EmuNES
 
         private Dictionary<Keys, bool> keyPressed;
         private FastBitmap bitmapBuffer;
-        private bool gameIsRunning;
+        private GameState gameState;
         private DateTime gameTickDateTime;
         private DateTime frameDateTime;
         private double averageDeltaTime;

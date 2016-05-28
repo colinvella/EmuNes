@@ -42,8 +42,7 @@ namespace EmuNES
 
             gameIsRunning = false;
 
-            bitmapBuffer = new Bitmap(256, 240);
-            bitmapBuffer.SetPixel(100, 100, Color.Green);
+            bitmapBuffer = new FastBitmap(256, 240);
         }
 
         private void OnApplicationClosing(object sender, CancelEventArgs cancelEventArgs)
@@ -110,7 +109,11 @@ namespace EmuNES
         {
             Console.Video.WritePixel = (x, y, colour) =>
             {
-                bitmapBuffer.SetPixel(x, y, Color.FromArgb(colour.Red, colour.Green, colour.Blue));
+                //bitmapBuffer.SetPixel(x, y, Color.FromArgb(colour.Red, colour.Green, colour.Blue));
+                int offset = (y * 256 + x) * 4;
+                bitmapBuffer.Bits[offset++] = colour.Blue;
+                bitmapBuffer.Bits[offset++] = colour.Green;
+                bitmapBuffer.Bits[offset++] = colour.Red;
             };
 
             Console.Video.ShowFrame = () => videoPanel.Invalidate();
@@ -169,7 +172,7 @@ namespace EmuNES
         private void OnVideoPanelPaint(object sender, PaintEventArgs paintEventArgs)
         {
             Graphics graphics = paintEventArgs.Graphics;
-            graphics.DrawImage(bitmapBuffer, 0, 0, 512, 480);
+            graphics.DrawImage(bitmapBuffer.Bitmap, 0, 0, 512, 480);
             //graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
             //graphics.DrawImage(Properties.Resources.Filter, 0, 0, 512, 480);
 
@@ -183,7 +186,7 @@ namespace EmuNES
         public NesCore.Console Console { get; private set; }
 
         private Dictionary<Keys, bool> keyPressed;
-        private Bitmap bitmapBuffer;
+        private FastBitmap bitmapBuffer;
         private bool gameIsRunning;
         private DateTime frameDateTime;
     }

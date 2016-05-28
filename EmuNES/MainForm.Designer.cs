@@ -39,10 +39,10 @@
             this.gamePauseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameResetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.videoPanel = new System.Windows.Forms.Panel();
-            this.gameTimer = new System.Windows.Forms.Timer(this.components);
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.emulatorStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.frameRateStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.gameTimer = new System.Windows.Forms.Timer(this.components);
             this.mainMenuStrip.SuspendLayout();
             this.videoPanel.SuspendLayout();
             this.statusStrip.SuspendLayout();
@@ -129,11 +129,6 @@
             this.videoPanel.Size = new System.Drawing.Size(683, 617);
             this.videoPanel.TabIndex = 1;
             // 
-            // gameTimer
-            // 
-            this.gameTimer.Interval = 20;
-            this.gameTimer.Tick += new System.EventHandler(this.OnGameTick);
-            // 
             // statusStrip
             // 
             this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -162,6 +157,11 @@
             this.frameRateStatusLabel.Text = "0 FPS";
             this.frameRateStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // gameTimer
+            // 
+            this.gameTimer.Interval = 10;
+            this.gameTimer.Tick += new System.EventHandler(this.OnGameTick);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -172,7 +172,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.mainMenuStrip;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;

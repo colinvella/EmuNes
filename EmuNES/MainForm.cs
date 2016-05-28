@@ -77,7 +77,7 @@ namespace EmuNES
                 return;
 
             gameIsRunning = true;
-            frameDateTime = DateTime.Now;
+            frameDateTime = gameTickDateTime = DateTime.Now;
 
             gameRunMenuItem.Enabled = false;
             gamePauseMenuItem.Enabled = true;
@@ -109,14 +109,24 @@ namespace EmuNES
         {
             Console.Video.WritePixel = (x, y, colour) =>
             {
-                //bitmapBuffer.SetPixel(x, y, Color.FromArgb(colour.Red, colour.Green, colour.Blue));
                 int offset = (y * 256 + x) * 4;
                 bitmapBuffer.Bits[offset++] = colour.Blue;
                 bitmapBuffer.Bits[offset++] = colour.Green;
                 bitmapBuffer.Bits[offset++] = colour.Red;
             };
 
-            Console.Video.ShowFrame = () => videoPanel.Invalidate();
+            Console.Video.ShowFrame = () =>
+            {
+                videoPanel.Invalidate();
+
+                // frame rate
+                DateTime currentDateTime = DateTime.Now;
+                double currentDeltaTime = (currentDateTime - frameDateTime).TotalSeconds;
+                frameDateTime = currentDateTime;
+                averageDeltaTime = averageDeltaTime * 0.9 + currentDeltaTime * 0.1;
+                int frameRate = (int)(1.0 / averageDeltaTime);
+                frameRateStatusLabel.Text = frameRate + " FPS";
+            };
         }
 
         private void ConfigureDefaultController()
@@ -166,7 +176,11 @@ namespace EmuNES
             if (!gameIsRunning)
                 return;
 
-            Console.Run(0.020);
+            DateTime currentTickDateTime = DateTime.Now;
+            double tickDelta = (currentTickDateTime - gameTickDateTime).TotalSeconds;
+            gameTickDateTime = currentTickDateTime;
+
+            Console.Run(tickDelta);
         }
 
         private void OnVideoPanelPaint(object sender, PaintEventArgs paintEventArgs)
@@ -175,12 +189,6 @@ namespace EmuNES
             graphics.DrawImage(bitmapBuffer.Bitmap, 0, 0, 512, 480);
             //graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
             //graphics.DrawImage(Properties.Resources.Filter, 0, 0, 512, 480);
-
-            DateTime currentDateTime = DateTime.Now;
-            double deltaTime = (currentDateTime - frameDateTime).TotalSeconds;
-            frameDateTime = currentDateTime;
-            int frameRate = (int)(1.0 / deltaTime);
-            frameRateStatusLabel.Text = frameRate + " FPS";
         }
 
         public NesCore.Console Console { get; private set; }
@@ -188,6 +196,8 @@ namespace EmuNES
         private Dictionary<Keys, bool> keyPressed;
         private FastBitmap bitmapBuffer;
         private bool gameIsRunning;
+        private DateTime gameTickDateTime;
         private DateTime frameDateTime;
+        private double averageDeltaTime;
     }
 }

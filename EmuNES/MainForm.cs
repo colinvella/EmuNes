@@ -78,6 +78,7 @@ namespace EmuNES
                 return;
 
             gameIsRunning = true;
+            frameDateTime = DateTime.Now;
 
             gameRunMenuItem.Enabled = false;
             gamePauseMenuItem.Enabled = true;
@@ -171,6 +172,12 @@ namespace EmuNES
             graphics.DrawImage(bitmapBuffer, 0, 0, 512, 480);
             //graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
             //graphics.DrawImage(Properties.Resources.Filter, 0, 0, 512, 480);
+
+            DateTime currentDateTime = DateTime.Now;
+            double deltaTime = (currentDateTime - frameDateTime).TotalSeconds;
+            frameDateTime = currentDateTime;
+            int frameRate = (int)(1.0 / deltaTime);
+            frameRateStatusLabel.Text = frameRate + " FPS";
         }
 
         public NesCore.Console Console { get; private set; }
@@ -178,5 +185,6 @@ namespace EmuNES
         private Dictionary<Keys, bool> keyPressed;
         private Bitmap bitmapBuffer;
         private bool gameIsRunning;
+        private DateTime frameDateTime;
     }
 }

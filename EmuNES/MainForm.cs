@@ -45,6 +45,12 @@ namespace EmuNES
             bitmapBuffer = new FastBitmap(256, 240);
         }
 
+        private void OnFormLoad(object sender, EventArgs eventArgs)
+        {
+            applicationMargin = new Size(Width - videoPanel.Width, Height - videoPanel.Height);
+            SetScreenSize(1);
+        }
+
         private void OnApplicationClosing(object sender, CancelEventArgs cancelEventArgs)
         {
             cancelEventArgs.Cancel = MessageBox.Show(
@@ -120,6 +126,73 @@ namespace EmuNES
             UpdateGameMenuItems();
         }
 
+        private void OnViewScreenSizeX1(object sender, EventArgs e)
+        {
+            SetScreenSize(1);
+        }
+
+        private void OnViewScreenSizeX2(object sender, EventArgs e)
+        {
+            SetScreenSize(2);
+        }
+
+        private void OnViewScreenSizeX3(object sender, EventArgs e)
+        {
+            SetScreenSize(3);
+        }
+
+        private void OnViewScreenSizeX4(object sender, EventArgs e)
+        {
+            SetScreenSize(4);
+        }
+
+        private void OnKeyDown(object sender, KeyEventArgs keyEventArgs)
+        {
+            keyPressed[keyEventArgs.KeyCode] = true;
+        }
+
+        private void OnKeyUp(object sender, KeyEventArgs keyEventArgs)
+        {
+            keyPressed[keyEventArgs.KeyCode] = false;
+        }
+
+        private void OnGameTick(object sender, EventArgs eventArgs)
+        {
+            if (gameState != GameState.Running)
+                return;
+
+            DateTime currentTickDateTime = DateTime.Now;
+            double tickDelta = (currentTickDateTime - gameTickDateTime).TotalSeconds;
+            gameTickDateTime = currentTickDateTime;
+
+            Console.Run(tickDelta);
+        }
+
+        private void OnVideoPanelPaint(object sender, PaintEventArgs paintEventArgs)
+        {
+            Graphics graphics = paintEventArgs.Graphics;
+
+            int bufferWidth = 256 * screenSize;
+            int bufferHeight = 240 * screenSize;
+
+            switch (gameState)
+            {
+                case GameState.Stopped:
+                    graphics.DrawImage(Properties.Resources.Background, 0, 0, videoPanel.Width, videoPanel.Height);
+                    break;
+                case GameState.Paused:
+                    graphics.DrawImage(Properties.Resources.Background, 0, 0, videoPanel.Width, videoPanel.Height);
+                    graphics.DrawImage(bitmapBuffer.Bitmap, 0, bufferHeight / 2, bufferWidth / 2, bufferHeight / 2);
+                    break;
+                case GameState.Running:
+                    graphics.DrawImage(bitmapBuffer.Bitmap, 0, 0, bufferWidth, bufferHeight);
+                    break;
+
+            }
+            //graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
+            //graphics.DrawImage(Properties.Resources.Filter, 0, 0, 512, 480);
+        }
+
         private void UpdateGameMenuItems()
         {
             switch (gameState)
@@ -148,6 +221,11 @@ namespace EmuNES
                 bitmapBuffer.Bits[offset++] = colour.Blue;
                 bitmapBuffer.Bits[offset++] = colour.Green;
                 bitmapBuffer.Bits[offset++] = colour.Red;
+
+                // test blur effect
+                //bitmapBuffer.Bits[offset] = (byte)(bitmapBuffer.Bits[offset++] * 3 / 4 + colour.Blue * 1 / 4);
+                //bitmapBuffer.Bits[offset] = (byte)(bitmapBuffer.Bits[offset++] * 3 / 4 + colour.Green * 1 / 4);
+                //bitmapBuffer.Bits[offset] = (byte)(bitmapBuffer.Bits[offset++] * 3 / 4 + colour.Red * 1 / 4);
             };
 
             Console.Video.ShowFrame = () =>
@@ -201,47 +279,17 @@ namespace EmuNES
             }
         }
 
-        private void OnKeyDown(object sender, KeyEventArgs keyEventArgs)
+        private void SetScreenSize(byte screenSize)
         {
-            keyPressed[keyEventArgs.KeyCode] = true;
-        }
+            this.screenSize = screenSize;
+            Width = 256 * screenSize + applicationMargin.Width;
+            Height = 240 * screenSize + applicationMargin.Height;
 
-        private void OnKeyUp(object sender, KeyEventArgs keyEventArgs)
-        {
-            keyPressed[keyEventArgs.KeyCode] = false;
-        }
-
-        private void OnGameTick(object sender, EventArgs eventArgs)
-        {
-            if (gameState != GameState.Running)
-                return;
-
-            DateTime currentTickDateTime = DateTime.Now;
-            double tickDelta = (currentTickDateTime - gameTickDateTime).TotalSeconds;
-            gameTickDateTime = currentTickDateTime;
-
-            Console.Run(tickDelta);
-        }
-
-        private void OnVideoPanelPaint(object sender, PaintEventArgs paintEventArgs)
-        {
-            Graphics graphics = paintEventArgs.Graphics;
-            switch (gameState)
-            {
-                case GameState.Stopped:
-                    graphics.DrawImage(Properties.Resources.Background, 0, 0, 512, 480);
-                    break;
-                case GameState.Paused:
-                    graphics.DrawImage(Properties.Resources.Background, 0, 0, 512, 480);
-                    graphics.DrawImage(bitmapBuffer.Bitmap, 0, 240, 256, 240);
-                    break;
-                case GameState.Running:
-                    graphics.DrawImage(bitmapBuffer.Bitmap, 0, 0, 512, 480);
-                    break;
-
-            }
-            //graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
-            //graphics.DrawImage(Properties.Resources.Filter, 0, 0, 512, 480);
+            viewScreenSizeX1MenuItem.Checked = screenSize == 1;
+            viewScreenSizeX2MenuItem.Checked = screenSize == 2;
+            viewScreenSizeX3MenuItem.Checked = screenSize == 3;
+            viewScreenSizeX4MenuItem.Checked = screenSize == 4;
+            videoPanel.Invalidate();
         }
 
         public NesCore.Console Console { get; private set; }
@@ -252,6 +300,8 @@ namespace EmuNES
         private DateTime gameTickDateTime;
         private DateTime frameDateTime;
         private double averageDeltaTime;
+        private Size applicationMargin;
+        private byte screenSize;
 
     }
 }

@@ -43,6 +43,12 @@
             this.gameRunMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameResetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameStopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewScreenSizeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewScreenSizeX1MenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewScreenSizeX2MenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewScreenSizeX3MenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewScreenSizeX4MenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.videoPanel.SuspendLayout();
             this.statusStrip.SuspendLayout();
@@ -53,7 +59,8 @@
             this.mainMenuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileMenuItem,
-            this.gameMenuItem});
+            this.gameMenuItem,
+            this.viewMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
             this.mainMenuStrip.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
@@ -85,6 +92,7 @@
             // 
             this.videoPanel.Controls.Add(this.statusStrip);
             this.videoPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.videoPanel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
             this.videoPanel.Location = new System.Drawing.Point(0, 28);
             this.videoPanel.Margin = new System.Windows.Forms.Padding(0);
             this.videoPanel.Name = "videoPanel";
@@ -121,7 +129,7 @@
             // 
             // gameTimer
             // 
-            this.gameTimer.Interval = 10;
+            this.gameTimer.Interval = 1;
             this.gameTimer.Tick += new System.EventHandler(this.OnGameTick);
             // 
             // fileOpenMenuItem
@@ -165,12 +173,60 @@
             this.gameStopMenuItem.Text = "Stop";
             this.gameStopMenuItem.Click += new System.EventHandler(this.OnGameStop);
             // 
+            // viewMenuItem
+            // 
+            this.viewMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.viewScreenSizeMenuItem});
+            this.viewMenuItem.Name = "viewMenuItem";
+            this.viewMenuItem.Size = new System.Drawing.Size(53, 24);
+            this.viewMenuItem.Text = "&View";
+            // 
+            // viewScreenSizeMenuItem
+            // 
+            this.viewScreenSizeMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.viewScreenSizeX1MenuItem,
+            this.viewScreenSizeX2MenuItem,
+            this.viewScreenSizeX3MenuItem,
+            this.viewScreenSizeX4MenuItem});
+            this.viewScreenSizeMenuItem.Name = "viewScreenSizeMenuItem";
+            this.viewScreenSizeMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.viewScreenSizeMenuItem.Text = "Screen &Size";
+            // 
+            // viewScreenSizeX1MenuItem
+            // 
+            this.viewScreenSizeX1MenuItem.Name = "viewScreenSizeX1MenuItem";
+            this.viewScreenSizeX1MenuItem.Size = new System.Drawing.Size(181, 26);
+            this.viewScreenSizeX1MenuItem.Text = "×1";
+            this.viewScreenSizeX1MenuItem.Click += new System.EventHandler(this.OnViewScreenSizeX1);
+            // 
+            // viewScreenSizeX2MenuItem
+            // 
+            this.viewScreenSizeX2MenuItem.Name = "viewScreenSizeX2MenuItem";
+            this.viewScreenSizeX2MenuItem.Size = new System.Drawing.Size(181, 26);
+            this.viewScreenSizeX2MenuItem.Text = "×2";
+            this.viewScreenSizeX2MenuItem.Click += new System.EventHandler(this.OnViewScreenSizeX2);
+            // 
+            // viewScreenSizeX3MenuItem
+            // 
+            this.viewScreenSizeX3MenuItem.Name = "viewScreenSizeX3MenuItem";
+            this.viewScreenSizeX3MenuItem.Size = new System.Drawing.Size(181, 26);
+            this.viewScreenSizeX3MenuItem.Text = "×3";
+            this.viewScreenSizeX3MenuItem.Click += new System.EventHandler(this.OnViewScreenSizeX3);
+            // 
+            // viewScreenSizeX4MenuItem
+            // 
+            this.viewScreenSizeX4MenuItem.Name = "viewScreenSizeX4MenuItem";
+            this.viewScreenSizeX4MenuItem.Size = new System.Drawing.Size(181, 26);
+            this.viewScreenSizeX4MenuItem.Text = "×4";
+            this.viewScreenSizeX4MenuItem.Click += new System.EventHandler(this.OnViewScreenSizeX4);
+            // 
             // MainForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(512, 508);
             this.Controls.Add(this.videoPanel);
             this.Controls.Add(this.mainMenuStrip);
+            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.mainMenuStrip;
@@ -180,6 +236,7 @@
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "EmuNES";
+            this.Load += new System.EventHandler(this.OnFormLoad);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OnKeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnKeyUp);
             this.mainMenuStrip.ResumeLayout(false);
@@ -208,6 +265,12 @@
         private System.Windows.Forms.ToolStripStatusLabel emulatorStatusLabel;
         private System.Windows.Forms.ToolStripStatusLabel frameRateStatusLabel;
         private System.Windows.Forms.ToolStripMenuItem gameStopMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewScreenSizeMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewScreenSizeX1MenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewScreenSizeX2MenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewScreenSizeX3MenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewScreenSizeX4MenuItem;
     }
 }
 

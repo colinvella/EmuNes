@@ -122,14 +122,21 @@ namespace EmuNES
 
         private void UpdateGameMenuItems()
         {
-            string runPauseText = null;
             switch (gameState)
             {
-                case GameState.Stopped: runPauseText = "&Run"; break;
-                case GameState.Running: runPauseText = "&Pause"; break;
-                case GameState.Paused: runPauseText = "&Resume"; break;
+                case GameState.Stopped:
+                    gameRunMenuItem.Text = "&Run";
+                    gameRunMenuItem.Image = Properties.Resources.GameRun;
+                    break;
+                case GameState.Running:
+                    gameRunMenuItem.Text = "&Pause";
+                    gameRunMenuItem.Image = Properties.Resources.GamePause;
+                    break;
+                case GameState.Paused:
+                    gameRunMenuItem.Text = "&Resume";
+                    gameRunMenuItem.Image = Properties.Resources.GameRun;
+                    break;
             }
-            gameRunMenuItem.Text = runPauseText;
             gameStopMenuItem.Enabled = gameState != GameState.Stopped;
         }
 
@@ -245,5 +252,6 @@ namespace EmuNES
         private DateTime gameTickDateTime;
         private DateTime frameDateTime;
         private double averageDeltaTime;
+
     }
 }

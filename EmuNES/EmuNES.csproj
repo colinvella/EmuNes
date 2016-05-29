@@ -88,6 +88,12 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="Resources\FileExit.png" />
+    <Content Include="Resources\GameRun.png" />
+    <Content Include="Resources\GameStop.png" />
+    <Content Include="Resources\GamePause.png" />
+    <None Include="Resources\FileOpen.png" />
+    <Content Include="Resources\GameReset.png" />
     <None Include="Resources\Filter.png" />
     <Content Include="Resources\Background.png" />
     <Content Include="Resources\Nes.ico" />

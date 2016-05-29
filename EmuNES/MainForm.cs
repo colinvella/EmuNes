@@ -71,43 +71,41 @@ namespace EmuNES
             Application.Exit();
         }
 
-        private void OnGameRun(object sender, EventArgs eventArgs)
+        private void OnGameRunPause(object sender, EventArgs eventArgs)
         {
-            if (gameState == GameState.Running)
-                return;
+            switch(gameState)
+            {
+                case GameState.Stopped:
+                    // run
+                    Console.Reset();
+                    gameTickDateTime = DateTime.Now;
+                    averageDeltaTime = 1.0 / 60.0;
+                    gameState = GameState.Running;
+                    gameTimer.Enabled = true;
+                    break;
+                case GameState.Running:
+                    // pause
+                    gameTimer.Enabled = false;
+                    gameState = GameState.Paused;
+                    break;
+                case GameState.Paused:
+                    // resume;
+                    gameTickDateTime = DateTime.Now;
+                    averageDeltaTime = 1.0 / 60.0;
+                    gameState = GameState.Running;
+                    gameTimer.Enabled = true;
+                    break;
+            }
 
-            if (gameState == GameState.Stopped)
-                Console.Reset();
-
-            gameState = GameState.Running;
-            frameDateTime = gameTickDateTime = DateTime.Now;
-
-            gameRunMenuItem.Enabled = false;
-            gamePauseMenuItem.Enabled = true;
-            gameResetMenuItem.Enabled = true;
-            gameStopMenuItem.Enabled = true;
-            gameTimer.Enabled = true;
-        }
-
-        private void OnGamePause(object sender, EventArgs eventArgs)
-        {
-            if (gameState != GameState.Running)
-                return;
-
-            gameState = GameState.Paused;
             videoPanel.Invalidate();
-
-            gameTimer.Enabled = false;
-            gameRunMenuItem.Enabled = true;
-            gamePauseMenuItem.Enabled = false;
-            gameResetMenuItem.Enabled = true;
-            gameStopMenuItem.Enabled = true;
+            UpdateGameMenuItems();
         }
 
         private void OnGameReset(object sender, EventArgs eventArgs)
         {
-            OnGameStop(this, EventArgs.Empty);
-            OnGameRun(this, EventArgs.Empty);
+            OnGameStop(sender, eventArgs);
+            Console.Reset();
+            OnGameRunPause(sender, eventArgs);
         }
 
         private void OnGameStop(object sender, EventArgs eventArgs)
@@ -119,10 +117,20 @@ namespace EmuNES
             videoPanel.Invalidate();
             gameState = GameState.Stopped;
 
-            gameRunMenuItem.Enabled = true;
-            gamePauseMenuItem.Enabled = false;
-            gameResetMenuItem.Enabled = false;
-            gameStopMenuItem.Enabled = false;
+            UpdateGameMenuItems();
+        }
+
+        private void UpdateGameMenuItems()
+        {
+            string runPauseText = null;
+            switch (gameState)
+            {
+                case GameState.Stopped: runPauseText = "&Run"; break;
+                case GameState.Running: runPauseText = "&Pause"; break;
+                case GameState.Paused: runPauseText = "&Resume"; break;
+            }
+            gameRunMenuItem.Text = runPauseText;
+            gameStopMenuItem.Enabled = gameState != GameState.Stopped;
         }
 
         private void ConfigureVideoBuffer()
@@ -176,7 +184,9 @@ namespace EmuNES
                 string cartridgeRomFilename = Path.GetFileNameWithoutExtension(cartridgeRomPath);
                 this.Text = cartridgeRomFilename + " - " + Application.ProductName;
 
-                OnGameRun(this, EventArgs.Empty);
+                gameMenuItem.Enabled = true;
+                OnGameStop(this, EventArgs.Empty);
+                OnGameRunPause(this, EventArgs.Empty);
             }
             catch (Exception exception)
             {

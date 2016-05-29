@@ -36,7 +36,6 @@
             this.fileExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameRunMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.gamePauseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameResetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameStopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.videoPanel = new System.Windows.Forms.Panel();
@@ -74,7 +73,7 @@
             // fileOpenMenuItem
             // 
             this.fileOpenMenuItem.Name = "fileOpenMenuItem";
-            this.fileOpenMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.fileOpenMenuItem.Size = new System.Drawing.Size(181, 26);
             this.fileOpenMenuItem.Text = "&Open";
             this.fileOpenMenuItem.Click += new System.EventHandler(this.OnFileOpen);
             // 
@@ -82,7 +81,7 @@
             // 
             this.fileExitMenuItem.Name = "fileExitMenuItem";
             this.fileExitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.fileExitMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.fileExitMenuItem.Size = new System.Drawing.Size(181, 26);
             this.fileExitMenuItem.Text = "Exit";
             this.fileExitMenuItem.Click += new System.EventHandler(this.OnFileExit);
             // 
@@ -90,32 +89,22 @@
             // 
             this.gameMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.gameRunMenuItem,
-            this.gamePauseMenuItem,
             this.gameResetMenuItem,
             this.gameStopMenuItem});
+            this.gameMenuItem.Enabled = false;
             this.gameMenuItem.Name = "gameMenuItem";
             this.gameMenuItem.Size = new System.Drawing.Size(60, 24);
             this.gameMenuItem.Text = "&Game";
             // 
             // gameRunMenuItem
             // 
-            this.gameRunMenuItem.Enabled = false;
             this.gameRunMenuItem.Name = "gameRunMenuItem";
             this.gameRunMenuItem.Size = new System.Drawing.Size(181, 26);
             this.gameRunMenuItem.Text = "&Run";
-            this.gameRunMenuItem.Click += new System.EventHandler(this.OnGameRun);
-            // 
-            // gamePauseMenuItem
-            // 
-            this.gamePauseMenuItem.Enabled = false;
-            this.gamePauseMenuItem.Name = "gamePauseMenuItem";
-            this.gamePauseMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.gamePauseMenuItem.Text = "&Pause";
-            this.gamePauseMenuItem.Click += new System.EventHandler(this.OnGamePause);
+            this.gameRunMenuItem.Click += new System.EventHandler(this.OnGameRunPause);
             // 
             // gameResetMenuItem
             // 
-            this.gameResetMenuItem.Enabled = false;
             this.gameResetMenuItem.Name = "gameResetMenuItem";
             this.gameResetMenuItem.Size = new System.Drawing.Size(181, 26);
             this.gameResetMenuItem.Text = "Reset";
@@ -123,7 +112,6 @@
             // 
             // gameStopMenuItem
             // 
-            this.gameStopMenuItem.Enabled = false;
             this.gameStopMenuItem.Name = "gameStopMenuItem";
             this.gameStopMenuItem.Size = new System.Drawing.Size(181, 26);
             this.gameStopMenuItem.Text = "Stop";
@@ -211,7 +199,6 @@
         private System.Windows.Forms.Timer gameTimer;
         private System.Windows.Forms.ToolStripMenuItem gameMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gameRunMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem gamePauseMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gameResetMenuItem;
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel emulatorStatusLabel;

@@ -854,11 +854,11 @@ namespace NesCore.Video
 
             if (showBackground || showSprites)
             {
-                if (evenFrame && scanLine == 261 && cycle == 339)
+                if (!evenFrame && scanLine == 261 && cycle == 339)
                 {
                     cycle = 0;
                     scanLine = 0;
-                    evenFrame = false;
+                    evenFrame = !evenFrame;
                     return;
                 }
             }

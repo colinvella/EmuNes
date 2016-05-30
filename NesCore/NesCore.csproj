@@ -61,6 +61,7 @@
     <Compile Include="Video\Palette.cs" />
     <Compile Include="Video\PaletteTints.cs" />
     <Compile Include="Video\RicohRP2C0X.cs" />
+    <Compile Include="Video\Sprite.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

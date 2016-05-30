@@ -441,10 +441,7 @@ namespace NesCore.Video
             streamWriter.Write(highTileByte);
             streamWriter.Write(tileData);
             streamWriter.Write(spriteCount);
-            streamWriter.Write(spritePatterns);
-            streamWriter.Write(spritePositions);
-            streamWriter.Write(spritePriorities);
-            streamWriter.Write(spriteIndexes);
+            streamWriter.Write(sprites);
             streamWriter.Write(nameTable);
             streamWriter.Write(vramIncrement);
             streamWriter.Write(spritePatternTable);
@@ -655,18 +652,18 @@ namespace NesCore.Video
             if (!showSprites)
                 return 0;
 
-	        for (int i = 0; i < spriteCount; i++)
+	        for (int index = 0; index < spriteCount; index++)
             {
-                int offset = (cycle - 1) - spritePositions[i];
+                int offset = (cycle - 1) - sprites[index].Position;
                 if (offset < 0 || offset > 7)
                     continue;
 
                 offset = 7 - offset;
-                byte colour = (byte)((spritePatterns[i] >> (offset * 4)) & 0x0F);
+                byte colour = (byte)((sprites[index].Pattern >> (offset * 4)) & 0x0F);
                 if (colour % 4 == 0)
                     continue;
 
-                spriteIndex = (byte)i;
+                spriteIndex = (byte)index;
 		        return colour;
             }
 
@@ -702,13 +699,13 @@ namespace NesCore.Video
                 if (opaqueSprite)
                 {
                     // opaque background and sprite pixels
-
+                    
                     // check sprite 0 hit
-                    if (spriteIndexes[spriteIndex] == 0 && x < 255)
+                    if (sprites[spriteIndex].Index == 0 && x < 255)
                         spriteZeroHit = true;
 
                     // determine if sprite or backgroubnd pixel prevails
-                    if (spritePriorities[spriteIndex] == 0)
+                    if (sprites[spriteIndex].Priority == 0)
                         colourIndex = (byte)(spritePixel | 0x10);
                     else
                         colourIndex = backgroundPixel;
@@ -825,10 +822,10 @@ namespace NesCore.Video
 
                 if (count < 8)
                 {
-                    spritePatterns[count] = FetchSpritePattern(index, row);
-                    spritePositions[count] = spriteX;
-                    spritePriorities[count] = (byte)((spriteAttributes >> 5) & 1);
-                    spriteIndexes[count] = (byte)index;
+                    sprites[count].Pattern = FetchSpritePattern(index, row);
+                    sprites[count].Position = spriteX;
+                    sprites[count].Priority = (byte)((spriteAttributes >> 5) & 1);
+                    sprites[count].Index = (byte)index;
                 }
                 ++count;
             }
@@ -918,10 +915,7 @@ namespace NesCore.Video
 
         // sprite temporary variables
         private int spriteCount;
-        private uint[] spritePatterns = new uint[8];
-        private byte[] spritePositions = new byte[8];
-        private byte[] spritePriorities = new byte[8];
-        private byte[] spriteIndexes = new byte[8];
+        private Sprite[] sprites = new Sprite[8];
 
         // $2000 PPUCTRL
         private byte nameTable;                         // 0: $2000; 1: $2400; 2: $2800; 3: $2C00

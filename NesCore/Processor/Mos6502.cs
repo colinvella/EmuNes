@@ -56,6 +56,11 @@ namespace NesCore.Processor
         public Action Lockup { get; set; }
 
         /// <summary>
+        /// Action triggered prior to execution of every instruction
+        /// </summary>
+        public Action Trace { get; set; }
+
+        /// <summary>
         /// Processor's instruction set
         /// </summary>
         public InstructionSet InstructionSet { get; private set; }
@@ -122,6 +127,9 @@ namespace NesCore.Processor
                     HandleInterrupt(IrqVector);
                 State.InterruptType = InterruptType.None;
             }
+
+            // run tracer if set
+            Trace?.Invoke();
 
             // keep track of current cycle
             UInt64 cycles = State.Cycles;

@@ -49,6 +49,12 @@ namespace EmuNES
         {
             applicationMargin = new Size(Width - videoPanel.Width, Height - videoPanel.Height);
             SetScreenSize(1);
+
+#if DEBUG
+            gameTimer.Interval = 20;
+#else
+            gameTimer.Interval = 1;
+#endif
         }
 
         private void OnApplicationClosing(object sender, CancelEventArgs cancelEventArgs)
@@ -161,11 +167,15 @@ namespace EmuNES
             if (gameState != GameState.Running)
                 return;
 
+#if DEBUG
+            Console.Run(0.020);
+#else
             DateTime currentTickDateTime = DateTime.Now;
             double tickDelta = (currentTickDateTime - gameTickDateTime).TotalSeconds;
             gameTickDateTime = currentTickDateTime;
 
             Console.Run(tickDelta);
+#endif
         }
 
         private void OnVideoPanelPaint(object sender, PaintEventArgs paintEventArgs)

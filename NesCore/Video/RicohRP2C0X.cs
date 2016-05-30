@@ -384,6 +384,12 @@ namespace NesCore.Video
                         CopyX();
                 }
             }
+            else
+            {
+                // rendering disabled - trigger WritePixel hook with black
+                if (visibleLine && visibleCycle)
+                    WritePixel((byte)(cycle - 1), (byte)scanLine, paletteTints[0][0x0F]);
+            }
 
             // sprite logic
             if (renderingEnabled)
@@ -737,12 +743,8 @@ namespace NesCore.Video
             if (grayscale)
                 paletteIndex &= 0xF0;
 
-            // get colour
+            // get colour from appropriate tint
             Colour colour = paletteTints[tint][paletteIndex];
-
-            // apply tinting if needed
-            //if (redTint || greenTint || blueTint)
-            //    colour = colour.Emphasise(redTint, greenTint, blueTint);
 
             // hook to write pixel
             WritePixel(x, y, colour);

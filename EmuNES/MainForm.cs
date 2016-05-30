@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -48,7 +49,9 @@ namespace EmuNES
         private void OnFormLoad(object sender, EventArgs eventArgs)
         {
             applicationMargin = new Size(Width - videoPanel.Width, Height - videoPanel.Height);
-            SetScreenSize(1);
+            SetScreenSizeAndAspect(1, true);
+            SetRasterEffect(false);
+            SetMotionBlur(false);
 
 #if DEBUG
             gameTimer.Interval = 20;
@@ -132,25 +135,41 @@ namespace EmuNES
             UpdateGameMenuItems();
         }
 
-        private void OnViewScreenSizeX1(object sender, EventArgs e)
+        private void OnViewScreenSizeX1(object sender, EventArgs eventArgs)
         {
             SetScreenSize(1);
         }
 
-        private void OnViewScreenSizeX2(object sender, EventArgs e)
+        private void OnViewScreenSizeX2(object sender, EventArgs eventArgs)
         {
             SetScreenSize(2);
         }
 
-        private void OnViewScreenSizeX3(object sender, EventArgs e)
+        private void OnViewScreenSizeX3(object sender, EventArgs eventArgse)
         {
             SetScreenSize(3);
         }
 
-        private void OnViewScreenSizeX4(object sender, EventArgs e)
+        private void OnViewScreenSizeX4(object sender, EventArgs eventArgs)
         {
             SetScreenSize(4);
         }
+
+        private void OnViewTvAspect(object sender, EventArgs eventArgs)
+        {
+            SetTvAspect(!tvAspect);
+        }
+
+        private void OnViewRasterEffect(object sender, EventArgs e)
+        {
+            SetRasterEffect(!rasterEffect);
+        }
+
+        private void OnViewMotionBlur(object sender, EventArgs e)
+        {
+            SetMotionBlur(!motionBlur);
+        }
+
 
         private void OnKeyDown(object sender, KeyEventArgs keyEventArgs)
         {
@@ -182,25 +201,31 @@ namespace EmuNES
         {
             Graphics graphics = paintEventArgs.Graphics;
 
-            int bufferWidth = 256 * screenSize;
-            int bufferHeight = 240 * screenSize;
-
             switch (gameState)
             {
                 case GameState.Stopped:
+                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     graphics.DrawImage(Properties.Resources.Background, 0, 0, videoPanel.Width, videoPanel.Height);
                     break;
                 case GameState.Paused:
+                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     graphics.DrawImage(Properties.Resources.Background, 0, 0, videoPanel.Width, videoPanel.Height);
-                    graphics.DrawImage(bitmapBuffer.Bitmap, 0, bufferHeight / 2, bufferWidth / 2, bufferHeight / 2);
+                    graphics.DrawImage(bitmapBuffer.Bitmap, 0, bufferSize.Height / 2, bufferSize.Width / 2, bufferSize.Height / 2);
                     break;
                 case GameState.Running:
-                    graphics.DrawImage(bitmapBuffer.Bitmap, 0, 0, bufferWidth, bufferHeight);
+                    if (rasterEffect)
+                    {
+                        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        graphics.DrawImage(bitmapBuffer.Bitmap, 0, 0, bufferSize.Width, bufferSize.Height);
+                        graphics.DrawImage(Properties.Resources.Filter, 0, 0, bufferSize.Width, bufferSize.Height);
+                    }
+                    else
+                    {
+                        graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                        graphics.DrawImage(bitmapBuffer.Bitmap, 0, 0, bufferSize.Width, bufferSize.Height);
+                    }
                     break;
-
             }
-            //graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
-            //graphics.DrawImage(Properties.Resources.Filter, 0, 0, 512, 480);
         }
 
         private void UpdateGameMenuItems()
@@ -228,14 +253,19 @@ namespace EmuNES
             Console.Video.WritePixel = (x, y, colour) =>
             {
                 int offset = (y * 256 + x) * 4;
-                bitmapBuffer.Bits[offset++] = colour.Blue;
-                bitmapBuffer.Bits[offset++] = colour.Green;
-                bitmapBuffer.Bits[offset++] = colour.Red;
 
-                // test blur effect
-                //bitmapBuffer.Bits[offset] = (byte)(bitmapBuffer.Bits[offset++] * 3 / 4 + colour.Blue * 1 / 4);
-                //bitmapBuffer.Bits[offset] = (byte)(bitmapBuffer.Bits[offset++] * 3 / 4 + colour.Green * 1 / 4);
-                //bitmapBuffer.Bits[offset] = (byte)(bitmapBuffer.Bits[offset++] * 3 / 4 + colour.Red * 1 / 4);
+                if (motionBlur)
+                {
+                    bitmapBuffer.Bits[offset] = (byte)(bitmapBuffer.Bits[offset++] * 3 / 4 + colour.Blue * 1 / 4);
+                    bitmapBuffer.Bits[offset] = (byte)(bitmapBuffer.Bits[offset++] * 3 / 4 + colour.Green * 1 / 4);
+                    bitmapBuffer.Bits[offset] = (byte)(bitmapBuffer.Bits[offset++] * 3 / 4 + colour.Red * 1 / 4);
+                }
+                else
+                {
+                    bitmapBuffer.Bits[offset++] = colour.Blue;
+                    bitmapBuffer.Bits[offset++] = colour.Green;
+                    bitmapBuffer.Bits[offset++] = colour.Red;
+                }
             };
 
             Console.Video.ShowFrame = () =>
@@ -289,18 +319,47 @@ namespace EmuNES
             }
         }
 
-        private void SetScreenSize(byte screenSize)
+        private void SetScreenSize(byte newScreenSize)
         {
-            this.screenSize = screenSize;
-            Width = 256 * screenSize + applicationMargin.Width;
-            Height = 240 * screenSize + applicationMargin.Height;
+            SetScreenSizeAndAspect(newScreenSize, tvAspect);
+        }
 
-            viewScreenSizeX1MenuItem.Checked = screenSize == 1;
-            viewScreenSizeX2MenuItem.Checked = screenSize == 2;
-            viewScreenSizeX3MenuItem.Checked = screenSize == 3;
-            viewScreenSizeX4MenuItem.Checked = screenSize == 4;
+        private void SetTvAspect(bool newTvAspect)
+        {
+            SetScreenSizeAndAspect(screenSize, newTvAspect);
+        }
+
+        private void SetScreenSizeAndAspect(byte newScreenSize, bool newTvAspect)
+        {
+            screenSize = newScreenSize;
+            tvAspect = newTvAspect;
+
+            bufferSize.Width = tvAspect ? 282 * screenSize : 256 * screenSize;
+            bufferSize.Height = 240 * screenSize;
+
+            Width = bufferSize.Width + applicationMargin.Width;
+            Height = bufferSize.Height + applicationMargin.Height;
+
+            viewScreenSizeX1MenuItem.Checked = newScreenSize == 1;
+            viewScreenSizeX2MenuItem.Checked = newScreenSize == 2;
+            viewScreenSizeX3MenuItem.Checked = newScreenSize == 3;
+            viewScreenSizeX4MenuItem.Checked = newScreenSize == 4;
+            viewTvAspectMenuItem.Checked = tvAspect;
             videoPanel.Invalidate();
         }
+        
+        private void SetRasterEffect(bool newRasterEffect)
+        {
+            rasterEffect = newRasterEffect;
+            rasterEffectMenuItem.Checked = rasterEffect;
+        }
+
+        private void SetMotionBlur(bool newMotionBlur)
+        {
+            motionBlur = newMotionBlur;
+            viewMotionBlurMenuItem.Checked = motionBlur;
+        }
+
 
         public NesCore.Console Console { get; private set; }
 
@@ -308,10 +367,18 @@ namespace EmuNES
         private FastBitmap bitmapBuffer;
         private GameState gameState;
         private DateTime gameTickDateTime;
+
+        // frame rate handling
         private DateTime frameDateTime;
         private double averageDeltaTime;
+
+        // view size
         private Size applicationMargin;
+        private Size bufferSize;
         private byte screenSize;
+        private bool tvAspect;
+        private bool rasterEffect;
+        private bool motionBlur;
 
     }
 }

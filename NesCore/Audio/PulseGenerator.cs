@@ -9,7 +9,7 @@ namespace NesCore.Audio
 {
     public class PulseGenerator: WaveGenerator
     {
-        public byte Control
+        public override byte Control
         {
             set
             {
@@ -22,6 +22,29 @@ namespace NesCore.Audio
             }
         }
 
+        public override byte Output
+        {
+            get
+            {
+                if (!Enabled)
+                    return 0;
+
+                if (LengthValue == 0)
+                    return 0;
+
+                if (dutyTable[DutyMode][DutyValue] == 0)
+                    return 0;
+
+                if (TimerPeriod < 8 || TimerPeriod > 0x7FF)
+                    return 0;
+
+                //if (!SweepNegate && TimerPeriod + (TimerPeriod >> SweepShift) > 0x7FF)
+                //    return 0;
+
+                return EnvelopeEnabled ? EnvelopeVolume : ConstantVolume;
+            }
+        }
+        
         public byte Sweep
         {
             set
@@ -82,7 +105,76 @@ namespace NesCore.Audio
         public byte EnvelopeVolume { get; private set; }
         public byte ConstantVolume { get; private set; }
 
-        void SaveState(BinaryWriter binaryWriter)
+        public void StepTimer()
+        {
+            if (TimerValue == 0)
+            {
+                TimerValue = TimerPeriod;
+                ++DutyValue;
+                DutyValue %= 8;
+            }
+            else
+            {
+                --TimerValue;
+            }
+        }
+
+        public void StepEnvelope()
+        {
+            if (EnvelopeStart)
+            {
+                EnvelopeVolume = 15;
+                EnvelopeValue = EnvelopePeriod;
+                EnvelopeStart = false;
+            }
+            else if (EnvelopeValue > 0)
+            {
+                --EnvelopeValue;
+            }
+            else
+            {
+                if (EnvelopeVolume > 0)
+                {
+                    --EnvelopeVolume;
+                }
+                else if (EnvelopeLoop)
+                {
+                    EnvelopeVolume = 15;
+                }
+                EnvelopeValue = EnvelopePeriod;
+            }
+        }
+
+        public void StepSweep()
+        {
+            if (SweepReload)
+            {
+                if (SweepEnabled && SweepValue == 0)
+                    ApplySweep();
+
+                SweepValue = SweepPeriod;
+                SweepReload = false;
+            }
+            else if (SweepValue > 0)
+            {
+                --SweepValue;
+            }
+            else
+            {
+                if (SweepEnabled)
+                    ApplySweep();
+
+                SweepValue = SweepPeriod;
+            }
+        }
+        
+        public void StepLength()
+        {
+            if (LengthEnabled && LengthValue > 0)
+                --LengthValue;
+        }
+
+        public void SaveState(BinaryWriter binaryWriter)
         {
             binaryWriter.Write(Enabled);
 
@@ -113,7 +205,7 @@ namespace NesCore.Audio
             binaryWriter.Write(ConstantVolume);
         }
 
-        void LoadState(BinaryReader binaryReader)
+        public void LoadState(BinaryReader binaryReader)
         {
             Enabled = binaryReader.ReadBoolean();
 
@@ -144,5 +236,21 @@ namespace NesCore.Audio
             ConstantVolume = binaryReader.ReadByte();
         }
 
+        private void ApplySweep()
+        {
+            ushort delta = (ushort)(TimerPeriod >> SweepShift);
+
+            if (SweepNegate)
+            {
+                TimerPeriod -= delta;
+
+                if (Channel == 1)
+                    --TimerPeriod;
+            }
+            else
+            {
+                TimerPeriod += delta;
+            }
+        }
     }
 }

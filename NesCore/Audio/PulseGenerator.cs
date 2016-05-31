@@ -77,8 +77,6 @@ namespace NesCore.Audio
             }
         }
 
-        public bool Enabled { get; private set; }
-
         public byte Channel { get; private set; }
 
         public bool LengthEnabled { get; private set; }
@@ -105,7 +103,7 @@ namespace NesCore.Audio
         public byte EnvelopeVolume { get; private set; }
         public byte ConstantVolume { get; private set; }
 
-        public void StepTimer()
+        public override void StepTimer()
         {
             if (TimerValue == 0)
             {
@@ -174,7 +172,7 @@ namespace NesCore.Audio
                 --LengthValue;
         }
 
-        public void SaveState(BinaryWriter binaryWriter)
+        public override void SaveState(BinaryWriter binaryWriter)
         {
             binaryWriter.Write(Enabled);
 
@@ -205,7 +203,7 @@ namespace NesCore.Audio
             binaryWriter.Write(ConstantVolume);
         }
 
-        public void LoadState(BinaryReader binaryReader)
+        public override void LoadState(BinaryReader binaryReader)
         {
             Enabled = binaryReader.ReadBoolean();
 

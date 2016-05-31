@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,9 +9,17 @@ namespace NesCore.Audio
 {
     public abstract class WaveGenerator
     {
+        public bool Enabled { get; protected set; }
+
         public abstract byte Control { set; }
 
         public abstract byte Output { get; }
+
+        public abstract void StepTimer();
+
+        public abstract void SaveState(BinaryWriter binaryWriter);
+
+        public abstract void LoadState(BinaryReader binaryReader);
 
         protected static readonly byte[] lengthTable = {
             10, 254, 20, 2, 40, 4, 80, 6, 160, 8, 60, 10, 14, 12, 26, 14,

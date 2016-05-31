@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NesCore.Audio
 {
-    public class PulseGenerator: WaveGenerator
+    public class PulseGenerator: ProceduralGenerator
     {
         public override byte Control
         {
@@ -78,12 +78,6 @@ namespace NesCore.Audio
         }
 
         public byte Channel { get; private set; }
-
-        public bool LengthEnabled { get; private set; }
-        public byte LengthValue { get; private set; }
-
-        public ushort TimerPeriod { get; private set; }
-        public ushort TimerValue { get; private set; }
 
         public byte DutyMode { get; private set; }
         public byte DutyValue { get; private set; }
@@ -165,24 +159,12 @@ namespace NesCore.Audio
                 SweepValue = SweepPeriod;
             }
         }
-        
-        public void StepLength()
-        {
-            if (LengthEnabled && LengthValue > 0)
-                --LengthValue;
-        }
 
         public override void SaveState(BinaryWriter binaryWriter)
         {
-            binaryWriter.Write(Enabled);
+            base.SaveState(binaryWriter);
 
             binaryWriter.Write(Channel);
-
-            binaryWriter.Write(LengthEnabled);
-            binaryWriter.Write(LengthValue);
-
-            binaryWriter.Write(TimerPeriod);
-            binaryWriter.Write(TimerValue);
 
             binaryWriter.Write(DutyMode);
             binaryWriter.Write(DutyValue);
@@ -205,15 +187,9 @@ namespace NesCore.Audio
 
         public override void LoadState(BinaryReader binaryReader)
         {
-            Enabled = binaryReader.ReadBoolean();
+            base.LoadState(binaryReader);
 
             Channel = binaryReader.ReadByte();
-
-            LengthEnabled = binaryReader.ReadBoolean();
-            LengthValue = binaryReader.ReadByte();
-
-            TimerPeriod = binaryReader.ReadUInt16();
-            TimerValue = binaryReader.ReadUInt16();
 
             DutyMode = binaryReader.ReadByte();
             DutyValue = binaryReader.ReadByte();

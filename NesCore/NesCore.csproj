@@ -37,6 +37,8 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audio\NoiseGenerator.cs" />
+    <Compile Include="Audio\ProceduralGenerator.cs" />
     <Compile Include="Audio\PulseGenerator.cs" />
     <Compile Include="Audio\TriangleGenerator.cs" />
     <Compile Include="Audio\WaveGenerator.cs" />

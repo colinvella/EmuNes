@@ -9,6 +9,11 @@ namespace NesCore.Audio
 {
     public class NoiseGenerator : ProceduralGenerator
     {
+        public NoiseGenerator()
+        {
+            ShiftRegister = 1;
+        }
+
         public override byte Control
         {
             set

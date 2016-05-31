@@ -37,7 +37,11 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audio\Apu.cs" />
     <Compile Include="Audio\DmcGenerator.cs" />
+    <Compile Include="Audio\Filtering\Filter.cs" />
+    <Compile Include="Audio\Filtering\FilterChain.cs" />
+    <Compile Include="Audio\Filtering\FirstOrderFilter.cs" />
     <Compile Include="Audio\NoiseGenerator.cs" />
     <Compile Include="Audio\ProceduralGenerator.cs" />
     <Compile Include="Audio\PulseGenerator.cs" />

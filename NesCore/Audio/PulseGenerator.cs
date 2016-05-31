@@ -9,6 +9,14 @@ namespace NesCore.Audio
 {
     public class PulseGenerator: ProceduralGenerator
     {
+        public PulseGenerator(byte channel)
+        {
+            if (channel != 1 && channel != 2)
+                throw new ArgumentOutOfRangeException("channel", "channel should have value 1 or 2");
+
+            this.Channel = channel;
+        }
+
         public override byte Control
         {
             set

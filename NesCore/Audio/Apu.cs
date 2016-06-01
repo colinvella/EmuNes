@@ -124,7 +124,7 @@ namespace NesCore.Audio
         /// <summary>
         /// Handler for triggering interrupt requests
         /// </summary>
-        public Action TriggerIrq { get; set; }
+        public Action TriggerInterruptRequest { get; set; }
 
         public float Output
         {
@@ -231,7 +231,7 @@ namespace NesCore.Audio
                 {
                     StepSweep();
                     StepLength();
-                    TriggerIrq?.Invoke();
+                    TriggerInterruptRequest?.Invoke();
                 }
             } else if (framePeriod == 5)
             {

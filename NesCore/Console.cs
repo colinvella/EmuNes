@@ -28,7 +28,7 @@ namespace NesCore
             // configure hardware and connect components
             ConfigureMemoryMap();
 
-            // connect processor it to memory
+            // connect processor to memory
             Processor.ReadByte = (ushort address) => { return Memory[address]; };
             Processor.WriteByte = (ushort address, byte value) => { Memory[address] = value; };
 
@@ -37,6 +37,16 @@ namespace NesCore
 
             // connect video to memory for DMA operations
             Video.ReadByte = (ushort address) => { return Memory[address]; };
+
+            // connect APU DMC to memory
+            Audio.Dmc.ReadMemorySample = (address) => Memory[address];
+
+            // wire IRQ between audio and processor
+            Audio.TriggerInterruptRequest = () =>
+            {
+                Processor.State.StallCycles += 4;
+                Processor.TriggerInterruptRequest();
+            };
 
             // connect default first controller
             ConnectControllerOne(new Joypad());

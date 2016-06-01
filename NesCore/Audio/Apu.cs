@@ -107,7 +107,7 @@ namespace NesCore.Audio
             get { return sampleRate; }
             set
             {
-                sampleRate = value;
+                sampleRate = CpuFrequency / value;
 
                 filterChain.Filters.Clear();
                 filterChain.Filters.Add(FirstOrderFilter.CreateHighPassFilter(sampleRate, 90f));

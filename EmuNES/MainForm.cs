@@ -45,6 +45,8 @@ namespace EmuNES
             gameState = GameState.Stopped;
 
             bitmapBuffer = new FastBitmap(256, 240);
+
+            audioManager = new AudioManager(44100, 44100);
         }
 
         private void OnFormLoad(object sender, EventArgs eventArgs)
@@ -53,6 +55,13 @@ namespace EmuNES
             SetScreenSizeAndAspect(1, true);
             SetRasterEffect(false);
             SetMotionBlur(false);
+
+            Random r = new Random();
+            for (int i = 0; i < 11025; i++)
+            {
+                audioManager.WriteSample((short)r.Next());
+            }
+            //audioManager.Start();
 
 #if DEBUG
             gameTimer.Interval = 20;
@@ -396,6 +405,9 @@ namespace EmuNES
         private bool tvAspect;
         private bool rasterEffect;
         private bool motionBlur;
+
+        // audio system
+        private AudioManager audioManager;
 
     }
 }

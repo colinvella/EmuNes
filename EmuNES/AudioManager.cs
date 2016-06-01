@@ -11,19 +11,67 @@ namespace EmuNES
     {
         public AudioManager(uint sampleRate, uint bufferSize)
         {
-            soundPlayer = new SoundPlayer(new AudioStream(sampleRate, bufferSize));
+            audioStreamCurrent = new AudioStream(sampleRate, bufferSize);
+            audioStreamBackup = new AudioStream(sampleRate, bufferSize);
+
+
+            soundPlayerCurrent = new SoundPlayer(audioStreamCurrent);
+            soundPlayerCurrent.Load();
+            soundPlayerBackup = new SoundPlayer(audioStreamBackup);
+            soundPlayerBackup.Load();
         }
 
         public void Start()
         {
-            soundPlayer.PlayLooping();
+            running = true;
+            RunAudioThread();
         }
 
         public void Stop()
         {
-            soundPlayer.Stop();
+            running = false;
         }
 
-        private SoundPlayer soundPlayer;
+        public void WriteSample(short sampleValue)
+        {
+            audioStreamCurrent.WriteSample(sampleValue);
+            audioStreamBackup.WriteSample(sampleValue);
+        }
+
+        public void WriteSample(float sampleValue)
+        {
+            audioStreamCurrent.WriteSample(sampleValue);
+            audioStreamBackup.WriteSample(sampleValue);
+        }
+
+        private void RunAudioThread()
+        {
+            Task.Factory.StartNew(() =>
+            {
+                while (running)
+                {
+                    SoundPlayer soundPlayerTemp = soundPlayerCurrent;
+                    soundPlayerCurrent = soundPlayerBackup;
+                    soundPlayerBackup = soundPlayerTemp;
+
+                    AudioStream audioStreamTemp = audioStreamCurrent;
+                    audioStreamCurrent = audioStreamBackup;
+                    audioStreamBackup = audioStreamTemp;
+
+                    audioStreamBackup.Position = 0;
+                    soundPlayerBackup.Stream = audioStreamBackup;
+                    soundPlayerBackup.LoadAsync();
+
+                    //audioStreamCurrent.Position = 0;
+                    soundPlayerCurrent.PlaySync();
+                }
+            });
+        }
+
+        private SoundPlayer soundPlayerCurrent;
+        private SoundPlayer soundPlayerBackup;
+        private AudioStream audioStreamCurrent;
+        private AudioStream audioStreamBackup;
+        private bool running;
     }
 }

@@ -44,29 +44,34 @@ namespace EmuNES
             // data part used for audio mixing
             bufferStart = Position;
             Write(new byte[subChunk2Size], 0, (int)subChunk2Size);
+
+            // reset position for sound player
+            position = 0;
         }
 
         public void WriteSample(short sampleValue)
         {
-            lock (positionLock)
-            {
-                // sample index within wave
-                long index = bufferStart + (position * blockAlign) % numSamples;
+            // sample index within wave
+            long index = bufferStart + samplePosition * blockAlign;
 
-                // get sample
-                short currentValue = BitConverter.ToInt16(data, (int)index);
+            // get sample
+            //            short currentValue = BitConverter.ToInt16(data, (int)index);
 
-                // mix samples
-                int mixedValue = currentValue + sampleValue;
+            // mix samples
+            //            int mixedValue = currentValue + sampleValue;
 
-                // clamp to range
-                mixedValue = Math.Min(mixedValue, short.MaxValue);
-                mixedValue = Math.Max(mixedValue, short.MinValue);
+            // clamp to range
+            //            mixedValue = Math.Min(mixedValue, short.MaxValue);
+            //            mixedValue = Math.Max(mixedValue, short.MinValue);
 
-                short clampedValue = (short)mixedValue;
-                byte[] bytes = BitConverter.GetBytes(clampedValue);
-                Array.Copy(bytes, 0, data, index, 2);
-            }
+            //           short clampedValue = (short)mixedValue;
+            //          byte[] bytes = BitConverter.GetBytes(clampedValue);
+
+            byte[] bytes = BitConverter.GetBytes(sampleValue);
+            Array.Copy(bytes, 0, data, index, 2);
+
+            ++samplePosition;
+            samplePosition %= numSamples;
         }
 
         public void WriteSample(float sampleValue)
@@ -103,6 +108,7 @@ namespace EmuNES
                 if (position + count > data.Length)
                     count = (int)(data.Length - position);
                 Array.Copy(data, position, buffer, offset, count);
+                position += count;
                 return count;
             }
         }
@@ -112,6 +118,7 @@ namespace EmuNES
             lock (positionLock)
             {
                 Array.Copy(buffer, offset, data, position, count);
+                position += count;
             }
         }
 
@@ -180,6 +187,7 @@ namespace EmuNES
         private uint sampleRate;
         private uint numSamples;
         private long bufferStart;
+        private long samplePosition;
         private ushort blockAlign;
     }
 }

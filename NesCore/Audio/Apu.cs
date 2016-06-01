@@ -83,6 +83,22 @@ namespace NesCore.Audio
             }
         }
 
+        public byte FrameCounter
+        {
+            set
+            {
+                framePeriod = (byte)(4 + (value >> 7) & 1);
+                frameIrq = ((value >> 6) & 1) == 0;
+
+                if (framePeriod == 5)
+                {
+                    StepEnvelope();
+                    StepSweep();
+                    StepLength();
+                }
+            }
+        }
+
         /// <summary>
         /// Sets the supported sample rate and configures the pass filters accordingly
         /// </summary>

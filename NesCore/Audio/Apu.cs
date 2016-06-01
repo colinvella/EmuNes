@@ -15,11 +15,11 @@ namespace NesCore.Audio
 
         public Apu()
         {
-            pulse1 = new PulseGenerator(1);
-            pulse2 = new PulseGenerator(2);
-            triangle = new TriangleGenerator();
-            noise = new NoiseGenerator();
-            dmc = new DmcGenerator();
+            Pulse1 = new PulseGenerator(1);
+            Pulse2 = new PulseGenerator(2);
+            Triangle = new TriangleGenerator();
+            Noise = new NoiseGenerator();
+            Dmc = new DmcGenerator();
 
             filterChain = new FilterChain();
         }
@@ -32,15 +32,15 @@ namespace NesCore.Audio
             get
             {
                 byte result = 0;
-                if (pulse1.LengthValue > 0)
+                if (Pulse1.LengthValue > 0)
                     result |= 1;
-                if (pulse2.LengthValue > 0)
+                if (Pulse2.LengthValue > 0)
                     result |= 2;
-                if (triangle.LengthValue > 0)
+                if (Triangle.LengthValue > 0)
                     result |= 4;
-                if (noise.LengthValue > 0)
+                if (Noise.LengthValue > 0)
                     result |= 8;
-                if (dmc.CurrentLength > 0)
+                if (Dmc.CurrentLength > 0)
                     result |= 16;
                 return result;
             }
@@ -53,32 +53,32 @@ namespace NesCore.Audio
         {
             set
             {
-                pulse1.Enabled = (value & 1) == 1;
-                pulse2.Enabled = (value & 2) == 2;
-                triangle.Enabled = (value & 4) == 4;
-                noise.Enabled = (value & 8) == 8;
-                dmc.Enabled = (value & 16) == 16;
+                Pulse1.Enabled = (value & 1) == 1;
+                Pulse2.Enabled = (value & 2) == 2;
+                Triangle.Enabled = (value & 4) == 4;
+                Noise.Enabled = (value & 8) == 8;
+                Dmc.Enabled = (value & 16) == 16;
                 
-                if (!pulse1.Enabled) 
-                    pulse1.LengthValue = 0;
+                if (!Pulse1.Enabled) 
+                    Pulse1.LengthValue = 0;
 
-                if (!pulse2.Enabled)
-                    pulse2.LengthValue = 0;
+                if (!Pulse2.Enabled)
+                    Pulse2.LengthValue = 0;
 
-                if (!triangle.Enabled)
-                    triangle.LengthValue = 0;
+                if (!Triangle.Enabled)
+                    Triangle.LengthValue = 0;
 
-                if (!noise.Enabled)
-                    noise.LengthValue = 0;
+                if (!Noise.Enabled)
+                    Noise.LengthValue = 0;
 
-                if (!dmc.Enabled)
+                if (!Dmc.Enabled)
                 {
-                    dmc.CurrentLength = 0;
+                    Dmc.CurrentLength = 0;
                 }
                 else
                 {
-                    if (dmc.CurrentLength == 0)
-                        dmc.Restart();
+                    if (Dmc.CurrentLength == 0)
+                        Dmc.Restart();
                 }
             }
         }
@@ -130,18 +130,24 @@ namespace NesCore.Audio
         {
             get
             {
-                byte pulseOutput1 = pulse1.Output;
-                byte pulseOutput2 = pulse2.Output;
+                byte pulseOutput1 = Pulse1.Output;
+                byte pulseOutput2 = Pulse2.Output;
                 float pulseOutput = pulseTable[pulseOutput1 + pulseOutput2];
 
-                byte triangleOutput = triangle.Output;
-                byte noiseOutput = noise.Output;
-                byte dmcOutput = dmc.Output;
+                byte triangleOutput = Triangle.Output;
+                byte noiseOutput = Noise.Output;
+                byte dmcOutput = Dmc.Output;
                 float tndOutput = tndTable[3 * triangleOutput + 2 * noiseOutput + dmcOutput];
 
                 return pulseOutput + tndOutput;
             }
         }
+
+        public PulseGenerator Pulse1 { get; private set; }
+        public PulseGenerator Pulse2 { get; private set; }
+        public TriangleGenerator Triangle { get; private set; }
+        public NoiseGenerator Noise { get; private set; }
+        public DmcGenerator Dmc { get; private set; }
 
         public void Step()
         {
@@ -174,11 +180,11 @@ namespace NesCore.Audio
             binaryWriter.Write(frameValue);
             binaryWriter.Write(frameIrq);
 
-            pulse1.SaveState(binaryWriter);
-            pulse2.SaveState(binaryWriter);
-            triangle.SaveState(binaryWriter);
-            noise.SaveState(binaryWriter);
-            dmc.SaveState(binaryWriter);
+            Pulse1.SaveState(binaryWriter);
+            Pulse2.SaveState(binaryWriter);
+            Triangle.SaveState(binaryWriter);
+            Noise.SaveState(binaryWriter);
+            Dmc.SaveState(binaryWriter);
         }
 
         public void LoadState(BinaryReader binaryReader)
@@ -188,23 +194,23 @@ namespace NesCore.Audio
             frameValue = binaryReader.ReadByte();
             frameIrq = binaryReader.ReadBoolean();
 
-            pulse1.LoadState(binaryReader);
-            pulse2.LoadState(binaryReader);
-            triangle.LoadState(binaryReader);
-            noise.LoadState(binaryReader);
-            dmc.LoadState(binaryReader);
+            Pulse1.LoadState(binaryReader);
+            Pulse2.LoadState(binaryReader);
+            Triangle.LoadState(binaryReader);
+            Noise.LoadState(binaryReader);
+            Dmc.LoadState(binaryReader);
         }
 
         private void StepTimer()
         {
             if (cycle % 2 == 0)
             {
-                pulse1.StepTimer();
-                pulse2.StepTimer();
-                noise.StepTimer();
-                dmc.StepTimer();
+                Pulse1.StepTimer();
+                Pulse2.StepTimer();
+                Noise.StepTimer();
+                Dmc.StepTimer();
             }
-            triangle.StepTimer();
+            Triangle.StepTimer();
         }
 
         private void StepFrameCounter()
@@ -244,31 +250,25 @@ namespace NesCore.Audio
 
         private void StepEnvelope()
         {
-            pulse1.StepEnvelope();
-            pulse2.StepEnvelope();
-            triangle.StepCounter();
-            noise.StepEnvelope();
+            Pulse1.StepEnvelope();
+            Pulse2.StepEnvelope();
+            Triangle.StepCounter();
+            Noise.StepEnvelope();
         }
 
         private void StepSweep()
         {
-            pulse1.StepSweep();
-            pulse2.StepSweep();
+            Pulse1.StepSweep();
+            Pulse2.StepSweep();
         }
 
         private void StepLength()
         {
-            pulse1.StepLength();
-            pulse2.StepLength();
-            triangle.StepLength();
-            noise.StepLength();
+            Pulse1.StepLength();
+            Pulse2.StepLength();
+            Triangle.StepLength();
+            Noise.StepLength();
         }
-
-        private PulseGenerator pulse1;
-        private PulseGenerator pulse2;
-        private TriangleGenerator triangle;
-        private NoiseGenerator noise;
-        private DmcGenerator dmc;
 
         private float sampleRate;
         private ulong cycle;

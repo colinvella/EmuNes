@@ -38,15 +38,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audio\Apu.cs" />
-    <Compile Include="Audio\DmcGenerator.cs" />
+    <Compile Include="Audio\Generators\DmcGenerator.cs" />
     <Compile Include="Audio\Filtering\Filter.cs" />
     <Compile Include="Audio\Filtering\FilterChain.cs" />
     <Compile Include="Audio\Filtering\FirstOrderFilter.cs" />
-    <Compile Include="Audio\NoiseGenerator.cs" />
-    <Compile Include="Audio\ProceduralGenerator.cs" />
-    <Compile Include="Audio\PulseGenerator.cs" />
-    <Compile Include="Audio\TriangleGenerator.cs" />
-    <Compile Include="Audio\WaveGenerator.cs" />
+    <Compile Include="Audio\Generators\NoiseGenerator.cs" />
+    <Compile Include="Audio\Generators\ProceduralGenerator.cs" />
+    <Compile Include="Audio\Generators\PulseGenerator.cs" />
+    <Compile Include="Audio\Generators\TriangleGenerator.cs" />
+    <Compile Include="Audio\Generators\WaveGenerator.cs" />
     <Compile Include="Input\Controller.cs" />
     <Compile Include="Input\Joypad.cs" />
     <Compile Include="Memory\ConfigurableMemoryMap.cs" />

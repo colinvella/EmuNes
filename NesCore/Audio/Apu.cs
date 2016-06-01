@@ -1,4 +1,5 @@
 ﻿using NesCore.Audio.Filtering;
+using NesCore.Audio.Generators;
 using System;
 using System.Collections.Generic;
 using System.Linq;

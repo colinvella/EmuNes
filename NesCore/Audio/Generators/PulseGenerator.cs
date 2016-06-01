@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NesCore.Audio
+namespace NesCore.Audio.Generators
 {
     public class PulseGenerator: ProceduralGenerator
     {

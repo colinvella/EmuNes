@@ -53,6 +53,8 @@ namespace NesCore.Audio.Generators
             }
         }
 
+        public ushort CurrentLength { get; private set; }
+
         public ReadMemorySampleHandler ReadMemorySample { get; set; }
 
         public override void StepTimer()
@@ -76,7 +78,7 @@ namespace NesCore.Audio.Generators
         public void Restart()
         {
             currentAddress = sampleAddress;
-            currentLength = sampleLength;
+            CurrentLength = sampleLength;
         }
 
         public override void SaveState(BinaryWriter binaryWriter)
@@ -89,7 +91,7 @@ namespace NesCore.Audio.Generators
             binaryWriter.Write(sampleLength);
 
             binaryWriter.Write(currentAddress);
-            binaryWriter.Write(currentLength);
+            binaryWriter.Write(CurrentLength);
 
             binaryWriter.Write(shiftRegister);
             binaryWriter.Write(bitCount);
@@ -112,7 +114,7 @@ namespace NesCore.Audio.Generators
             sampleLength = binaryReader.ReadUInt16();
 
             currentAddress = binaryReader.ReadUInt16();
-            currentLength = binaryReader.ReadUInt16();
+            CurrentLength = binaryReader.ReadUInt16();
 
             shiftRegister = binaryReader.ReadByte();
             bitCount = binaryReader.ReadByte();
@@ -127,19 +129,19 @@ namespace NesCore.Audio.Generators
 
         private void StepReader()
         {
-            if (currentLength > 0 && bitCount == 0)
+            if (CurrentLength > 0 && bitCount == 0)
             {
                 // cpu should stall 4 cycles here
-                shiftRegister = ReadMemorySample(currentAddress++);
+                shiftRegister = ReadMemorySample == null ? (byte)0 : ReadMemorySample(currentAddress++);
 
                 bitCount = 8;
 
                 if (currentAddress == 0)
                     currentAddress = 0x8000;
 
-                --currentLength;
+                --CurrentLength;
 
-                if (currentLength == 0 && loop)
+                if (CurrentLength == 0 && loop)
                     Restart();
             }
         }
@@ -171,7 +173,6 @@ namespace NesCore.Audio.Generators
         private ushort sampleLength;
 
         private ushort currentAddress;
-        private ushort currentLength;
 
         private byte shiftRegister;
         private byte bitCount;

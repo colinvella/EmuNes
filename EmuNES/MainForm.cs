@@ -285,11 +285,17 @@ namespace EmuNES
 
         private void ConfigureAudio()
         {
-            Console.Audio.SampleRate = 22500;
+            Console.Audio.SampleRate = 44100;
 
+            BinaryWriter bw = new BinaryWriter(new FileStream(Application.StartupPath + "\\audio.bin", FileMode.OpenOrCreate, FileAccess.Write));
+            int i = 0;
             Console.Audio.WriteSample = (sampleValue) =>
             {
                 // TODO: actual audio here
+                bw.Write(sampleValue);
+                bw.Flush();
+                System.Console.WriteLine(i + ": " + sampleValue);
+                ++i;
             };
         }
 

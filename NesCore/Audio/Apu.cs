@@ -238,9 +238,10 @@ namespace NesCore.Audio
                 ++frameValue;
                 frameValue %= 5;
 
-                StepEnvelope();
+                if (frameValue != 4)
+                    StepEnvelope();
 
-                if (frameValue == 0 ||frameValue == 2)
+                if (frameValue == 0 || frameValue == 2)
                 {
                     StepSweep();
                     StepLength();

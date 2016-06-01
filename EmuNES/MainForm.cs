@@ -38,7 +38,8 @@ namespace EmuNES
 
             Console = new NesCore.Console();
 
-            ConfigureVideoBuffer();
+            ConfigureVideo();
+            ConfigureAudio();
             ConfigureDefaultController();
 
             gameState = GameState.Stopped;
@@ -248,7 +249,7 @@ namespace EmuNES
             gameStopMenuItem.Enabled = gameState != GameState.Stopped;
         }
 
-        private void ConfigureVideoBuffer()
+        private void ConfigureVideo()
         {
             Console.Video.WritePixel = (x, y, colour) =>
             {
@@ -279,6 +280,16 @@ namespace EmuNES
                 averageDeltaTime = averageDeltaTime * 0.9 + currentDeltaTime * 0.1;
                 int frameRate = (int)(1.0 / averageDeltaTime);
                 frameRateStatusLabel.Text = frameRate + " FPS";
+            };
+        }
+
+        private void ConfigureAudio()
+        {
+            Console.Audio.SampleRate = 22500;
+
+            Console.Audio.WriteSample = (sampleValue) =>
+            {
+                // TODO: actual audio here
             };
         }
 

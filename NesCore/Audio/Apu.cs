@@ -110,9 +110,9 @@ namespace NesCore.Audio
                 sampleRate = CpuFrequency / value;
 
                 filterChain.Filters.Clear();
-                filterChain.Filters.Add(FirstOrderFilter.CreateHighPassFilter(sampleRate, 90f));
-                filterChain.Filters.Add(FirstOrderFilter.CreateHighPassFilter(sampleRate, 440f));
-                filterChain.Filters.Add(FirstOrderFilter.CreateLowPassFilter(sampleRate, 14000f));
+                filterChain.Filters.Add(FirstOrderFilter.CreateHighPassFilter(value, 90f));
+                filterChain.Filters.Add(FirstOrderFilter.CreateHighPassFilter(value, 440f));
+                filterChain.Filters.Add(FirstOrderFilter.CreateLowPassFilter(value, 14000f));
             }
         }
 

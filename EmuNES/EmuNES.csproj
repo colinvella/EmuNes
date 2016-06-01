@@ -50,6 +50,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AudioManager.cs" />
+    <Compile Include="AudioStream.cs" />
     <Compile Include="FastBitmap.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

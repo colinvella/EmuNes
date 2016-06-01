@@ -24,6 +24,9 @@ namespace NesCore.Audio
             filterChain = new FilterChain();
         }
 
+        /// <summary>
+        /// Status register
+        /// </summary>
         public byte Status
         {
             get
@@ -40,6 +43,43 @@ namespace NesCore.Audio
                 if (dmc.CurrentLength > 0)
                     result |= 16;
                 return result;
+            }
+        }
+
+        /// <summary>
+        /// Control register
+        /// </summary>
+        public byte Control
+        {
+            set
+            {
+                pulse1.Enabled = (value & 1) == 1;
+                pulse2.Enabled = (value & 2) == 2;
+                triangle.Enabled = (value & 4) == 4;
+                noise.Enabled = (value & 8) == 8;
+                dmc.Enabled = (value & 16) == 16;
+                
+                if (!pulse1.Enabled) 
+                    pulse1.LengthValue = 0;
+
+                if (!pulse2.Enabled)
+                    pulse2.LengthValue = 0;
+
+                if (!triangle.Enabled)
+                    triangle.LengthValue = 0;
+
+                if (!noise.Enabled)
+                    noise.LengthValue = 0;
+
+                if (!dmc.Enabled)
+                {
+                    dmc.CurrentLength = 0;
+                }
+                else
+                {
+                    if (dmc.CurrentLength == 0)
+                        dmc.Restart();
+                }
             }
         }
 

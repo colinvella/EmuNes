@@ -9,7 +9,7 @@ namespace NesCore.Audio.Generators
 {
     public abstract class WaveGenerator
     {
-        public bool Enabled { get; protected set; }
+        public bool Enabled { get; set; }
 
         public abstract byte Control { set; }
 

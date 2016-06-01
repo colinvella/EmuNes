@@ -10,7 +10,7 @@ namespace NesCore.Audio.Generators
     public abstract class ProceduralGenerator: WaveGenerator
     {
         public bool LengthEnabled { get; protected set; }
-        public byte LengthValue { get; protected set; }
+        public byte LengthValue { get; set; }
 
         public ushort TimerPeriod { get; protected set; }
         public ushort TimerValue { get; protected set; }

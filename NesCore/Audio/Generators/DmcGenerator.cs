@@ -53,7 +53,7 @@ namespace NesCore.Audio.Generators
             }
         }
 
-        public ushort CurrentLength { get; private set; }
+        public ushort CurrentLength { get; set; }
 
         public ReadMemorySampleHandler ReadMemorySample { get; set; }
 

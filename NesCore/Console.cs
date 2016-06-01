@@ -39,14 +39,14 @@ namespace NesCore
             Video.ReadByte = (ushort address) => { return Memory[address]; };
 
             // connect APU DMC to memory
-            Audio.Dmc.ReadMemorySample = (address) => Memory[address];
-
-            // wire IRQ between audio and processor
-            Audio.TriggerInterruptRequest = () =>
+            Audio.Dmc.ReadMemorySample = (address) =>
             {
                 Processor.State.StallCycles += 4;
-                Processor.TriggerInterruptRequest();
+                return Memory[address];
             };
+
+            // wire IRQ between audio and processor
+            Audio.TriggerInterruptRequest = () => Processor.TriggerInterruptRequest();
 
             // connect default first controller
             ConnectControllerOne(new Joypad());

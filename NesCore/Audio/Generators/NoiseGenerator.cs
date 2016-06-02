@@ -85,7 +85,7 @@ namespace NesCore.Audio.Generators
                 byte b2 = (byte)((ShiftRegister >> shift) & 1);
 
                 ShiftRegister >>= 1;
-                ShiftRegister |= (byte)((b1 ^ b2) << 14);
+                ShiftRegister |= (ushort)((b1 ^ b2) << 14);
             }
             else
             {

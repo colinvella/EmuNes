@@ -30,7 +30,7 @@ namespace NesCore.Audio.Generators
         {
             get
             {
-                if (Enabled)
+                if (!Enabled)
                     return 0;
 
                 if (LengthValue == 0)

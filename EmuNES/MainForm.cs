@@ -301,7 +301,7 @@ namespace EmuNES
 
             //BinaryWriter bw = new BinaryWriter(new FileStream(Application.StartupPath + "\\audio.bin", FileMode.OpenOrCreate, FileAccess.Write));
 
-            float[] sampleBuffer = new float[4410];
+            float[] sampleBuffer = new float[512];
             int writeIndex = 0;
 
             Console.Audio.WriteSample = (sampleValue) =>

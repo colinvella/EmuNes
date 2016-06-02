@@ -17,7 +17,7 @@ namespace EmuNES
 
         public override int Read(float[] buffer, int offset, int sampleCount)
         {
-            lock (queueLock)
+            //lock (queueLock)
             {
                 for (int n = 0; n < sampleCount; n++)
                 {
@@ -34,7 +34,7 @@ namespace EmuNES
 
         public void Queue(float[] sampleValues)
         {
-            lock (queueLock)
+            //lock (queueLock)
             {
                 for (int index = 0; index < sampleValues.Length; index++)
                 {

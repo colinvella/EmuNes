@@ -126,6 +126,9 @@ namespace NesCore.Audio
         /// </summary>
         public Action TriggerInterruptRequest { get; set; }
 
+        /// <summary>
+        /// Current output
+        /// </summary>
         public float Output
         {
             get
@@ -142,6 +145,8 @@ namespace NesCore.Audio
                 return pulseOutput + tndOutput;
             }
         }
+
+        // wave generators
 
         public PulseGenerator Pulse1 { get; private set; }
         public PulseGenerator Pulse2 { get; private set; }

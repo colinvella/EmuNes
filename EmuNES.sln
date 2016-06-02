@@ -18,6 +18,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Roms", "Roms", "{012C7D28-9
 		Roms\palette.nes = Roms\palette.nes
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{6E224CFE-3372-466E-8516-66B14E2D0F10}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NAudio", "NAudio", "{A03867BD-D87D-40D5-92DB-E443CCA4200D}"
+	ProjectSection(SolutionItems) = preProject
+		Libraries\NAudio\NAudio.dll = Libraries\NAudio\NAudio.dll
+		Libraries\NAudio\NAudio.WindowsMediaFormat.dll = Libraries\NAudio\NAudio.WindowsMediaFormat.dll
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,5 +47,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A03867BD-D87D-40D5-92DB-E443CCA4200D} = {6E224CFE-3372-466E-8516-66B14E2D0F10}
 	EndGlobalSection
 EndGlobal

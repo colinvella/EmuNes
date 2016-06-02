@@ -270,15 +270,29 @@ namespace EmuNES
 
                 if (motionBlur)
                 {
-                    bitmapBuffer.Bits[offset] = (byte)(bitmapBuffer.Bits[offset++] * 3 / 4 + colour.Blue * 1 / 4);
-                    bitmapBuffer.Bits[offset] = (byte)(bitmapBuffer.Bits[offset++] * 3 / 4 + colour.Green * 1 / 4);
-                    bitmapBuffer.Bits[offset] = (byte)(bitmapBuffer.Bits[offset++] * 3 / 4 + colour.Red * 1 / 4);
+                    byte oldBlue = bitmapBuffer.Bits[offset];
+                    if (colour.Blue < oldBlue)
+                        bitmapBuffer.Bits[offset++] = (byte)(oldBlue * 0.8);
+                    else
+                        bitmapBuffer.Bits[offset++] = colour.Blue;
+
+                    byte oldGreen = bitmapBuffer.Bits[offset];
+                    if (colour.Green < oldGreen)
+                        bitmapBuffer.Bits[offset++] = (byte)(oldGreen * 0.8);
+                    else
+                        bitmapBuffer.Bits[offset++] = colour.Green;
+
+                    byte oldRed = bitmapBuffer.Bits[offset];
+                    if (colour.Red < oldRed)
+                        bitmapBuffer.Bits[offset] = (byte)(oldRed * 0.8);
+                    else
+                        bitmapBuffer.Bits[offset] = colour.Red;
                 }
                 else
                 {
                     bitmapBuffer.Bits[offset++] = colour.Blue;
                     bitmapBuffer.Bits[offset++] = colour.Green;
-                    bitmapBuffer.Bits[offset++] = colour.Red;
+                    bitmapBuffer.Bits[offset] = colour.Red;
                 }
             };
 

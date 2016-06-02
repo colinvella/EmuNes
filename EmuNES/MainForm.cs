@@ -1,4 +1,5 @@
-﻿using NesCore.Input;
+﻿using NAudio.Wave;
+using NesCore.Input;
 using NesCore.Storage;
 using NesCore.Video;
 using System;
@@ -46,7 +47,13 @@ namespace EmuNES
 
             bitmapBuffer = new FastBitmap(256, 240);
 
-            audioManager = new AudioManager(44100, 44100);
+            waveOut = new WaveOut();
+            var apuAudioProvider = new ApuAudioProvider();
+            apuAudioProvider.SetWaveFormat(44100, 1); // 16kHz mono
+            apuAudioProvider.Frequency = 1000;
+            apuAudioProvider.Amplitude = 0.25f;
+
+            waveOut.Init(apuAudioProvider);
         }
 
         private void OnFormLoad(object sender, EventArgs eventArgs)
@@ -56,12 +63,7 @@ namespace EmuNES
             SetRasterEffect(false);
             SetMotionBlur(false);
 
-            Random r = new Random();
-            for (int i = 0; i < 11025; i++)
-            {
-                audioManager.WriteSample((short)r.Next());
-            }
-            //audioManager.Start();
+            //waveOut.Play();
 
 #if DEBUG
             gameTimer.Interval = 20;
@@ -407,7 +409,7 @@ namespace EmuNES
         private bool motionBlur;
 
         // audio system
-        private AudioManager audioManager;
+        private WaveOut waveOut;
 
     }
 }

@@ -48,11 +48,8 @@ namespace EmuNES
             bitmapBuffer = new FastBitmap(256, 240);
 
             waveOut = new WaveOut();
-            var apuAudioProvider = new ApuAudioProvider();
-            apuAudioProvider.SetWaveFormat(44100, 1); // 16kHz mono
-            apuAudioProvider.Frequency = 1000;
-            apuAudioProvider.Amplitude = 0.25f;
 
+            apuAudioProvider = new ApuAudioProvider();
             waveOut.Init(apuAudioProvider);
         }
 
@@ -62,8 +59,6 @@ namespace EmuNES
             SetScreenSizeAndAspect(1, true);
             SetRasterEffect(false);
             SetMotionBlur(false);
-
-            //waveOut.Play();
 
 #if DEBUG
             gameTimer.Interval = 20;
@@ -109,9 +104,11 @@ namespace EmuNES
                     averageDeltaTime = 1.0 / 60.0;
                     gameState = GameState.Running;
                     gameTimer.Enabled = true;
+                    waveOut.Play();
                     break;
                 case GameState.Running:
                     // pause
+                    waveOut.Pause();
                     gameTimer.Enabled = false;
                     gameState = GameState.Paused;
                     break;
@@ -121,6 +118,7 @@ namespace EmuNES
                     averageDeltaTime = 1.0 / 60.0;
                     gameState = GameState.Running;
                     gameTimer.Enabled = true;
+                    waveOut.Resume();
                     break;
             }
 
@@ -130,6 +128,8 @@ namespace EmuNES
 
         private void OnGameReset(object sender, EventArgs eventArgs)
         {
+            waveOut.Stop();
+            waveOut.Play();
             OnGameStop(sender, eventArgs);
             Console.Reset();
             OnGameRunPause(sender, eventArgs);
@@ -143,6 +143,7 @@ namespace EmuNES
             gameTimer.Enabled = false;
             videoPanel.Invalidate();
             gameState = GameState.Stopped;
+            waveOut.Stop();
 
             UpdateGameMenuItems();
         }
@@ -298,15 +299,24 @@ namespace EmuNES
         {
             Console.Audio.SampleRate = 44100;
 
-            BinaryWriter bw = new BinaryWriter(new FileStream(Application.StartupPath + "\\audio.bin", FileMode.OpenOrCreate, FileAccess.Write));
-            int i = 0;
+            //BinaryWriter bw = new BinaryWriter(new FileStream(Application.StartupPath + "\\audio.bin", FileMode.OpenOrCreate, FileAccess.Write));
+
+            float[] sampleBuffer = new float[4410];
+            int writeIndex = 0;
+
             Console.Audio.WriteSample = (sampleValue) =>
             {
-                // TODO: actual audio here
-                bw.Write(sampleValue);
-                bw.Flush();
-                System.Console.WriteLine(i + ": " + sampleValue);
-                ++i;
+                sampleBuffer[writeIndex++] = sampleValue;
+                writeIndex %= sampleBuffer.Length;
+
+                if (writeIndex == 0)
+                    apuAudioProvider.Queue(sampleBuffer);
+              
+                //bw.Write(sampleValue);
+                //bw.Flush();
+                //System.Console.WriteLine(i + ": " + sampleValue);
+                //++i;
+                //apuAudioProvider.Queue(sampleValue);
             };
         }
 
@@ -410,6 +420,7 @@ namespace EmuNES
 
         // audio system
         private WaveOut waveOut;
+        private ApuAudioProvider apuAudioProvider;
 
     }
 }

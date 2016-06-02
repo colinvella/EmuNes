@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NesCoreTest", "NesCoreTest\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Roms", "Roms", "{012C7D28-92C0-49FD-B4A6-D46F85AF4E27}"
 	ProjectSection(SolutionItems) = preProject
+		Roms\Balloon Fight (USA).nes = Roms\Balloon Fight (USA).nes
+		Roms\Bomberman (USA).nes = Roms\Bomberman (USA).nes
+		Roms\Excitebike (Japan, USA).nes = Roms\Excitebike (Japan, USA).nes
+		Roms\Journey to Silius (USA).nes = Roms\Journey to Silius (USA).nes
 		Roms\Mega Man 2 (USA).nes = Roms\Mega Man 2 (USA).nes
 		Roms\nestest.log = Roms\nestest.log
 		Roms\nestest.nes = Roms\nestest.nes

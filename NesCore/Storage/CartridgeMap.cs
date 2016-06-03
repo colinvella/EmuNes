@@ -8,7 +8,8 @@ namespace NesCore.Storage
 {
     public interface CartridgeMap
     {
+        string Name { get;  }
+
         byte this[ushort address] { get; set; }
-        
     }
 }

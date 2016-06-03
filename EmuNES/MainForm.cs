@@ -90,6 +90,21 @@ namespace EmuNES
             LoadCartridgeRom(openFileDialog.FileName);
         }
 
+        private void OnFileProperties(object sender, EventArgs eventArgs)
+        {
+            if (cartridge == null)
+                return;
+
+            string cartridgeProperties
+                = "Program Rom Size: " + cartridge.ProgramRom.Count + "k\r\n"
+                + "Character rom Size: " + cartridge.CharacterRom.Length + "k\r\n"
+                + "Mapper Type: " + cartridge.MapperType + " (" + cartridge.Map.Name + ")\r\n"
+                + "Mirroring Mode: " + cartridge.MirrorMode + "\r\n"
+                + "Battery Present: " + (cartridge.BatteryPresent ? "Yes" : "No");
+
+            MessageBox.Show(this, cartridgeProperties, this.cartridgeRomFilename + " Properties", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
         private void OnFileExit(object sender, EventArgs eventArgs)
         {
             Application.Exit();
@@ -351,14 +366,16 @@ namespace EmuNES
             try
             {
                 BinaryReader romBinaryReader = new BinaryReader(new FileStream(cartridgeRomPath, FileMode.Open));
-                Cartridge cartridge = new Cartridge(romBinaryReader);
+                this.cartridge = new Cartridge(romBinaryReader);
                 romBinaryReader.Close();
                 Console.LoadCartridge(cartridge);
 
-                string cartridgeRomFilename = Path.GetFileNameWithoutExtension(cartridgeRomPath);
+                this.cartridgeRomFilename = Path.GetFileNameWithoutExtension(cartridgeRomPath);
                 this.Text = cartridgeRomFilename + " - " + Application.ProductName;
 
+                filePropertiesMenuItem.Enabled = true;
                 gameMenuItem.Enabled = true;
+
                 OnGameStop(this, EventArgs.Empty);
                 OnGameRunPause(this, EventArgs.Empty);
             }
@@ -436,6 +453,9 @@ namespace EmuNES
 
         public NesCore.Console Console { get; private set; }
 
+        private Cartridge cartridge;
+        private string cartridgeRomFilename;
+
         private Dictionary<Keys, bool> keyPressed;
         private FastBitmap bitmapBuffer;
         private GameState gameState;
@@ -458,6 +478,5 @@ namespace EmuNES
         // audio system
         private WaveOut waveOut;
         private ApuAudioProvider apuAudioProvider;
-
     }
 }

@@ -32,26 +32,27 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.fileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileOpenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gameRunMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gameResetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gameStopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewScreenSizeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewScreenSizeX1MenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewScreenSizeX2MenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewScreenSizeX3MenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewScreenSizeX4MenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewTvAspectMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rasterEffectMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewMotionBlurMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.videoPanel = new System.Windows.Forms.Panel();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.emulatorStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.frameRateStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.gameTimer = new System.Windows.Forms.Timer(this.components);
-            this.viewTvAspectMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.fileOpenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.fileExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.gameRunMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.gameResetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.gameStopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.rasterEffectMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.viewMotionBlurMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filePropertiesMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.videoPanel.SuspendLayout();
             this.statusStrip.SuspendLayout();
@@ -67,7 +68,7 @@
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
             this.mainMenuStrip.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
-            this.mainMenuStrip.Size = new System.Drawing.Size(512, 28);
+            this.mainMenuStrip.Size = new System.Drawing.Size(512, 24);
             this.mainMenuStrip.TabIndex = 0;
             this.mainMenuStrip.Text = "Main Menu Strip";
             // 
@@ -75,10 +76,28 @@
             // 
             this.fileMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileOpenMenuItem,
+            this.filePropertiesMenuItem,
             this.fileExitMenuItem});
             this.fileMenuItem.Name = "fileMenuItem";
-            this.fileMenuItem.Size = new System.Drawing.Size(44, 24);
+            this.fileMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileMenuItem.Text = "&File";
+            // 
+            // fileOpenMenuItem
+            // 
+            this.fileOpenMenuItem.Image = global::EmuNES.Properties.Resources.FileOpen;
+            this.fileOpenMenuItem.Name = "fileOpenMenuItem";
+            this.fileOpenMenuItem.Size = new System.Drawing.Size(156, 26);
+            this.fileOpenMenuItem.Text = "&Open";
+            this.fileOpenMenuItem.Click += new System.EventHandler(this.OnFileOpen);
+            // 
+            // fileExitMenuItem
+            // 
+            this.fileExitMenuItem.Image = global::EmuNES.Properties.Resources.FileExit;
+            this.fileExitMenuItem.Name = "fileExitMenuItem";
+            this.fileExitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
+            this.fileExitMenuItem.Size = new System.Drawing.Size(156, 26);
+            this.fileExitMenuItem.Text = "Exit";
+            this.fileExitMenuItem.Click += new System.EventHandler(this.OnFileExit);
             // 
             // gameMenuItem
             // 
@@ -88,8 +107,32 @@
             this.gameStopMenuItem});
             this.gameMenuItem.Enabled = false;
             this.gameMenuItem.Name = "gameMenuItem";
-            this.gameMenuItem.Size = new System.Drawing.Size(60, 24);
+            this.gameMenuItem.Size = new System.Drawing.Size(50, 20);
             this.gameMenuItem.Text = "&Game";
+            // 
+            // gameRunMenuItem
+            // 
+            this.gameRunMenuItem.Image = global::EmuNES.Properties.Resources.GameRun;
+            this.gameRunMenuItem.Name = "gameRunMenuItem";
+            this.gameRunMenuItem.Size = new System.Drawing.Size(106, 26);
+            this.gameRunMenuItem.Text = "&Run";
+            this.gameRunMenuItem.Click += new System.EventHandler(this.OnGameRunPause);
+            // 
+            // gameResetMenuItem
+            // 
+            this.gameResetMenuItem.Image = global::EmuNES.Properties.Resources.GameReset;
+            this.gameResetMenuItem.Name = "gameResetMenuItem";
+            this.gameResetMenuItem.Size = new System.Drawing.Size(106, 26);
+            this.gameResetMenuItem.Text = "Reset";
+            this.gameResetMenuItem.Click += new System.EventHandler(this.OnGameReset);
+            // 
+            // gameStopMenuItem
+            // 
+            this.gameStopMenuItem.Image = global::EmuNES.Properties.Resources.GameStop;
+            this.gameStopMenuItem.Name = "gameStopMenuItem";
+            this.gameStopMenuItem.Size = new System.Drawing.Size(106, 26);
+            this.gameStopMenuItem.Text = "Stop";
+            this.gameStopMenuItem.Click += new System.EventHandler(this.OnGameStop);
             // 
             // viewMenuItem
             // 
@@ -99,7 +142,7 @@
             this.rasterEffectMenuItem,
             this.viewMotionBlurMenuItem});
             this.viewMenuItem.Name = "viewMenuItem";
-            this.viewMenuItem.Size = new System.Drawing.Size(53, 24);
+            this.viewMenuItem.Size = new System.Drawing.Size(44, 20);
             this.viewMenuItem.Text = "&View";
             // 
             // viewScreenSizeMenuItem
@@ -110,46 +153,67 @@
             this.viewScreenSizeX3MenuItem,
             this.viewScreenSizeX4MenuItem});
             this.viewScreenSizeMenuItem.Name = "viewScreenSizeMenuItem";
-            this.viewScreenSizeMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.viewScreenSizeMenuItem.Size = new System.Drawing.Size(139, 22);
             this.viewScreenSizeMenuItem.Text = "Screen &Size";
             // 
             // viewScreenSizeX1MenuItem
             // 
             this.viewScreenSizeX1MenuItem.Name = "viewScreenSizeX1MenuItem";
-            this.viewScreenSizeX1MenuItem.Size = new System.Drawing.Size(102, 26);
+            this.viewScreenSizeX1MenuItem.Size = new System.Drawing.Size(88, 22);
             this.viewScreenSizeX1MenuItem.Text = "×1";
             this.viewScreenSizeX1MenuItem.Click += new System.EventHandler(this.OnViewScreenSizeX1);
             // 
             // viewScreenSizeX2MenuItem
             // 
             this.viewScreenSizeX2MenuItem.Name = "viewScreenSizeX2MenuItem";
-            this.viewScreenSizeX2MenuItem.Size = new System.Drawing.Size(102, 26);
+            this.viewScreenSizeX2MenuItem.Size = new System.Drawing.Size(88, 22);
             this.viewScreenSizeX2MenuItem.Text = "×2";
             this.viewScreenSizeX2MenuItem.Click += new System.EventHandler(this.OnViewScreenSizeX2);
             // 
             // viewScreenSizeX3MenuItem
             // 
             this.viewScreenSizeX3MenuItem.Name = "viewScreenSizeX3MenuItem";
-            this.viewScreenSizeX3MenuItem.Size = new System.Drawing.Size(102, 26);
+            this.viewScreenSizeX3MenuItem.Size = new System.Drawing.Size(88, 22);
             this.viewScreenSizeX3MenuItem.Text = "×3";
             this.viewScreenSizeX3MenuItem.Click += new System.EventHandler(this.OnViewScreenSizeX3);
             // 
             // viewScreenSizeX4MenuItem
             // 
             this.viewScreenSizeX4MenuItem.Name = "viewScreenSizeX4MenuItem";
-            this.viewScreenSizeX4MenuItem.Size = new System.Drawing.Size(102, 26);
+            this.viewScreenSizeX4MenuItem.Size = new System.Drawing.Size(88, 22);
             this.viewScreenSizeX4MenuItem.Text = "×4";
             this.viewScreenSizeX4MenuItem.Click += new System.EventHandler(this.OnViewScreenSizeX4);
+            // 
+            // viewTvAspectMenuItem
+            // 
+            this.viewTvAspectMenuItem.Name = "viewTvAspectMenuItem";
+            this.viewTvAspectMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.viewTvAspectMenuItem.Text = "&TV Aspect";
+            this.viewTvAspectMenuItem.Click += new System.EventHandler(this.OnViewTvAspect);
+            // 
+            // rasterEffectMenuItem
+            // 
+            this.rasterEffectMenuItem.Name = "rasterEffectMenuItem";
+            this.rasterEffectMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.rasterEffectMenuItem.Text = "&Raster Effect";
+            this.rasterEffectMenuItem.Click += new System.EventHandler(this.OnViewRasterEffect);
+            // 
+            // viewMotionBlurMenuItem
+            // 
+            this.viewMotionBlurMenuItem.Name = "viewMotionBlurMenuItem";
+            this.viewMotionBlurMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.viewMotionBlurMenuItem.Text = "Motion &Blur";
+            this.viewMotionBlurMenuItem.Click += new System.EventHandler(this.OnViewMotionBlur);
             // 
             // videoPanel
             // 
             this.videoPanel.Controls.Add(this.statusStrip);
             this.videoPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.videoPanel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.videoPanel.Location = new System.Drawing.Point(0, 28);
+            this.videoPanel.Location = new System.Drawing.Point(0, 24);
             this.videoPanel.Margin = new System.Windows.Forms.Padding(0);
             this.videoPanel.Name = "videoPanel";
-            this.videoPanel.Size = new System.Drawing.Size(512, 480);
+            this.videoPanel.Size = new System.Drawing.Size(512, 484);
             this.videoPanel.TabIndex = 1;
             // 
             // statusStrip
@@ -158,9 +222,9 @@
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.emulatorStatusLabel,
             this.frameRateStatusLabel});
-            this.statusStrip.Location = new System.Drawing.Point(0, 455);
+            this.statusStrip.Location = new System.Drawing.Point(0, 462);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(512, 25);
+            this.statusStrip.Size = new System.Drawing.Size(512, 22);
             this.statusStrip.SizingGrip = false;
             this.statusStrip.TabIndex = 0;
             this.statusStrip.Text = "statusStrip1";
@@ -168,7 +232,7 @@
             // emulatorStatusLabel
             // 
             this.emulatorStatusLabel.Name = "emulatorStatusLabel";
-            this.emulatorStatusLabel.Size = new System.Drawing.Size(453, 20);
+            this.emulatorStatusLabel.Size = new System.Drawing.Size(462, 17);
             this.emulatorStatusLabel.Spring = true;
             this.emulatorStatusLabel.Text = "Status";
             this.emulatorStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -176,7 +240,7 @@
             // frameRateStatusLabel
             // 
             this.frameRateStatusLabel.Name = "frameRateStatusLabel";
-            this.frameRateStatusLabel.Size = new System.Drawing.Size(44, 20);
+            this.frameRateStatusLabel.Size = new System.Drawing.Size(35, 17);
             this.frameRateStatusLabel.Text = "0 FPS";
             this.frameRateStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
@@ -185,67 +249,13 @@
             this.gameTimer.Interval = 50;
             this.gameTimer.Tick += new System.EventHandler(this.OnGameTick);
             // 
-            // viewTvAspectMenuItem
+            // filePropertiesMenuItem
             // 
-            this.viewTvAspectMenuItem.Name = "viewTvAspectMenuItem";
-            this.viewTvAspectMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.viewTvAspectMenuItem.Text = "&TV Aspect";
-            this.viewTvAspectMenuItem.Click += new System.EventHandler(this.OnViewTvAspect);
-            // 
-            // fileOpenMenuItem
-            // 
-            this.fileOpenMenuItem.Image = global::EmuNES.Properties.Resources.FileOpen;
-            this.fileOpenMenuItem.Name = "fileOpenMenuItem";
-            this.fileOpenMenuItem.Size = new System.Drawing.Size(161, 26);
-            this.fileOpenMenuItem.Text = "&Open";
-            this.fileOpenMenuItem.Click += new System.EventHandler(this.OnFileOpen);
-            // 
-            // fileExitMenuItem
-            // 
-            this.fileExitMenuItem.Image = global::EmuNES.Properties.Resources.FileExit;
-            this.fileExitMenuItem.Name = "fileExitMenuItem";
-            this.fileExitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.fileExitMenuItem.Size = new System.Drawing.Size(161, 26);
-            this.fileExitMenuItem.Text = "Exit";
-            this.fileExitMenuItem.Click += new System.EventHandler(this.OnFileExit);
-            // 
-            // gameRunMenuItem
-            // 
-            this.gameRunMenuItem.Image = global::EmuNES.Properties.Resources.GameRun;
-            this.gameRunMenuItem.Name = "gameRunMenuItem";
-            this.gameRunMenuItem.Size = new System.Drawing.Size(120, 26);
-            this.gameRunMenuItem.Text = "&Run";
-            this.gameRunMenuItem.Click += new System.EventHandler(this.OnGameRunPause);
-            // 
-            // gameResetMenuItem
-            // 
-            this.gameResetMenuItem.Image = global::EmuNES.Properties.Resources.GameReset;
-            this.gameResetMenuItem.Name = "gameResetMenuItem";
-            this.gameResetMenuItem.Size = new System.Drawing.Size(120, 26);
-            this.gameResetMenuItem.Text = "Reset";
-            this.gameResetMenuItem.Click += new System.EventHandler(this.OnGameReset);
-            // 
-            // gameStopMenuItem
-            // 
-            this.gameStopMenuItem.Image = global::EmuNES.Properties.Resources.GameStop;
-            this.gameStopMenuItem.Name = "gameStopMenuItem";
-            this.gameStopMenuItem.Size = new System.Drawing.Size(120, 26);
-            this.gameStopMenuItem.Text = "Stop";
-            this.gameStopMenuItem.Click += new System.EventHandler(this.OnGameStop);
-            // 
-            // rasterEffectMenuItem
-            // 
-            this.rasterEffectMenuItem.Name = "rasterEffectMenuItem";
-            this.rasterEffectMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.rasterEffectMenuItem.Text = "&Raster Effect";
-            this.rasterEffectMenuItem.Click += new System.EventHandler(this.OnViewRasterEffect);
-            // 
-            // viewMotionBlurMenuItem
-            // 
-            this.viewMotionBlurMenuItem.Name = "viewMotionBlurMenuItem";
-            this.viewMotionBlurMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.viewMotionBlurMenuItem.Text = "Motion &Blur";
-            this.viewMotionBlurMenuItem.Click += new System.EventHandler(this.OnViewMotionBlur);
+            this.filePropertiesMenuItem.Enabled = false;
+            this.filePropertiesMenuItem.Name = "filePropertiesMenuItem";
+            this.filePropertiesMenuItem.Size = new System.Drawing.Size(156, 26);
+            this.filePropertiesMenuItem.Text = "&Properties...";
+            this.filePropertiesMenuItem.Click += new System.EventHandler(this.OnFileProperties);
             // 
             // MainForm
             // 
@@ -301,6 +311,7 @@
         private System.Windows.Forms.ToolStripMenuItem viewTvAspectMenuItem;
         private System.Windows.Forms.ToolStripMenuItem rasterEffectMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewMotionBlurMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem filePropertiesMenuItem;
     }
 }
 

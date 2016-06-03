@@ -19,6 +19,8 @@ namespace NesCore.Storage
             programBankOffsets[1] = GetProgramBankOffset(-1);
         }
 
+        public string Name { get { return "MMC1"; } }
+
         public Cartridge Cartridge { get; private set; }
 
         public byte this[ushort address]

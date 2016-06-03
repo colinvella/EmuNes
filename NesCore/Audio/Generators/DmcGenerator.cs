@@ -132,15 +132,16 @@ namespace NesCore.Audio.Generators
             if (CurrentLength > 0 && bitCount == 0)
             {
                 // cpu should stall 4 cycles here
-                shiftRegister = ReadMemorySample == null ? (byte)0 : ReadMemorySample(currentAddress++);
+                if (ReadMemorySample != null)
+                   shiftRegister = ReadMemorySample(currentAddress);
 
                 bitCount = 8;
 
+                ++currentAddress;
                 if (currentAddress == 0)
                     currentAddress = 0x8000;
 
                 --CurrentLength;
-
                 if (CurrentLength == 0 && loop)
                     Restart();
             }

@@ -15,7 +15,7 @@ namespace NesCore.Audio.Generators
         {
             set
             {
-                irq = (value & 0x80) == 0x80;
+                InterruptRequestEnabled = (value & 0x80) == 0x80;
                 loop = (value & 0x40) == 0x40;
                 tickPeriod = dmcTable[value & 0x0F];
             }
@@ -55,7 +55,14 @@ namespace NesCore.Audio.Generators
 
         public ushort CurrentLength { get; set; }
 
+        public bool InterruptRequestEnabled { get; private set; }
+
         public ReadMemorySampleHandler ReadMemorySample { get; set; }
+
+        /// <summary>
+        /// Handler for triggering interrupt requests
+        /// </summary>
+        public Action TriggerInterruptRequest { get; set; }
 
         public override void StepTimer()
         {
@@ -101,7 +108,7 @@ namespace NesCore.Audio.Generators
 
             binaryWriter.Write(loop);
 
-            binaryWriter.Write(irq);
+            binaryWriter.Write(InterruptRequestEnabled);
         }
 
         public override void LoadState(BinaryReader binaryReader)
@@ -124,7 +131,7 @@ namespace NesCore.Audio.Generators
 
             loop = binaryReader.ReadBoolean();
 
-            irq = binaryReader.ReadBoolean();
+            InterruptRequestEnabled = binaryReader.ReadBoolean();
         }
 
         private void StepReader()
@@ -142,8 +149,19 @@ namespace NesCore.Audio.Generators
                     currentAddress = 0x8000;
 
                 --CurrentLength;
-                if (CurrentLength == 0 && loop)
-                    Restart();
+
+                if (CurrentLength == 0)
+                {
+                    if (loop)
+                        Restart();
+                    else
+                    {
+                        if (InterruptRequestEnabled)
+                            TriggerInterruptRequest();
+
+                    }
+
+                }
             }
         }
 
@@ -182,8 +200,6 @@ namespace NesCore.Audio.Generators
         private byte tickValue;
 
         private bool loop;
-
-        private bool irq;
 
         private static readonly byte[] dmcTable = {
             214, 190, 170, 160, 143, 127, 113, 107, 95, 80, 71, 64, 53, 42, 36, 27,

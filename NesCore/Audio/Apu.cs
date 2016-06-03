@@ -75,7 +75,7 @@ namespace NesCore.Audio
                 {
                     Dmc.CurrentLength = 0;
                 }
-                else
+                else // DMC enabled
                 {
                     if (Dmc.CurrentLength == 0)
                         Dmc.Restart();

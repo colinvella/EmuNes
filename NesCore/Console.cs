@@ -47,6 +47,7 @@ namespace NesCore
 
             // wire IRQ between audio and processor
             Audio.TriggerInterruptRequest = () => Processor.TriggerInterruptRequest();
+            Audio.Dmc.TriggerInterruptRequest = () => Processor.TriggerInterruptRequest();
 
             // connect default first controller
             ConnectControllerOne(new Joypad());

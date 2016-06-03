@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -218,20 +219,21 @@ namespace EmuNES
             switch (gameState)
             {
                 case GameState.Stopped:
-                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    graphics.InterpolationMode = InterpolationMode.Low;
                     graphics.DrawImage(Properties.Resources.Background, 0, 0, videoPanel.Width, videoPanel.Height);
                     break;
                 case GameState.Paused:
-                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    graphics.InterpolationMode = InterpolationMode.Low;
                     graphics.DrawImage(Properties.Resources.Background, 0, 0, videoPanel.Width, videoPanel.Height);
                     graphics.DrawImage(bitmapBuffer.Bitmap, 0, bufferSize.Height / 2, bufferSize.Width / 2, bufferSize.Height / 2);
                     break;
                 case GameState.Running:
                     if (rasterEffect)
                     {
-                        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        graphics.InterpolationMode = InterpolationMode.Low;
                         graphics.DrawImage(bitmapBuffer.Bitmap, 0, 0, bufferSize.Width, bufferSize.Height);
-                        graphics.DrawImage(Properties.Resources.Filter, 0, 0, bufferSize.Width, bufferSize.Height);
+                        graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                        graphics.DrawImage(resizedRasterFilter, 0, 0);
                     }
                     else
                     {
@@ -387,6 +389,8 @@ namespace EmuNES
             Width = bufferSize.Width + applicationMargin.Width;
             Height = bufferSize.Height + applicationMargin.Height;
 
+            resizedRasterFilter = ResizeImage(Properties.Resources.Filter, bufferSize.Width, bufferSize.Height);
+
             viewScreenSizeX1MenuItem.Checked = newScreenSize == 1;
             viewScreenSizeX2MenuItem.Checked = newScreenSize == 2;
             viewScreenSizeX3MenuItem.Checked = newScreenSize == 3;
@@ -407,6 +411,28 @@ namespace EmuNES
             viewMotionBlurMenuItem.Checked = motionBlur;
         }
 
+        private Bitmap ResizeImage(Image image, int width, int height)
+        {
+            Rectangle destRect = new Rectangle(0, 0, width, height);
+            Bitmap destImage = new Bitmap(width, height);
+
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (Graphics graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                using (ImageAttributes wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
+        }
 
         public NesCore.Console Console { get; private set; }
 
@@ -414,6 +440,8 @@ namespace EmuNES
         private FastBitmap bitmapBuffer;
         private GameState gameState;
         private DateTime gameTickDateTime;
+
+        private Image resizedRasterFilter;
 
         // frame rate handling
         private DateTime frameDateTime;

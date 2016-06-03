@@ -93,16 +93,6 @@ namespace EmuNES.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Filter {
-            get {
-                object obj = ResourceManager.GetObject("Filter", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap GamePause {
             get {
                 object obj = ResourceManager.GetObject("GamePause", resourceCulture);
@@ -136,6 +126,16 @@ namespace EmuNES.Properties {
         internal static System.Drawing.Bitmap GameStop {
             get {
                 object obj = ResourceManager.GetObject("GameStop", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap RasterFilter {
+            get {
+                object obj = ResourceManager.GetObject("RasterFilter", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

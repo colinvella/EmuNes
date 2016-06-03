@@ -49,7 +49,7 @@ namespace EmuNES
             bitmapBuffer = new FastBitmap(256, 240);
 
             waveOut = new WaveOut();
-            waveOut.DesiredLatency = 64;
+            waveOut.DesiredLatency = 100;
 
             apuAudioProvider = new ApuAudioProvider();
             waveOut.Init(apuAudioProvider);
@@ -406,7 +406,8 @@ namespace EmuNES
             Width = bufferSize.Width + applicationMargin.Width;
             Height = bufferSize.Height + applicationMargin.Height;
 
-            resizedRasterFilter = ResizeImage(Properties.Resources.Filter, bufferSize.Width, bufferSize.Height);
+            // create resized version of raster filter to optimise rendering
+            resizedRasterFilter = ResizeImage(Properties.Resources.RasterFilter, bufferSize.Width, bufferSize.Height);
 
             viewScreenSizeX1MenuItem.Checked = newScreenSize == 1;
             viewScreenSizeX2MenuItem.Checked = newScreenSize == 2;

@@ -98,7 +98,7 @@
     <Content Include="Resources\GamePause.png" />
     <None Include="Resources\FileOpen.png" />
     <Content Include="Resources\GameReset.png" />
-    <None Include="Resources\Filter.png" />
+    <None Include="Resources\RasterFilter.png" />
     <Content Include="Resources\Background.png" />
     <Content Include="Resources\Nes.ico" />
   </ItemGroup>

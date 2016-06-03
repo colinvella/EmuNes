@@ -89,13 +89,6 @@ namespace NesCore.Audio
             {
                 framePeriod = (byte)(4 + (value >> 7) & 1);
                 frameIrq = ((value >> 6) & 1) == 0;
-
-                if (framePeriod == 5)
-                {
-                    StepEnvelope();
-                    StepSweep();
-                    StepLength();
-                }
             }
         }
 

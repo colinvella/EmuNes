@@ -314,24 +314,18 @@ namespace EmuNES
         {
             Console.Audio.SampleRate = 44100;
 
-            //BinaryWriter bw = new BinaryWriter(new FileStream(Application.StartupPath + "\\audio.bin", FileMode.OpenOrCreate, FileAccess.Write));
-
-            float[] sampleBuffer = new float[512];
+            float[] outputBuffer = new float[512];
             int writeIndex = 0;
 
             Console.Audio.WriteSample = (sampleValue) =>
             {
-                sampleBuffer[writeIndex++] = sampleValue;
-                writeIndex %= sampleBuffer.Length;
+                // fill buffer
+                outputBuffer[writeIndex++] = sampleValue;
+                writeIndex %= outputBuffer.Length;
 
+                // when buffer full, send to wave provider
                 if (writeIndex == 0)
-                    apuAudioProvider.Queue(sampleBuffer);
-              
-                //bw.Write(sampleValue);
-                //bw.Flush();
-                //System.Console.WriteLine(i + ": " + sampleValue);
-                //++i;
-                //apuAudioProvider.Queue(sampleValue);
+                    apuAudioProvider.Queue(outputBuffer);
             };
         }
 

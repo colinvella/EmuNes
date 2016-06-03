@@ -19,7 +19,7 @@ namespace NesCore.Audio.Generators
             set
             {
                 LengthEnabled = ((value >> 5) & 1) == 0;
-                EnvelopeLoop = ((value >> 5) & 1) == 1;
+                EnvelopeLoop = !LengthEnabled;
                 EnvelopeEnabled = ((value >> 4) & 1) == 0;
                 EnvelopePeriod = ConstantVolume = (byte)(value & 15);
                 EnvelopeStart = true;

@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -80,7 +81,7 @@ namespace EmuNES
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = Application.ExecutablePath;
-            openFileDialog.Filter = "NES ROM files (*.nes)|*.nes|All files (*.*)|*.*";
+            openFileDialog.Filter = "NES ROM files (*.nes)|*.nes|ZIP files (*.zip)|*.zip|All files (*.*)|*.*";
             openFileDialog.FilterIndex = 1;
             openFileDialog.RestoreDirectory = true;
             openFileDialog.Title = "Open Game ROM";
@@ -365,7 +366,9 @@ namespace EmuNES
         {
             try
             {
-                BinaryReader romBinaryReader = new BinaryReader(new FileStream(cartridgeRomPath, FileMode.Open));
+                Stream cartridgeRomStream = GetCartridgeRomStream(cartridgeRomPath);
+
+                BinaryReader romBinaryReader = new BinaryReader(cartridgeRomStream);
                 this.cartridge = new Cartridge(romBinaryReader);
                 romBinaryReader.Close();
                 Console.LoadCartridge(cartridge);
@@ -383,6 +386,39 @@ namespace EmuNES
             {
                 MessageBox.Show(this, "Unable to load cartridge rom. Reason: " + exception.Message, "Open Game ROM", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        /// <summary>
+        /// Tries to get a stream to a cartridge rom file using the given path.
+        /// If the file is a ZIP archive, the a stream to the first NES file is
+        /// returned.
+        /// </summary>
+        /// <param name="cartridgeRomPath">Path to NES or ZIP file</param>
+        /// <returns></returns>
+        private Stream GetCartridgeRomStream(string cartridgeRomPath)
+        {
+            Stream cartridgeRomStream = null;
+
+            if (Path.GetExtension(cartridgeRomPath).ToLower() == ".zip")
+            {
+                Stream zipStream = new FileStream(cartridgeRomPath, FileMode.Open);
+                ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Read);
+
+                // find first nes file
+                foreach (ZipArchiveEntry entry in zipArchive.Entries)
+                {
+                    if (entry.FullName.EndsWith(".nes", StringComparison.OrdinalIgnoreCase))
+                    {
+                        cartridgeRomStream = entry.Open();
+                        break;
+                    }
+                }
+            }
+
+            if (cartridgeRomStream == null)
+                cartridgeRomStream = new FileStream(cartridgeRomPath, FileMode.Open);
+
+            return cartridgeRomStream;
         }
 
         private void SetScreenSize(byte newScreenSize)

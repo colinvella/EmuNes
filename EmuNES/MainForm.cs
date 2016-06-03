@@ -49,7 +49,7 @@ namespace EmuNES
             bitmapBuffer = new FastBitmap(256, 240);
 
             waveOut = new WaveOut();
-            waveOut.DesiredLatency = 100;
+            waveOut.DesiredLatency = 64;
 
             apuAudioProvider = new ApuAudioProvider();
             waveOut.Init(apuAudioProvider);

@@ -59,9 +59,10 @@ namespace EmuNES
         private void OnFormLoad(object sender, EventArgs eventArgs)
         {
             applicationMargin = new Size(Width - videoPanel.Width, Height - videoPanel.Height);
-            SetScreenSizeAndAspect(1, true);
+            SetScreen(1, true);
             SetRasterEffect(false);
             SetMotionBlur(false);
+            viewScreenSizeFullScreenMenuItem.ShortcutKeys = Keys.Alt | Keys.Enter;
 
 #if DEBUG
             gameTimer.Interval = 20;
@@ -81,7 +82,7 @@ namespace EmuNES
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = Application.ExecutablePath;
-            openFileDialog.Filter = "NES ROM files (*.nes)|*.nes|ZIP files (*.zip)|*.zip|All files (*.*)|*.*";
+            openFileDialog.Filter = "NES ROM files (*.nes, *.zip)|*.nes;*.zip|All files (*.*)|*.*";
             openFileDialog.FilterIndex = 1;
             openFileDialog.RestoreDirectory = true;
             openFileDialog.Title = "Open Game ROM";
@@ -186,6 +187,11 @@ namespace EmuNES
             SetScreenSize(4);
         }
 
+        private void OnViewScreenSizeFullScreen(object sender, EventArgs e)
+        {
+            SetFullScreen(!fullScreen);
+        }
+
         private void OnViewTvAspect(object sender, EventArgs eventArgs)
         {
             SetTvAspect(!tvAspect);
@@ -231,12 +237,13 @@ namespace EmuNES
         private void OnVideoPanelPaint(object sender, PaintEventArgs paintEventArgs)
         {
             Graphics graphics = paintEventArgs.Graphics;
+            int leftCenteredMargin = (videoPanel.Width - bufferSize.Width) / 2;
 
             switch (gameState)
             {
                 case GameState.Stopped:
-                    graphics.InterpolationMode = InterpolationMode.Low;
-                    graphics.DrawImage(Properties.Resources.Background, 0, 0, videoPanel.Width, videoPanel.Height);
+                    //graphics.InterpolationMode = InterpolationMode.Low;
+                    //graphics.DrawImage(Properties.Resources.Background, 0, 0, videoPanel.Width, videoPanel.Height);
                     break;
                 case GameState.Paused:
                     graphics.InterpolationMode = InterpolationMode.Low;
@@ -247,14 +254,14 @@ namespace EmuNES
                     if (rasterEffect)
                     {
                         graphics.InterpolationMode = InterpolationMode.Low;
-                        graphics.DrawImage(bitmapBuffer.Bitmap, 0, 0, bufferSize.Width, bufferSize.Height);
+                        graphics.DrawImage(bitmapBuffer.Bitmap, leftCenteredMargin, 0, bufferSize.Width, bufferSize.Height);
                         graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-                        graphics.DrawImage(resizedRasterFilter, 0, 0);
+                        graphics.DrawImage(resizedRasterFilter, leftCenteredMargin, 0);
                     }
                     else
                     {
                         graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-                        graphics.DrawImage(bitmapBuffer.Bitmap, 0, 0, bufferSize.Width, bufferSize.Height);
+                        graphics.DrawImage(bitmapBuffer.Bitmap, leftCenteredMargin, 0, bufferSize.Width, bufferSize.Height);
                     }
                     break;
             }
@@ -426,16 +433,19 @@ namespace EmuNES
 
         private void SetScreenSize(byte newScreenSize)
         {
-            SetScreenSizeAndAspect(newScreenSize, tvAspect);
+            SetScreen(newScreenSize, tvAspect);
         }
 
         private void SetTvAspect(bool newTvAspect)
         {
-            SetScreenSizeAndAspect(screenSize, newTvAspect);
+            SetScreen(screenSize, newTvAspect);
         }
 
-        private void SetScreenSizeAndAspect(byte newScreenSize, bool newTvAspect)
+        private void SetScreen(byte newScreenSize, bool newTvAspect)
         {
+            if (fullScreen)
+                SetFullScreen(false);
+
             screenSize = newScreenSize;
             tvAspect = newTvAspect;
 
@@ -454,6 +464,34 @@ namespace EmuNES
             viewScreenSizeX4MenuItem.Checked = newScreenSize == 4;
             viewTvAspectMenuItem.Checked = tvAspect;
             videoPanel.Invalidate();
+        }
+
+        private void SetFullScreen(bool fullScreen)
+        {
+            this.fullScreen = fullScreen;
+            if (fullScreen)
+            {
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.MainMenuStrip.Hide();
+                this.statusStrip.Hide();
+                this.Left = this.Top = 0;
+                int screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
+                int screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
+
+                this.Width = screenWidth;
+                this.Height = screenHeight;
+                bufferSize.Width = screenHeight * 282 / 256;
+                bufferSize.Height = screenHeight + 1;
+                this.resizedRasterFilter = ResizeImage(Properties.Resources.RasterFilter,
+                    bufferSize.Width, bufferSize.Height);
+            }
+            else
+            {
+                this.FormBorderStyle = FormBorderStyle.FixedSingle;
+                this.MainMenuStrip.Show();
+                this.statusStrip.Show();
+                SetScreen(screenSize, tvAspect);
+            }
         }
         
         private void SetRasterEffect(bool newRasterEffect)
@@ -511,6 +549,7 @@ namespace EmuNES
         private Size applicationMargin;
         private Size bufferSize;
         private byte screenSize;
+        private bool fullScreen;
         private bool tvAspect;
         private bool rasterEffect;
         private bool motionBlur;

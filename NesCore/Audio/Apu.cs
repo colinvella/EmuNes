@@ -89,6 +89,16 @@ namespace NesCore.Audio
             {
                 framePeriod = (byte)(4 + ((value >> 7) & 1));
                 frameIrq = ((value >> 6) & 1) == 0;
+
+                // if bit 7 set, should clock all generators to 0
+                if (framePeriod == 5)
+                {
+                    Pulse1.LengthValue = 0;
+                    Pulse2.LengthValue = 0;
+                    Triangle.LengthValue = 0;
+                    Noise.LengthValue = 0;
+                    Dmc.CurrentLength = 0;
+                }
             }
         }
 

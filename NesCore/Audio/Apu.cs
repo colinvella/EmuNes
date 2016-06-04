@@ -229,7 +229,8 @@ namespace NesCore.Audio
                 {
                     StepSweep();
                     StepLength();
-                    TriggerInterruptRequest?.Invoke();
+                    if (frameIrq)
+                        TriggerInterruptRequest?.Invoke();
                 }
             } else if (framePeriod == 5)
             {

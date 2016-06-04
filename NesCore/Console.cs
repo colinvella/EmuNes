@@ -242,7 +242,7 @@ namespace NesCore
             Memory.ConfigureMemoryWrite(0x400C, (address, value) => Audio.Noise.Control = value);
 
             // $400E APU Noise Period
-            Memory.ConfigureMemoryWrite(0x400E, (address, value) => Audio.Noise.Period = value);
+            Memory.ConfigureMemoryWrite(0x400E, (address, value) => Audio.Noise.ModeAndPeriod = value);
 
             // $400F APU Noise Length
             Memory.ConfigureMemoryWrite(0x400F, (address, value) => Audio.Noise.Length = value);

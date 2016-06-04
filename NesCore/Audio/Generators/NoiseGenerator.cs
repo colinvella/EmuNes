@@ -43,7 +43,7 @@ namespace NesCore.Audio.Generators
             }
         }
 
-        public byte Period
+        public byte ModeAndPeriod
         {
             set
             {

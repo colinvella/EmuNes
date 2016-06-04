@@ -267,14 +267,17 @@ namespace EmuNES
                 case GameState.Stopped:
                     gameRunMenuItem.Text = "&Run";
                     gameRunMenuItem.Image = Properties.Resources.GameRun;
+                    gameRunMenuItem.ShortcutKeys = Keys.Control | Keys.R;
                     break;
                 case GameState.Running:
                     gameRunMenuItem.Text = "&Pause";
                     gameRunMenuItem.Image = Properties.Resources.GamePause;
+                    gameRunMenuItem.ShortcutKeys = Keys.Control | Keys.P;
                     break;
                 case GameState.Paused:
                     gameRunMenuItem.Text = "&Resume";
                     gameRunMenuItem.Image = Properties.Resources.GameRun;
+                    gameRunMenuItem.ShortcutKeys = Keys.Control | Keys.R;
                     break;
             }
             gameStopMenuItem.Enabled = gameState != GameState.Stopped;

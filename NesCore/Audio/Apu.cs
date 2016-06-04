@@ -87,7 +87,7 @@ namespace NesCore.Audio
         {
             set
             {
-                framePeriod = (byte)(4 + (value >> 7) & 1);
+                framePeriod = (byte)(4 + ((value >> 7) & 1));
                 frameIrq = ((value >> 6) & 1) == 0;
             }
         }

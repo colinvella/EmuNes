@@ -276,6 +276,9 @@ namespace NesCore
             // $4015 APU Control/Status
             Memory.ConfigureMemoryAccess(0x4015, (address) => Audio.Status, (address, value) => Audio.Control = value);
 
+            // $4017 APU Frame Counter (write only)
+            Memory.ConfigureMemoryWrite(0x4017, (address, value) => Audio.FrameCounter = value);
+
             // $4020-$FFFF Cartridge space: PRG ROM, PRG RAM, and mapper registers - done when cartridge loaded
         }
 
@@ -284,7 +287,8 @@ namespace NesCore
             if (portAddress != 0x4016 && portAddress != 0x4017)
                 throw new ArgumentOutOfRangeException("portAddress", portAddress, "Allowed port addresses are $4016 ans $4017");
             Memory.ConfigureMemoryRead(portAddress, (address) => controller.Port);
-            Memory.ConfigureMemoryWrite(portAddress, (address, value) => controller.Port = value);
+            // second controller writes still happen on $4016, not $4017
+            Memory.ConfigureMemoryWrite(0x4016, (address, value) => controller.Port = value);
         }
 
         private long allocatedCycles;

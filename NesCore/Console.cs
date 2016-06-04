@@ -287,24 +287,8 @@ namespace NesCore
             Memory.ConfigureMemoryWrite(portAddress, (address, value) => controller.Port = value);
         }
 
-        private ushort MirrorAddress(byte mode, ushort address)
-        {
-            address = (ushort)((address - 0x2000) % 0x1000);
-            int table = address / 0x0400;
-            int offset = address % 0x0400;
-            return (ushort)(0x2000 + mirrorLookup[mode][table] * 0x0400 + offset);
-        }
-
         private long allocatedCycles;
 
         private const uint MemorySize = ushort.MaxValue + 1;
-
-        private static readonly ushort[][] mirrorLookup = {
-            new ushort[]{0, 0, 1, 1},
-            new ushort[]{0, 1, 0, 1},
-            new ushort[]{0, 0, 0, 0},
-            new ushort[]{1, 1, 1, 1},
-            new ushort[]{0, 1, 2, 3}
-        };
     }
 }

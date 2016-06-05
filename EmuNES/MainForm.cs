@@ -523,7 +523,7 @@ namespace EmuNES
             {
                 graphics.CompositingMode = CompositingMode.SourceCopy;
                 graphics.CompositingQuality = CompositingQuality.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.InterpolationMode = InterpolationMode.Low;
 
                 using (ImageAttributes wrapMode = new ImageAttributes())
                 {

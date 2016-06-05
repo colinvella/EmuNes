@@ -468,9 +468,13 @@ namespace EmuNES
 
         private void SetFullScreen(bool fullScreen)
         {
+            if (this.fullScreen == fullScreen)
+                return;
+
             this.fullScreen = fullScreen;
             if (fullScreen)
             {
+                this.windowModePosition = new Point(this.Left, this.Top);
                 this.FormBorderStyle = FormBorderStyle.None;
                 this.MainMenuStrip.Hide();
                 this.statusStrip.Hide();
@@ -491,6 +495,8 @@ namespace EmuNES
                 this.MainMenuStrip.Show();
                 this.statusStrip.Show();
                 SetScreen(screenSize, tvAspect);
+                this.Left = windowModePosition.X;
+                this.Top = windowModePosition.Y;
             }
         }
         
@@ -550,6 +556,7 @@ namespace EmuNES
         private Size bufferSize;
         private byte screenSize;
         private bool fullScreen;
+        private Point windowModePosition;
         private bool tvAspect;
         private bool rasterEffect;
         private bool motionBlur;

@@ -239,6 +239,7 @@ namespace EmuNES
             Graphics graphics = paintEventArgs.Graphics;
             int leftCenteredMargin = (videoPanel.Width - bufferSize.Width) / 2;
 
+            graphics.InterpolationMode = InterpolationMode.Low;
             switch (gameState)
             {
                 case GameState.Stopped:
@@ -246,14 +247,13 @@ namespace EmuNES
                     //graphics.DrawImage(Properties.Resources.Background, 0, 0, videoPanel.Width, videoPanel.Height);
                     break;
                 case GameState.Paused:
-                    graphics.InterpolationMode = InterpolationMode.Low;
-                    graphics.DrawImage(Properties.Resources.Background, 0, 0, videoPanel.Width, videoPanel.Height);
-                    graphics.DrawImage(bitmapBuffer.Bitmap, 0, bufferSize.Height / 2, bufferSize.Width / 2, bufferSize.Height / 2);
+                    graphics.DrawImage(bitmapBuffer.Bitmap, leftCenteredMargin, 0, bufferSize.Width, bufferSize.Height);
+                    graphics.FillRectangle(new SolidBrush(Color.FromArgb(192, Color.Black)), leftCenteredMargin, 0, bufferSize.Width, bufferSize.Height);
+                    DrawCenteredText(graphics, "Paused");
                     break;
                 case GameState.Running:
                     if (rasterEffect)
                     {
-                        graphics.InterpolationMode = InterpolationMode.Low;
                         graphics.DrawImage(bitmapBuffer.Bitmap, leftCenteredMargin, 0, bufferSize.Width, bufferSize.Height);
                         graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                         graphics.DrawImage(resizedRasterFilter, leftCenteredMargin, 0);
@@ -265,6 +265,22 @@ namespace EmuNES
                     }
                     break;
             }
+        }
+
+        private void DrawCenteredText(Graphics graphics, string text)
+        {
+            //Font font = new Font(this.Font.FontFamily, this.Font.Size * 2);
+            Font font = new Font(this.Font.FontFamily, videoPanel.Height / 10, GraphicsUnit.Pixel);
+            SizeF textSize = graphics.MeasureString(text, font);
+            float textX = (videoPanel.Width - textSize.Width) / 2;
+            float textY = (videoPanel.Height - this.Font.GetHeight(graphics)) / 2;
+
+            graphics.DrawString(text, font, Brushes.Black, textX - 1, textY);
+            graphics.DrawString(text, font, Brushes.Black, textX + 1, textY);
+            graphics.DrawString(text, font, Brushes.Black, textX, textY - 1);
+            graphics.DrawString(text, font, Brushes.Black, textX, textY + 1);
+
+            graphics.DrawString(text, font, Brushes.White, textX, textY);
         }
 
         private void UpdateGameMenuItems()

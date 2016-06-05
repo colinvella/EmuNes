@@ -418,53 +418,54 @@ namespace NesCore.Video
         /// <summary>
         /// Saves the state of the PPU
         /// </summary>
-        /// <param name="streamWriter"></param>
-        public void Save(StreamWriter streamWriter)
+        /// <param name="binaryWriter"></param>
+        public void SaveState(BinaryWriter binaryWriter)
         {
-            streamWriter.Write(cycle);
-            streamWriter.Write(scanLine);
-            streamWriter.Write(paletteData);
-            streamWriter.Write(nameTableData);
-            streamWriter.Write(oamData);
-            streamWriter.Write(vramAddress);
-            streamWriter.Write(tempAddress);
-            streamWriter.Write(scrollX);
-            streamWriter.Write(writeToggle);
-            streamWriter.Write(evenFrame);
-            streamWriter.Write(nmiOccurred);
-            streamWriter.Write(nmiOutput);
-            streamWriter.Write(nmiPrevious);
-            streamWriter.Write(nmiDelay);
-            streamWriter.Write(nameTableByte);
-            streamWriter.Write(attributeTableByte);
-            streamWriter.Write(lowTileByte);
-            streamWriter.Write(highTileByte);
-            streamWriter.Write(tileData);
-            streamWriter.Write(spriteCount);
-            streamWriter.Write(sprites);
-            streamWriter.Write(nameTable);
-            streamWriter.Write(vramIncrement);
-            streamWriter.Write(spritePatternTable);
-            streamWriter.Write(backgroundPatternTableAddress);
-            streamWriter.Write(spriteSize);
-            streamWriter.Write(masterSlave);
-            streamWriter.Write(grayscale);
-            streamWriter.Write(showLeftBackground);
-            streamWriter.Write(showLeftSprites);
-            streamWriter.Write(showBackground);
-            streamWriter.Write(showSprites);
-            streamWriter.Write(tint);
-            streamWriter.Write(spriteZeroHit);
-            streamWriter.Write(spriteOverflow);
-	        streamWriter.Write(oamAddress);
-	        streamWriter.Write(bufferedData);
+            binaryWriter.Write(cycle);
+            binaryWriter.Write(scanLine);
+            binaryWriter.Write(paletteData);
+            binaryWriter.Write(nameTableData);
+            binaryWriter.Write(oamData);
+            binaryWriter.Write(vramAddress);
+            binaryWriter.Write(tempAddress);
+            binaryWriter.Write(scrollX);
+            binaryWriter.Write((byte)writeToggle);
+            binaryWriter.Write(evenFrame);
+            binaryWriter.Write(nmiOccurred);
+            binaryWriter.Write(nmiOutput);
+            binaryWriter.Write(nmiPrevious);
+            binaryWriter.Write(nmiDelay);
+            binaryWriter.Write(nameTableByte);
+            binaryWriter.Write(attributeTableByte);
+            binaryWriter.Write(lowTileByte);
+            binaryWriter.Write(highTileByte);
+            binaryWriter.Write(tileData);
+            binaryWriter.Write(spriteCount);
+            for (int spriteIndex = 0; spriteIndex < spriteCount; spriteIndex++)
+                sprites[spriteIndex].SaveState(binaryWriter);
+            binaryWriter.Write(nameTable);
+            binaryWriter.Write((byte)vramIncrement);
+            binaryWriter.Write(spritePatternTable);
+            binaryWriter.Write(backgroundPatternTableAddress);
+            binaryWriter.Write((byte)spriteSize);
+            binaryWriter.Write(masterSlave);
+            binaryWriter.Write(grayscale);
+            binaryWriter.Write(showLeftBackground);
+            binaryWriter.Write(showLeftSprites);
+            binaryWriter.Write(showBackground);
+            binaryWriter.Write(showSprites);
+            binaryWriter.Write(tint);
+            binaryWriter.Write(spriteZeroHit);
+            binaryWriter.Write(spriteOverflow);
+	        binaryWriter.Write(oamAddress);
+	        binaryWriter.Write(bufferedData);
         }
 
         /// <summary>
         /// Restores the state of the PPU
         /// </summary>
-        /// <param name="streamReader"></param>
-        public void Load(StreamReader streamReader)
+        /// <param name="binaryReader"></param>
+        public void LoadState(BinaryReader binaryReader)
         {
             throw new NotImplementedException();
         }
@@ -654,7 +655,7 @@ namespace NesCore.Video
 
 	        for (int index = 0; index < spriteCount; index++)
             {
-                int offset = (cycle - 1) - sprites[index].Position;
+                int offset = (cycle - 1) - sprites[index].PositionX;
                 if (offset < 0 || offset > 7)
                     continue;
 
@@ -823,7 +824,7 @@ namespace NesCore.Video
                 if (count < 8)
                 {
                     sprites[count].Pattern = FetchSpritePattern(index, row);
-                    sprites[count].Position = spriteX;
+                    sprites[count].PositionX = spriteX;
                     sprites[count].Priority = (byte)((spriteAttributes >> 5) & 1);
                     sprites[count].Index = (byte)index;
                 }

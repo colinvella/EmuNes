@@ -45,6 +45,8 @@
             this.viewScreenSizeX2MenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewScreenSizeX3MenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewScreenSizeX4MenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewScreenSizeSeparator = new System.Windows.Forms.ToolStripSeparator();
+            this.viewScreenSizeFullScreenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewTvAspectMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rasterEffectMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewMotionBlurMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,8 +55,6 @@
             this.emulatorStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.frameRateStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.gameTimer = new System.Windows.Forms.Timer(this.components);
-            this.viewScreenSizeSeparator = new System.Windows.Forms.ToolStripSeparator();
-            this.viewScreenSizeFullScreenMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.videoPanel.SuspendLayout();
             this.statusStrip.SuspendLayout();
@@ -88,7 +88,7 @@
             // 
             this.fileOpenMenuItem.Image = global::EmuNES.Properties.Resources.FileOpen;
             this.fileOpenMenuItem.Name = "fileOpenMenuItem";
-            this.fileOpenMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.fileOpenMenuItem.Size = new System.Drawing.Size(161, 26);
             this.fileOpenMenuItem.Text = "&Open";
             this.fileOpenMenuItem.Click += new System.EventHandler(this.OnFileOpen);
             // 
@@ -96,7 +96,7 @@
             // 
             this.filePropertiesMenuItem.Enabled = false;
             this.filePropertiesMenuItem.Name = "filePropertiesMenuItem";
-            this.filePropertiesMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.filePropertiesMenuItem.Size = new System.Drawing.Size(161, 26);
             this.filePropertiesMenuItem.Text = "&Properties...";
             this.filePropertiesMenuItem.Click += new System.EventHandler(this.OnFileProperties);
             // 
@@ -105,7 +105,7 @@
             this.fileExitMenuItem.Image = global::EmuNES.Properties.Resources.FileExit;
             this.fileExitMenuItem.Name = "fileExitMenuItem";
             this.fileExitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.fileExitMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.fileExitMenuItem.Size = new System.Drawing.Size(161, 26);
             this.fileExitMenuItem.Text = "Exit";
             this.fileExitMenuItem.Click += new System.EventHandler(this.OnFileExit);
             // 
@@ -124,7 +124,7 @@
             // 
             this.gameRunMenuItem.Image = global::EmuNES.Properties.Resources.GameRun;
             this.gameRunMenuItem.Name = "gameRunMenuItem";
-            this.gameRunMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.gameRunMenuItem.Size = new System.Drawing.Size(166, 26);
             this.gameRunMenuItem.Text = "&Run";
             this.gameRunMenuItem.Click += new System.EventHandler(this.OnGameRunPause);
             // 
@@ -132,7 +132,7 @@
             // 
             this.gameResetMenuItem.Image = global::EmuNES.Properties.Resources.GameReset;
             this.gameResetMenuItem.Name = "gameResetMenuItem";
-            this.gameResetMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.gameResetMenuItem.Size = new System.Drawing.Size(166, 26);
             this.gameResetMenuItem.Text = "Reset";
             this.gameResetMenuItem.Click += new System.EventHandler(this.OnGameReset);
             // 
@@ -141,7 +141,7 @@
             this.gameStopMenuItem.Image = global::EmuNES.Properties.Resources.GameStop;
             this.gameStopMenuItem.Name = "gameStopMenuItem";
             this.gameStopMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
-            this.gameStopMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.gameStopMenuItem.Size = new System.Drawing.Size(166, 26);
             this.gameStopMenuItem.Text = "Stop";
             this.gameStopMenuItem.Click += new System.EventHandler(this.OnGameStop);
             // 
@@ -201,6 +201,19 @@
             this.viewScreenSizeX4MenuItem.Text = "×4";
             this.viewScreenSizeX4MenuItem.Click += new System.EventHandler(this.OnViewScreenSizeX4);
             // 
+            // viewScreenSizeSeparator
+            // 
+            this.viewScreenSizeSeparator.Name = "viewScreenSizeSeparator";
+            this.viewScreenSizeSeparator.Size = new System.Drawing.Size(198, 6);
+            // 
+            // viewScreenSizeFullScreenMenuItem
+            // 
+            this.viewScreenSizeFullScreenMenuItem.Name = "viewScreenSizeFullScreenMenuItem";
+            this.viewScreenSizeFullScreenMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.E)));
+            this.viewScreenSizeFullScreenMenuItem.Size = new System.Drawing.Size(201, 26);
+            this.viewScreenSizeFullScreenMenuItem.Text = "Full Screen";
+            this.viewScreenSizeFullScreenMenuItem.Click += new System.EventHandler(this.OnViewScreenSizeFullScreen);
+            // 
             // viewTvAspectMenuItem
             // 
             this.viewTvAspectMenuItem.Name = "viewTvAspectMenuItem";
@@ -227,7 +240,7 @@
             // 
             // videoPanel
             // 
-            this.videoPanel.BackgroundImage = global::EmuNES.Properties.Resources.Background;
+            this.videoPanel.BackColor = System.Drawing.Color.Black;
             this.videoPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.videoPanel.Controls.Add(this.statusStrip);
             this.videoPanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -240,6 +253,7 @@
             // 
             // statusStrip
             // 
+            this.statusStrip.BackColor = System.Drawing.SystemColors.Control;
             this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.emulatorStatusLabel,
@@ -254,7 +268,7 @@
             // emulatorStatusLabel
             // 
             this.emulatorStatusLabel.Name = "emulatorStatusLabel";
-            this.emulatorStatusLabel.Size = new System.Drawing.Size(453, 20);
+            this.emulatorStatusLabel.Size = new System.Drawing.Size(414, 20);
             this.emulatorStatusLabel.Spring = true;
             this.emulatorStatusLabel.Text = "Status";
             this.emulatorStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -270,19 +284,6 @@
             // 
             this.gameTimer.Interval = 50;
             this.gameTimer.Tick += new System.EventHandler(this.OnGameTick);
-            // 
-            // viewScreenSizeSeparator
-            // 
-            this.viewScreenSizeSeparator.Name = "viewScreenSizeSeparator";
-            this.viewScreenSizeSeparator.Size = new System.Drawing.Size(198, 6);
-            // 
-            // viewScreenSizeFullScreenMenuItem
-            // 
-            this.viewScreenSizeFullScreenMenuItem.Name = "viewScreenSizeFullScreenMenuItem";
-            this.viewScreenSizeFullScreenMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.E)));
-            this.viewScreenSizeFullScreenMenuItem.Size = new System.Drawing.Size(201, 26);
-            this.viewScreenSizeFullScreenMenuItem.Text = "Full Screen";
-            this.viewScreenSizeFullScreenMenuItem.Click += new System.EventHandler(this.OnViewScreenSizeFullScreen);
             // 
             // MainForm
             // 

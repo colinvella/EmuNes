@@ -280,6 +280,7 @@
             // 
             // gameTimer
             // 
+            this.gameTimer.Enabled = true;
             this.gameTimer.Interval = 50;
             this.gameTimer.Tick += new System.EventHandler(this.OnGameTick);
             // 

@@ -122,13 +122,11 @@ namespace EmuNES
                     gameTickDateTime = DateTime.Now;
                     averageDeltaTime = 1.0 / 60.0;
                     gameState = GameState.Running;
-                    gameTimer.Enabled = true;
                     waveOut.Play();
                     break;
                 case GameState.Running:
                     // pause
                     waveOut.Pause();
-                    gameTimer.Enabled = false;
                     gameState = GameState.Paused;
                     break;
                 case GameState.Paused:
@@ -136,7 +134,6 @@ namespace EmuNES
                     gameTickDateTime = DateTime.Now;
                     averageDeltaTime = 1.0 / 60.0;
                     gameState = GameState.Running;
-                    gameTimer.Enabled = true;
                     waveOut.Resume();
                     break;
             }
@@ -159,7 +156,6 @@ namespace EmuNES
             if (gameState == GameState.Stopped)
                 return;
 
-            gameTimer.Enabled = false;
             videoPanel.Invalidate();
             gameState = GameState.Stopped;
             waveOut.Stop();
@@ -269,18 +265,20 @@ namespace EmuNES
 
         private void DrawCenteredText(Graphics graphics, string text)
         {
-            //Font font = new Font(this.Font.FontFamily, this.Font.Size * 2);
-            Font font = new Font(this.Font.FontFamily, videoPanel.Height / 10, GraphicsUnit.Pixel);
-            SizeF textSize = graphics.MeasureString(text, font);
+            if (resizedCaptionFont == null)
+                resizedCaptionFont = new Font(this.Font.FontFamily, videoPanel.Height / 20, GraphicsUnit.Pixel);
+
+            SizeF textSize = graphics.MeasureString(text, resizedCaptionFont);
             float textX = (videoPanel.Width - textSize.Width) / 2;
             float textY = (videoPanel.Height - videoPanel.Height / 10) / 2;
 
-            graphics.DrawString(text, font, Brushes.Black, textX - 1, textY);
-            graphics.DrawString(text, font, Brushes.Black, textX + 1, textY);
-            graphics.DrawString(text, font, Brushes.Black, textX, textY - 1);
-            graphics.DrawString(text, font, Brushes.Black, textX, textY + 1);
+            // back outline
+            graphics.DrawString(text, resizedCaptionFont, Brushes.Black, textX - 1, textY);
+            graphics.DrawString(text, resizedCaptionFont, Brushes.Black, textX + 1, textY);
+            graphics.DrawString(text, resizedCaptionFont, Brushes.Black, textX, textY - 1);
+            graphics.DrawString(text, resizedCaptionFont, Brushes.Black, textX, textY + 1);
 
-            graphics.DrawString(text, font, Brushes.White, textX, textY);
+            graphics.DrawString(text, resizedCaptionFont, Brushes.White, textX, textY);
         }
 
         private void UpdateGameMenuItems()
@@ -462,6 +460,8 @@ namespace EmuNES
             if (fullScreen)
                 SetFullScreen(false);
 
+            resizedCaptionFont = null;
+
             screenSize = newScreenSize;
             tvAspect = newTvAspect;
 
@@ -486,6 +486,8 @@ namespace EmuNES
         {
             if (this.fullScreen == fullScreen)
                 return;
+
+            resizedCaptionFont = null;
 
             this.fullScreen = fullScreen;
             if (fullScreen)
@@ -562,6 +564,7 @@ namespace EmuNES
         private DateTime gameTickDateTime;
 
         private Image resizedRasterFilter;
+        private Font resizedCaptionFont;
 
         // frame rate handling
         private DateTime frameDateTime;

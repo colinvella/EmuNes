@@ -73,6 +73,8 @@ namespace NesCore.Storage
 
         public CartridgeMap Map { get; private set; }
 
+        public Action MirrorModeChanged { get; set; }
+
         public override string ToString()
         {
             return "PRG: " + Hex.Format((uint)ProgramRom.Count)

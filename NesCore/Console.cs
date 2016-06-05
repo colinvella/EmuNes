@@ -93,7 +93,7 @@ namespace NesCore
                 (address, value) => cartridge.Map[address] = value);
 
             // name table mirroring mode determined from cartridge rom
-            Video.ConfigureNameTableMirroringMode(cartridge.MirrorMode);
+            cartridge.MirrorModeChanged = () => Video.ConfigureNameTableMirroringMode(cartridge.MirrorMode);
         }
 
         /// <summary>

@@ -114,6 +114,9 @@ namespace NesCore.Storage
                 case 3: Cartridge.MirrorMode = MirrorHorizontal; break;
             }
             UpdateOffsets();
+
+            // call mirrir mode change hook
+            Cartridge.MirrorModeChanged?.Invoke();
         }
 
         // CHR bank 0 (internal, $A000-$BFFF)

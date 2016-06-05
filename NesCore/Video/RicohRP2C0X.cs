@@ -423,40 +423,52 @@ namespace NesCore.Video
         {
             binaryWriter.Write(cycle);
             binaryWriter.Write(scanLine);
+
             binaryWriter.Write(paletteData);
             binaryWriter.Write(nameTableData);
             binaryWriter.Write(oamData);
+
             binaryWriter.Write(vramAddress);
             binaryWriter.Write(tempAddress);
-            binaryWriter.Write(scrollX);
             binaryWriter.Write((byte)writeToggle);
+
+            binaryWriter.Write(scrollX);
+
             binaryWriter.Write(evenFrame);
+
             binaryWriter.Write(nmiOccurred);
             binaryWriter.Write(nmiOutput);
             binaryWriter.Write(nmiPrevious);
             binaryWriter.Write(nmiDelay);
+
             binaryWriter.Write(nameTableByte);
             binaryWriter.Write(attributeTableByte);
             binaryWriter.Write(lowTileByte);
             binaryWriter.Write(highTileByte);
             binaryWriter.Write(tileData);
+
             binaryWriter.Write(spriteCount);
             for (int spriteIndex = 0; spriteIndex < spriteCount; spriteIndex++)
                 sprites[spriteIndex].SaveState(binaryWriter);
+
             binaryWriter.Write(nameTable);
             binaryWriter.Write((byte)vramIncrement);
             binaryWriter.Write(spritePatternTable);
             binaryWriter.Write(backgroundPatternTableAddress);
             binaryWriter.Write((byte)spriteSize);
             binaryWriter.Write(masterSlave);
-            binaryWriter.Write(grayscale);
+
             binaryWriter.Write(showLeftBackground);
             binaryWriter.Write(showLeftSprites);
             binaryWriter.Write(showBackground);
             binaryWriter.Write(showSprites);
+
+            binaryWriter.Write(grayscale);
             binaryWriter.Write(tint);
+
             binaryWriter.Write(spriteZeroHit);
             binaryWriter.Write(spriteOverflow);
+
 	        binaryWriter.Write(oamAddress);
 	        binaryWriter.Write(bufferedData);
         }
@@ -467,7 +479,56 @@ namespace NesCore.Video
         /// <param name="binaryReader"></param>
         public void LoadState(BinaryReader binaryReader)
         {
-            throw new NotImplementedException();
+            cycle = binaryReader.ReadInt32();
+            scanLine = binaryReader.ReadInt32();
+
+            paletteData = binaryReader.ReadBytes(paletteData.Length);
+            nameTableData = binaryReader.ReadBytes(nameTableData.Length);
+            oamData = binaryReader.ReadBytes(oamData.Length);
+
+            vramAddress = binaryReader.ReadUInt16();
+            tempAddress = binaryReader.ReadUInt16();
+            writeToggle = (WriteToggle)binaryReader.ReadByte();
+
+            scrollX = binaryReader.ReadByte();
+
+            evenFrame = binaryReader.ReadBoolean();
+
+            nmiOccurred = binaryReader.ReadBoolean();
+            nmiOutput = binaryReader.ReadBoolean();
+            nmiPrevious = binaryReader.ReadBoolean();
+            nmiDelay = binaryReader.ReadByte();
+
+            nameTableByte = binaryReader.ReadByte();
+            attributeTableByte = binaryReader.ReadByte();
+            lowTileByte = binaryReader.ReadByte();
+            highTileByte = binaryReader.ReadByte();
+            tileData = binaryReader.ReadUInt64();
+
+            spriteCount = binaryReader.ReadInt32();
+            for (int spriteIndex = 0; spriteIndex < spriteCount; spriteIndex++)
+                sprites[spriteIndex].LoadState(binaryReader);
+
+            nameTable = binaryReader.ReadByte();
+            vramIncrement = (VramIncrement)binaryReader.ReadByte();
+            spritePatternTable = binaryReader.ReadByte();
+            backgroundPatternTableAddress = binaryReader.ReadUInt16();
+            spriteSize = (SpriteSize)binaryReader.ReadByte();
+            masterSlave = binaryReader.ReadBoolean();
+
+            showLeftBackground = binaryReader.ReadBoolean();
+            showLeftSprites = binaryReader.ReadBoolean();
+            showBackground = binaryReader.ReadBoolean();
+            showSprites = binaryReader.ReadBoolean();
+
+            grayscale = binaryReader.ReadBoolean();
+            tint = binaryReader.ReadByte();
+
+            spriteZeroHit = binaryReader.ReadBoolean();
+            spriteOverflow = binaryReader.ReadBoolean();
+
+            oamAddress = binaryReader.ReadByte();
+            bufferedData = binaryReader.ReadByte();
         }
 
         private byte ReadPalette(ushort address)

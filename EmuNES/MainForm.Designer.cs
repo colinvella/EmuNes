@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+            System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.fileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -55,6 +57,9 @@
             this.emulatorStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.frameRateStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.gameTimer = new System.Windows.Forms.Timer(this.components);
+            this.fileRecentFilesMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mainMenuStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
@@ -78,6 +83,9 @@
             this.fileMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileOpenMenuItem,
             this.filePropertiesMenuItem,
+            toolStripSeparator1,
+            this.fileRecentFilesMenuItem,
+            toolStripSeparator2,
             this.fileExitMenuItem});
             this.fileMenuItem.Name = "fileMenuItem";
             this.fileMenuItem.Size = new System.Drawing.Size(44, 24);
@@ -87,7 +95,7 @@
             // 
             this.fileOpenMenuItem.Image = global::EmuNES.Properties.Resources.FileOpen;
             this.fileOpenMenuItem.Name = "fileOpenMenuItem";
-            this.fileOpenMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.fileOpenMenuItem.Size = new System.Drawing.Size(181, 26);
             this.fileOpenMenuItem.Text = "&Open";
             this.fileOpenMenuItem.Click += new System.EventHandler(this.OnFileOpen);
             // 
@@ -95,7 +103,7 @@
             // 
             this.filePropertiesMenuItem.Enabled = false;
             this.filePropertiesMenuItem.Name = "filePropertiesMenuItem";
-            this.filePropertiesMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.filePropertiesMenuItem.Size = new System.Drawing.Size(181, 26);
             this.filePropertiesMenuItem.Text = "&Properties...";
             this.filePropertiesMenuItem.Click += new System.EventHandler(this.OnFileProperties);
             // 
@@ -104,7 +112,7 @@
             this.fileExitMenuItem.Image = global::EmuNES.Properties.Resources.FileExit;
             this.fileExitMenuItem.Name = "fileExitMenuItem";
             this.fileExitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.fileExitMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.fileExitMenuItem.Size = new System.Drawing.Size(181, 26);
             this.fileExitMenuItem.Text = "Exit";
             this.fileExitMenuItem.Click += new System.EventHandler(this.OnFileExit);
             // 
@@ -284,6 +292,22 @@
             this.gameTimer.Interval = 50;
             this.gameTimer.Tick += new System.EventHandler(this.OnGameTick);
             // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(178, 6);
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new System.Drawing.Size(178, 6);
+            // 
+            // fileRecentFilesMenuItem
+            // 
+            this.fileRecentFilesMenuItem.Name = "fileRecentFilesMenuItem";
+            this.fileRecentFilesMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.fileRecentFilesMenuItem.Text = "Recent Files...";
+            // 
             // MainForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -340,6 +364,7 @@
         private System.Windows.Forms.ToolStripMenuItem filePropertiesMenuItem;
         private System.Windows.Forms.ToolStripSeparator viewScreenSizeSeparator;
         private System.Windows.Forms.ToolStripMenuItem viewScreenSizeFullScreenMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fileRecentFilesMenuItem;
     }
 }
 

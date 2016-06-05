@@ -28,7 +28,10 @@ namespace EmuNES
         #region Public members
 
         public void AddRecentFile(string recentFile)
-        { 
+        {
+            // remove if already there to add as first
+            RemoveRecentFile(recentFile);
+
             string recentFiles = ConfigurationManager.AppSettings["RecentFiles"];
             if (recentFiles == null)
                 recentFiles = "";
@@ -43,6 +46,8 @@ namespace EmuNES
         public void RemoveRecentFile(string recentFile)
         {
             string recentFiles = ConfigurationManager.AppSettings["RecentFiles"];
+            if (recentFiles == null)
+                recentFiles = "";
 
             recentFiles = String.Join("|",
                 recentFiles.Split(new char[] { '|'}).Where(
@@ -112,11 +117,12 @@ namespace EmuNES
             this.ParentMenuItem.Enabled = true;
         }
 
-        private void OnClearRecentFilesClicked(object obj, EventArgs evt)
+        private void OnClearRecentFilesClicked(object sender, EventArgs eventArgs)
         {
             UpdateRecentFiles("");
+            RefreshRecentFilesMenu();
             if (ClearRecentFilesClicked != null)
-                this.ClearRecentFilesClicked(obj, evt);
+                this.ClearRecentFilesClicked(sender, eventArgs);
         }
 
         #endregion

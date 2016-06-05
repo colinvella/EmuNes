@@ -58,6 +58,8 @@ namespace EmuNES
 
         private void OnFormLoad(object sender, EventArgs eventArgs)
         {
+            recentFileManager = new RecentFileManager(fileRecentFilesMenuItem, LoadRecentRom);
+
             applicationMargin = new Size(Width - videoPanel.ClientSize.Width, Height - videoPanel.ClientSize.Height);
             SetScreen(1, true);
             SetRasterEffect(false);
@@ -386,7 +388,14 @@ namespace EmuNES
             Console.ConnectControllerOne(joypad);
         }
 
-        private void LoadCartridgeRom(string cartridgeRomPath)
+        private void LoadRecentRom(object sender, EventArgs eventArgs)
+        {
+            string cartridgeRomPath = ((ToolStripMenuItem)sender).Text;
+            if (!LoadCartridgeRom(cartridgeRomPath))
+                recentFileManager.RemoveRecentFile(cartridgeRomPath);
+        }
+
+        private bool LoadCartridgeRom(string cartridgeRomPath)
         {
             try
             {
@@ -405,10 +414,15 @@ namespace EmuNES
 
                 OnGameStop(this, EventArgs.Empty);
                 OnGameRunPause(this, EventArgs.Empty);
+
+                recentFileManager.AddRecentFile(cartridgeRomPath);
+
+                return true;
             }
             catch (Exception exception)
             {
                 MessageBox.Show(this, "Unable to load cartridge rom. Reason: " + exception.Message, "Open Game ROM", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
         }
 
@@ -557,6 +571,7 @@ namespace EmuNES
 
         private Cartridge cartridge;
         private string cartridgeRomFilename;
+        private RecentFileManager recentFileManager;
 
         private Dictionary<Keys, bool> keyPressed;
         private FastBitmap bitmapBuffer;

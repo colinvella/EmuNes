@@ -1,6 +1,7 @@
 ﻿using NesCore.Utility;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -220,6 +221,16 @@ namespace NesCore.Memory
         public void ConfigureMemoryWrite(ushort address, WriteMemoryHandler writeMemoryHandler)
         {
             writeMemoryHandlers[address] = writeMemoryHandler;
+        }
+
+        public void SaveState(BinaryWriter binaryWriter)
+        {
+            binaryWriter.Write(memory);
+        }
+
+        public void LoadState(BinaryReader binaryReader)
+        { 
+            memory = binaryReader.ReadBytes(memory.Length);
         }
 
         /// <summary>

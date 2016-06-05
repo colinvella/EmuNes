@@ -431,6 +431,7 @@ namespace NesCore.Video
             binaryWriter.Write(vramAddress);
             binaryWriter.Write(tempAddress);
             binaryWriter.Write((byte)writeToggle);
+            binaryWriter.Write(registerLatch);
 
             binaryWriter.Write(scrollX);
 
@@ -471,6 +472,8 @@ namespace NesCore.Video
 
 	        binaryWriter.Write(oamAddress);
 	        binaryWriter.Write(bufferedData);
+
+            Memory.SaveState(binaryWriter);
         }
 
         /// <summary>
@@ -489,6 +492,7 @@ namespace NesCore.Video
             vramAddress = binaryReader.ReadUInt16();
             tempAddress = binaryReader.ReadUInt16();
             writeToggle = (WriteToggle)binaryReader.ReadByte();
+            registerLatch = binaryReader.ReadByte();
 
             scrollX = binaryReader.ReadByte();
 
@@ -529,6 +533,8 @@ namespace NesCore.Video
 
             oamAddress = binaryReader.ReadByte();
             bufferedData = binaryReader.ReadByte();
+
+            Memory.LoadState(binaryReader);
         }
 
         private byte ReadPalette(ushort address)

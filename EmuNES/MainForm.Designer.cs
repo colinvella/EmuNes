@@ -56,7 +56,6 @@
             this.frameRateStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.gameTimer = new System.Windows.Forms.Timer(this.components);
             this.mainMenuStrip.SuspendLayout();
-            this.videoPanel.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -242,13 +241,12 @@
             // 
             this.videoPanel.BackColor = System.Drawing.Color.Black;
             this.videoPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.videoPanel.Controls.Add(this.statusStrip);
             this.videoPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.videoPanel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
             this.videoPanel.Location = new System.Drawing.Point(0, 28);
             this.videoPanel.Margin = new System.Windows.Forms.Padding(0);
             this.videoPanel.Name = "videoPanel";
-            this.videoPanel.Size = new System.Drawing.Size(512, 480);
+            this.videoPanel.Size = new System.Drawing.Size(512, 455);
             this.videoPanel.TabIndex = 1;
             // 
             // statusStrip
@@ -258,7 +256,7 @@
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.emulatorStatusLabel,
             this.frameRateStatusLabel});
-            this.statusStrip.Location = new System.Drawing.Point(0, 455);
+            this.statusStrip.Location = new System.Drawing.Point(0, 483);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(512, 25);
             this.statusStrip.SizingGrip = false;
@@ -268,7 +266,7 @@
             // emulatorStatusLabel
             // 
             this.emulatorStatusLabel.Name = "emulatorStatusLabel";
-            this.emulatorStatusLabel.Size = new System.Drawing.Size(414, 20);
+            this.emulatorStatusLabel.Size = new System.Drawing.Size(453, 20);
             this.emulatorStatusLabel.Spring = true;
             this.emulatorStatusLabel.Text = "Status";
             this.emulatorStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -291,6 +289,7 @@
             this.ClientSize = new System.Drawing.Size(512, 508);
             this.Controls.Add(this.videoPanel);
             this.Controls.Add(this.mainMenuStrip);
+            this.Controls.Add(this.statusStrip);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -306,8 +305,6 @@
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnKeyUp);
             this.mainMenuStrip.ResumeLayout(false);
             this.mainMenuStrip.PerformLayout();
-            this.videoPanel.ResumeLayout(false);
-            this.videoPanel.PerformLayout();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             this.ResumeLayout(false);

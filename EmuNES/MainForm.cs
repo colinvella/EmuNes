@@ -58,7 +58,7 @@ namespace EmuNES
 
         private void OnFormLoad(object sender, EventArgs eventArgs)
         {
-            applicationMargin = new Size(Width - videoPanel.Width, Height - videoPanel.Height);
+            applicationMargin = new Size(Width - videoPanel.ClientSize.Width, Height - videoPanel.ClientSize.Height);
             SetScreen(1, true);
             SetRasterEffect(false);
             SetMotionBlur(false);
@@ -273,7 +273,7 @@ namespace EmuNES
             Font font = new Font(this.Font.FontFamily, videoPanel.Height / 10, GraphicsUnit.Pixel);
             SizeF textSize = graphics.MeasureString(text, font);
             float textX = (videoPanel.Width - textSize.Width) / 2;
-            float textY = (videoPanel.Height - this.Font.GetHeight(graphics)) / 2;
+            float textY = (videoPanel.Height - videoPanel.Height / 10) / 2;
 
             graphics.DrawString(text, font, Brushes.Black, textX - 1, textY);
             graphics.DrawString(text, font, Brushes.Black, textX + 1, textY);

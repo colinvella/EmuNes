@@ -7,17 +7,18 @@ using System.Threading.Tasks;
 
 namespace NesCore.Storage
 {
-    class CartridgeMapNRom : CartridgeMap
+    class CartridgeMapCnRom : CartridgeMap
     {
-        public CartridgeMapNRom(Cartridge cartridge)
+        public CartridgeMapCnRom(Cartridge cartridge)
         {
             Cartridge = cartridge;
-            programBankCount = cartridge.ProgramRom.Count / 0x4000;
+            int programBankCount = cartridge.ProgramRom.Count / 0x4000;
+            characterBank = 0;
             programBank1 = 0;
             programBank2 = programBankCount - 1;
         }
 
-        public virtual string Name { get { return "NROM"; } }
+        public virtual string Name { get { return "CNROM"; } }
 
         public Cartridge Cartridge { get; private set; }
 
@@ -32,42 +33,30 @@ namespace NesCore.Storage
             get
             {
                 if (address < 0x2000)
-                    return Cartridge.CharacterRom[address];
+                    return Cartridge.CharacterRom[characterBank * 0x2000 + address];
 
                 if (address >= 0xC000)
-                {
-                    int index = programBank2 * 0x4000 + address - 0xC000;
-                    return Cartridge.ProgramRom[index];
-                }
+                    return Cartridge.ProgramRom[programBank2 * 0x4000 + address - 0xC000];
 
                 if (address >= 0x8000)
-                {
-                    int index = programBank1 * 0x4000 + address - 0x8000;
-                    return Cartridge.ProgramRom[index];
-                }
+                    return Cartridge.ProgramRom[programBank1 * 0x4000 + address - 0x8000];
 
                 if (address >= 0x6000)
                     return Cartridge.SaveRam[address - 0x6000];
 
-                throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
+                throw new Exception("Unhandled CNROM mapper read at address: " + Hex.Format(address));
             }
 
             set
             {
                 if (address < 0x2000)
-                {
-                    Cartridge.CharacterRom[address] = value;
-                }
+                    Cartridge.CharacterRom[characterBank * 0x2000 + address] = value;
                 else if (address >= 0x8000)
-                {
-                    programBank1 = value % programBankCount;
-                }
+                    characterBank = value % 3;
                 else if (address >= 0x6000)
-                { 
                     Cartridge.SaveRam[address - 0x6000] = value;
-                }
                 else
-                    throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
+                    throw new Exception("Unhandled CNROM mapper write at address: " + Hex.Format(address));
             }
         }
 
@@ -75,7 +64,7 @@ namespace NesCore.Storage
         {
         }
 
-        private int programBankCount;
+        private int characterBank;
         private int programBank1;
         private int programBank2;
     }

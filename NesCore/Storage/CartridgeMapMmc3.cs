@@ -76,7 +76,7 @@ namespace NesCore.Storage
 
         public void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
         {
-            if (cycle != 280)  // TODO: this *should* be 260
+            if (cycle != 260)
                 return;
 
             if (scanLine > 239 && scanLine < 261)

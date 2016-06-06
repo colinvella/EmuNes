@@ -57,6 +57,7 @@ namespace NesCore
         public RicohRP2C0X Video { get; private set; }
         public Apu Audio { get; private set; }
         public ConfigurableMemoryMap Memory { get; private set; }
+        public Cartridge Cartridge { get; private set; }
 
         /// <summary>
         /// Connect a controller to the first port
@@ -97,6 +98,10 @@ namespace NesCore
             Video.ConfigureNameTableMirroringMode(cartridge.MirrorMode);
             // wired to mirror mode changes (for more complex mappers like MMC1)
             cartridge.MirrorModeChanged = () => Video.ConfigureNameTableMirroringMode(cartridge.MirrorMode);
+
+            // wire IRQ triggering for MMC3
+            cartridge.Map.TriggerInterruptRequest = () => Processor.TriggerInterruptRequest();
+            Cartridge = cartridge;
         }
 
         /// <summary>
@@ -126,7 +131,7 @@ namespace NesCore
 	        for (ulong index = 0; index < ppuCycles; index++)
             {
                 Video.Step();
-		        // cartridge map step goes here
+                Cartridge.Map.StepVideo(Video.ScanLine, Video.Cycle, Video.ShowBackground, Video.ShowSprites);
 	        }
 
             // audio emulation

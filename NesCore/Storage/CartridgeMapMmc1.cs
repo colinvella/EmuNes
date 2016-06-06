@@ -23,6 +23,12 @@ namespace NesCore.Storage
 
         public Cartridge Cartridge { get; private set; }
 
+        public Action TriggerInterruptRequest
+        {
+            get { return null; }
+            set { }
+        }
+
         public byte this[ushort address]
         {
             get
@@ -63,6 +69,10 @@ namespace NesCore.Storage
                     Cartridge.SaveRam[address - 0x6000] = value;
                 }
             }
+        }
+
+        public void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
+        {
         }
 
         private void LoadRegister(ushort address, byte value)
@@ -108,10 +118,10 @@ namespace NesCore.Storage
 
             switch (mirror)
             {
-                case 0: Cartridge.MirrorMode = MirrorSingle0; break;
-                case 1: Cartridge.MirrorMode = MirrorSingle1; break;
-                case 2: Cartridge.MirrorMode = MirrorVertical; break;
-                case 3: Cartridge.MirrorMode = MirrorHorizontal; break;
+                case 0: Cartridge.MirrorMode = Cartridge.MirrorSingle0; break;
+                case 1: Cartridge.MirrorMode = Cartridge.MirrorSingle1; break;
+                case 2: Cartridge.MirrorMode = Cartridge.MirrorVertical; break;
+                case 3: Cartridge.MirrorMode = Cartridge.MirrorHorizontal; break;
             }
             UpdateOffsets();
 
@@ -209,11 +219,5 @@ namespace NesCore.Storage
         private byte characterBank1;
         private int[] programBankOffsets;
         private int[] characterBankOffsets;
-
-        const byte MirrorHorizontal = 0;
-        const byte MirrorVertical = 1;
-        const byte MirrorSingle0 = 2;
-        const byte MirrorSingle1 = 3;
-        const byte MirrorFour = 4;
     }
 }

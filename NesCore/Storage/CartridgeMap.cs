@@ -10,6 +10,10 @@ namespace NesCore.Storage
     {
         string Name { get;  }
 
+        Action TriggerInterruptRequest { get; set; }
+
         byte this[ushort address] { get; set; }
+
+        void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites);
     }
 }

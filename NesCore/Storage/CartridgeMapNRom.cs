@@ -21,6 +21,12 @@ namespace NesCore.Storage
 
         public Cartridge Cartridge { get; private set; }
 
+        public Action TriggerInterruptRequest
+        {
+            get { return null; }
+            set { }
+        }
+
         public byte this[ushort address]
         {
             get
@@ -63,6 +69,10 @@ namespace NesCore.Storage
                 else
                     throw new Exception("Unhandled NROM mapper read at address: " + Hex.Format(address));
             }
+        }
+
+        public void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
+        {
         }
 
         private int prgBanks;

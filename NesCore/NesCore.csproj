@@ -62,6 +62,7 @@
     <Compile Include="Storage\Cartridge.cs" />
     <Compile Include="Storage\CartridgeMap.cs" />
     <Compile Include="Storage\CartridgeMapMmc1.cs" />
+    <Compile Include="Storage\CartridgeMapMmc3.cs" />
     <Compile Include="Storage\CartridgeMapNRom.cs" />
     <Compile Include="Utility\Assembler.cs" />
     <Compile Include="Utility\AssemblerException.cs" />

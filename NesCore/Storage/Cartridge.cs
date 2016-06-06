@@ -60,6 +60,7 @@ namespace NesCore.Storage
             {
                 case 0: Map = new CartridgeMapNRom(this); break;
                 case 1: Map = new CartridgeMapMmc1(this); break;
+                case 4: Map = new CartridgeMapMmc3(this); break;
                 default: throw new NotSupportedException("Mapper Type " + Utility.Hex.Format(MapperType) + " not supported");
             }
         }
@@ -83,6 +84,12 @@ namespace NesCore.Storage
                 + ", Mirror Mode:" + Hex.Format(MirrorMode)
                 + ", Battery: " + (BatteryPresent ? "Yes" : "No");
         }
+
+        public const byte MirrorHorizontal = 0;
+        public const byte MirrorVertical = 1;
+        public const byte MirrorSingle0 = 2;
+        public const byte MirrorSingle1 = 3;
+        public const byte MirrorFour = 4;
 
         private const uint InesMagicNumber = 0x1a53454e;
     }

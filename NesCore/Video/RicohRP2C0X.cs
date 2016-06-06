@@ -45,6 +45,12 @@ namespace NesCore.Video
 
         public ConfigurableMemoryMap Memory { get; private set; }
 
+        // properties exposed for cartridge mapper stepping
+        public int Cycle { get; private set; }              // 0-340
+        public int ScanLine { get; private set; }           // 0-261, 0-239=visible, 240=post, 241-260=vblank, 261=pre
+        public bool ShowBackground { get; private set; }    // false: hide;   true: show
+        public bool ShowSprites { get; private set; }       // false: hide;   true: show
+
         // implementation hooks
 
         public Action TriggerNonMaskableInterupt { get; set; }
@@ -105,8 +111,8 @@ namespace NesCore.Video
                 grayscale = (value & 0x01) != 0;
                 showLeftBackground = (value & 0x02) != 0;
                 showLeftSprites = (value & 0x04) != 0;
-                showBackground = (value & 0x08) != 0;
-                showSprites = (value & 0x10) != 0;
+                ShowBackground = (value & 0x08) != 0;
+                ShowSprites = (value & 0x10) != 0;
                 tint = (byte)(value >> 5);
             }
         }
@@ -314,8 +320,8 @@ namespace NesCore.Video
         /// </summary>
         public void Reset()
         {
-            cycle = 340;
-            scanLine = 240;
+            Cycle = 340;
+            ScanLine = 240;
 
             Control = 0x00;
             Mask = 0x00;
@@ -329,14 +335,14 @@ namespace NesCore.Video
         {
             Tick();
 
-            bool renderingEnabled = showBackground || showSprites;
-            bool preLine = scanLine == 261;
-            bool visibleLine = scanLine < 240;
+            bool renderingEnabled = ShowBackground || ShowSprites;
+            bool preLine = ScanLine == 261;
+            bool visibleLine = ScanLine < 240;
             // postLine := ppu.ScanLine == 240
             bool renderLine = preLine || visibleLine;
 
-            bool preFetchCycle = cycle >= 321 && cycle <= 336;
-            bool visibleCycle = cycle >= 1 && cycle <= 256;
+            bool preFetchCycle = Cycle >= 321 && Cycle <= 336;
+            bool visibleCycle = Cycle >= 1 && Cycle <= 256;
             bool fetchCycle = preFetchCycle || visibleCycle;
 
             // background logic
@@ -349,7 +355,7 @@ namespace NesCore.Video
                 {
                     tileData <<= 4;
 
-                    switch (cycle % 8)
+                    switch (Cycle % 8)
                     {
                         case 1:
                             FetchNameTableByte();
@@ -369,18 +375,18 @@ namespace NesCore.Video
                     }
                 }
 
-                if (preLine && cycle >= 280 && cycle <= 304)
+                if (preLine && Cycle >= 280 && Cycle <= 304)
                     CopyY();
 
                 if (renderLine)
                 {
-                    if (fetchCycle && cycle % 8 == 0)
+                    if (fetchCycle && Cycle % 8 == 0)
                         IncrementX();
 
-                    if (cycle == 256)
+                    if (Cycle == 256)
                         IncrementY();
 
-                    if (cycle == 257)
+                    if (Cycle == 257)
                         CopyX();
                 }
             }
@@ -388,13 +394,13 @@ namespace NesCore.Video
             {
                 // rendering disabled - trigger WritePixel hook with black
                 if (visibleLine && visibleCycle)
-                    WritePixel((byte)(cycle - 1), (byte)scanLine, paletteTints[0][0x0F]);
+                    WritePixel((byte)(Cycle - 1), (byte)ScanLine, paletteTints[0][0x0F]);
             }
 
             // sprite logic
             if (renderingEnabled)
             {
-                if (cycle == 257)
+                if (Cycle == 257)
                 {
                     if (visibleLine)
                         EvaluateSprites();
@@ -404,10 +410,10 @@ namespace NesCore.Video
             }
 
             // vblank logic
-            if (scanLine == 241 && cycle == 1)
+            if (ScanLine == 241 && Cycle == 1)
                 SetVerticalBlank();
 
-            if (preLine && cycle == 1)
+            if (preLine && Cycle == 1)
             {
                 ClearVerticalBlank();
                 spriteZeroHit = false;
@@ -421,8 +427,8 @@ namespace NesCore.Video
         /// <param name="binaryWriter"></param>
         public void SaveState(BinaryWriter binaryWriter)
         {
-            binaryWriter.Write(cycle);
-            binaryWriter.Write(scanLine);
+            binaryWriter.Write(Cycle);
+            binaryWriter.Write(ScanLine);
 
             binaryWriter.Write(paletteData);
             binaryWriter.Write(nameTableData);
@@ -461,8 +467,8 @@ namespace NesCore.Video
 
             binaryWriter.Write(showLeftBackground);
             binaryWriter.Write(showLeftSprites);
-            binaryWriter.Write(showBackground);
-            binaryWriter.Write(showSprites);
+            binaryWriter.Write(ShowBackground);
+            binaryWriter.Write(ShowSprites);
 
             binaryWriter.Write(grayscale);
             binaryWriter.Write(tint);
@@ -482,8 +488,8 @@ namespace NesCore.Video
         /// <param name="binaryReader"></param>
         public void LoadState(BinaryReader binaryReader)
         {
-            cycle = binaryReader.ReadInt32();
-            scanLine = binaryReader.ReadInt32();
+            Cycle = binaryReader.ReadInt32();
+            ScanLine = binaryReader.ReadInt32();
 
             paletteData = binaryReader.ReadBytes(paletteData.Length);
             nameTableData = binaryReader.ReadBytes(nameTableData.Length);
@@ -522,8 +528,8 @@ namespace NesCore.Video
 
             showLeftBackground = binaryReader.ReadBoolean();
             showLeftSprites = binaryReader.ReadBoolean();
-            showBackground = binaryReader.ReadBoolean();
-            showSprites = binaryReader.ReadBoolean();
+            ShowBackground = binaryReader.ReadBoolean();
+            ShowSprites = binaryReader.ReadBoolean();
 
             grayscale = binaryReader.ReadBoolean();
             tint = binaryReader.ReadByte();
@@ -541,14 +547,14 @@ namespace NesCore.Video
         {
             if (address >= 16 && address % 4 == 0)
                 address -= 16;
-            return paletteData[address];
+            return paletteData[address % paletteData.Length];
         }
 
         private void WritePalette(ushort address, byte value)
         {
             if (address >= 16 && address % 4 == 0)
                 address -= 16;
-            paletteData[address] = value;
+            paletteData[address % paletteData.Length] = value;
         }
         
         // NTSC Timing Helper Functions
@@ -707,7 +713,7 @@ namespace NesCore.Video
 
         private byte GetBackgroundPixel()
         {
-	        if (!showBackground)
+	        if (!ShowBackground)
                 return 0;
 
             uint data = FetchTileData() >> ((7 - scrollX) * 4);
@@ -717,12 +723,12 @@ namespace NesCore.Video
         private byte GetSpritePixel(out byte spriteIndex)
         {
             spriteIndex = 0;
-            if (!showSprites)
+            if (!ShowSprites)
                 return 0;
 
 	        for (int index = 0; index < spriteCount; index++)
             {
-                int offset = (cycle - 1) - sprites[index].PositionX;
+                int offset = (Cycle - 1) - sprites[index].PositionX;
                 if (offset < 0 || offset > 7)
                     continue;
 
@@ -741,8 +747,8 @@ namespace NesCore.Video
 
         private void RenderPixel()
         {
-            byte x = (byte)(cycle - 1);
-            byte y = (byte)scanLine;
+            byte x = (byte)(Cycle - 1);
+            byte y = (byte)ScanLine;
 
             byte backgroundPixel = GetBackgroundPixel();
 
@@ -883,7 +889,7 @@ namespace NesCore.Video
                 byte spriteAttributes = oamData[index * 4 + 2];
                 byte spriteX = oamData[index * 4 + 3];
 
-                int row = scanLine - spriteY;
+                int row = ScanLine - spriteY;
 
                 if (row < 0 || row >= spriteHeight)
                     continue;
@@ -919,26 +925,26 @@ namespace NesCore.Video
                 }
             }
 
-            if (showBackground || showSprites)
+            if (ShowBackground || ShowSprites)
             {
-                if (!evenFrame && scanLine == 261 && cycle == 339)
+                if (!evenFrame && ScanLine == 261 && Cycle == 339)
                 {
-                    cycle = 0;
-                    scanLine = 0;
+                    Cycle = 0;
+                    ScanLine = 0;
                     evenFrame = !evenFrame;
                     return;
                 }
             }
-            ++cycle;
+            ++Cycle;
 
-            if (cycle > 340)
+            if (Cycle > 340)
             {
-                cycle = 0;
-                ++scanLine;
+                Cycle = 0;
+                ++ScanLine;
 
-                if (scanLine > 261)
+                if (ScanLine > 261)
                 {
-                    scanLine = 0;
+                    ScanLine = 0;
                     evenFrame = !evenFrame;
                 }
             }
@@ -951,9 +957,6 @@ namespace NesCore.Video
             int offset = address % 0x0400;
             return (ushort)(0x2000 + mirrorLookup[mode][table] * 0x0400 + offset);
         }
-
-        private int cycle; // 0-340
-        private int scanLine; // 0-261, 0-239=visible, 240=post, 241-260=vblank, 261=pre
 
         // storage variables
         private byte[] paletteData = new byte[32];
@@ -997,8 +1000,6 @@ namespace NesCore.Video
         private bool grayscale;             // true: gray scale mode; false: colour mode
         private bool showLeftBackground;    // false: hide;   true: show
         private bool showLeftSprites;       // false: hide;   true: show
-        private bool showBackground;        // false: hide;   true: show
-        private bool showSprites;           // false: hide;   true: show
         private byte tint;                  // 000 - 111 binary showing colour emphasis in BGR order 
 
         // $2002 PPUSTATUS

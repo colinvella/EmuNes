@@ -755,7 +755,7 @@ namespace NesCore.Video
             byte spriteIndex = 0;
             byte spritePixel = GetSpritePixel(out spriteIndex);
 
-            if (x < 8 && backgroundPatternTableAddress == 0x0000)
+            if (!showLeftBackground && x < 8 && backgroundPatternTableAddress == 0x0000)
                 backgroundPixel = 0;
 
             if (x < 8 && !showLeftSprites)

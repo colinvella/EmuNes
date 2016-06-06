@@ -58,6 +58,7 @@
             this.frameRateStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.gameTimer = new System.Windows.Forms.Timer(this.components);
             this.fileRecentFilesMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.iconTimer = new System.Windows.Forms.Timer(this.components);
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mainMenuStrip.SuspendLayout();
@@ -308,6 +309,12 @@
             this.fileRecentFilesMenuItem.Size = new System.Drawing.Size(181, 26);
             this.fileRecentFilesMenuItem.Text = "Recent Files...";
             // 
+            // iconTimer
+            // 
+            this.iconTimer.Enabled = true;
+            this.iconTimer.Interval = 250;
+            this.iconTimer.Tick += new System.EventHandler(this.OnIconTick);
+            // 
             // MainForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -365,6 +372,7 @@
         private System.Windows.Forms.ToolStripSeparator viewScreenSizeSeparator;
         private System.Windows.Forms.ToolStripMenuItem viewScreenSizeFullScreenMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fileRecentFilesMenuItem;
+        private System.Windows.Forms.Timer iconTimer;
     }
 }
 

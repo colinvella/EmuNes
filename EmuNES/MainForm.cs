@@ -12,6 +12,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -232,6 +233,25 @@ namespace EmuNES
 #endif
         }
 
+        private void OnIconTick(object sender, EventArgs eventArgs)
+        {
+            if (gameState != GameState.Running)
+            {
+                if (this.Icon != Properties.Resources.Nes)
+                    this.Icon = Properties.Resources.Nes;
+                return;
+            }
+
+            // update application icon with running game
+            if (gameIcon != null)
+                DestroyIcon(gameIcon.Handle);
+
+            Bitmap bitmapIcon = ResizeImage(bitmapBuffer.Bitmap, 32, 32);
+            gameIcon = Icon.FromHandle(bitmapIcon.GetHicon());
+            bitmapIcon.Dispose();
+            this.Icon = gameIcon;
+        }
+
         private void OnVideoPanelPaint(object sender, PaintEventArgs paintEventArgs)
         {
             Graphics graphics = paintEventArgs.Graphics;
@@ -261,9 +281,13 @@ namespace EmuNES
                         graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                         graphics.DrawImage(bitmapBuffer.Bitmap, leftCenteredMargin, 0, bufferSize.Width, bufferSize.Height);
                     }
+
                     break;
             }
         }
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        extern static bool DestroyIcon(IntPtr handle);
 
         private void DrawCenteredText(Graphics graphics, string text)
         {
@@ -577,6 +601,7 @@ namespace EmuNES
         private FastBitmap bitmapBuffer;
         private GameState gameState;
         private DateTime gameTickDateTime;
+        private Icon gameIcon;
 
         private Image resizedRasterFilter;
         private Font resizedCaptionFont;

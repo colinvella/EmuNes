@@ -241,8 +241,8 @@ namespace EmuNES
             switch (gameState)
             {
                 case GameState.Stopped:
-                    //graphics.InterpolationMode = InterpolationMode.Low;
-                    //graphics.DrawImage(Properties.Resources.Background, 0, 0, videoPanel.Width, videoPanel.Height);
+                    graphics.InterpolationMode = InterpolationMode.Low;
+                    graphics.DrawImage(Properties.Resources.Background, 0, 0, videoPanel.Width, videoPanel.Height);
                     break;
                 case GameState.Paused:
                     graphics.DrawImage(bitmapBuffer.Bitmap, leftCenteredMargin, 0, bufferSize.Width, bufferSize.Height);

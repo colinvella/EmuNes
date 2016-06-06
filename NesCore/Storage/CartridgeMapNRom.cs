@@ -17,7 +17,7 @@ namespace NesCore.Storage
             prgBank2 = prgBanks - 1;
         }
 
-        public string Name { get { return "NROM"; } }
+        public virtual string Name { get { return "NROM"; } }
 
         public Cartridge Cartridge { get; private set; }
 

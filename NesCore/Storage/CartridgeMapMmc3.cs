@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NesCore.Storage
 {
-    public class CartridgeMapMmc3 : CartridgeMap
+    class CartridgeMapMmc3 : CartridgeMap
     {
         public CartridgeMapMmc3(Cartridge cartridge)
         {

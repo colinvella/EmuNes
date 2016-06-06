@@ -48,7 +48,7 @@ namespace NesCore.Video
 
         public Colour this[byte index]
         {
-            get { return colours[index];  }
+            get { return colours[index % colours.Length];  }
         }
 
         private static readonly ulong[] baseColourValues =

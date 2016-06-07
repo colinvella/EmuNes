@@ -382,7 +382,7 @@ namespace EmuNES
         {
             Console.Audio.SampleRate = 44100;
 
-            float[] outputBuffer = new float[512];
+            float[] outputBuffer = new float[256];
             int writeIndex = 0;
 
             Console.Audio.WriteSample = (sampleValue) =>

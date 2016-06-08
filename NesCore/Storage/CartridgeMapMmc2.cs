@@ -12,8 +12,8 @@ namespace NesCore.Storage
         public CartridgeMapMmc2(Cartridge cartridge)
         {
             Cartridge = cartridge;
+            programBankCount = (byte)(Cartridge.ProgramRom.Count / 0x2000);
             programBank = 0;
-            programBankLast3 = Cartridge.ProgramRom.Count - 0x2000 * 3;
             characterBank1 = 0;
             characterBank2 = 0;
             latch0 = 0xFD;
@@ -34,27 +34,23 @@ namespace NesCore.Storage
         {
             get
             {
-                // first 2 switchable 4K PPU banks
-                if (address < 0x1000)
+                if (address < 0x2000)
                 {
-                    byte value = Cartridge.CharacterRom[characterBank1 * 0x1000 + address];
+                    SetCharacterBanks();
 
-                    // chr bank 1 switching by reading specific addresses
+                    byte value = 0;
+                    ushort index = (ushort)(address & 0x0FFF);
+
+                    if (address < 0x1000)
+                        value = Cartridge.CharacterRom[selectedCharacterBank0 * 0x1000 + index];
+                    else // 0x1000 - 0x1FFF
+                        value = Cartridge.CharacterRom[selectedCharacterBank1 * 0x1000 + index];
+
                     if (address == 0x0FD8)
                         latch0 = 0xFD;
                     else if (address == 0x0FE8)
-                        latch0 = 0xFE;
+                        latch1 = 0xFE;
 
-                    return value;
-                }
-
-                // second 2 switchable 4K PPU banks
-                if (address < 0x2000)
-                {
-                    ushort offset = (ushort)(address - 0x1000);
-                    byte value = Cartridge.CharacterRom[0x2000 + characterBank2 * 0x1000 + offset];
-
-                    // chr bank 2 switching by reading specific address ranges
                     if (address >= 0x1FD8 && address <= 0x1FDF)
                         latch1 = 0xFD;
                     else if (address >= 0x1FE8 && address <= 0x1FEF)
@@ -65,23 +61,18 @@ namespace NesCore.Storage
                     return value;
                 }
 
-                if (address >= 0x6000  && address < 0x8000)
+                if (address >= 0x8000)
                 {
-                    // first 8K PRG bank
-                    address -= 0x6000;
-                    return Cartridge.ProgramRom[address];
-                }
+                    int index = address & 0x1FFF;
 
-                if (address >= 0x8000 && address < 0xA000)
-                {
-                    address -= 0x8000;
-                    return Cartridge.ProgramRom[programBank * 0x2000 + address];
-                }
-
-                if (address >= 0xA000)
-                {
-                    address -= 0xA000;
-                    return Cartridge.ProgramRom[programBankLast3 + address];
+                    if (address < 0xA000)
+                        return Cartridge.ProgramRom[programBank * 0x2000 + index];
+                    else if (address < 0xC000)
+                        return Cartridge.ProgramRom[(programBankCount - 3) * 0x2000 + index];
+                    else if (address < 0xE000)
+                        return Cartridge.ProgramRom[(programBankCount - 2) * 0x2000 + index];
+                    else // 0xE000 - 0xFFFF
+                        return Cartridge.ProgramRom[(programBankCount - 1) * 0x2000 + index];
                 }
 
                 throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
@@ -89,37 +80,41 @@ namespace NesCore.Storage
 
             set
             {
-                if (address < 0x1000)
-                {
-                    // first 2 switchable 4K PPU banks
-                    Cartridge.CharacterRom[characterBank1 * 0x1000 + address] = value;
-                    return;
-                }
-
                 if (address < 0x2000)
                 {
-                    // second 2 switchable 4K PPU banks
-                    address -= 0x1000;
-                    Cartridge.CharacterRom[0x2000 + characterBank2 * 0x1000 + address] = value;
+                    int index = address & 0x0FFF;
+                    SetCharacterBanks();
+
+                    if (address < 0x1000)
+                        Cartridge.CharacterRom[selectedCharacterBank0 * 0x1000 + index] = value;
+                    else
+                        Cartridge.CharacterRom[selectedCharacterBank1 * 0x1000 + index] = value;
+
                     return;
                 }
 
-                if (address >= 0xA000 && address < 0xB000)
+                if (address >= 0x8000)
                 {
-                    programBank = value & 0x0F;
-                    return;
-                }
-
-                if (address >= 0xB000 && address < 0xC000)
-                {
-                    characterBank1 = value & 0x1F;
-                    return;
-                }
-
-                if (address >= 0xF000)
-                {
-                    Cartridge.MirrorMode = ((value & 1) == 1) ? Cartridge.MirrorHorizontal : Cartridge.MirrorVertical;
-                    Cartridge.MirrorModeChanged?.Invoke();
+                    if (address < 0xA000)
+                    {
+                        int index = address & 0x1FFF;
+                        throw new NotImplementedException("MMC2 write to $8000 - $9FFF");
+                    }
+                    else if (address < 0xB000)
+                        programBank = (byte)(value & 0x0F);
+                    else if (address < 0xC000)
+                        characterBank0 = (byte)(value & 0x1F);
+                    else if (address < 0xD000)
+                        characterBank1 = (byte)(value & 0x1F);
+                    else if (address < 0xE000)
+                        characterBank2 = (byte)(value & 0x1F);
+                    else if (address < 0xF000)
+                        characterBank3 = (byte)(value & 0x1F);
+                    else //address >= 0xF000
+                    {
+                        Cartridge.MirrorMode = ((value & 1) == 1) ? Cartridge.MirrorHorizontal : Cartridge.MirrorVertical;
+                        Cartridge.MirrorModeChanged?.Invoke();
+                    }
                     return;
                 }
 
@@ -131,10 +126,20 @@ namespace NesCore.Storage
         {
         }
 
-        private int programBank;
-        private int programBankLast3;
-        private int characterBank1;
-        private int characterBank2;
+        private void SetCharacterBanks()
+        {
+            selectedCharacterBank0 = latch0 == 0xFD ? characterBank0 : characterBank1;
+            selectedCharacterBank1 = latch1 == 0xFD ? characterBank2 : characterBank3;
+    	}
+
+        private byte programBankCount;
+        private byte programBank;
+        private byte characterBank0;
+        private byte characterBank1;
+        private byte characterBank2;
+        private byte characterBank3;
+        private byte selectedCharacterBank0;
+        private byte selectedCharacterBank1;
         private byte latch0;
         private byte latch1;
     }

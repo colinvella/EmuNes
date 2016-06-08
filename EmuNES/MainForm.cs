@@ -528,8 +528,11 @@ namespace EmuNES
             resizedCaptionFont = null;
 
             this.fullScreen = fullScreen;
+
             if (fullScreen)
             {
+                Cursor.Hide();
+
                 this.windowModePosition = new Point(this.Left, this.Top);
                 this.FormBorderStyle = FormBorderStyle.None;
                 this.MainMenuStrip.Hide();
@@ -547,6 +550,8 @@ namespace EmuNES
             }
             else
             {
+                Cursor.Show();
+
                 this.FormBorderStyle = FormBorderStyle.FixedSingle;
                 this.MainMenuStrip.Show();
                 this.statusStrip.Show();

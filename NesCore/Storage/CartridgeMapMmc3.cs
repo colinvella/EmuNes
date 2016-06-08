@@ -54,7 +54,7 @@ namespace NesCore.Storage
                 else if (address >= 0x6000)
                     return Cartridge.SaveRam[address - 0x6000];
                 else
-                    throw new Exception("Unhandled MMC3 mapper write at address: " + Hex.Format(address));
+                    throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
             }
 
             set
@@ -70,7 +70,7 @@ namespace NesCore.Storage
                 else if (address >= 0x6000)
                     Cartridge.SaveRam[address - 0x6000] = value;
                 else
-                    throw new Exception("Unhandled MMC3 mapper write at address: " + Hex.Format(address));
+                    throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
             }
         }
 

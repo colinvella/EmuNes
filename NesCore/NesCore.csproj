@@ -61,6 +61,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\Cartridge.cs" />
     <Compile Include="Storage\CartridgeMap.cs" />
+    <Compile Include="Storage\CartridgeMapColourDreams.cs" />
     <Compile Include="Storage\CartridgeMapMmc1.cs" />
     <Compile Include="Storage\CartridgeMapMmc3.cs" />
     <Compile Include="Storage\CartridgeMapCnRom.cs" />

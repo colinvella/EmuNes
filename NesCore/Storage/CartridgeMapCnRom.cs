@@ -44,7 +44,7 @@ namespace NesCore.Storage
                 if (address >= 0x6000)
                     return Cartridge.SaveRam[address - 0x6000];
 
-                throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
+                throw new Exception("Unhandled CNROM mapper read at address: " + Hex.Format(address));
             }
 
             set
@@ -56,7 +56,7 @@ namespace NesCore.Storage
                 else if (address >= 0x6000)
                     Cartridge.SaveRam[address - 0x6000] = value;
                 else
-                    throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
+                    throw new Exception("Unhandled CNROM mapper write at address: " + Hex.Format(address));
             }
         }
 

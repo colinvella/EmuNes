@@ -45,18 +45,16 @@ namespace NesCore.Storage
                         value = Cartridge.CharacterRom[selectedCharacterBank0 * 0x1000 + index];
                     else // 0x1000 - 0x1FFF
                         value = Cartridge.CharacterRom[selectedCharacterBank1 * 0x1000 + index];
-
+                    
                     if (address == 0x0FD8)
                         latch0 = 0xFD;
                     else if (address == 0x0FE8)
-                        latch1 = 0xFE;
+                        latch0 = 0xFE;
 
                     if (address >= 0x1FD8 && address <= 0x1FDF)
                         latch1 = 0xFD;
                     else if (address >= 0x1FE8 && address <= 0x1FEF)
                         latch1 = 0xFE;
-
-                    // REF: https://github.com/nwidger/nintengo/blob/master/nes/mmc2.go
 
                     return value;
                 }

@@ -13,6 +13,7 @@ namespace NesCore.Storage
         {
             this.Cartridge = cartridge;
             bankMode = 0;
+            programRam = new byte[0x2000];
         }
 
         public Cartridge Cartridge { get; private set; }
@@ -23,6 +24,9 @@ namespace NesCore.Storage
             {
                 if (address < 0x2000)
                     return Cartridge.CharacterRom[address];
+
+                if (address >= 0x6000 && address < 0x8000)
+                    return programRam[address - 0x6000];
 
                 int index = 0;
                 switch (bankMode)
@@ -79,6 +83,12 @@ namespace NesCore.Storage
                     return;
                 }
 
+                if (address >= 0x6000 && address < 0x8000)
+                {
+                    programRam[address - 0x6000] = value;
+                    return;
+                }
+
                 if (address >= 0x8000)
                 {
                     bankMode = address & 0x03;
@@ -114,5 +124,6 @@ namespace NesCore.Storage
         private int bankMode;
         private int programRomBank;
         private int subBank;
+        private byte[] programRam;
     }
 }

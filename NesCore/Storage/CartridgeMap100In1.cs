@@ -12,7 +12,7 @@ namespace NesCore.Storage
         public CartridgeMap100In1(Cartridge cartridge)
         {
             this.Cartridge = cartridge;
-            bankMode = 2;
+            bankMode = 0;
         }
 
         public Cartridge Cartridge { get; private set; }

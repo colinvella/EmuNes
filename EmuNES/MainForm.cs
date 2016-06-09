@@ -40,6 +40,9 @@ namespace EmuNES
             foreach (Keys key in Enum.GetValues(typeof(Keys)))
                 keyPressed[key] = false;
 
+            // set up joystick object before console
+            joystick = new Joystick();
+
             Console = new NesCore.Console();
 
             ConfigureVideo();
@@ -117,7 +120,7 @@ namespace EmuNES
 
         private void OnGameRunPause(object sender, EventArgs eventArgs)
         {
-            switch(gameState)
+            switch (gameState)
             {
                 case GameState.Stopped:
                     // run
@@ -219,6 +222,8 @@ namespace EmuNES
 
         private void OnGameTick(object sender, EventArgs eventArgs)
         {
+            joystick.UpdateState();
+
             if (gameState != GameState.Running)
                 return;
 
@@ -400,14 +405,16 @@ namespace EmuNES
         private void ConfigureDefaultController()
         {
             Joypad joypad = new Joypad();
-            joypad.Start = () => keyPressed[Keys.Enter];
-            joypad.Select = () => keyPressed[Keys.Tab];
-            joypad.A = () => keyPressed[Keys.Z];
-            joypad.B = () => keyPressed[Keys.X];
-            joypad.Up = () => keyPressed[Keys.Up];
-            joypad.Down = () => keyPressed[Keys.Down];
-            joypad.Left = () => keyPressed[Keys.Left];
-            joypad.Right = () => keyPressed[Keys.Right];
+            joypad.Start = () => keyPressed[Keys.Enter] || joystick.Buttons[9];
+            joypad.Select = () => keyPressed[Keys.Tab] || joystick.Buttons[8];
+            joypad.A = () => keyPressed[Keys.Z] || joystick.Buttons[1];
+            joypad.B = () => keyPressed[Keys.X] || joystick.Buttons[2];
+            joypad.Up = () => keyPressed[Keys.Up] || joystick.Up;
+            joypad.Down = () => keyPressed[Keys.Down] || joystick.Down;
+            joypad.Left = () => keyPressed[Keys.Left] || joystick.Left;
+            joypad.Right = () => keyPressed[Keys.Right] || joystick.Right;
+
+            //joystick.ButtonPressed = (Joystick.Button button) => MessageBox.Show(button.ToString());
 
             Console.ConnectControllerOne(joypad);
         }
@@ -560,7 +567,7 @@ namespace EmuNES
                 this.Top = windowModePosition.Y;
             }
         }
-        
+
         private void SetRasterEffect(bool newRasterEffect)
         {
             rasterEffect = newRasterEffect;
@@ -602,7 +609,6 @@ namespace EmuNES
         private string cartridgeRomFilename;
         private RecentFileManager recentFileManager;
 
-        private Dictionary<Keys, bool> keyPressed;
         private FastBitmap bitmapBuffer;
         private GameState gameState;
         private DateTime gameTickDateTime;
@@ -628,5 +634,9 @@ namespace EmuNES
         // audio system
         private WaveOut waveOut;
         private ApuAudioProvider apuAudioProvider;
+
+        // input system
+        private Dictionary<Keys, bool> keyPressed;
+        private Joystick joystick;
     }
 }

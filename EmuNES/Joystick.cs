@@ -62,8 +62,10 @@ namespace EmuNES
 
             oldButtonState = new bool[32];
             buttonState = new bool[32];
-            minX = minY = int.MaxValue;
-            maxX = maxY = int.MinValue;
+            //minX = minY = int.MaxValue;
+            //maxX = maxY = int.MinValue;
+            minX = minY = 0;
+            maxX = maxY = 65535;
 
             int joystickCount = joyGetNumDevs();
             for (Int32 joystickIndex = 0; joystickIndex < joystickCount; joystickIndex++)
@@ -92,7 +94,7 @@ namespace EmuNES
 
         public void UpdateState()
         {
-            Int32 result, i = joyId;
+            Int32 result;
 
             int joyX = 0;
             int joyY = 0;
@@ -109,7 +111,7 @@ namespace EmuNES
             }
             else
             {
-                result = joyGetPos(i, ref joyInfo);
+                result = joyGetPos(joyId, ref joyInfo);
                 if (result != 0) return;
 
                 joyX = joyInfo.wXpos;
@@ -118,20 +120,24 @@ namespace EmuNES
             }
 
             // auto calibrate
-            minX = Math.Min(minX, joyInfoEx.dwXpos);
-            minY = Math.Min(minY, joyInfoEx.dwYpos);
-            maxX = Math.Max(maxX, joyInfoEx.dwXpos);
-            maxY = Math.Max(maxY, joyInfoEx.dwYpos);
+            minX = Math.Min(minX, joyX);
+            minY = Math.Min(minY, joyY);
+            maxX = Math.Max(maxX, joyX);
+            maxY = Math.Max(maxY, joyY);
+            int centreMinX = (minX * 3 + maxX) / 4;
+            int centreMaxX = (minX + maxX * 3) / 4;
+            int centreMinY = (minY * 3 + maxY) / 4;
+            int centreMaxY = (minY + maxY * 3) / 4;
 
             bool oldLeft = Left;
             bool oldRight = Right;
             bool oldUp = Up;
             bool oldDown = Down;
 
-            Left = joyX < minX / 2;
-            Right = joyX > maxX / 2;
-            Up = joyY < minY / 2;
-            Down = joyY > maxY / 2;
+            Left = joyX < centreMinX;
+            Right = joyX > centreMaxX;
+            Up = joyY < centreMinY;
+            Down = joyY > centreMaxY;
 
             Array.Copy(Buttons.ToArray(), oldButtonState, oldButtonState.Length);
             for (int bitIndex = 0; bitIndex < 32; bitIndex++)
@@ -145,7 +151,7 @@ namespace EmuNES
                 if (!oldLeft && Left)
                     ButtonPressed(Button.Left);
                 if (!oldRight && Right)
-                    ButtonPressed(Button.Left);
+                    ButtonPressed(Button.Right);
                 if (!oldUp && Up)
                     ButtonPressed(Button.Up);
                 if (!oldDown && Down)

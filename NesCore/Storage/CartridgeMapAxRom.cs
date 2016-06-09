@@ -50,7 +50,7 @@ namespace NesCore.Storage
                     // ---M-PPP
                     programBank = value & 7;
                     Cartridge.MirrorMode = (value & 0x10) == 0x10
-                        ? Cartridge.MirrorSingle1 : Cartridge.MirrorSingle0;
+                        ? MirrorMode.Single1 : MirrorMode.Single0;
                 }
                 else if (address >= 0x6000)
                     Cartridge.SaveRam[address - 0x6000] = value;

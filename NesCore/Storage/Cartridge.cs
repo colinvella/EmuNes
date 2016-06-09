@@ -35,7 +35,7 @@ namespace NesCore.Storage
             // determine mirroring mode
             int mirrorLowBit = controlBits1 & 1;
             int mirrorHighBit = (controlBits1 >> 3) & 1;
-            MirrorMode = (byte)((mirrorHighBit << 1) | mirrorLowBit);
+            MirrorMode = (MirrorMode)((mirrorHighBit << 1) | mirrorLowBit);
 
             // battery-backed RAM
             BatteryPresent = (controlBits1 & 0x2) != 0;
@@ -77,7 +77,7 @@ namespace NesCore.Storage
         public byte[] CharacterRom { get; private set; }
         public byte[] SaveRam { get; private set; }
         public byte MapperType { get; private set; }
-        public byte MirrorMode { get; set; }
+        public MirrorMode MirrorMode { get; set; }
         public bool BatteryPresent { get; private set; }
 
         public CartridgeMap Map { get; private set; }
@@ -89,15 +89,9 @@ namespace NesCore.Storage
             return "PRG: " + Hex.Format((uint)ProgramRom.Count)
                 + "b, CHR: " + Hex.Format((uint)CharacterRom.Length)
                 + "b, Mapper Type: " + Hex.Format(MapperType)
-                + ", Mirror Mode:" + Hex.Format(MirrorMode)
+                + ", Mirror Mode:" + MirrorMode + " (" + (byte)MirrorMode + ")"
                 + ", Battery: " + (BatteryPresent ? "Yes" : "No");
         }
-
-        public const byte MirrorHorizontal = 0;
-        public const byte MirrorVertical = 1;
-        public const byte MirrorSingle0 = 2;
-        public const byte MirrorSingle1 = 3;
-        public const byte MirrorFour = 4;
 
         private const uint InesMagicNumber = 0x1a53454e;
     }

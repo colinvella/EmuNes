@@ -95,7 +95,7 @@ namespace NesCore.Storage
                     programRomBank = value & 0x3f;
                     subBank = value >> 7;
 
-                    byte mirrorMode = (value & 0x40) != 0 ? Cartridge.MirrorHorizontal : Cartridge.MirrorVertical;
+                    MirrorMode mirrorMode = (value & 0x40) != 0 ? MirrorMode.Horizontal : MirrorMode.Vertical;
                     if (Cartridge.MirrorMode != mirrorMode)
                     {
                         Cartridge.MirrorMode = mirrorMode;

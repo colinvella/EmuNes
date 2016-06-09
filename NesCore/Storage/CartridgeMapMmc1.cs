@@ -118,10 +118,10 @@ namespace NesCore.Storage
 
             switch (mirror)
             {
-                case 0: Cartridge.MirrorMode = Cartridge.MirrorSingle0; break;
-                case 1: Cartridge.MirrorMode = Cartridge.MirrorSingle1; break;
-                case 2: Cartridge.MirrorMode = Cartridge.MirrorVertical; break;
-                case 3: Cartridge.MirrorMode = Cartridge.MirrorHorizontal; break;
+                case 0: Cartridge.MirrorMode = MirrorMode.Single0; break;
+                case 1: Cartridge.MirrorMode = MirrorMode.Single1; break;
+                case 2: Cartridge.MirrorMode = MirrorMode.Vertical; break;
+                case 3: Cartridge.MirrorMode = MirrorMode.Horizontal; break;
             }
             UpdateOffsets();
 

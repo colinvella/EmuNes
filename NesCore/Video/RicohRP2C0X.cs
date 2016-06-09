@@ -1,4 +1,5 @@
 ﻿using NesCore.Memory;
+using NesCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -307,7 +308,7 @@ namespace NesCore.Video
         /// Configures name table data mirroring mode
         /// </summary>
         /// <param name="mirrorMode">mirroring mode from cartridge ROM</param>
-        public void ConfigureNameTableMirroringMode(byte mirrorMode)
+        public void ConfigureNameTableMirroringMode(MirrorMode mirrorMode)
         {
             // $2000-$3EFF
             Memory.ConfigureMemoryAccessRange(0x2000, 0x1F00,
@@ -950,12 +951,12 @@ namespace NesCore.Video
             }
         }
 
-        private ushort MirrorAddress(byte mode, ushort address)
+        private ushort MirrorAddress(MirrorMode mirrorMode, ushort address)
         {
             address = (ushort)((address - 0x2000) % 0x1000);
             int table = address / 0x0400;
             int offset = address % 0x0400;
-            return (ushort)(0x2000 + mirrorLookup[mode][table] * 0x0400 + offset);
+            return (ushort)(0x2000 + mirrorLookup[(int)mirrorMode][table] * 0x0400 + offset);
         }
 
         // storage variables

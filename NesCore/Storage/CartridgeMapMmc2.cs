@@ -110,7 +110,7 @@ namespace NesCore.Storage
                         characterBank3 = (byte)(value & 0x1F);
                     else //address >= 0xF000
                     {
-                        Cartridge.MirrorMode = ((value & 1) == 1) ? Cartridge.MirrorHorizontal : Cartridge.MirrorVertical;
+                        Cartridge.MirrorMode = ((value & 1) == 1) ? MirrorMode.Horizontal : MirrorMode.Vertical;
                         Cartridge.MirrorModeChanged?.Invoke();
                     }
                     return;

@@ -166,7 +166,7 @@ namespace NesCore.Storage
 
         private void WriteMirror(byte value)
         {
-            Cartridge.MirrorMode = ((value & 1) == 0) ? Cartridge.MirrorVertical : Cartridge.MirrorHorizontal;
+            Cartridge.MirrorMode = ((value & 1) == 0) ? MirrorMode.Vertical : MirrorMode.Horizontal;
         }
 
         private void WriteProtect(byte value)

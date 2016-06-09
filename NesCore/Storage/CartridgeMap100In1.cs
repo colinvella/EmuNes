@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NesCore.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,15 +21,69 @@ namespace NesCore.Storage
         {
             get
             {
-                throw new NotImplementedException();
+                if (address < 0x2000)
+                    return Cartridge.CharacterRom[address];
+
+                int index = 0;
+                switch (bankMode)
+                {
+                    case 0:
+                        index = address & 0x3FFF;
+                        if (address >= 0x8000 && address < 0xC000)
+                        {
+                            return Cartridge.ProgramRom[programRomBank * 0x4000 + index];
+                        }
+                        else if (address >= 0xC000)
+                        {
+                            return Cartridge.ProgramRom[(programRomBank | 1) * 0x4000 + index];
+                        }
+                        break;
+                    case 1:
+                        index = address & 0x3FFF;
+                        if (address >= 0x8000 && address < 0xC000)
+                        {
+                            return Cartridge.ProgramRom[programRomBank * 0x4000 + index];
+                        }
+                        else if (address >= 0xC000)
+                        {
+                            // last bank
+                            return Cartridge.ProgramRom[Cartridge.ProgramRom.Count - 0x4000 + index];
+                        }
+                        break;
+                    case 2:
+                        // 8k banks
+                        index = address & 0x1FFF;
+                        if (address >= 0x8000)
+                        {
+                            return Cartridge.ProgramRom[programRomBank * 0x4000 + subBank * 0x2000 + index];
+                        }
+                        break;
+                    case 3:
+                        // 16k banks (mirrored)
+                        index = address & 0x3FFF;
+                        if (address >= 0x8000)
+                        {
+                            return Cartridge.ProgramRom[programRomBank * 0x4000 + index];
+                        }
+                        break;
+                }
+
+                throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
             }
 
             set
             {
+                if (address < 0x2000)
+                {
+                    Cartridge.CharacterRom[address] = value;
+                    return;
+                }
+
                 if (address >= 0x8000)
                 {
                     bankMode = address & 0x03;
                     programRomBank = value & 0x3f;
+                    subBank = value >> 7;
 
                     byte mirrorMode = (value & 0x40) != 0 ? Cartridge.MirrorHorizontal : Cartridge.MirrorVertical;
                     if (Cartridge.MirrorMode != mirrorMode)
@@ -38,7 +93,8 @@ namespace NesCore.Storage
                     }
                     return;
                 }
-                throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
+
+                throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
             }
         }
 

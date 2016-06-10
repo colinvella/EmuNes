@@ -67,7 +67,7 @@ namespace EmuNES
 
             applicationMargin = new Size(Width - videoPanel.ClientSize.Width, Height - videoPanel.ClientSize.Height);
             SetScreen(1, true);
-            SetRasterEffect(false);
+            SetScreenFilter(ScreenFilter.None);
             SetMotionBlur(false);
             viewScreenSizeFullScreenMenuItem.ShortcutKeys = Keys.Alt | Keys.Enter;
 
@@ -211,16 +211,31 @@ namespace EmuNES
             SetTvAspect(!tvAspect);
         }
 
-        private void OnViewRasterEffect(object sender, EventArgs e)
+        private void OnViewScreenFilter(object sender, EventArgs e)
         {
-            SetRasterEffect(!rasterEffect);
+            int filterCount = Enum.GetValues(typeof(ScreenFilter)).Length;
+            screenFilter = (ScreenFilter)(((int)screenFilter + 1) % filterCount);
+            SetScreenFilter(screenFilter);
+        }
+
+        private void OnVewScreenFilterItem(object sender, EventArgs eventArgs)
+        {
+            int filterIndex = 0;
+            foreach (ToolStripMenuItem filterMenuItem in viewScreenFilterMenuItem.DropDownItems)
+            {
+                if (filterMenuItem == sender)
+                {
+                    SetScreenFilter((ScreenFilter)filterIndex);
+                    return;
+                }
+                ++filterIndex;
+            }
         }
 
         private void OnViewMotionBlur(object sender, EventArgs e)
         {
             SetMotionBlur(!motionBlur);
         }
-
 
         private void OnKeyDown(object sender, KeyEventArgs keyEventArgs)
         {
@@ -287,11 +302,11 @@ namespace EmuNES
                     DrawCenteredText(graphics, "Paused");
                     break;
                 case GameState.Running:
-                    if (rasterEffect)
+                    if (screenFilter != ScreenFilter.None)
                     {
                         graphics.DrawImage(bitmapBuffer.Bitmap, leftCenteredMargin, 0, bufferSize.Width, bufferSize.Height);
                         graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-                        graphics.DrawImage(resizedRasterFilter, leftCenteredMargin, 0);
+                        graphics.DrawImage(resizedScreenFilter, leftCenteredMargin, 0);
                     }
                     else
                     {
@@ -426,8 +441,6 @@ namespace EmuNES
             joypad.Left = () => keyPressed[Keys.Left] || gameController.Left;
             joypad.Right = () => keyPressed[Keys.Right] || gameController.Right;
 
-            //joystick.ButtonPressed = (Joystick.Button button) => MessageBox.Show(button.ToString());
-
             Console.ConnectControllerOne(joypad);
         }
 
@@ -555,7 +568,7 @@ namespace EmuNES
             Height = bufferSize.Height + applicationMargin.Height;
 
             // create resized version of raster filter to optimise rendering
-            resizedRasterFilter = ResizeImage(Properties.Resources.FilterRaster, bufferSize.Width, bufferSize.Height);
+            UpdateResizedScreenFilter();
 
             viewScreenSizeX1MenuItem.Checked = newScreenSize == 1;
             viewScreenSizeX2MenuItem.Checked = newScreenSize == 2;
@@ -590,8 +603,8 @@ namespace EmuNES
                 this.Height = screenHeight;
                 bufferSize.Width = screenHeight * 282 / 256;
                 bufferSize.Height = screenHeight + 1;
-                this.resizedRasterFilter = ResizeImage(Properties.Resources.FilterRaster,
-                    bufferSize.Width, bufferSize.Height);
+
+                UpdateResizedScreenFilter();
             }
             else
             {
@@ -606,10 +619,28 @@ namespace EmuNES
             }
         }
 
-        private void SetRasterEffect(bool newRasterEffect)
+        private void UpdateResizedScreenFilter()
         {
-            rasterEffect = newRasterEffect;
-            rasterEffectMenuItem.Checked = rasterEffect;
+            Image sourceFilter = null;
+            switch (screenFilter)
+            {
+                case ScreenFilter.Raster: sourceFilter = Properties.Resources.FilterRaster; break;
+                case ScreenFilter.Lcd: sourceFilter = Properties.Resources.FilterLcd; break;
+            }
+
+            if (sourceFilter != null)
+                this.resizedScreenFilter = ResizeImage(sourceFilter,
+                    bufferSize.Width, bufferSize.Height);
+        }
+
+        private void SetScreenFilter(ScreenFilter newScreenFilter)
+        {
+            screenFilter = newScreenFilter;
+            UpdateResizedScreenFilter();
+
+            viewScreenFilterNoneMenuItem.Checked = screenFilter == ScreenFilter.None;
+            viewScreenFilterRasterMenuItem.Checked = screenFilter == ScreenFilter.Raster;
+            viewScreenFilterLcdMenuItem.Checked = screenFilter == ScreenFilter.Lcd;
         }
 
         private void SetMotionBlur(bool newMotionBlur)
@@ -653,7 +684,7 @@ namespace EmuNES
         private DateTime gameTickDateTime;
         private Icon gameIcon;
 
-        private Image resizedRasterFilter;
+        private Image resizedScreenFilter;
         private Font resizedCaptionFont;
 
         // frame rate handling
@@ -667,7 +698,7 @@ namespace EmuNES
         private bool fullScreen;
         private Point windowModePosition;
         private bool tvAspect;
-        private bool rasterEffect;
+        private ScreenFilter screenFilter;
         private bool motionBlur;
 
         // audio system

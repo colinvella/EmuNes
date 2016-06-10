@@ -99,6 +99,11 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="Resources\FileExit.png" />
+    <None Include="Resources\ViewTvAspect.png" />
+    <None Include="Resources\ViewMotionBlur.png" />
+    <None Include="Resources\ViewScreenSizeFull.png" />
+    <None Include="Resources\ViewScreenSize.png" />
+    <None Include="Resources\ViewScreenFilter.png" />
     <None Include="Resources\FilterLcd.png" />
     <Content Include="Resources\GameRun.png" />
     <Content Include="Resources\GameStop.png" />

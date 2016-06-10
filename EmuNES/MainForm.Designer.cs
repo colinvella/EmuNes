@@ -192,8 +192,9 @@
             this.viewScreenSizeX4MenuItem,
             this.viewScreenSizeSeparator,
             this.viewScreenSizeFullScreenMenuItem});
+            this.viewScreenSizeMenuItem.Image = global::EmuNES.Properties.Resources.ViewScreenSize;
             this.viewScreenSizeMenuItem.Name = "viewScreenSizeMenuItem";
-            this.viewScreenSizeMenuItem.Size = new System.Drawing.Size(214, 26);
+            this.viewScreenSizeMenuItem.Size = new System.Drawing.Size(213, 26);
             this.viewScreenSizeMenuItem.Text = "Screen &Size";
             // 
             // viewScreenSizeX1MenuItem
@@ -235,6 +236,7 @@
             // 
             // viewScreenSizeFullScreenMenuItem
             // 
+            this.viewScreenSizeFullScreenMenuItem.Image = global::EmuNES.Properties.Resources.ViewScreenSizeFull;
             this.viewScreenSizeFullScreenMenuItem.Name = "viewScreenSizeFullScreenMenuItem";
             this.viewScreenSizeFullScreenMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.E)));
             this.viewScreenSizeFullScreenMenuItem.Size = new System.Drawing.Size(201, 26);
@@ -243,9 +245,10 @@
             // 
             // viewTvAspectMenuItem
             // 
+            this.viewTvAspectMenuItem.Image = global::EmuNES.Properties.Resources.ViewTvAspect;
             this.viewTvAspectMenuItem.Name = "viewTvAspectMenuItem";
             this.viewTvAspectMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
-            this.viewTvAspectMenuItem.Size = new System.Drawing.Size(214, 26);
+            this.viewTvAspectMenuItem.Size = new System.Drawing.Size(213, 26);
             this.viewTvAspectMenuItem.Text = "&TV Aspect";
             this.viewTvAspectMenuItem.Click += new System.EventHandler(this.OnViewTvAspect);
             // 
@@ -255,38 +258,39 @@
             this.viewScreenFilterNoneMenuItem,
             this.viewScreenFilterRasterMenuItem,
             this.viewScreenFilterLcdMenuItem});
+            this.viewScreenFilterMenuItem.Image = global::EmuNES.Properties.Resources.ViewScreenFilter;
             this.viewScreenFilterMenuItem.Name = "viewScreenFilterMenuItem";
-            this.viewScreenFilterMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.viewScreenFilterMenuItem.Size = new System.Drawing.Size(214, 26);
+            this.viewScreenFilterMenuItem.Size = new System.Drawing.Size(213, 26);
             this.viewScreenFilterMenuItem.Text = "Screen &Filter";
             this.viewScreenFilterMenuItem.Click += new System.EventHandler(this.OnViewScreenFilter);
             // 
             // viewScreenFilterNoneMenuItem
             // 
             this.viewScreenFilterNoneMenuItem.Name = "viewScreenFilterNoneMenuItem";
-            this.viewScreenFilterNoneMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.viewScreenFilterNoneMenuItem.Size = new System.Drawing.Size(125, 26);
             this.viewScreenFilterNoneMenuItem.Text = "None";
             this.viewScreenFilterNoneMenuItem.Click += new System.EventHandler(this.OnVewScreenFilterItem);
             // 
             // viewScreenFilterRasterMenuItem
             // 
             this.viewScreenFilterRasterMenuItem.Name = "viewScreenFilterRasterMenuItem";
-            this.viewScreenFilterRasterMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.viewScreenFilterRasterMenuItem.Size = new System.Drawing.Size(125, 26);
             this.viewScreenFilterRasterMenuItem.Text = "Raster";
             this.viewScreenFilterRasterMenuItem.Click += new System.EventHandler(this.OnVewScreenFilterItem);
             // 
             // viewScreenFilterLcdMenuItem
             // 
             this.viewScreenFilterLcdMenuItem.Name = "viewScreenFilterLcdMenuItem";
-            this.viewScreenFilterLcdMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.viewScreenFilterLcdMenuItem.Size = new System.Drawing.Size(125, 26);
             this.viewScreenFilterLcdMenuItem.Text = "LCD";
             this.viewScreenFilterLcdMenuItem.Click += new System.EventHandler(this.OnVewScreenFilterItem);
             // 
             // viewMotionBlurMenuItem
             // 
+            this.viewMotionBlurMenuItem.Image = global::EmuNES.Properties.Resources.ViewMotionBlur;
             this.viewMotionBlurMenuItem.Name = "viewMotionBlurMenuItem";
             this.viewMotionBlurMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.B)));
-            this.viewMotionBlurMenuItem.Size = new System.Drawing.Size(214, 26);
+            this.viewMotionBlurMenuItem.Size = new System.Drawing.Size(213, 26);
             this.viewMotionBlurMenuItem.Text = "Motion &Blur";
             this.viewMotionBlurMenuItem.Click += new System.EventHandler(this.OnViewMotionBlur);
             // 

@@ -127,6 +127,12 @@
   <data name="FileOpen" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\FileOpen.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="FilterLcd" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\FilterLcd.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="FilterRaster" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\FilterRaster.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="GamePause" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\GamePause.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -141,8 +147,5 @@
   </data>
   <data name="Nes" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Nes.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="RasterFilter" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\RasterFilter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

@@ -555,7 +555,7 @@ namespace EmuNES
             Height = bufferSize.Height + applicationMargin.Height;
 
             // create resized version of raster filter to optimise rendering
-            resizedRasterFilter = ResizeImage(Properties.Resources.RasterFilter, bufferSize.Width, bufferSize.Height);
+            resizedRasterFilter = ResizeImage(Properties.Resources.FilterRaster, bufferSize.Width, bufferSize.Height);
 
             viewScreenSizeX1MenuItem.Checked = newScreenSize == 1;
             viewScreenSizeX2MenuItem.Checked = newScreenSize == 2;
@@ -590,7 +590,7 @@ namespace EmuNES
                 this.Height = screenHeight;
                 bufferSize.Width = screenHeight * 282 / 256;
                 bufferSize.Height = screenHeight + 1;
-                this.resizedRasterFilter = ResizeImage(Properties.Resources.RasterFilter,
+                this.resizedRasterFilter = ResizeImage(Properties.Resources.FilterRaster,
                     bufferSize.Width, bufferSize.Height);
             }
             else

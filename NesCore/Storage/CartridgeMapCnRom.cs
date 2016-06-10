@@ -42,7 +42,7 @@ namespace NesCore.Storage
                     return Cartridge.ProgramRom[programBank1 * 0x4000 + address - 0x8000];
 
                 if (address >= 0x6000)
-                    return Cartridge.SaveRam[address - 0x6000];
+                    return Cartridge.SaveRam[(ushort)(address - 0x6000)];
 
                 throw new Exception("Unhandled CNROM mapper read at address: " + Hex.Format(address));
             }
@@ -54,7 +54,7 @@ namespace NesCore.Storage
                 else if (address >= 0x8000)
                     characterBank = value % 3;
                 else if (address >= 0x6000)
-                    Cartridge.SaveRam[address - 0x6000] = value;
+                    Cartridge.SaveRam[(ushort)(address - 0x6000)] = value;
                 else
                     throw new Exception("Unhandled CNROM mapper write at address: " + Hex.Format(address));
             }

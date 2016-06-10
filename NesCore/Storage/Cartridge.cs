@@ -12,7 +12,7 @@ namespace NesCore.Storage
     {
         public Cartridge(BinaryReader romBinaryReader)
         {
-            SaveRam = new byte[0x2000];
+            SaveRam = new SaveRam();
 
             uint magicNumber = romBinaryReader.ReadUInt32();
 
@@ -75,7 +75,7 @@ namespace NesCore.Storage
 
         public IReadOnlyList<byte> ProgramRom { get; private set; }
         public byte[] CharacterRom { get; private set; }
-        public byte[] SaveRam { get; private set; }
+        public SaveRam SaveRam { get; }
         public byte MapperType { get; private set; }
         public MirrorMode MirrorMode { get; set; }
         public bool BatteryPresent { get; private set; }

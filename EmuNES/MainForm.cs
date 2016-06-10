@@ -82,6 +82,13 @@ namespace EmuNES
             cancelEventArgs.Cancel = MessageBox.Show(
                 this, "Are you sure?", "Exit " + Application.ProductName,
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No;
+
+            if (cancelEventArgs.Cancel)
+                return;
+
+            // save previous SRAM if applicable
+            if (this.cartridge != null && this.cartridge.SaveRam.Modified)
+                StoreSaveRam();
         }
 
         private void OnFileOpen(object sender, EventArgs eventArgs)
@@ -165,6 +172,10 @@ namespace EmuNES
             videoPanel.Invalidate();
             gameState = GameState.Stopped;
             waveOut.Stop();
+
+            // save previous SRAM if applicable
+            if (this.cartridge.SaveRam.Modified)
+                StoreSaveRam();
 
             UpdateGameMenuItems();
         }
@@ -430,14 +441,32 @@ namespace EmuNES
         {
             try
             {
+                // save previous SRAM if applicable
+                if (this.cartridge != null && this.cartridge.SaveRam.Modified)
+                    StoreSaveRam();
+
                 Stream cartridgeRomStream = GetCartridgeRomStream(cartridgeRomPath);
 
                 BinaryReader romBinaryReader = new BinaryReader(cartridgeRomStream);
-                this.cartridge = new Cartridge(romBinaryReader);
+                Cartridge newCartridge = new Cartridge(romBinaryReader);
                 romBinaryReader.Close();
+
+                // load SRAM if file exists
+                this.cartridgeSaveRamFilename = cartridgeRomPath.Replace(".nes", ".sram").Replace(".zip", ".sram");
+                if (File.Exists(this.cartridgeSaveRamFilename))
+                {
+                    BinaryReader saveRamBinaryReader = new BinaryReader(new FileStream(this.cartridgeSaveRamFilename, FileMode.Open));
+                    newCartridge.SaveRam.Load(saveRamBinaryReader);
+                    saveRamBinaryReader.Close();
+                    MessageBox.Show("SaveRam loaded!");
+                }
+
+                this.cartridge = newCartridge;
+
                 Console.LoadCartridge(cartridge);
 
                 this.cartridgeRomFilename = Path.GetFileNameWithoutExtension(cartridgeRomPath);
+
                 this.Text = cartridgeRomFilename + " - " + Application.ProductName;
 
                 filePropertiesMenuItem.Enabled = true;
@@ -455,6 +484,14 @@ namespace EmuNES
                 MessageBox.Show(this, "Unable to load cartridge rom. Reason: " + exception.Message, "Open Game ROM", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
+        }
+
+        private void StoreSaveRam()
+        {
+            BinaryWriter saveRamBinaryWriter = new BinaryWriter(new FileStream(this.cartridgeSaveRamFilename, FileMode.OpenOrCreate, FileAccess.Write));
+            this.cartridge.SaveRam.Save(saveRamBinaryWriter);
+            saveRamBinaryWriter.Close();
+            MessageBox.Show("SaveRam saved!");
         }
 
         /// <summary>
@@ -607,6 +644,7 @@ namespace EmuNES
 
         private Cartridge cartridge;
         private string cartridgeRomFilename;
+        private string cartridgeSaveRamFilename;
         private RecentFileManager recentFileManager;
 
         private FastBitmap bitmapBuffer;

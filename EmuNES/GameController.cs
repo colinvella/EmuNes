@@ -53,26 +53,16 @@ namespace EmuNES
 
         public delegate void ButtonPressedHandler(Button button);
 
-        public GameController()
+        public GameController(int gameControllerId)
         {
             joyInfoEx = new JOYINFOEX();
             joyInfoEx.dwSize = Marshal.SizeOf(joyInfoEx);
             joyInfoEx.dwFlags = JOY_RETURNALL;
 
-            joyId = 0;
+            this.joystickId = gameControllerId;
 
             oldButtonState = new bool[32];
             buttonState = new bool[32];
-
-            int joystickCount = joyGetNumDevs();
-            for (Int32 joystickIndex = 0; joystickIndex < joystickCount; joystickIndex++)
-            {
-                if (joyGetPosEx(joystickIndex, ref joyInfoEx) == 0)
-                {
-                    joyId = joystickIndex;
-                    //joyEx = true;
-                }
-            }
         }
 
         public bool Left { get; private set; }
@@ -90,7 +80,7 @@ namespace EmuNES
             int joyY = 0;
             int joyButtons = 0;
    
-            int result = joyGetPosEx(joyId, ref joyInfoEx);
+            int result = joyGetPosEx(joystickId, ref joyInfoEx);
             if (result == 0)
             {
                 joyX = joyInfoEx.dwXpos;
@@ -98,8 +88,7 @@ namespace EmuNES
                 joyButtons = joyInfoEx.dwButtons;
             }
 
-            // auto calibrate
-
+            // detect button changes for event dispatch
             bool oldLeft = Left;
             bool oldRight = Right;
             bool oldUp = Up;
@@ -117,6 +106,7 @@ namespace EmuNES
                 joyButtons >>= 1;
             }
 
+            // if event wired, fire it on any presses
             if (ButtonPressed != null)
             {
                 if (!oldLeft && Left)
@@ -135,7 +125,7 @@ namespace EmuNES
         }
 
         private JOYINFOEX joyInfoEx;
-        private Int32 joyId;
+        private Int32 joystickId;
 
         private bool[] buttonState;
         private bool[] oldButtonState;
@@ -169,9 +159,6 @@ namespace EmuNES
 
         private const String WINMM_NATIVE_LIBRARY = "winmm.dll";
         private const CallingConvention CALLING_CONVENTION = CallingConvention.StdCall;
-
-        [DllImport(WINMM_NATIVE_LIBRARY, CallingConvention = CALLING_CONVENTION), SuppressUnmanagedCodeSecurity]
-        private static extern Int32 joyGetNumDevs();
 
         [DllImport(WINMM_NATIVE_LIBRARY, CallingConvention = CALLING_CONVENTION), SuppressUnmanagedCodeSecurity]
         private static extern Int32 joyGetPosEx(Int32 uJoyID, ref JOYINFOEX pji);

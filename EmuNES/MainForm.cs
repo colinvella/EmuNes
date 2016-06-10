@@ -41,7 +41,8 @@ namespace EmuNES
                 keyPressed[key] = false;
 
             // set up joystick object before console
-            joystick = new GameController();
+            this.gameControllerManager = new GameControllerManager();
+            this.gameController = gameControllerManager[0];
 
             Console = new NesCore.Console();
 
@@ -233,7 +234,7 @@ namespace EmuNES
 
         private void OnGameTick(object sender, EventArgs eventArgs)
         {
-            joystick.UpdateState();
+            gameController.UpdateState();
 
             if (gameState != GameState.Running)
                 return;
@@ -416,14 +417,14 @@ namespace EmuNES
         private void ConfigureDefaultController()
         {
             Joypad joypad = new Joypad();
-            joypad.Start = () => keyPressed[Keys.Enter] || joystick.Buttons[9];
-            joypad.Select = () => keyPressed[Keys.Tab] || joystick.Buttons[8];
-            joypad.A = () => keyPressed[Keys.Z] || joystick.Buttons[1];
-            joypad.B = () => keyPressed[Keys.X] || joystick.Buttons[2];
-            joypad.Up = () => keyPressed[Keys.Up] || joystick.Up;
-            joypad.Down = () => keyPressed[Keys.Down] || joystick.Down;
-            joypad.Left = () => keyPressed[Keys.Left] || joystick.Left;
-            joypad.Right = () => keyPressed[Keys.Right] || joystick.Right;
+            joypad.Start = () => keyPressed[Keys.Enter] || gameController.Buttons[9];
+            joypad.Select = () => keyPressed[Keys.Tab] || gameController.Buttons[8];
+            joypad.A = () => keyPressed[Keys.Z] || gameController.Buttons[1];
+            joypad.B = () => keyPressed[Keys.X] || gameController.Buttons[2];
+            joypad.Up = () => keyPressed[Keys.Up] || gameController.Up;
+            joypad.Down = () => keyPressed[Keys.Down] || gameController.Down;
+            joypad.Left = () => keyPressed[Keys.Left] || gameController.Left;
+            joypad.Right = () => keyPressed[Keys.Right] || gameController.Right;
 
             //joystick.ButtonPressed = (Joystick.Button button) => MessageBox.Show(button.ToString());
 
@@ -675,6 +676,7 @@ namespace EmuNES
 
         // input system
         private Dictionary<Keys, bool> keyPressed;
-        private GameController joystick;
+        private GameControllerManager gameControllerManager;
+        private GameController gameController;
     }
 }

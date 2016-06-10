@@ -93,6 +93,26 @@ namespace EmuNES.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap FileProperties {
+            get {
+                object obj = ResourceManager.GetObject("FileProperties", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap FileRecent {
+            get {
+                object obj = ResourceManager.GetObject("FileRecent", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap FilterLcd {
             get {
                 object obj = ResourceManager.GetObject("FilterLcd", resourceCulture);

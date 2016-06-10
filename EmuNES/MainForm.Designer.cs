@@ -71,12 +71,12 @@
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(168, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(178, 6);
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(168, 6);
+            toolStripSeparator2.Size = new System.Drawing.Size(178, 6);
             // 
             // mainMenuStrip
             // 
@@ -109,22 +109,24 @@
             // 
             this.fileOpenMenuItem.Image = global::EmuNES.Properties.Resources.FileOpen;
             this.fileOpenMenuItem.Name = "fileOpenMenuItem";
-            this.fileOpenMenuItem.Size = new System.Drawing.Size(171, 26);
+            this.fileOpenMenuItem.Size = new System.Drawing.Size(181, 26);
             this.fileOpenMenuItem.Text = "&Open";
             this.fileOpenMenuItem.Click += new System.EventHandler(this.OnFileOpen);
             // 
             // filePropertiesMenuItem
             // 
             this.filePropertiesMenuItem.Enabled = false;
+            this.filePropertiesMenuItem.Image = global::EmuNES.Properties.Resources.FileProperties;
             this.filePropertiesMenuItem.Name = "filePropertiesMenuItem";
-            this.filePropertiesMenuItem.Size = new System.Drawing.Size(171, 26);
+            this.filePropertiesMenuItem.Size = new System.Drawing.Size(181, 26);
             this.filePropertiesMenuItem.Text = "&Properties...";
             this.filePropertiesMenuItem.Click += new System.EventHandler(this.OnFileProperties);
             // 
             // fileRecentFilesMenuItem
             // 
+            this.fileRecentFilesMenuItem.Image = global::EmuNES.Properties.Resources.FileRecent;
             this.fileRecentFilesMenuItem.Name = "fileRecentFilesMenuItem";
-            this.fileRecentFilesMenuItem.Size = new System.Drawing.Size(171, 26);
+            this.fileRecentFilesMenuItem.Size = new System.Drawing.Size(181, 26);
             this.fileRecentFilesMenuItem.Text = "Recent Files...";
             // 
             // fileExitMenuItem
@@ -132,7 +134,7 @@
             this.fileExitMenuItem.Image = global::EmuNES.Properties.Resources.FileExit;
             this.fileExitMenuItem.Name = "fileExitMenuItem";
             this.fileExitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.fileExitMenuItem.Size = new System.Drawing.Size(171, 26);
+            this.fileExitMenuItem.Size = new System.Drawing.Size(181, 26);
             this.fileExitMenuItem.Text = "Exit";
             this.fileExitMenuItem.Click += new System.EventHandler(this.OnFileExit);
             // 

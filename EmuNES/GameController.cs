@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EmuNES
 {
-    class Joystick
+    class GameController
     {      
         public enum Button
         {
@@ -53,32 +53,24 @@ namespace EmuNES
 
         public delegate void ButtonPressedHandler(Button button);
 
-        public Joystick()
+        public GameController()
         {
-            joyInfo = new JOYINFO();
             joyInfoEx = new JOYINFOEX();
-            joyEx = false;
+            joyInfoEx.dwSize = Marshal.SizeOf(joyInfoEx);
+            joyInfoEx.dwFlags = JOY_RETURNALL;
+
             joyId = 0;
 
             oldButtonState = new bool[32];
             buttonState = new bool[32];
-            //minX = minY = int.MaxValue;
-            //maxX = maxY = int.MinValue;
-            minX = minY = 0;
-            maxX = maxY = 65535;
 
             int joystickCount = joyGetNumDevs();
             for (Int32 joystickIndex = 0; joystickIndex < joystickCount; joystickIndex++)
             {
-                if (joyGetPos(joystickIndex, ref joyInfo) == 0)
-                {
-                    joyId = joystickIndex;
-                    joyEx = false;
-                }
                 if (joyGetPosEx(joystickIndex, ref joyInfoEx) == 0)
                 {
                     joyId = joystickIndex;
-                    joyEx = true;
+                    //joyEx = true;
                 }
             }
         }
@@ -94,50 +86,29 @@ namespace EmuNES
 
         public void UpdateState()
         {
-            Int32 result;
-
             int joyX = 0;
             int joyY = 0;
             int joyButtons = 0;
-
-            if (joyEx)
+   
+            int result = joyGetPosEx(joyId, ref joyInfoEx);
+            if (result == 0)
             {
-                result = joyGetPosEx(joyId, ref joyInfoEx);
-                if (result != 0) return;
-
                 joyX = joyInfoEx.dwXpos;
                 joyY = joyInfoEx.dwYpos;
                 joyButtons = joyInfoEx.dwButtons;
             }
-            else
-            {
-                result = joyGetPos(joyId, ref joyInfo);
-                if (result != 0) return;
-
-                joyX = joyInfo.wXpos;
-                joyY = joyInfo.wYpos;
-                joyButtons = joyInfo.wButtons;
-            }
 
             // auto calibrate
-            minX = Math.Min(minX, joyX);
-            minY = Math.Min(minY, joyY);
-            maxX = Math.Max(maxX, joyX);
-            maxY = Math.Max(maxY, joyY);
-            int centreMinX = (minX * 3 + maxX) / 4;
-            int centreMaxX = (minX + maxX * 3) / 4;
-            int centreMinY = (minY * 3 + maxY) / 4;
-            int centreMaxY = (minY + maxY * 3) / 4;
 
             bool oldLeft = Left;
             bool oldRight = Right;
             bool oldUp = Up;
             bool oldDown = Down;
 
-            Left = joyX < centreMinX;
-            Right = joyX > centreMaxX;
-            Up = joyY < centreMinY;
-            Down = joyY > centreMaxY;
+            Left = joyX < JoyCentreMinX;
+            Right = joyX > JoyCentreMaxX;
+            Up = joyY < JoyCentreMinY;
+            Down = joyY > JoyCentreMaxY;
 
             Array.Copy(Buttons.ToArray(), oldButtonState, oldButtonState.Length);
             for (int bitIndex = 0; bitIndex < 32; bitIndex++)
@@ -163,17 +134,11 @@ namespace EmuNES
             }
         }
 
-        private JOYINFO joyInfo;
         private JOYINFOEX joyInfoEx;
-        private Boolean joyEx;
         private Int32 joyId;
 
         private bool[] buttonState;
         private bool[] oldButtonState;
-        private int minX;
-        private int maxX;
-        private int minY;
-        private int maxY;
 
         [StructLayout(LayoutKind.Sequential)]
         private struct JOYINFOEX
@@ -193,14 +158,14 @@ namespace EmuNES
             public Int32 dwReserved2; // Reserved; do not use.
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct JOYINFO
-        {
-            public Int32 wXpos; // Current X-coordinate.
-            public Int32 wYpos; // Current Y-coordinate.
-            public Int32 wZpos; // Current Z-coordinate.
-            public Int32 wButtons; // Current state of joystick buttons.
-        }
+        private const int JoyMinX = 0;
+        private const int JoyMinY = 0;
+        private const int JoyMaxX = ushort.MaxValue;
+        private const int JoyMaxY = JoyMaxX;
+        private const int JoyCentreMinX = ushort.MaxValue / 4;
+        private const int JoyCentreMinY = JoyCentreMinX;
+        private const int JoyCentreMaxX = ushort.MaxValue * 3 / 4;
+        private const int JoyCentreMaxY = JoyCentreMaxX;
 
         private const String WINMM_NATIVE_LIBRARY = "winmm.dll";
         private const CallingConvention CALLING_CONVENTION = CallingConvention.StdCall;
@@ -209,9 +174,16 @@ namespace EmuNES
         private static extern Int32 joyGetNumDevs();
 
         [DllImport(WINMM_NATIVE_LIBRARY, CallingConvention = CALLING_CONVENTION), SuppressUnmanagedCodeSecurity]
-        private static extern Int32 joyGetPos(Int32 uJoyId, ref JOYINFO pJoyInfo);
-
-        [DllImport(WINMM_NATIVE_LIBRARY, CallingConvention = CALLING_CONVENTION), SuppressUnmanagedCodeSecurity]
         private static extern Int32 joyGetPosEx(Int32 uJoyID, ref JOYINFOEX pji);
+
+        private const int JOY_RETURNBUTTONS = 0x80;
+        private const int JOY_RETURNY = 0x2;
+        private const int JOY_RETURNX = 0x1;
+        private const int JOY_RETURNPOV = 0x40;
+        private const int JOY_RETURNR = 0x8;
+        private const int JOY_RETURNU = 0x10;
+        private const int JOY_RETURNV = 0x20;
+        private const int JOY_RETURNZ = 0x4;
+        private const int JOY_RETURNALL = JOY_RETURNX | JOY_RETURNY | JOY_RETURNZ | JOY_RETURNR | JOY_RETURNU | JOY_RETURNV | JOY_RETURNPOV | JOY_RETURNBUTTONS;
     }
 }

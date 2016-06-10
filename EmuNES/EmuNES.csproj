@@ -57,7 +57,7 @@
   <ItemGroup>
     <Compile Include="ApuAudioProvider.cs" />
     <Compile Include="FastBitmap.cs" />
-    <Compile Include="Joystick.cs" />
+    <Compile Include="GameController.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -41,7 +41,7 @@ namespace EmuNES
                 keyPressed[key] = false;
 
             // set up joystick object before console
-            joystick = new Joystick();
+            joystick = new GameController();
 
             Console = new NesCore.Console();
 
@@ -675,6 +675,6 @@ namespace EmuNES
 
         // input system
         private Dictionary<Keys, bool> keyPressed;
-        private Joystick joystick;
+        private GameController joystick;
     }
 }

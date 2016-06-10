@@ -472,7 +472,7 @@ namespace EmuNES
                     BinaryReader saveRamBinaryReader = new BinaryReader(new FileStream(this.cartridgeSaveRamFilename, FileMode.Open));
                     newCartridge.SaveRam.Load(saveRamBinaryReader);
                     saveRamBinaryReader.Close();
-                    MessageBox.Show("SaveRam loaded!");
+                    emulatorStatusLabel.Text = "SaveRam file detected and loaded";
                 }
 
                 this.cartridge = newCartridge;
@@ -505,7 +505,8 @@ namespace EmuNES
             BinaryWriter saveRamBinaryWriter = new BinaryWriter(new FileStream(this.cartridgeSaveRamFilename, FileMode.OpenOrCreate, FileAccess.Write));
             this.cartridge.SaveRam.Save(saveRamBinaryWriter);
             saveRamBinaryWriter.Close();
-            MessageBox.Show("SaveRam saved!");
+            emulatorStatusLabel.Text = "SaveRam saved to disk";
+
         }
 
         /// <summary>

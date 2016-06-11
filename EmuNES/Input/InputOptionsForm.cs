@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace EmuNES
+namespace EmuNES.Input
 {
     public partial class InputOptionsForm : Form
     {

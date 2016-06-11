@@ -55,14 +55,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApuAudioProvider.cs" />
-    <Compile Include="FastBitmap.cs" />
-    <Compile Include="GameController.cs" />
-    <Compile Include="GameControllerManager.cs" />
-    <Compile Include="InputOptionsForm.cs">
+    <Compile Include="Audio\ApuAudioProvider.cs" />
+    <Compile Include="Video\FastBitmap.cs" />
+    <Compile Include="Input\GameController.cs" />
+    <Compile Include="Input\GameControllerManager.cs" />
+    <Compile Include="Input\InputOptionsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="InputOptionsForm.Designer.cs">
+    <Compile Include="Input\InputOptionsForm.Designer.cs">
       <DependentUpon>InputOptionsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainForm.cs">
@@ -75,8 +75,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="RecentFileManager.cs" />
-    <Compile Include="ScreenFilter.cs" />
-    <EmbeddedResource Include="InputOptionsForm.resx">
+    <Compile Include="Video\ScreenFilter.cs" />
+    <EmbeddedResource Include="Input\InputOptionsForm.resx">
       <DependentUpon>InputOptionsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">

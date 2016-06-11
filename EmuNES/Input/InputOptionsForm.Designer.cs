@@ -1,4 +1,4 @@
-﻿namespace EmuNES
+﻿namespace EmuNES.Input
 {
     partial class InputOptionsForm
     {

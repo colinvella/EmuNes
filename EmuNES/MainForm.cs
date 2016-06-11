@@ -1,4 +1,6 @@
-﻿using NAudio.Wave;
+﻿using EmuNES.Audio;
+using EmuNES.Input;
+using NAudio.Wave;
 using NesCore.Input;
 using NesCore.Storage;
 using NesCore.Video;

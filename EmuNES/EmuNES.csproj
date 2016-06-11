@@ -59,6 +59,12 @@
     <Compile Include="FastBitmap.cs" />
     <Compile Include="GameController.cs" />
     <Compile Include="GameControllerManager.cs" />
+    <Compile Include="InputOptionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InputOptionsForm.Designer.cs">
+      <DependentUpon>InputOptionsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -70,6 +76,9 @@
     <Compile Include="GameState.cs" />
     <Compile Include="RecentFileManager.cs" />
     <Compile Include="ScreenFilter.cs" />
+    <EmbeddedResource Include="InputOptionsForm.resx">
+      <DependentUpon>InputOptionsForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -99,6 +108,7 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="Resources\FileExit.png" />
+    <None Include="Resources\OptionsInput.png" />
     <None Include="Resources\ViewTvAspect.png" />
     <None Include="Resources\ViewMotionBlur.png" />
     <None Include="Resources\ViewScreenSizeFull.png" />

@@ -56,6 +56,9 @@
             this.viewScreenFilterRasterMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewScreenFilterLcdMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewMotionBlurMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsInputMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.videoPanel = new System.Windows.Forms.Panel();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.emulatorStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -71,12 +74,12 @@
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(178, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(168, 6);
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(178, 6);
+            toolStripSeparator2.Size = new System.Drawing.Size(168, 6);
             // 
             // mainMenuStrip
             // 
@@ -84,7 +87,9 @@
             this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileMenuItem,
             this.gameMenuItem,
-            this.viewMenuItem});
+            this.viewMenuItem,
+            this.toolStripMenuItem1,
+            this.optionsMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
             this.mainMenuStrip.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
@@ -109,7 +114,7 @@
             // 
             this.fileOpenMenuItem.Image = global::EmuNES.Properties.Resources.FileOpen;
             this.fileOpenMenuItem.Name = "fileOpenMenuItem";
-            this.fileOpenMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.fileOpenMenuItem.Size = new System.Drawing.Size(171, 26);
             this.fileOpenMenuItem.Text = "&Open";
             this.fileOpenMenuItem.Click += new System.EventHandler(this.OnFileOpen);
             // 
@@ -118,7 +123,7 @@
             this.filePropertiesMenuItem.Enabled = false;
             this.filePropertiesMenuItem.Image = global::EmuNES.Properties.Resources.FileProperties;
             this.filePropertiesMenuItem.Name = "filePropertiesMenuItem";
-            this.filePropertiesMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.filePropertiesMenuItem.Size = new System.Drawing.Size(171, 26);
             this.filePropertiesMenuItem.Text = "&Properties...";
             this.filePropertiesMenuItem.Click += new System.EventHandler(this.OnFileProperties);
             // 
@@ -126,7 +131,7 @@
             // 
             this.fileRecentFilesMenuItem.Image = global::EmuNES.Properties.Resources.FileRecent;
             this.fileRecentFilesMenuItem.Name = "fileRecentFilesMenuItem";
-            this.fileRecentFilesMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.fileRecentFilesMenuItem.Size = new System.Drawing.Size(171, 26);
             this.fileRecentFilesMenuItem.Text = "Recent Files...";
             // 
             // fileExitMenuItem
@@ -134,7 +139,7 @@
             this.fileExitMenuItem.Image = global::EmuNES.Properties.Resources.FileExit;
             this.fileExitMenuItem.Name = "fileExitMenuItem";
             this.fileExitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.fileExitMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.fileExitMenuItem.Size = new System.Drawing.Size(171, 26);
             this.fileExitMenuItem.Text = "Exit";
             this.fileExitMenuItem.Click += new System.EventHandler(this.OnFileExit);
             // 
@@ -296,6 +301,27 @@
             this.viewMotionBlurMenuItem.Text = "Motion &Blur";
             this.viewMotionBlurMenuItem.Click += new System.EventHandler(this.OnViewMotionBlur);
             // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(12, 24);
+            // 
+            // optionsMenuItem
+            // 
+            this.optionsMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.optionsInputMenuItem});
+            this.optionsMenuItem.Name = "optionsMenuItem";
+            this.optionsMenuItem.Size = new System.Drawing.Size(73, 24);
+            this.optionsMenuItem.Text = "&Options";
+            // 
+            // optionsInputMenuItem
+            // 
+            this.optionsInputMenuItem.Image = global::EmuNES.Properties.Resources.OptionsInput;
+            this.optionsInputMenuItem.Name = "optionsInputMenuItem";
+            this.optionsInputMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.optionsInputMenuItem.Text = "&Input...";
+            this.optionsInputMenuItem.Click += new System.EventHandler(this.OnOptionsInput);
+            // 
             // videoPanel
             // 
             this.videoPanel.BackColor = System.Drawing.Color.Black;
@@ -410,6 +436,9 @@
         private System.Windows.Forms.ToolStripMenuItem viewScreenFilterNoneMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewScreenFilterRasterMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewScreenFilterLcdMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem optionsMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem optionsInputMenuItem;
     }
 }
 

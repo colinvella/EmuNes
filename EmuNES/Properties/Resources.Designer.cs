@@ -183,6 +183,16 @@ namespace EmuNES.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap OptionsInput {
+            get {
+                object obj = ResourceManager.GetObject("OptionsInput", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ViewMotionBlur {
             get {
                 object obj = ResourceManager.GetObject("ViewMotionBlur", resourceCulture);

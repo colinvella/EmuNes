@@ -232,9 +232,15 @@ namespace EmuNES
             }
         }
 
-        private void OnViewMotionBlur(object sender, EventArgs e)
+        private void OnViewMotionBlur(object sender, EventArgs eventArgs)
         {
             SetMotionBlur(!motionBlur);
+        }
+
+        private void OnOptionsInput(object sender, EventArgs eventArgs)
+        {
+            InputOptionsForm inputOptionsForm = new InputOptionsForm();
+            inputOptionsForm.ShowDialog(this);
         }
 
         private void OnKeyDown(object sender, KeyEventArgs keyEventArgs)

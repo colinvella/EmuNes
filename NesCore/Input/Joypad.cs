@@ -30,10 +30,10 @@ namespace NesCore.Input
         {
             get
             {
-                byte value = 0x00;
+                byte value = 0x40;
 
                 if (buttonIndex < 8 && buttonPressed[buttonIndex]())
-                    value = 0x01;
+                    value = 0x41;
                 ++buttonIndex;
 
                 if ((strobe & 0x01) == 0x01)

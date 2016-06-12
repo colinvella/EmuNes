@@ -17,7 +17,7 @@ namespace EmuNES.Input
             int joystickCount = joyGetNumDevs();
             for (Int32 joystickIndex = 0; joystickIndex < joystickCount; joystickIndex++)
             {
-                gameControllers.Add(new GameController(joystickIndex));
+                gameControllers.Add(new GameController((byte)joystickIndex));
             }
         }
 

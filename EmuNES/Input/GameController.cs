@@ -10,36 +10,25 @@ namespace EmuNES.Input
 {
     class GameController
     {      
-        public enum Button
+        public GameController(byte id)
         {
-            None,
-            Left, Right, Up, Down,
-            Button0,  Button1,  Button2,  Button3,  Button4,  Button5,  Button6,  Button7,
-            Button8,  Button9,  Button10, Button11, Button12, Button13, Button14, Button15,
-            Button16, Button17, Button18, Button19, Button20, Button21, Button22, Button23,
-            Button24, Button25, Button26, Button27, Button28, Button29, Button30, Button31
-        }
-
-        public delegate void ButtonPressedHandler(Button button);
-
-        public GameController(int gameControllerId)
-        {
+            Id = id;
             joyInfoEx = new JOYINFOEX();
             joyInfoEx.dwSize = Marshal.SizeOf(joyInfoEx);
             joyInfoEx.dwFlags = JOY_RETURNALL;
 
-            this.joystickId = gameControllerId;
-
             oldButtonState = new bool[32];
             buttonState = new bool[32];
         }
+
+        public byte Id { get; private set; }
 
         public bool Left { get; private set; }
         public bool Right { get; private set; }
         public bool Up { get; private set; }
         public bool Down { get; private set; }
 
-        public ButtonPressedHandler ButtonPressed { get; set; }
+        public event GameControllerEventHandler ButtonPressed;
 
         public IReadOnlyList<bool> Buttons { get { return buttonState; } }
 
@@ -49,7 +38,7 @@ namespace EmuNES.Input
             int joyY = 0;
             int joyButtons = 0;
    
-            int result = joyGetPosEx(joystickId, ref joyInfoEx);
+            int result = joyGetPosEx(Id, ref joyInfoEx);
             if (result == 0)
             {
                 joyX = joyInfoEx.dwXpos;
@@ -79,22 +68,21 @@ namespace EmuNES.Input
             if (ButtonPressed != null)
             {
                 if (!oldLeft && Left)
-                    ButtonPressed(Button.Left);
+                    ButtonPressed(this, new GameControllerEventArgs(Id, Button.Left));
                 if (!oldRight && Right)
-                    ButtonPressed(Button.Right);
+                    ButtonPressed(this, new GameControllerEventArgs(Id, Button.Right));
                 if (!oldUp && Up)
-                    ButtonPressed(Button.Up);
+                    ButtonPressed(this, new GameControllerEventArgs(Id, Button.Up));
                 if (!oldDown && Down)
-                    ButtonPressed(Button.Down);
+                    ButtonPressed(this, new GameControllerEventArgs(Id, Button.Down));
 
                 for (int buttonIndex = 0; buttonIndex < 32; buttonIndex++)
                     if (!oldButtonState[buttonIndex] && buttonState[buttonIndex])
-                        ButtonPressed(Button.Button0 + buttonIndex);
+                        ButtonPressed(this, new GameControllerEventArgs(Id, Button.Button0 + buttonIndex));
             }
         }
 
         private JOYINFOEX joyInfoEx;
-        private Int32 joystickId;
 
         private bool[] buttonState;
         private bool[] oldButtonState;

@@ -65,6 +65,10 @@ namespace NesCore.Storage
                     int offset = address % 0x0400;
                     Cartridge.CharacterRom[characterBankOffsets[bank] + offset] = value;
                 }
+                else if (address >= 0x4100 && address < 0x6000)
+                {
+                    // absorbing writes (e.g. Somari homebrew ROM writes to $4100 for some reason)
+                }
                 else if (address >= 0x8000)
                     WriteRegister(address, value);
                 else if (address >= 0x6000)

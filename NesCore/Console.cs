@@ -88,8 +88,8 @@ namespace NesCore
         /// <param name="cartridge"></param>
         public void LoadCartridge(Cartridge cartridge)
         {
-            // connect $6000 upwards to main memory
-            Memory.ConfigureMemoryAccessRange(0x6000, 0xA000,
+            // connect $4100 upwards to main memory
+            Memory.ConfigureMemoryAccessRange(0x4100, 0x10000 - 0x4100,
                 (address) => cartridge.Map[address],
                 (address, value) => cartridge.Map[address] = value);
 

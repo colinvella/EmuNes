@@ -14,12 +14,17 @@ namespace EmuNES.Input
         public GameControllerManager()
         {
             gameControllers = new List<GameController>();
-            int joystickCount = joyGetNumDevs();
-            for (Int32 joystickIndex = 0; joystickIndex < joystickCount; joystickIndex++)
+            int joystickCount =  WindowsMultiMedia.joyGetNumDevs();
+            byte controllerId = 0;
+            WindowsMultiMedia.JOYINFOEX joyInfoEx = new WindowsMultiMedia.JOYINFOEX();
+            for (Int32 deviceId = 0; deviceId < joystickCount; deviceId++)
             {
-                gameControllers.Add(new GameController((byte)joystickIndex));
+                if (WindowsMultiMedia.joyGetPosEx(deviceId, ref joyInfoEx) == 0)
+                    gameControllers.Add(new GameController(controllerId++, deviceId));
             }
         }
+
+        public byte Count { get { return (byte)gameControllers.Count; } }
 
         public GameController this[ushort gameControllerIndex]
         {
@@ -37,11 +42,5 @@ namespace EmuNES.Input
         }
 
         private List<GameController> gameControllers;
-
-        private const String WINMM_NATIVE_LIBRARY = "winmm.dll";
-        private const CallingConvention CALLING_CONVENTION = CallingConvention.StdCall;
-
-        [DllImport(WINMM_NATIVE_LIBRARY, CallingConvention = CALLING_CONVENTION), SuppressUnmanagedCodeSecurity]
-        private static extern Int32 joyGetNumDevs();
     }
 }

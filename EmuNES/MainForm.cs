@@ -44,7 +44,6 @@ namespace EmuNES
 
             // set up joystick object before console
             this.gameControllerManager = new GameControllerManager();
-            this.gameController = gameControllerManager[0];
 
             Console = new NesCore.Console();
 
@@ -440,26 +439,34 @@ namespace EmuNES
         private void ConfigureDefaultController()
         {
             Joypad joypad = new Joypad();
-            /*
-            joypad.Start = () => keyPressed[Keys.Enter] || gameController.Buttons[9];
-            joypad.Select = () => keyPressed[Keys.Tab] || gameController.Buttons[8];
-            joypad.A = () => keyPressed[Keys.Z] || gameController.Buttons[1];
-            joypad.B = () => keyPressed[Keys.X] || gameController.Buttons[2];
-            joypad.Up = () => keyPressed[Keys.Up] || gameController.Up;
-            joypad.Down = () => keyPressed[Keys.Down] || gameController.Down;
-            joypad.Left = () => keyPressed[Keys.Left] || gameController.Left;
-            joypad.Right = () => keyPressed[Keys.Right] || gameController.Right;
-            */
 
-            joypad.Start = () => keyPressed[Keys.Enter];
-            joypad.Select = () => keyPressed[Keys.Tab];
-            joypad.A = () => keyPressed[Keys.Z];
-            joypad.B = () => keyPressed[Keys.X];
-            joypad.Up = () => keyPressed[Keys.Up];
-            joypad.Down = () => keyPressed[Keys.Down];
-            joypad.Left = () => keyPressed[Keys.Left];
-            joypad.Right = () => keyPressed[Keys.Right];
-            
+            if (gameControllerManager.Count > 0)
+            {
+                // temporary - if there is a controller, accept both keyboard and joypad for controller 1
+                GameController gameController = gameControllerManager[0];
+
+                joypad.Start = () => keyPressed[Keys.Enter] || gameController.Buttons[9];
+                joypad.Select = () => keyPressed[Keys.Tab] || gameController.Buttons[8];
+                joypad.A = () => keyPressed[Keys.Z] || gameController.Buttons[1];
+                joypad.B = () => keyPressed[Keys.X] || gameController.Buttons[2];
+                joypad.Up = () => keyPressed[Keys.Up] || gameController.Up;
+                joypad.Down = () => keyPressed[Keys.Down] || gameController.Down;
+                joypad.Left = () => keyPressed[Keys.Left] || gameController.Left;
+                joypad.Right = () => keyPressed[Keys.Right] || gameController.Right;
+            }
+            else
+            {
+                // temporary - otherwise, just keyboard input
+                joypad.Start = () => keyPressed[Keys.Enter];
+                joypad.Select = () => keyPressed[Keys.Tab];
+                joypad.A = () => keyPressed[Keys.Z];
+                joypad.B = () => keyPressed[Keys.X];
+                joypad.Up = () => keyPressed[Keys.Up];
+                joypad.Down = () => keyPressed[Keys.Down];
+                joypad.Left = () => keyPressed[Keys.Left];
+                joypad.Right = () => keyPressed[Keys.Right];
+            }
+
             Console.ConnectController(1, joypad);
         }
 
@@ -728,6 +735,5 @@ namespace EmuNES
         // input system
         private Dictionary<Keys, bool> keyPressed;
         private GameControllerManager gameControllerManager;
-        private GameController gameController;
     }
 }

@@ -58,6 +58,7 @@
     <Compile Include="Audio\ApuAudioProvider.cs" />
     <Compile Include="Input\Button.cs" />
     <Compile Include="Input\GameControllerEventArgs.cs" />
+    <Compile Include="Input\WindowsMultiMedia.cs" />
     <Compile Include="Video\FastBitmap.cs" />
     <Compile Include="Input\GameController.cs" />
     <Compile Include="Input\GameControllerManager.cs" />

@@ -10,12 +10,13 @@ namespace EmuNES.Input
 {
     class GameController
     {      
-        public GameController(byte id)
+        public GameController(byte id, int deviceId)
         {
             Id = id;
-            joyInfoEx = new JOYINFOEX();
+            this.deviceId = deviceId;
+            joyInfoEx = new WindowsMultiMedia.JOYINFOEX();
             joyInfoEx.dwSize = Marshal.SizeOf(joyInfoEx);
-            joyInfoEx.dwFlags = JOY_RETURNALL;
+            joyInfoEx.dwFlags = WindowsMultiMedia.JOY_RETURNALL;
 
             oldButtonState = new bool[32];
             buttonState = new bool[32];
@@ -38,7 +39,7 @@ namespace EmuNES.Input
             int joyY = 0;
             int joyButtons = 0;
    
-            int result = joyGetPosEx(Id, ref joyInfoEx);
+            int result = WindowsMultiMedia.joyGetPosEx(deviceId, ref joyInfoEx);
             if (result == 0)
             {
                 joyX = joyInfoEx.dwXpos;
@@ -82,28 +83,10 @@ namespace EmuNES.Input
             }
         }
 
-        private JOYINFOEX joyInfoEx;
-
+        private int deviceId;
+        private WindowsMultiMedia.JOYINFOEX joyInfoEx;
         private bool[] buttonState;
         private bool[] oldButtonState;
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct JOYINFOEX
-        {
-            public Int32 dwSize; // Size, in bytes, of this structure.
-            public Int32 dwFlags; // Flags indicating the valid information returned in this structure.
-            public Int32 dwXpos; // Current X-coordinate.
-            public Int32 dwYpos; // Current Y-coordinate.
-            public Int32 dwZpos; // Current Z-coordinate.
-            public Int32 dwRpos; // Current position of the rudder or fourth joystick axis.
-            public Int32 dwUpos; // Current fifth axis position.
-            public Int32 dwVpos; // Current sixth axis position.
-            public Int32 dwButtons; // Current state of the 32 joystick buttons (bits)
-            public Int32 dwButtonNumber; // Current button number that is pressed.
-            public Int32 dwPOV; // Current position of the point-of-view control (0..35,900, deg*100)
-            public Int32 dwReserved1; // Reserved; do not use.
-            public Int32 dwReserved2; // Reserved; do not use.
-        }
 
         private const int JoyMinX = 0;
         private const int JoyMinY = 0;
@@ -113,21 +96,5 @@ namespace EmuNES.Input
         private const int JoyCentreMinY = JoyCentreMinX;
         private const int JoyCentreMaxX = ushort.MaxValue * 3 / 4;
         private const int JoyCentreMaxY = JoyCentreMaxX;
-
-        private const String WINMM_NATIVE_LIBRARY = "winmm.dll";
-        private const CallingConvention CALLING_CONVENTION = CallingConvention.StdCall;
-
-        [DllImport(WINMM_NATIVE_LIBRARY, CallingConvention = CALLING_CONVENTION), SuppressUnmanagedCodeSecurity]
-        private static extern Int32 joyGetPosEx(Int32 uJoyID, ref JOYINFOEX pji);
-
-        private const int JOY_RETURNBUTTONS = 0x80;
-        private const int JOY_RETURNY = 0x2;
-        private const int JOY_RETURNX = 0x1;
-        private const int JOY_RETURNPOV = 0x40;
-        private const int JOY_RETURNR = 0x8;
-        private const int JOY_RETURNU = 0x10;
-        private const int JOY_RETURNV = 0x20;
-        private const int JOY_RETURNZ = 0x4;
-        private const int JOY_RETURNALL = JOY_RETURNX | JOY_RETURNY | JOY_RETURNZ | JOY_RETURNR | JOY_RETURNU | JOY_RETURNV | JOY_RETURNPOV | JOY_RETURNBUTTONS;
     }
 }

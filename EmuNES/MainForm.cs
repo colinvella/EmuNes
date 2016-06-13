@@ -246,7 +246,7 @@ namespace EmuNES
 
         private void OnOptionsInput(object sender, EventArgs eventArgs)
         {
-            InputOptionsForm inputOptionsForm = new InputOptionsForm();
+            InputOptionsForm inputOptionsForm = new InputOptionsForm(Console, keyPressed);
             inputOptionsForm.ShowDialog(this);
         }
 

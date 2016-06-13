@@ -21,6 +21,8 @@ namespace NesCore
             Processor = new Mos6502();
             Video = new RicohRP2C0X();
             Audio = new Apu();
+            ControllerMultiplexor1 = new ControllerMultiplexor();
+            ControllerMultiplexor2 = new ControllerMultiplexor();
             Memory = new ConfigurableMemoryMap();
 
             allocatedCycles = 0;
@@ -50,31 +52,34 @@ namespace NesCore
             Audio.Dmc.TriggerInterruptRequest = () => Processor.TriggerInterruptRequest();
 
             // connect default first controller
-            ConnectControllerOne(new Joypad());
+            ConnectController(1, new Joypad());
         }
 
+        public ConfigurableMemoryMap Memory { get; private set; }
         public Mos6502 Processor { get; private set; }
         public RicohRP2C0X Video { get; private set; }
         public Apu Audio { get; private set; }
-        public ConfigurableMemoryMap Memory { get; private set; }
+        public ControllerMultiplexor ControllerMultiplexor1 { get; private set; }
+        public ControllerMultiplexor ControllerMultiplexor2 { get; private set; }
         public Cartridge Cartridge { get; private set; }
 
         /// <summary>
-        /// Connect a controller to the first port
+        /// Connects a controller to the given port
         /// </summary>
-        /// <param name="controller"></param>
-        public void ConnectControllerOne(Controller controller)
+        /// <param name="portNumber">Port number between 1 and 4</param>
+        /// <param name="controller">Controller to connect</param>
+        public void ConnectController(byte portNumber, Controller controller)
         {
-            ConnectController(0x4016, controller);
-        }
+            if (portNumber == 0 || portNumber > 3)
+                throw new ArgumentOutOfRangeException("portNumber", "Port number must be between 1 and 4");
 
-        /// <summary>
-        /// Connect a controller to the second port
-        /// </summary>
-        /// <param name="controller"></param>
-        public void ConnectControllerTwo(Controller controller)
-        {
-            ConnectController(0x4017, controller);
+            switch (portNumber)
+            {
+                case 1: ControllerMultiplexor1.Primary = controller; break;
+                case 2: ControllerMultiplexor2.Primary = controller; break;
+                case 3: ControllerMultiplexor1.Secondary = controller; break;
+                case 4: ControllerMultiplexor2.Secondary = controller; break;
+            }
         }
 
         /// <summary>
@@ -284,19 +289,19 @@ namespace NesCore
             // $4015 APU Control/Status
             Memory.ConfigureMemoryAccess(0x4015, (address) => Audio.Status, (address, value) => Audio.Control = value);
 
+            // $4016 controller read (joypad 1 and 3)
+            Memory.ConfigureMemoryRead(0x4016, (address) => ControllerMultiplexor1.Port);
+
+            // $4016 controller write (strobes all controllers)
+            Memory.ConfigureMemoryWrite(0x4016, (address, value) => { ControllerMultiplexor1.Port = value; ControllerMultiplexor2.Port = value; });
+
+            // $4017 controller read (joypad 2 and 4)
+            Memory.ConfigureMemoryRead(0x4017, (address) => ControllerMultiplexor2.Port);
+
             // $4017 APU Frame Counter (write only)
             Memory.ConfigureMemoryWrite(0x4017, (address, value) => Audio.FrameCounter = value);
 
             // $4020-$FFFF Cartridge space: PRG ROM, PRG RAM, and mapper registers - done when cartridge loaded
-        }
-
-        private void ConnectController(ushort portAddress, Controller controller)
-        {
-            if (portAddress != 0x4016 && portAddress != 0x4017)
-                throw new ArgumentOutOfRangeException("portAddress", portAddress, "Allowed port addresses are $4016 ans $4017");
-            Memory.ConfigureMemoryRead(portAddress, (address) => controller.Port);
-            // second controller writes still happen on $4016, not $4017
-            Memory.ConfigureMemoryWrite(0x4016, (address, value) => controller.Port = value);
         }
 
         private long allocatedCycles;

@@ -31,6 +31,11 @@ namespace EmuNES.Input
             }
         }
 
+        public void UpdateState()
+        {
+            gameControllers.ForEach((gameController) => gameController.UpdateState());
+        }
+
         private List<GameController> gameControllers;
 
         private const String WINMM_NATIVE_LIBRARY = "winmm.dll";

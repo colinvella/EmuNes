@@ -257,7 +257,7 @@ namespace EmuNES
 
         private void OnGameTick(object sender, EventArgs eventArgs)
         {
-            gameController.UpdateState();
+            gameControllerManager.UpdateState();
 
             if (gameState != GameState.Running)
                 return;
@@ -440,6 +440,7 @@ namespace EmuNES
         private void ConfigureDefaultController()
         {
             Joypad joypad = new Joypad();
+            /*
             joypad.Start = () => keyPressed[Keys.Enter] || gameController.Buttons[9];
             joypad.Select = () => keyPressed[Keys.Tab] || gameController.Buttons[8];
             joypad.A = () => keyPressed[Keys.Z] || gameController.Buttons[1];
@@ -448,8 +449,18 @@ namespace EmuNES
             joypad.Down = () => keyPressed[Keys.Down] || gameController.Down;
             joypad.Left = () => keyPressed[Keys.Left] || gameController.Left;
             joypad.Right = () => keyPressed[Keys.Right] || gameController.Right;
+            */
 
-            Console.ConnectControllerOne(joypad);
+            joypad.Start = () => keyPressed[Keys.Enter];
+            joypad.Select = () => keyPressed[Keys.Tab];
+            joypad.A = () => keyPressed[Keys.Z];
+            joypad.B = () => keyPressed[Keys.X];
+            joypad.Up = () => keyPressed[Keys.Up];
+            joypad.Down = () => keyPressed[Keys.Down];
+            joypad.Left = () => keyPressed[Keys.Left];
+            joypad.Right = () => keyPressed[Keys.Right];
+            
+            Console.ConnectController(1, joypad);
         }
 
         private void LoadRecentRom(object sender, EventArgs eventArgs)

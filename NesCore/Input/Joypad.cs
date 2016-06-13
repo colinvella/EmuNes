@@ -26,31 +26,26 @@ namespace NesCore.Input
         public ButtonPressed Left { get { return buttonPressed[6]; } set { buttonPressed[6] = value; } }
         public ButtonPressed Right { get { return buttonPressed[7]; } set { buttonPressed[7] = value; } }
 
-        public byte Port
+        public void Strobe()
         {
-            get
-            {
-                byte value = 0x40;
+            buttonIndex = 0x00;
+        }
 
-                if (buttonIndex < 8 && buttonPressed[buttonIndex]())
-                    value = 0x41;
-                ++buttonIndex;
+        public bool Read()
+        {
+            bool value = false;
 
-                if ((strobe & 0x01) == 0x01)
-                    buttonIndex = 0x00;
+            if (buttonIndex < 8 && buttonPressed[buttonIndex]())
+                value = true;
+            ++buttonIndex;
 
-                return value;
-            }
-            set
-            {
-                strobe = value;
-                if ((strobe & 0x01) == 0x01)
-                    buttonIndex = 0x00;
-            }
+            //if ((strobe & 0x01) == 0x01)
+            //    buttonIndex = 0x00;
+
+            return value;
         }
 
         private ButtonPressed[] buttonPressed;
         private byte buttonIndex;
-        private byte strobe;
     }
 }

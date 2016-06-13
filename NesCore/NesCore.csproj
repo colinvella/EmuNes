@@ -48,6 +48,7 @@
     <Compile Include="Audio\Generators\TriangleGenerator.cs" />
     <Compile Include="Audio\Generators\WaveGenerator.cs" />
     <Compile Include="Input\Controller.cs" />
+    <Compile Include="Input\ControllerMultiplexor.cs" />
     <Compile Include="Input\Joypad.cs" />
     <Compile Include="Memory\ConfigurableMemoryMap.cs" />
     <Compile Include="Console.cs" />

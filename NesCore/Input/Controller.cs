@@ -8,6 +8,7 @@ namespace NesCore.Input
 {
     public interface Controller
     {
-        byte Port { get; set; }
+        void Strobe();
+        bool Read();
     }
 }

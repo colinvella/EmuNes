@@ -7,15 +7,16 @@ using System.Threading.Tasks;
 
 namespace NesCore.Storage
 {
-    class CartridgeMapAxRom : CartridgeMap
+    class CartridgeMapGxRom : CartridgeMap
     {
-        public CartridgeMapAxRom(Cartridge cartridge)
+        public CartridgeMapGxRom(Cartridge cartridge)
         {
             Cartridge = cartridge;
             programBank = 0;
+            characterBank = 0;
         }
 
-        public virtual string Name { get { return "AxROM"; } }
+        public virtual string Name { get { return "GxROM"; } }
 
         public Cartridge Cartridge { get; private set; }
 
@@ -30,13 +31,10 @@ namespace NesCore.Storage
             get
             {
                 if (address < 0x2000)
-                    return Cartridge.CharacterRom[address];
+                    return Cartridge.CharacterRom[characterBank * 0x2000 + address];
 
                 if (address >= 0x8000)
                     return Cartridge.ProgramRom[programBank * 0x8000 + address - 0x8000];
-
-                if (address >= 0x6000)
-                    return Cartridge.SaveRam[(ushort)(address - 0x6000)];
 
                 throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
             }
@@ -44,14 +42,11 @@ namespace NesCore.Storage
             set
             {
                 if (address < 0x2000)
-                    Cartridge.CharacterRom[address] = value;
+                    Cartridge.CharacterRom[characterBank * 0x2000 + address] = value;
                 else if (address >= 0x8000)
                 {
-                    // ---M-PPP
-                    programBank = value & 7;
-                    Cartridge.MirrorMode = (value & 0x10) == 0x10
-                        ? MirrorMode.Single1 : MirrorMode.Single0;
-                    Cartridge.MirrorModeChanged?.Invoke();
+                    // --PP--CC
+                    characterBank = value & 7;
                 }
                 else if (address >= 0x6000)
                     Cartridge.SaveRam[(ushort)(address - 0x6000)] = value;
@@ -65,5 +60,6 @@ namespace NesCore.Storage
         }
 
         private int programBank;
+        private int characterBank;
     }
 }

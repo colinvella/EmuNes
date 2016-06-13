@@ -63,6 +63,7 @@
     <Compile Include="Storage\Cartridge.cs" />
     <Compile Include="Storage\CartridgeMap.cs" />
     <Compile Include="Storage\CartridgeMap100In1.cs" />
+    <Compile Include="Storage\CartridgeMapGxRom.cs" />
     <Compile Include="Storage\CartridgeMapCpRom.cs" />
     <Compile Include="Storage\CartridgeMapColourDreams.cs" />
     <Compile Include="Storage\CartridgeMapMmc1.cs" />

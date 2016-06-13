@@ -68,6 +68,7 @@ namespace NesCore.Storage
                 case 11: Map = new CartridgeMapColourDreams(this); break;
                 case 13: Map = new CartridgeMapCpRom(this); break;
                 case 15: Map = new CartridgeMap100In1(this); break;
+                case 66: Map = new CartridgeMapGxRom(this); break;
                 default: throw new NotSupportedException(
                     "Mapper Type " + Utility.Hex.Format(MapperType) + " not supported");
             }

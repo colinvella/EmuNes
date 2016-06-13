@@ -46,6 +46,7 @@ namespace NesCore.Storage
                 else if (address >= 0x8000)
                 {
                     // --PP--CC
+                    programBank = (value >> 4) & 7;
                     characterBank = value & 7;
                 }
                 else if (address >= 0x6000)
@@ -55,9 +56,7 @@ namespace NesCore.Storage
             }
         }
 
-        public void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
-        {
-        }
+        public void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites) { }
 
         private int programBank;
         private int characterBank;

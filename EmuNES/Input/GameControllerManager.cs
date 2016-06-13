@@ -16,7 +16,11 @@ namespace EmuNES.Input
             gameControllers = new List<GameController>();
             int joystickCount =  WindowsMultiMedia.GetJoystickDeviceCount();
             byte controllerId = 0;
+
             WindowsMultiMedia.JOYINFOEX joyInfoEx = new WindowsMultiMedia.JOYINFOEX();
+            joyInfoEx.dwSize = Marshal.SizeOf(joyInfoEx);
+            joyInfoEx.dwFlags = WindowsMultiMedia.JOY_RETURNALL;
+
             for (Int32 deviceId = 0; deviceId < joystickCount; deviceId++)
             {
                 if (WindowsMultiMedia.GetJoystickState(deviceId, ref joyInfoEx) == WindowsMultiMedia.JOYERR_NOERROR)

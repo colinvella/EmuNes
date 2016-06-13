@@ -14,12 +14,12 @@ namespace EmuNES.Input
         public GameControllerManager()
         {
             gameControllers = new List<GameController>();
-            int joystickCount =  WindowsMultiMedia.joyGetNumDevs();
+            int joystickCount =  WindowsMultiMedia.GetJoystickDeviceCount();
             byte controllerId = 0;
             WindowsMultiMedia.JOYINFOEX joyInfoEx = new WindowsMultiMedia.JOYINFOEX();
             for (Int32 deviceId = 0; deviceId < joystickCount; deviceId++)
             {
-                if (WindowsMultiMedia.joyGetPosEx(deviceId, ref joyInfoEx) == 0)
+                if (WindowsMultiMedia.GetJoystickState(deviceId, ref joyInfoEx) == WindowsMultiMedia.JOYERR_NOERROR)
                     gameControllers.Add(new GameController(controllerId++, deviceId));
             }
         }

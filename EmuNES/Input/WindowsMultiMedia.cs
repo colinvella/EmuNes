@@ -11,6 +11,38 @@ namespace EmuNES.Input
     class WindowsMultiMedia
     {
         [StructLayout(LayoutKind.Sequential)]
+        internal struct JOYCAPS
+        {
+            public UInt16 wMid;
+            public UInt16 wPid;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string szPname;
+            public Int32 wXmin;
+            public Int32 wXmax;
+            public Int32 wYmin;
+            public Int32 wYmax;
+            public Int32 wZmin;
+            public Int32 wZmax;
+            public Int32 wNumButtons;
+            public Int32 wPeriodMin;
+            public Int32 wPeriodMax;
+            public Int32 wRmin;
+            public Int32 wRmax;
+            public Int32 wUmin;
+            public Int32 wUmax;
+            public Int32 wVmin;
+            public Int32 wVmax;
+            public Int32 wCaps;
+            public Int32 wMaxAxes;
+            public Int32 wNumAxes;
+            public Int32 wMaxButtons;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string szRegKey;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string szOEMVxD;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
         public struct JOYINFOEX
         {
             public Int32 dwSize; // Size, in bytes, of this structure.
@@ -28,12 +60,16 @@ namespace EmuNES.Input
             public Int32 dwReserved2; // Reserved; do not use.
         }
 
-        [DllImport(WINMM_NATIVE_LIBRARY, CallingConvention = CALLING_CONVENTION), SuppressUnmanagedCodeSecurity]
-        public static extern Int32 joyGetNumDevs();
+        [DllImport(WINMM_NATIVE_LIBRARY, EntryPoint = "joyGetNumDevs", CallingConvention = CALLING_CONVENTION), SuppressUnmanagedCodeSecurity]
+        public static extern Int32 GetJoystickDeviceCount();
 
-        [DllImport(WINMM_NATIVE_LIBRARY, CallingConvention = CALLING_CONVENTION), SuppressUnmanagedCodeSecurity]
-        public static extern Int32 joyGetPosEx(Int32 uJoyID, ref JOYINFOEX pji);
+        [DllImport(WINMM_NATIVE_LIBRARY, EntryPoint = "joyGetDevCaps", CallingConvention = CALLING_CONVENTION)]
+        private static extern uint GetJoystickDeviceCapabilities(uint id, out JOYCAPS caps, int cbjc);
 
+        [DllImport(WINMM_NATIVE_LIBRARY, EntryPoint = "joyGetPosEx", CallingConvention = CALLING_CONVENTION), SuppressUnmanagedCodeSecurity]
+        public static extern Int32 GetJoystickState(Int32 uJoyID, ref JOYINFOEX pji);
+
+        public const int JOYERR_NOERROR = 0;
         public const int JOY_RETURNBUTTONS = 0x80;
         public const int JOY_RETURNY = 0x2;
         public const int JOY_RETURNX = 0x1;

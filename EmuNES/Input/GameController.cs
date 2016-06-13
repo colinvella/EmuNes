@@ -39,8 +39,7 @@ namespace EmuNES.Input
             int joyY = 0;
             int joyButtons = 0;
    
-            int result = WindowsMultiMedia.joyGetPosEx(deviceId, ref joyInfoEx);
-            if (result == 0)
+            if (WindowsMultiMedia.GetJoystickState(deviceId, ref joyInfoEx) == WindowsMultiMedia.JOYERR_NOERROR)
             {
                 joyX = joyInfoEx.dwXpos;
                 joyY = joyInfoEx.dwYpos;

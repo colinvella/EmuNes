@@ -319,7 +319,7 @@
             // 
             this.optionsInputMenuItem.Image = global::EmuNES.Properties.Resources.OptionsInput;
             this.optionsInputMenuItem.Name = "optionsInputMenuItem";
-            this.optionsInputMenuItem.Size = new System.Drawing.Size(127, 26);
+            this.optionsInputMenuItem.Size = new System.Drawing.Size(181, 26);
             this.optionsInputMenuItem.Text = "&Input...";
             this.optionsInputMenuItem.Click += new System.EventHandler(this.OnOptionsInput);
             // 

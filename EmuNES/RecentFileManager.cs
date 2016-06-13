@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Configuration;
+using System.Drawing;
 
 namespace EmuNES
 {
@@ -13,7 +14,8 @@ namespace EmuNES
         /// <exception cref="ArgumentException">If anything is null or nameOfProgram contains a forward slash or is empty.</exception>
         public RecentFileManager(ToolStripMenuItem parentMenuItem,
             Action<object, EventArgs> recentFileClickedHandler,
-            Action<object, EventArgs> clearRecentFilesClickedHandler = null)
+            Action<object, EventArgs> clearRecentFilesClickedHandler = null,
+            Image fileIcon = null)
         {
             if (parentMenuItem == null)
                 throw new ArgumentNullException("parentMenuItem");
@@ -21,9 +23,16 @@ namespace EmuNES
             this.ParentMenuItem = parentMenuItem;
             this.RecentFileClicked = recentFileClickedHandler;
             this.ClearRecentFilesClicked = clearRecentFilesClickedHandler;
+            this.FileIcon = fileIcon;
 
             this.RefreshRecentFilesMenu();
         }
+
+        #region Public Properties
+
+        public Image FileIcon { get; set; }
+
+        #endregion
 
         #region Public members
 
@@ -101,6 +110,9 @@ namespace EmuNES
             foreach (string valueName in valueNames)
             {
                 recentFileMenuItem = this.ParentMenuItem.DropDownItems.Add(valueName);
+                if (FileIcon != null)
+                    recentFileMenuItem.Image = FileIcon;
+
                 if (RecentFileClicked != null)
                     recentFileMenuItem.Click += new EventHandler(this.RecentFileClicked);
             }

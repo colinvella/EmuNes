@@ -64,13 +64,19 @@ namespace EmuNES
 
         private void OnFormLoad(object sender, EventArgs eventArgs)
         {
-            recentFileManager = new RecentFileManager(fileRecentFilesMenuItem, LoadRecentRom);
+            recentFileManager = new RecentFileManager(
+                fileRecentFilesMenuItem,
+                LoadRecentRom, null,
+                Properties.Resources.FileOpen);
 
             applicationMargin = new Size(Width - videoPanel.ClientSize.Width, Height - videoPanel.ClientSize.Height);
             SetScreen(1, true);
             SetScreenFilter(ScreenFilter.None);
             SetMotionBlur(false);
             viewScreenSizeFullScreenMenuItem.ShortcutKeys = Keys.Alt | Keys.Enter;
+
+            // make space for checkboxes (disabled due to icons)
+            ((ToolStripDropDownMenu)viewMenuItem.DropDown).ShowCheckMargin = true;
 
 #if DEBUG
             gameTimer.Interval = 20;
@@ -252,6 +258,10 @@ namespace EmuNES
         private void OnKeyUp(object sender, KeyEventArgs keyEventArgs)
         {
             keyPressed[keyEventArgs.KeyCode] = false;
+
+            // custom shurtcut code as menu item has dropdown items
+            if (keyEventArgs.Control && keyEventArgs.KeyCode == Keys.F)
+                OnViewScreenFilter(this, EventArgs.Empty);
         }
 
         private void OnGameTick(object sender, EventArgs eventArgs)

@@ -78,6 +78,8 @@ namespace EmuNES
             // make space for checkboxes (disabled due to icons)
             ((ToolStripDropDownMenu)viewMenuItem.DropDown).ShowCheckMargin = true;
 
+            Application.Idle += TickWhileIdle;
+
 #if DEBUG
             gameTimer.Interval = 20;
 #else
@@ -262,6 +264,16 @@ namespace EmuNES
             // custom shurtcut code as menu item has dropdown items
             if (keyEventArgs.Control && keyEventArgs.KeyCode == Keys.F)
                 OnViewScreenFilter(this, EventArgs.Empty);
+        }
+
+        void TickWhileIdle(object sender, EventArgs eventArgs)
+        {
+            WindowsUser32.Message message;
+
+            while (!WindowsUser32.PeekMessage(out message, IntPtr.Zero, 0, 0, 0))
+            {
+                OnGameTick(sender, eventArgs);
+            }
         }
 
         private void OnGameTick(object sender, EventArgs eventArgs)

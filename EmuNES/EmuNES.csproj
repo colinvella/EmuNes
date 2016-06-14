@@ -79,6 +79,7 @@
     <Compile Include="GameState.cs" />
     <Compile Include="RecentFileManager.cs" />
     <Compile Include="Video\ScreenFilter.cs" />
+    <Compile Include="WindowsUser32.cs" />
     <EmbeddedResource Include="Input\InputOptionsForm.resx">
       <DependentUpon>InputOptionsForm.cs</DependentUpon>
     </EmbeddedResource>

@@ -38,9 +38,7 @@ namespace EmuNES
             aProp.SetValue(videoPanel, true, null);
 
             // map for key states to help controller mapping
-            keyPressed = new Dictionary<Keys, bool>();
-            foreach (Keys key in Enum.GetValues(typeof(Keys)))
-                keyPressed[key] = false;
+            this.keyboardState = new KeyboardState();
 
             // set up joystick object before console
             this.gameControllerManager = new GameControllerManager();
@@ -248,18 +246,18 @@ namespace EmuNES
 
         private void OnOptionsInput(object sender, EventArgs eventArgs)
         {
-            InputOptionsForm inputOptionsForm = new InputOptionsForm(Console, keyPressed);
+            InputOptionsForm inputOptionsForm = new InputOptionsForm(Console, keyboardState);
             inputOptionsForm.ShowDialog(this);
         }
 
         private void OnKeyDown(object sender, KeyEventArgs keyEventArgs)
         {
-            keyPressed[keyEventArgs.KeyCode] = true;
+            keyboardState[keyEventArgs.KeyCode] = true;
         }
 
         private void OnKeyUp(object sender, KeyEventArgs keyEventArgs)
         {
-            keyPressed[keyEventArgs.KeyCode] = false;
+            keyboardState[keyEventArgs.KeyCode] = false;
 
             // custom shurtcut code as menu item has dropdown items
             if (keyEventArgs.Control && keyEventArgs.KeyCode == Keys.F)
@@ -467,26 +465,26 @@ namespace EmuNES
                 // temporary - if there is a controller, accept both keyboard and joypad for controller 1
                 GameController gameController = gameControllerManager[0];
 
-                joypad.Start = () => keyPressed[Keys.Enter] || gameController.Buttons[9];
-                joypad.Select = () => keyPressed[Keys.Tab] || gameController.Buttons[8];
-                joypad.A = () => keyPressed[Keys.Z] || gameController.Buttons[1];
-                joypad.B = () => keyPressed[Keys.X] || gameController.Buttons[2];
-                joypad.Up = () => keyPressed[Keys.Up] || gameController.Up;
-                joypad.Down = () => keyPressed[Keys.Down] || gameController.Down;
-                joypad.Left = () => keyPressed[Keys.Left] || gameController.Left;
-                joypad.Right = () => keyPressed[Keys.Right] || gameController.Right;
+                joypad.Start = () => keyboardState[Keys.Enter] || gameController.Buttons[9];
+                joypad.Select = () => keyboardState[Keys.Tab] || gameController.Buttons[8];
+                joypad.A = () => keyboardState[Keys.Z] || gameController.Buttons[1];
+                joypad.B = () => keyboardState[Keys.X] || gameController.Buttons[2];
+                joypad.Up = () => keyboardState[Keys.Up] || gameController.Up;
+                joypad.Down = () => keyboardState[Keys.Down] || gameController.Down;
+                joypad.Left = () => keyboardState[Keys.Left] || gameController.Left;
+                joypad.Right = () => keyboardState[Keys.Right] || gameController.Right;
             }
             else
             {
                 // temporary - otherwise, just keyboard input
-                joypad.Start = () => keyPressed[Keys.Enter];
-                joypad.Select = () => keyPressed[Keys.Tab];
-                joypad.A = () => keyPressed[Keys.Z];
-                joypad.B = () => keyPressed[Keys.X];
-                joypad.Up = () => keyPressed[Keys.Up];
-                joypad.Down = () => keyPressed[Keys.Down];
-                joypad.Left = () => keyPressed[Keys.Left];
-                joypad.Right = () => keyPressed[Keys.Right];
+                joypad.Start = () => keyboardState[Keys.Enter];
+                joypad.Select = () => keyboardState[Keys.Tab];
+                joypad.A = () => keyboardState[Keys.Z];
+                joypad.B = () => keyboardState[Keys.X];
+                joypad.Up = () => keyboardState[Keys.Up];
+                joypad.Down = () => keyboardState[Keys.Down];
+                joypad.Left = () => keyboardState[Keys.Left];
+                joypad.Right = () => keyboardState[Keys.Right];
             }
 
             Console.ConnectController(1, joypad);
@@ -755,7 +753,7 @@ namespace EmuNES
         private ApuAudioProvider apuAudioProvider;
 
         // input system
-        private Dictionary<Keys, bool> keyPressed;
+        private KeyboardState keyboardState;
         private GameControllerManager gameControllerManager;
     }
 }

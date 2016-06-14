@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace EmuNES.Input
 {
-    class KeyboardState
+    public class KeyboardState
     {
         public KeyboardState()
         {

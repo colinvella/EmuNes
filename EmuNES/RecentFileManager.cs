@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Configuration;
 using System.Drawing;
 
 namespace EmuNES
@@ -41,20 +40,20 @@ namespace EmuNES
             // remove if already there to add as first
             RemoveRecentFile(recentFile);
 
-            string recentFiles = ConfigurationManager.AppSettings["RecentFiles"];
+            string recentFiles = EmulatorConfiguration.Instance["RecentFiles"];
             if (recentFiles == null)
                 recentFiles = "";
 
             recentFiles = recentFile.Trim() + "|" + recentFiles;
 
-            UpdateRecentFiles(recentFiles);
+            EmulatorConfiguration.Instance["RecentFiles"] = recentFiles;
 
             this.RefreshRecentFilesMenu();
         }
 
         public void RemoveRecentFile(string recentFile)
         {
-            string recentFiles = ConfigurationManager.AppSettings["RecentFiles"];
+            string recentFiles = EmulatorConfiguration.Instance["RecentFiles"];
             if (recentFiles == null)
                 recentFiles = "";
 
@@ -62,7 +61,7 @@ namespace EmuNES
                 recentFiles.Split(new char[] { '|'}).Where(
                     (x) => x.ToLower() != recentFile.ToLower()));
 
-            UpdateRecentFiles(recentFiles);
+            EmulatorConfiguration.Instance["RecentFiles"] = recentFiles;
 
             this.RefreshRecentFilesMenu();
         }
@@ -71,32 +70,9 @@ namespace EmuNES
 
         #region private methods
 
-        private void UpdateRecentFiles(string recentFiles)
-        {
-            try
-            {
-                var configurationFile
-                    = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                var settings = configurationFile.AppSettings.Settings;
-
-                if (settings["RecentFiles"] == null)
-                    settings.Add("RecentFiles", recentFiles);
-                else
-                    settings["RecentFiles"].Value = recentFiles;
-
-                configurationFile.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection(configurationFile.AppSettings.SectionInformation.Name);
-            }
-            catch (ConfigurationErrorsException)
-            {
-                MessageBox.Show("Unabled to update list of most recently used files",
-                    "Recently Used Files", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
         private void RefreshRecentFilesMenu()
         {
-            string recentFiles = ConfigurationManager.AppSettings["RecentFiles"];
+            string recentFiles = EmulatorConfiguration.Instance["RecentFiles"];
             if (recentFiles == null)
             {
                 this.ParentMenuItem.Enabled = false;
@@ -131,7 +107,7 @@ namespace EmuNES
 
         private void OnClearRecentFilesClicked(object sender, EventArgs eventArgs)
         {
-            UpdateRecentFiles("");
+            EmulatorConfiguration.Instance["RecentFiles"] = "";
             RefreshRecentFilesMenu();
             if (ClearRecentFilesClicked != null)
                 this.ClearRecentFilesClicked(sender, eventArgs);

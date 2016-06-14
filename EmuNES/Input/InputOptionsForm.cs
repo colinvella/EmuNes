@@ -19,6 +19,7 @@ namespace EmuNES.Input
             InitializeComponent();
 
             this.console = console;
+            this.controllers = new Controller[4];
             this.keyPressed = keyPressed;
         }
 
@@ -27,30 +28,28 @@ namespace EmuNES.Input
             controllerIdComboBox.SelectedIndex = controllerTypeComboBox.SelectedIndex = 0;
         }
 
-
         private void OnConfigureController(object sender, EventArgs eventArgs)
         {
             Joypad joypad = new Joypad();
             QuickConfigurationForm quickConfigurationForm = new QuickConfigurationForm(joypad, keyPressed);
             quickConfigurationForm.ShowDialog();
+            controllers[controllerTypeComboBox.SelectedIndex] = joypad;
+        }
 
-            this.console.ConnectController((byte)(controllerIdComboBox.SelectedIndex + 1), joypad);
+        private void OnOk(object sender, EventArgs eventArgs)
+        {
+            for (int controllerIndex = 0; controllerIndex < 4; controllerIndex++)
+            {
+                Controller controller = controllers[controllerIndex];
+                if (controller != null)
+                    this.console.ConnectController((byte)(controllerIndex + 1), controller);
+            }
+            DialogResult = DialogResult.OK;
         }
 
         private NesCore.Console console;
         private Dictionary<Keys, bool> keyPressed;
 
-        private enum  JoypadConfigState
-        {
-            Ready,
-            Start,
-            Select,
-            A,
-            B,
-            Up,
-            Down,
-            Left,
-            Right,
-        }
+        private Controller[] controllers;
     }
 }

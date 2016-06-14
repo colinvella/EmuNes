@@ -17,17 +17,11 @@ namespace NesCore.Storage
             characterRam = new byte[0x2000];
     }
 
-    public virtual string Name { get { return "CPROM"; } }
+        public override string Name { get { return "CPROM"; } }
 
         public Cartridge Cartridge { get; private set; }
 
-        public Action TriggerInterruptRequest
-        {
-            get { return null; }
-            set { }
-        }
-
-        public byte this[ushort address]
+        public override byte this[ushort address]
         {
             get
             {
@@ -66,10 +60,6 @@ namespace NesCore.Storage
                 else
                     throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
             }
-        }
-
-        public void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
-        {
         }
 
         private int characterBank;

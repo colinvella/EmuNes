@@ -26,15 +26,9 @@ namespace NesCore.Storage
 
         public Cartridge Cartridge { get; private set; }
 
-        public string Name { get { return "MMC3"; } }
+        public override string Name { get { return "MMC3"; } }
 
-        public Action TriggerInterruptRequest
-        {
-            get { return triggerInterruptRequest; }
-            set { triggerInterruptRequest = value; }
-        }
-
-        public byte this[ushort address]
+        public override byte this[ushort address]
         {
             get
             {
@@ -78,7 +72,7 @@ namespace NesCore.Storage
             }
         }
 
-        public void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
+        public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
         {
             if (cycle != 260)
                 return;
@@ -130,7 +124,7 @@ namespace NesCore.Storage
             {
                 --counter;
                 if (counter == 0 && irqEnable)
-                    triggerInterruptRequest?.Invoke();
+                    TriggerInterruptRequest?.Invoke();
             }
         }
 
@@ -274,6 +268,5 @@ namespace NesCore.Storage
         private byte counter;
         private bool irqEnable;
 
-        private Action triggerInterruptRequest;
     }
 }

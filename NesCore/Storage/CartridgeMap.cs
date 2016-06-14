@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace NesCore.Storage
 {
-    public interface CartridgeMap
+    public abstract class CartridgeMap
     {
-        string Name { get;  }
+        public abstract string Name { get;  }
 
-        Action TriggerInterruptRequest { get; set; }
+        public virtual Action TriggerInterruptRequest { get; set; }
 
-        byte this[ushort address] { get; set; }
+        public abstract byte this[ushort address] { get; set; }
 
-        void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites);
+        public virtual void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites) { }
     }
 }

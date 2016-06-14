@@ -18,7 +18,7 @@ namespace NesCore.Storage
 
         public Cartridge Cartridge { get; private set; }
 
-        public byte this[ushort address]
+        public override byte this[ushort address]
         {
             get
             {
@@ -108,18 +108,10 @@ namespace NesCore.Storage
             }
         }
 
-        public string Name
+        public override string Name
         {
             get { return "100-in-1"; }
         }
-
-        public Action TriggerInterruptRequest
-        {
-            get { return null; }
-            set { }
-        }
-
-        public void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites) { }
 
         private int bankMode;
         private int programRomBank;

@@ -19,17 +19,11 @@ namespace NesCore.Storage
             programBankOffsets[1] = GetProgramBankOffset(-1);
         }
 
-        public string Name { get { return "MMC1"; } }
+        public override string Name { get { return "MMC1"; } }
 
         public Cartridge Cartridge { get; private set; }
 
-        public Action TriggerInterruptRequest
-        {
-            get { return null; }
-            set { }
-        }
-
-        public byte this[ushort address]
+        public override byte this[ushort address]
         {
             get
             {
@@ -69,10 +63,6 @@ namespace NesCore.Storage
                     Cartridge.SaveRam[(ushort)(address - 0x6000)] = value;
                 }
             }
-        }
-
-        public void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
-        {
         }
 
         private void LoadRegister(ushort address, byte value)

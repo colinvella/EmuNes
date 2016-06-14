@@ -16,17 +16,11 @@ namespace NesCore.Storage
             characterBank = 0;
         }
 
-        public virtual string Name { get { return "GxROM"; } }
+        public override string Name { get { return "GxROM"; } }
 
         public Cartridge Cartridge { get; private set; }
-
-        public Action TriggerInterruptRequest
-        {
-            get { return null; }
-            set { }
-        }
-
-        public byte this[ushort address]
+        
+        public override byte this[ushort address]
         {
             get
             {
@@ -55,8 +49,6 @@ namespace NesCore.Storage
                     throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
             }
         }
-
-        public void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites) { }
 
         private int programBank;
         private int characterBank;

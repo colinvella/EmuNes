@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="Audio\ApuAudioProvider.cs" />
     <Compile Include="EmulatorConfiguration.cs" />
+    <Compile Include="Input\KeyboardState.cs" />
     <Compile Include="Input\QuickConfigurationForm.cs">
       <SubType>Form</SubType>
     </Compile>

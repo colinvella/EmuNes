@@ -23,12 +23,18 @@ namespace EmuNES.Input
             this.newJoypad = null;
         }
 
+        private void OnFormLoad(object sender, EventArgs e)
+        {
+            controllerIdComboBox.SelectedIndex = controllerTypeComboBox.SelectedIndex = 0;
+        }
+
+
         private void OnConfigureController(object sender, EventArgs eventArgs)
         {
             if (joypadConfigState == JoypadConfigState.Ready)
             {
                 joypadConfigState = JoypadConfigState.Start;
-                configureOneButton.Text = "&Cancel";
+                configureButton.Text = "&Cancel";
                 configureTextbox.Text = "Press " + joypadConfigState;
                 configureTextbox.Focus();
                 this.newJoypad = new Joypad();
@@ -36,7 +42,7 @@ namespace EmuNES.Input
             else
             {
                 joypadConfigState = JoypadConfigState.Ready;
-                configureOneButton.Text = "&Configure...";
+                configureButton.Text = "&Configure...";
             }
         }
 
@@ -81,10 +87,10 @@ namespace EmuNES.Input
                     break;
                 case JoypadConfigState.Right:
                     newJoypad.Right = () => keyPressed[keyEventArgs.KeyCode];
-                    console.ConnectController((byte)(tabControl.SelectedIndex + 1), newJoypad);
+                    console.ConnectController(1, newJoypad);
                     newJoypad = null;
                     joypadConfigState = JoypadConfigState.Ready;
-                    configureOneButton.Text = "&Configure";
+                    configureButton.Text = "&Configure";
                     configureTextbox.Text = "Done";
                     break;
             }
@@ -107,6 +113,5 @@ namespace EmuNES.Input
             Left,
             Right,
         }
-
     }
 }

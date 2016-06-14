@@ -73,6 +73,7 @@
     <Compile Include="Storage\CartridgeMapAxRom.cs" />
     <Compile Include="Storage\CartridgeMapMmc2.cs" />
     <Compile Include="Storage\CartridgeMapNRom.cs" />
+    <Compile Include="Storage\CartridgeMapCamerica71.cs" />
     <Compile Include="Storage\CartridgeMapUxRom.cs" />
     <Compile Include="Storage\MirrorMode.cs" />
     <Compile Include="Storage\SaveRam.cs" />

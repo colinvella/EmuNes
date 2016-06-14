@@ -393,9 +393,9 @@ namespace NesCore.Video
             }
             else
             {
-                // rendering disabled - trigger WritePixel hook with black
+                // rendering disabled - trigger WritePixel hook with last active colour
                 if (visibleLine && visibleCycle)
-                    WritePixel((byte)(Cycle - 1), (byte)ScanLine, paletteTints[0][0x0F]);
+                    WritePixel((byte)(Cycle - 1), (byte)ScanLine, lastColour);
             }
 
             // sprite logic
@@ -819,6 +819,7 @@ namespace NesCore.Video
             Colour colour = paletteTints[tint][paletteIndex];
 
             // hook to write pixel
+            lastColour = colour;
             WritePixel(x, y, colour);
         }
 
@@ -1014,6 +1015,8 @@ namespace NesCore.Video
         private byte bufferedData; // for buffered reads
 
         private PaletteTints paletteTints;
+
+        private Colour lastColour;
 
         private static readonly ushort[][] mirrorLookup = {
             new ushort[]{0, 0, 1, 1},

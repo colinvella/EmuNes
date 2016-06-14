@@ -20,7 +20,6 @@ namespace EmuNES.Input
 
             this.console = console;
             this.keyPressed = keyPressed;
-            this.newJoypad = null;
         }
 
         private void OnFormLoad(object sender, EventArgs e)
@@ -31,75 +30,15 @@ namespace EmuNES.Input
 
         private void OnConfigureController(object sender, EventArgs eventArgs)
         {
-            if (joypadConfigState == JoypadConfigState.Ready)
-            {
-                joypadConfigState = JoypadConfigState.Start;
-                configureButton.Text = "&Cancel";
-                configureTextbox.Text = "Press " + joypadConfigState;
-                configureTextbox.Focus();
-                this.newJoypad = new Joypad();
-            }
-            else
-            {
-                joypadConfigState = JoypadConfigState.Ready;
-                configureButton.Text = "&Configure...";
-            }
-        }
+            Joypad joypad = new Joypad();
+            QuickConfigurationForm quickConfigurationForm = new QuickConfigurationForm(joypad, keyPressed);
+            quickConfigurationForm.ShowDialog();
 
-        private void OnKeyDown(object sender, KeyEventArgs keyEventArgs)
-        {
-            switch (joypadConfigState)
-            {
-                case JoypadConfigState.Start:
-                    newJoypad.Start = () => keyPressed[keyEventArgs.KeyCode];
-                    ++joypadConfigState;
-                    configureTextbox.Text = "Press " + joypadConfigState;
-                    break;
-                case JoypadConfigState.Select:
-                    newJoypad.Select = () => keyPressed[keyEventArgs.KeyCode];
-                    ++joypadConfigState;
-                    configureTextbox.Text = "Press " + joypadConfigState;
-                    break;
-                case JoypadConfigState.A:
-                    newJoypad.A = () => keyPressed[keyEventArgs.KeyCode];
-                    ++joypadConfigState;
-                    configureTextbox.Text = "Press " + joypadConfigState;
-                    break;
-                case JoypadConfigState.B:
-                    newJoypad.B = () => keyPressed[keyEventArgs.KeyCode];
-                    ++joypadConfigState;
-                    configureTextbox.Text = "Press " + joypadConfigState;
-                    break;
-                case JoypadConfigState.Up:
-                    newJoypad.Up = () => keyPressed[keyEventArgs.KeyCode];
-                    ++joypadConfigState;
-                    configureTextbox.Text = "Press " + joypadConfigState;
-                    break;
-                case JoypadConfigState.Down:
-                    newJoypad.Down = () => keyPressed[keyEventArgs.KeyCode];
-                    ++joypadConfigState;
-                    configureTextbox.Text = "Press " + joypadConfigState;
-                    break;
-                case JoypadConfigState.Left:
-                    newJoypad.Left = () => keyPressed[keyEventArgs.KeyCode];
-                    ++joypadConfigState;
-                    configureTextbox.Text = "Press " + joypadConfigState;
-                    break;
-                case JoypadConfigState.Right:
-                    newJoypad.Right = () => keyPressed[keyEventArgs.KeyCode];
-                    console.ConnectController(1, newJoypad);
-                    newJoypad = null;
-                    joypadConfigState = JoypadConfigState.Ready;
-                    configureButton.Text = "&Configure";
-                    configureTextbox.Text = "Done";
-                    break;
-            }
+            this.console.ConnectController((byte)(controllerIdComboBox.SelectedIndex + 1), joypad);
         }
 
         private NesCore.Console console;
         private Dictionary<Keys, bool> keyPressed;
-        private JoypadConfigState joypadConfigState = JoypadConfigState.Ready;
-        private Joypad newJoypad;
 
         private enum  JoypadConfigState
         {

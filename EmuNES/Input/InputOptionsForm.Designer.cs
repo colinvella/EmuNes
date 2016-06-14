@@ -31,7 +31,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InputOptionsForm));
             this.okButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
-            this.configureTextbox = new System.Windows.Forms.TextBox();
             this.configureButton = new System.Windows.Forms.Button();
             this.controllerIdComboBox = new System.Windows.Forms.ComboBox();
             this.controllerTypeComboBox = new System.Windows.Forms.ComboBox();
@@ -39,6 +38,7 @@
             // 
             // okButton
             // 
+            this.okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.okButton.Location = new System.Drawing.Point(327, 292);
             this.okButton.Margin = new System.Windows.Forms.Padding(2);
             this.okButton.Name = "okButton";
@@ -57,16 +57,6 @@
             this.cancelButton.TabIndex = 1;
             this.cancelButton.Text = "&Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
-            // 
-            // configureTextbox
-            // 
-            this.configureTextbox.Location = new System.Drawing.Point(12, 111);
-            this.configureTextbox.Margin = new System.Windows.Forms.Padding(2);
-            this.configureTextbox.Name = "configureTextbox";
-            this.configureTextbox.ReadOnly = true;
-            this.configureTextbox.Size = new System.Drawing.Size(76, 20);
-            this.configureTextbox.TabIndex = 2;
-            this.configureTextbox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OnKeyDown);
             // 
             // configureButton
             // 
@@ -107,12 +97,13 @@
             // 
             // InputOptionsForm
             // 
+            this.AcceptButton = this.okButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.cancelButton;
             this.ClientSize = new System.Drawing.Size(436, 327);
             this.Controls.Add(this.controllerTypeComboBox);
             this.Controls.Add(this.controllerIdComboBox);
-            this.Controls.Add(this.configureTextbox);
             this.Controls.Add(this.configureButton);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.okButton);
@@ -126,7 +117,6 @@
             this.Text = "Input Options";
             this.Load += new System.EventHandler(this.OnFormLoad);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -135,7 +125,6 @@
         private System.Windows.Forms.Button okButton;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button configureButton;
-        private System.Windows.Forms.TextBox configureTextbox;
         private System.Windows.Forms.ComboBox controllerIdComboBox;
         private System.Windows.Forms.ComboBox controllerTypeComboBox;
     }

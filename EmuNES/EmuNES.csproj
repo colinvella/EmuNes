@@ -56,6 +56,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audio\ApuAudioProvider.cs" />
+    <Compile Include="Input\QuickConfigurationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Input\QuickConfigurationForm.Designer.cs">
+      <DependentUpon>QuickConfigurationForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Input\Button.cs" />
     <Compile Include="Input\GameControllerEventArgs.cs" />
     <Compile Include="Input\WindowsMultiMedia.cs" />
@@ -80,6 +86,9 @@
     <Compile Include="RecentFileManager.cs" />
     <Compile Include="Video\ScreenFilter.cs" />
     <Compile Include="WindowsUser32.cs" />
+    <EmbeddedResource Include="Input\QuickConfigurationForm.resx">
+      <DependentUpon>QuickConfigurationForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Input\InputOptionsForm.resx">
       <DependentUpon>InputOptionsForm.cs</DependentUpon>
     </EmbeddedResource>

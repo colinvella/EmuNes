@@ -151,8 +151,18 @@ namespace NesCore.Processor
             // note: this takes care of fixed durations; variable durations e.g. for branching are computed within the instruction
             State.Cycles += instruction.Cycles;
 
-            // consume an extra cycle if a page is crossed during addressing
-            if (pageCrossed)
+            // consume an extra cycle if a page is crossed during addressing (unless it is an exception?)
+            bool pageCrossException = 
+                opCode == 0x1E ||
+                opCode == 0x13 || opCode == 0x1B || opCode == 0x1F ||
+                opCode == 0x33 || opCode == 0x3B || opCode == 0x3E || opCode == 0x3F ||
+                opCode == 0x53 || opCode == 0x5B || opCode == 0x5E || opCode == 0x5F ||
+                opCode == 0x73 || opCode == 0x7B || opCode == 0x7E || opCode == 0x7F ||
+                opCode == 0x91 || opCode == 0x93 || opCode == 0x99 || opCode == 0x9B || opCode == 0x9C || opCode == 0x9D || opCode == 0x9E || opCode == 0x9F ||
+                opCode == 0xD3 || opCode == 0xDB || opCode == 0xDE || opCode == 0xDF ||
+                opCode == 0xF3 || opCode == 0xFB || opCode == 0xFE || opCode == 0xFF;
+
+            if (pageCrossed && !pageCrossException)
                 ++State.Cycles;
 
             // execute the instruction

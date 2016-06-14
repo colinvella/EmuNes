@@ -148,7 +148,7 @@ namespace NesCore.Processor
             State.ProgramCounter += instruction.Size;
 
             // advance cycle count by instruction cycle duration
-            // note: this takes care of fixed durations; variable durations e.g. for brancing are computed within the instruction
+            // note: this takes care of fixed durations; variable durations e.g. for branching are computed within the instruction
             State.Cycles += instruction.Cycles;
 
             // consume an extra cycle if a page is crossed during addressing

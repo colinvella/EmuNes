@@ -65,6 +65,8 @@
             this.frameRateStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.gameTimer = new System.Windows.Forms.Timer(this.components);
             this.iconTimer = new System.Windows.Forms.Timer(this.components);
+            this.debugMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.debugCodeDisassemblyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mainMenuStrip.SuspendLayout();
@@ -89,7 +91,8 @@
             this.gameMenuItem,
             this.viewMenuItem,
             this.toolStripMenuItem1,
-            this.optionsMenuItem});
+            this.optionsMenuItem,
+            this.debugMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
             this.mainMenuStrip.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
@@ -319,7 +322,7 @@
             // 
             this.optionsInputMenuItem.Image = global::EmuNES.Properties.Resources.OptionsInput;
             this.optionsInputMenuItem.Name = "optionsInputMenuItem";
-            this.optionsInputMenuItem.Size = new System.Drawing.Size(115, 26);
+            this.optionsInputMenuItem.Size = new System.Drawing.Size(156, 26);
             this.optionsInputMenuItem.Text = "&Input...";
             this.optionsInputMenuItem.Click += new System.EventHandler(this.OnOptionsInput);
             // 
@@ -374,6 +377,21 @@
             this.iconTimer.Enabled = true;
             this.iconTimer.Interval = 250;
             this.iconTimer.Tick += new System.EventHandler(this.OnIconTick);
+            // 
+            // debugMenuItem
+            // 
+            this.debugMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.debugCodeDisassemblyMenuItem});
+            this.debugMenuItem.Name = "debugMenuItem";
+            this.debugMenuItem.Size = new System.Drawing.Size(54, 20);
+            this.debugMenuItem.Text = "&Debug";
+            // 
+            // debugCodeDisassemblyMenuItem
+            // 
+            this.debugCodeDisassemblyMenuItem.Name = "debugCodeDisassemblyMenuItem";
+            this.debugCodeDisassemblyMenuItem.Size = new System.Drawing.Size(170, 22);
+            this.debugCodeDisassemblyMenuItem.Text = "&Code Disassembly";
+            this.debugCodeDisassemblyMenuItem.Click += new System.EventHandler(this.OnDebugCodeDisassembly);
             // 
             // MainForm
             // 
@@ -439,6 +457,8 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem optionsMenuItem;
         private System.Windows.Forms.ToolStripMenuItem optionsInputMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem debugMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem debugCodeDisassemblyMenuItem;
     }
 }
 

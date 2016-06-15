@@ -1,4 +1,5 @@
 ﻿using EmuNES.Audio;
+using EmuNES.Debug;
 using EmuNES.Input;
 using NAudio.Wave;
 using NesCore.Input;
@@ -75,6 +76,8 @@ namespace EmuNES
 
             // make space for checkboxes (disabled due to icons)
             ((ToolStripDropDownMenu)viewMenuItem.DropDown).ShowCheckMargin = true;
+
+            codeDisassemblyForm = new CodeDisassemblyForm();
 
             Application.Idle += TickWhileIdle;
 
@@ -248,6 +251,22 @@ namespace EmuNES
         {
             InputOptionsForm inputOptionsForm = new InputOptionsForm(Console, keyboardState);
             inputOptionsForm.ShowDialog(this);
+        }
+
+        private void OnDebugCodeDisassembly(object sender, EventArgs eventArgs)
+        {
+            if (debugCodeDisassemblyMenuItem.Checked)
+            {
+                codeDisassemblyForm.Hide();
+                Console.Processor.Trace = null;
+            }
+            else
+            {
+                codeDisassemblyForm.Show(this);
+                Console.Processor.Trace = () => codeDisassemblyForm.Trace(Console);
+            }
+            debugCodeDisassemblyMenuItem.Checked = !debugCodeDisassemblyMenuItem.Checked;
+            this.Focus();
         }
 
         private void OnKeyDown(object sender, KeyEventArgs keyEventArgs)
@@ -755,5 +774,8 @@ namespace EmuNES
         // input system
         private KeyboardState keyboardState;
         private GameControllerManager gameControllerManager;
+
+        // debug
+        private CodeDisassemblyForm codeDisassemblyForm;
     }
 }

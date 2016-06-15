@@ -638,7 +638,9 @@ namespace NesCore.Video
             {
                 // TODO: this fixes some games but the delay shouldn't have to be so
                 // long, so the timings are off somewhere
-                nmiDelay = 15;
+                //nmiDelay = 35;
+                //if (evenFrame)
+                //    nmiDelay -= 3;
             }
             nmiPrevious = nmi;
         }

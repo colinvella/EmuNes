@@ -152,9 +152,10 @@ namespace NesCore.Processor
             State.Cycles += instruction.Cycles;
 
             // consume an extra cycle if a page is crossed during addressing (unless it is an exception?)
-            bool pageCrossException = 
-                opCode == 0x1E ||
-                opCode == 0x13 || opCode == 0x1B || opCode == 0x1F ||
+
+            // some ABX, ABY and IZY opcodes do not incure extra cycle when crossing
+            bool pageCrossException =                 
+                opCode == 0x13 || opCode == 0x1B || opCode == 0x1E || opCode == 0x1F ||
                 opCode == 0x33 || opCode == 0x3B || opCode == 0x3E || opCode == 0x3F ||
                 opCode == 0x53 || opCode == 0x5B || opCode == 0x5E || opCode == 0x5F ||
                 opCode == 0x73 || opCode == 0x7B || opCode == 0x7E || opCode == 0x7F ||

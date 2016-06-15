@@ -393,9 +393,11 @@ namespace NesCore.Video
             }
             else
             {
-                // rendering disabled - trigger WritePixel hook with last active colour
+                // rendering disabled - trigger WritePixel hook with default background pixel
                 if (visibleLine && visibleCycle)
-                    WritePixel((byte)(Cycle - 1), (byte)ScanLine, lastColour);
+                {
+                    WritePixel((byte)(Cycle - 1), (byte)ScanLine, paletteTints[tint][Memory[0x3F00]]);
+                }
             }
 
             // sprite logic
@@ -638,9 +640,9 @@ namespace NesCore.Video
             {
                 // TODO: this fixes some games but the delay shouldn't have to be so
                 // long, so the timings are off somewhere
-                //nmiDelay = 35;
-                //if (evenFrame)
-                //    nmiDelay -= 3;
+                nmiDelay = 35; // seems better than 15 - not sure what I'm doing here!
+                if (evenFrame)
+                    nmiDelay -= 5;
             }
             nmiPrevious = nmi;
         }
@@ -821,7 +823,6 @@ namespace NesCore.Video
             Colour colour = paletteTints[tint][paletteIndex];
 
             // hook to write pixel
-            lastColour = colour;
             WritePixel(x, y, colour);
         }
 
@@ -1017,8 +1018,6 @@ namespace NesCore.Video
         private byte bufferedData; // for buffered reads
 
         private PaletteTints paletteTints;
-
-        private Colour lastColour;
 
         private static readonly ushort[][] mirrorLookup = {
             new ushort[]{0, 0, 1, 1},

@@ -45,7 +45,7 @@ namespace EmuNES.Diagnostics
                 if (needsRefresh && (DateTime.Now - lastRefresh).TotalSeconds > 5)
                 {
                     lastRefresh = DateTime.Now;
-                    BeginInvoke((new Action(() => dataGridView.DataSource = new SortableBindingList<DisassemblyLine>(disassemblyLines.OrderBy((x) => x.Address)))));
+                    dataGridView.DataSource = new SortableBindingList<DisassemblyLine>(disassemblyLines.OrderBy((x) => x.Address));
                     needsRefresh = false;
                 }
             }

@@ -95,6 +95,10 @@ namespace NesCore.Storage
                     programRomBank = value & 0x3f;
                     subBank = value >> 7;
 
+                    // invalidate address region
+                    // should refine this
+                    BankSwitch?.Invoke(0x8000, 0x8000);
+
                     MirrorMode mirrorMode = (value & 0x40) != 0 ? MirrorMode.Horizontal : MirrorMode.Vertical;
                     if (Cartridge.MirrorMode != mirrorMode)
                     {

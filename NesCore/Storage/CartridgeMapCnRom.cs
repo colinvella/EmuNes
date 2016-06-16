@@ -46,7 +46,12 @@ namespace NesCore.Storage
                 if (address < 0x2000)
                     Cartridge.CharacterRom[characterBank * 0x2000 + address] = value;
                 else if (address >= 0x8000)
+                {
                     characterBank = value % 3;
+
+                    // invalidate address region
+                    BankSwitch?.Invoke(0x0000, 0x2000);
+                }
                 else if (address >= 0x6000)
                     Cartridge.SaveRam[(ushort)(address - 0x6000)] = value;
                 else

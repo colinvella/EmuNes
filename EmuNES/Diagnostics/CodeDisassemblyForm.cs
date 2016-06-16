@@ -37,15 +37,15 @@ namespace EmuNES.Diagnostics
             if (!disassemblyLineMap.ContainsKey(address))
             {
                 disassemblyLineMap[address] = disassemblyLine;
-                disassemblyLines.Add(disassemblyLine);
-                lastDissaembly = DateTime.Now;
+                disassemblyLines.Add(disassemblyLine);                
                 needsRefresh = true;
             }
             else
             {
-                if (needsRefresh && (DateTime.Now - lastDissaembly).TotalSeconds > 2)
+                if (needsRefresh && (DateTime.Now - lastRefresh).TotalSeconds > 5)
                 {
-                    BeginInvoke((new Action(() => dataGridView.DataSource = new SortableBindingList<DisassemblyLine>(disassemblyLines))));
+                    lastRefresh = DateTime.Now;
+                    BeginInvoke((new Action(() => dataGridView.DataSource = new SortableBindingList<DisassemblyLine>(disassemblyLines.OrderBy((x) => x.Address)))));
                     needsRefresh = false;
                 }
             }
@@ -61,6 +61,7 @@ namespace EmuNES.Diagnostics
             dataGridView.DataSource = disassemblyBindingList;
             dataGridView.Sort(dataGridView.Columns[0], ListSortDirection.Ascending);
 
+            lastRefresh = DateTime.Now;
             needsRefresh = true;
         }
 
@@ -71,7 +72,7 @@ namespace EmuNES.Diagnostics
 
         private Dictionary<ushort, DisassemblyLine> disassemblyLineMap;
         private List<DisassemblyLine> disassemblyLines;
-        private DateTime lastDissaembly;
+        private DateTime lastRefresh;
         private bool needsRefresh;
     }
 }

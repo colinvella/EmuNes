@@ -42,6 +42,10 @@ namespace NesCore.Storage
                     // --PP--CC
                     programBank = (value >> 4) & 7;
                     characterBank = value & 7;
+
+                    // invalidate address regions
+                    BankSwitch?.Invoke(0x0000, 0x2000);
+                    BankSwitch?.Invoke(0x8000, 0x8000);
                 }
                 else if (address >= 0x6000)
                     Cartridge.SaveRam[(ushort)(address - 0x6000)] = value;

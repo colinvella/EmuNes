@@ -101,7 +101,12 @@ namespace NesCore.Storage
                         throw new NotImplementedException("MMC4 write to $8000 - $9FFF");
                     }
                     else if (address < 0xB000)
+                    {
                         programBank = (byte)(value & 0x0F);
+
+                        // invalidate address regions
+                        BankSwitch?.Invoke(0x8000, 0x8000);
+                    }
                     else if (address < 0xC000)
                         characterBank0 = (byte)(value & 0x1F);
                     else if (address < 0xD000)
@@ -126,7 +131,10 @@ namespace NesCore.Storage
         {
             selectedCharacterBank0 = latch0 == 0xFD ? characterBank0 : characterBank1;
             selectedCharacterBank1 = latch1 == 0xFD ? characterBank2 : characterBank3;
-    	}
+
+            // invalidate address regions
+            BankSwitch?.Invoke(0x0000, 0x2000);
+        }
 
         private byte programBankCount;
         private byte programBank;

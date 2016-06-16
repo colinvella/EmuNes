@@ -154,6 +154,10 @@ namespace NesCore.Storage
             characterBankMode = (byte)((value >> 7) & 1);
             registerIndex = (byte)(value & 7);
             UpdateOffsets();
+
+            // invalidate address regions
+            BankSwitch?.Invoke(0x0000, 0x2000);
+            BankSwitch?.Invoke(0x8000, 0x8000);
         }
 
         private void WriteBankData(byte value)

@@ -43,9 +43,9 @@ namespace EmuNES.Diagnostics
             }
             else
             {
-                if (needsRefresh && (DateTime.Now - lastDissaembly).TotalSeconds > 1)
+                if (needsRefresh && (DateTime.Now - lastDissaembly).TotalSeconds > 2)
                 {
-                    dataGridView.DataSource = new SortableBindingList<DisassemblyLine>(disassemblyLines/*.OrderBy((x) => x.Address)*/);
+                    BeginInvoke((new Action(() => dataGridView.DataSource = new SortableBindingList<DisassemblyLine>(disassemblyLines))));
                     needsRefresh = false;
                 }
             }

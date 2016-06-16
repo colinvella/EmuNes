@@ -255,20 +255,27 @@ namespace EmuNES
 
         private void OnDiagnosticsCodeDisassembly(object sender, EventArgs eventArgs)
         {
-            if (Console.Cartridge == null)
-                return;
+            traceEnabled = !traceEnabled;
+            diagnosticsCodeDisassemblyMenuItem.Checked = traceEnabled;
 
-            if (diagnosticsCodeDisassemblyMenuItem.Checked)
+            if (traceEnabled)
             {
                 codeDisassemblyForm.Hide();
                 Console.Processor.Trace = null;
-                Console.Cartridge.Map.ProgramBankSwitch = null;
+                if (Console.Cartridge != null)
+                {
+                    Console.Cartridge.Map.ProgramBankSwitch = null;
+                }
             }
             else
             {
                 codeDisassemblyForm.Show(this);
                 Console.Processor.Trace = () => codeDisassemblyForm.Trace();
-                Console.Cartridge.Map.ProgramBankSwitch = (address, size) => codeDisassemblyForm.InvalidateMemoryRange(address, size);
+                if (Console.Cartridge != null)
+                {
+                    Console.Cartridge.Map.ProgramBankSwitch
+                        = (address, size) => codeDisassemblyForm.InvalidateMemoryRange(address, size);
+                }
             }
             diagnosticsCodeDisassemblyMenuItem.Checked = !diagnosticsCodeDisassemblyMenuItem.Checked;
             this.Focus();
@@ -545,9 +552,9 @@ namespace EmuNES
                     emulatorStatusLabel.Text = "SaveRam file detected and loaded";
                 }
 
-                this.cartridge = newCartridge;
+                Console.LoadCartridge(newCartridge);
 
-                Console.LoadCartridge(cartridge);
+                this.cartridge = newCartridge;
 
                 this.cartridgeRomFilename = Path.GetFileNameWithoutExtension(cartridgeRomPath);
 
@@ -555,7 +562,12 @@ namespace EmuNES
 
                 filePropertiesMenuItem.Enabled = true;
                 gameMenuItem.Enabled = true;
-                diagnosticsMenuItem.Enabled = true;
+
+                if (traceEnabled)
+                {
+                    Console.Cartridge.Map.ProgramBankSwitch = 
+                        (address, size) => codeDisassemblyForm.InvalidateMemoryRange(address, size);
+                }
 
                 OnGameStop(this, EventArgs.Empty);
                 OnGameRunPause(this, EventArgs.Empty);
@@ -783,5 +795,6 @@ namespace EmuNES
 
         // debug
         private CodeDisassemblyForm codeDisassemblyForm;
+        private bool traceEnabled;
     }
 }

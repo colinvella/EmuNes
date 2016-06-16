@@ -59,14 +59,14 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsInputMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.diagnosticsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.diagnosticsCodeDisassemblyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.videoPanel = new System.Windows.Forms.Panel();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.emulatorStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.frameRateStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.gameTimer = new System.Windows.Forms.Timer(this.components);
             this.iconTimer = new System.Windows.Forms.Timer(this.components);
-            this.debugMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.debugCodeDisassemblyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mainMenuStrip.SuspendLayout();
@@ -92,7 +92,7 @@
             this.viewMenuItem,
             this.toolStripMenuItem1,
             this.optionsMenuItem,
-            this.debugMenuItem});
+            this.diagnosticsMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
             this.mainMenuStrip.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
@@ -326,6 +326,22 @@
             this.optionsInputMenuItem.Text = "&Input...";
             this.optionsInputMenuItem.Click += new System.EventHandler(this.OnOptionsInput);
             // 
+            // diagnosticsMenuItem
+            // 
+            this.diagnosticsMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.diagnosticsCodeDisassemblyMenuItem});
+            this.diagnosticsMenuItem.Name = "diagnosticsMenuItem";
+            this.diagnosticsMenuItem.Size = new System.Drawing.Size(80, 20);
+            this.diagnosticsMenuItem.Text = "&Diagnostics";
+            // 
+            // diagnosticsCodeDisassemblyMenuItem
+            // 
+            this.diagnosticsCodeDisassemblyMenuItem.Name = "diagnosticsCodeDisassemblyMenuItem";
+            this.diagnosticsCodeDisassemblyMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F12)));
+            this.diagnosticsCodeDisassemblyMenuItem.Size = new System.Drawing.Size(222, 22);
+            this.diagnosticsCodeDisassemblyMenuItem.Text = "&Code Disassembly";
+            this.diagnosticsCodeDisassemblyMenuItem.Click += new System.EventHandler(this.OnDiagnosticsCodeDisassembly);
+            // 
             // videoPanel
             // 
             this.videoPanel.BackColor = System.Drawing.Color.Black;
@@ -377,21 +393,6 @@
             this.iconTimer.Enabled = true;
             this.iconTimer.Interval = 250;
             this.iconTimer.Tick += new System.EventHandler(this.OnIconTick);
-            // 
-            // debugMenuItem
-            // 
-            this.debugMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.debugCodeDisassemblyMenuItem});
-            this.debugMenuItem.Name = "debugMenuItem";
-            this.debugMenuItem.Size = new System.Drawing.Size(54, 20);
-            this.debugMenuItem.Text = "&Debug";
-            // 
-            // debugCodeDisassemblyMenuItem
-            // 
-            this.debugCodeDisassemblyMenuItem.Name = "debugCodeDisassemblyMenuItem";
-            this.debugCodeDisassemblyMenuItem.Size = new System.Drawing.Size(170, 22);
-            this.debugCodeDisassemblyMenuItem.Text = "&Code Disassembly";
-            this.debugCodeDisassemblyMenuItem.Click += new System.EventHandler(this.OnDebugCodeDisassembly);
             // 
             // MainForm
             // 
@@ -457,8 +458,8 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem optionsMenuItem;
         private System.Windows.Forms.ToolStripMenuItem optionsInputMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem debugMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem debugCodeDisassemblyMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem diagnosticsMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem diagnosticsCodeDisassemblyMenuItem;
     }
 }
 

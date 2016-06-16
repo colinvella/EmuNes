@@ -38,7 +38,15 @@ namespace EmuNES.Diagnostics
             {
                 disassemblyLineMap[address] = disassemblyLine;
                 disassemblyLines.Add(disassemblyLine);
-                dataGridView.DataSource = new SortableBindingList<DisassemblyLine>(disassemblyLines);
+                needsRefresh = true;
+            }
+            else
+            {
+                if (needsRefresh)
+                {
+                    dataGridView.DataSource = new SortableBindingList<DisassemblyLine>(disassemblyLines/*.OrderBy((x) => x.Address)*/);
+                    needsRefresh = false;
+                }
             }
         }
 
@@ -51,6 +59,8 @@ namespace EmuNES.Diagnostics
             dataGridView.AutoGenerateColumns = true;
             dataGridView.DataSource = disassemblyBindingList;
             dataGridView.Sort(dataGridView.Columns[0], ListSortDirection.Ascending);
+
+            needsRefresh = true;
         }
 
         private void OnFormClosing(object sender, FormClosingEventArgs formClosingEventArgs)
@@ -60,5 +70,6 @@ namespace EmuNES.Diagnostics
 
         private Dictionary<ushort, DisassemblyLine> disassemblyLineMap;
         private List<DisassemblyLine> disassemblyLines;
+        private bool needsRefresh;
     }
 }

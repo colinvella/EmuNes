@@ -253,9 +253,9 @@ namespace EmuNES
             inputOptionsForm.ShowDialog(this);
         }
 
-        private void OnDebugCodeDisassembly(object sender, EventArgs eventArgs)
+        private void OnDiagnosticsCodeDisassembly(object sender, EventArgs eventArgs)
         {
-            if (debugCodeDisassemblyMenuItem.Checked)
+            if (diagnosticsCodeDisassemblyMenuItem.Checked)
             {
                 codeDisassemblyForm.Hide();
                 Console.Processor.Trace = null;
@@ -265,7 +265,7 @@ namespace EmuNES
                 codeDisassemblyForm.Show(this);
                 Console.Processor.Trace = () => codeDisassemblyForm.Trace(Console);
             }
-            debugCodeDisassemblyMenuItem.Checked = !debugCodeDisassemblyMenuItem.Checked;
+            diagnosticsCodeDisassemblyMenuItem.Checked = !diagnosticsCodeDisassemblyMenuItem.Checked;
             this.Focus();
         }
 

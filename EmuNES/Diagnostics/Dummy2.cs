@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel;
+using System.Linq;
 using System.Linq.Expressions;
-using System.Collections;
-using System.Reflection;
-using System.Xml.Linq;
- 
+using System.Text;
+using System.Threading.Tasks;
+
 namespace EmuNES.Diagnostics
 {
     public class SortableBindingList<T> : BindingList<T>
@@ -148,4 +146,5 @@ namespace EmuNES.Diagnostics
         private Action<SortableBindingList<T>, List<T>> populateBaseList
             = (a, b) => a.ResetItems(b);
     }
+
 }

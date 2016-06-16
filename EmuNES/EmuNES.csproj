@@ -63,6 +63,7 @@
       <DependentUpon>CodeDisassemblyForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Diagnostics\DisassemblyLine.cs" />
+    <Compile Include="Diagnostics\Dummy.cs" />
     <Compile Include="Diagnostics\SortableBindingList.cs" />
     <Compile Include="EmulatorConfiguration.cs" />
     <Compile Include="Input\KeyboardState.cs" />

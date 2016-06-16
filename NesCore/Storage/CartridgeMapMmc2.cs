@@ -94,10 +94,13 @@ namespace NesCore.Storage
                     }
                     else if (address < 0xB000)
                     {
+                        int oldProgramBank = programBank;
+
                         programBank = (byte)(value & 0x0F);
 
                         // invalidate address region (only first bank $8000-9FFF switchable, others fixed to last 3)
-                        ProgramBankSwitch?.Invoke(0x8000, 0x2000);
+                        if (programBank != oldProgramBank)
+                            ProgramBankSwitch?.Invoke(0x8000, 0x2000);
                     }
                     else if (address < 0xC000)
                         characterBank0 = (byte)(value & 0x1F);

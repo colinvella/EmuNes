@@ -330,6 +330,7 @@
             // 
             this.diagnosticsMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.diagnosticsCodeDisassemblyMenuItem});
+            this.diagnosticsMenuItem.Enabled = false;
             this.diagnosticsMenuItem.Name = "diagnosticsMenuItem";
             this.diagnosticsMenuItem.Size = new System.Drawing.Size(80, 20);
             this.diagnosticsMenuItem.Text = "&Diagnostics";

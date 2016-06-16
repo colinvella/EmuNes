@@ -38,6 +38,8 @@ namespace NesCore.Storage
             {
                 if (address >= 0x8000)
                 {
+                    int oldProgramBank = programBank;
+
                     // CCCCLLPP
                     // CCCC - CHR bank, LL - CIC chip lockout defeat, PP - PRG bank
                     programBank = value & 0x3;
@@ -45,7 +47,8 @@ namespace NesCore.Storage
 
                     // invalidate address regions
                     CharacterBankSwitch?.Invoke(0x0000, 0x2000);
-                    ProgramBankSwitch?.Invoke(0x8000, 0x8000);
+                    if (programBank != oldProgramBank)
+                        ProgramBankSwitch?.Invoke(0x8000, 0x8000);
                 }
                 else
                     throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));

@@ -91,13 +91,16 @@ namespace NesCore.Storage
 
                 if (address >= 0x8000)
                 {
+                    int oldBankMode = bankMode;
+
                     bankMode = address & 0x03;
                     programRomBank = value & 0x3f;
                     subBank = value >> 7;
 
                     // invalidate address region
                     // should refine this
-                    ProgramBankSwitch?.Invoke(0x8000, 0x8000);
+                    if (bankMode != oldBankMode)
+                        ProgramBankSwitch?.Invoke(0x8000, 0x8000);
 
                     MirrorMode mirrorMode = (value & 0x40) != 0 ? MirrorMode.Horizontal : MirrorMode.Vertical;
                     if (Cartridge.MirrorMode != mirrorMode)

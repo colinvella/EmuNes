@@ -51,6 +51,20 @@ namespace EmuNES.Diagnostics
             }
         }
 
+        public void InvalidateMemoryRange(ushort address, ushort size)
+        {
+            int endExclusive = address + size;
+            var invalidAddresses = disassemblyLineMap.Keys.Where((x) => x >= address && x < endExclusive).ToArray();
+
+            foreach (ushort invalidAddress in invalidAddresses)
+                disassemblyLineMap.Remove(invalidAddress);
+
+            disassemblyLines.Clear();
+            disassemblyLines.AddRange(disassemblyLineMap.Values);
+
+            needsRefresh = true;
+        }
+
         private void OnFormLoad(object sender, EventArgs e)
         {
             disassemblyLineMap = new Dictionary<ushort, DisassemblyLine>();

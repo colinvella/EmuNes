@@ -54,10 +54,13 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0x8000)
                 {
+                    int oldProgramBank1 = programBank1;
+
                     programBank1 = value % programBankCount;
 
                     // invalidate address region
-                    ProgramBankSwitch?.Invoke(0x8000, 0x4000);
+                    if (programBank1 != oldProgramBank1)
+                        ProgramBankSwitch?.Invoke(0x8000, 0x4000);
                 }
                 else if (address >= 0x6000)
                 { 

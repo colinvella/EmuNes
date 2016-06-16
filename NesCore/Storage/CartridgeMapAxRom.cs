@@ -41,6 +41,8 @@ namespace NesCore.Storage
                     Cartridge.CharacterRom[address] = value;
                 else if (address >= 0x8000)
                 {
+                    int oldProgramBank = programBank;
+
                     // ---M-PPP
                     programBank = value & 7;
 
@@ -49,7 +51,8 @@ namespace NesCore.Storage
                     Cartridge.MirrorModeChanged?.Invoke();
 
                     // invalidate address region
-                    ProgramBankSwitch?.Invoke(0x8000, 0x8000);
+                    if (programBank != oldProgramBank)
+                        ProgramBankSwitch?.Invoke(0x8000, 0x8000);
                 }
                 else if (address >= 0x6000)
                     Cartridge.SaveRam[(ushort)(address - 0x6000)] = value;

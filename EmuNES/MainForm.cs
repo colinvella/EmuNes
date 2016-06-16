@@ -255,15 +255,20 @@ namespace EmuNES
 
         private void OnDiagnosticsCodeDisassembly(object sender, EventArgs eventArgs)
         {
+            if (Console.Cartridge == null)
+                return;
+
             if (diagnosticsCodeDisassemblyMenuItem.Checked)
             {
                 codeDisassemblyForm.Hide();
                 Console.Processor.Trace = null;
+                Console.Cartridge.Map.ProgramBankSwitch = null;
             }
             else
             {
                 codeDisassemblyForm.Show(this);
                 Console.Processor.Trace = () => codeDisassemblyForm.Trace(Console);
+                Console.Cartridge.Map.ProgramBankSwitch = (address, size) => codeDisassemblyForm.InvalidateMemoryRange(address, size);
             }
             diagnosticsCodeDisassemblyMenuItem.Checked = !diagnosticsCodeDisassemblyMenuItem.Checked;
             this.Focus();
@@ -550,6 +555,7 @@ namespace EmuNES
 
                 filePropertiesMenuItem.Enabled = true;
                 gameMenuItem.Enabled = true;
+                diagnosticsMenuItem.Enabled = true;
 
                 OnGameStop(this, EventArgs.Empty);
                 OnGameRunPause(this, EventArgs.Empty);

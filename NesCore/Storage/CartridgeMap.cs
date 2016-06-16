@@ -14,7 +14,9 @@ namespace NesCore.Storage
 
         public virtual Action TriggerInterruptRequest { get; set; }
 
-        public BankSwitchHandler BankSwitch { get; set; }
+        public BankSwitchHandler ProgramBankSwitch { get; set; }
+
+        public BankSwitchHandler CharacterBankSwitch { get; set; }
 
         public abstract byte this[ushort address] { get; set; }
 

@@ -156,8 +156,8 @@ namespace NesCore.Storage
             UpdateOffsets();
 
             // invalidate address regions
-            BankSwitch?.Invoke(0x0000, 0x2000);
-            BankSwitch?.Invoke(0x8000, 0x8000);
+            CharacterBankSwitch?.Invoke(0x0000, 0x2000);
+            ProgramBankSwitch?.Invoke(0x8000, 0x8000);
         }
 
         private void WriteBankData(byte value)

@@ -59,8 +59,8 @@ namespace NesCore.Storage
                     LoadRegister(address, value);
 
                     // invalidate address regions (may need refining)
-                    BankSwitch?.Invoke(0x0000, 0x2000);
-                    BankSwitch?.Invoke(0x8000, 0x8000);
+                    CharacterBankSwitch?.Invoke(0x0000, 0x2000);
+                    ProgramBankSwitch?.Invoke(0x8000, 0x8000);
                 }
                 else if (address >= 0x6000)
                 {

@@ -49,7 +49,7 @@ namespace NesCore.Storage
                     Cartridge.MirrorModeChanged?.Invoke();
 
                     // invalidate address region
-                    BankSwitch?.Invoke(0x8000, 0x8000);
+                    ProgramBankSwitch?.Invoke(0x8000, 0x8000);
                 }
                 else if (address >= 0x6000)
                     Cartridge.SaveRam[(ushort)(address - 0x6000)] = value;

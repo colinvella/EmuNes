@@ -105,7 +105,7 @@ namespace NesCore.Storage
                         programBank = (byte)(value & 0x0F);
 
                         // invalidate address regions
-                        BankSwitch?.Invoke(0x8000, 0x8000);
+                        ProgramBankSwitch?.Invoke(0x8000, 0x8000);
                     }
                     else if (address < 0xC000)
                         characterBank0 = (byte)(value & 0x1F);
@@ -133,7 +133,7 @@ namespace NesCore.Storage
             selectedCharacterBank1 = latch1 == 0xFD ? characterBank2 : characterBank3;
 
             // invalidate address regions
-            BankSwitch?.Invoke(0x0000, 0x2000);
+            CharacterBankSwitch?.Invoke(0x0000, 0x2000);
         }
 
         private byte programBankCount;

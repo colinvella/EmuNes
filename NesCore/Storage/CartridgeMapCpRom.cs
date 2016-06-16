@@ -60,7 +60,7 @@ namespace NesCore.Storage
                     characterBank = value & 0x03;
 
                     // invalidate address regions
-                    BankSwitch?.Invoke(0x0000, 0x1000);
+                    CharacterBankSwitch?.Invoke(0x0000, 0x1000);
                 }
                 else
                     throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));

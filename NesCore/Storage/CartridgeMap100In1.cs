@@ -97,7 +97,7 @@ namespace NesCore.Storage
 
                     // invalidate address region
                     // should refine this
-                    BankSwitch?.Invoke(0x8000, 0x8000);
+                    ProgramBankSwitch?.Invoke(0x8000, 0x8000);
 
                     MirrorMode mirrorMode = (value & 0x40) != 0 ? MirrorMode.Horizontal : MirrorMode.Vertical;
                     if (Cartridge.MirrorMode != mirrorMode)

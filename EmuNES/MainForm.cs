@@ -1,5 +1,5 @@
 ﻿using EmuNES.Audio;
-using EmuNES.Debug;
+using EmuNES.Diagnostics;
 using EmuNES.Input;
 using NAudio.Wave;
 using NesCore.Input;

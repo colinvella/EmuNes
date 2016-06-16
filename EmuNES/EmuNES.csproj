@@ -56,14 +56,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audio\ApuAudioProvider.cs" />
-    <Compile Include="Debug\CodeDisassemblyForm.cs">
+    <Compile Include="Diagnostics\CodeDisassemblyForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Debug\CodeDisassemblyForm.Designer.cs">
+    <Compile Include="Diagnostics\CodeDisassemblyForm.Designer.cs">
       <DependentUpon>CodeDisassemblyForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Debug\DisassemblyLine.cs" />
-    <Compile Include="Debug\SortableBindingList.cs" />
+    <Compile Include="Diagnostics\DisassemblyLine.cs" />
+    <Compile Include="Diagnostics\SortableBindingList.cs" />
     <Compile Include="EmulatorConfiguration.cs" />
     <Compile Include="Input\KeyboardState.cs" />
     <Compile Include="Input\QuickConfigurationForm.cs">
@@ -96,7 +96,7 @@
     <Compile Include="RecentFileManager.cs" />
     <Compile Include="Video\ScreenFilter.cs" />
     <Compile Include="WindowsUser32.cs" />
-    <EmbeddedResource Include="Debug\CodeDisassemblyForm.resx">
+    <EmbeddedResource Include="Diagnostics\CodeDisassemblyForm.resx">
       <DependentUpon>CodeDisassemblyForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Input\QuickConfigurationForm.resx">

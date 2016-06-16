@@ -1,4 +1,4 @@
-﻿namespace EmuNES.Debug
+﻿namespace EmuNES.Diagnostics
 {
     partial class CodeDisassemblyForm
     {

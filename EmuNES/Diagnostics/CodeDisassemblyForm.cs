@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace EmuNES.Debug
+namespace EmuNES.Diagnostics
 {
     public partial class CodeDisassemblyForm : Form
     {
@@ -46,7 +46,7 @@ namespace EmuNES.Debug
         {
             disassemblyLineMap = new Dictionary<ushort, DisassemblyLine>();
             disassemblyLines = new List<DisassemblyLine>();
-            disassemblyBindingList = new SortableBindingList<DisassemblyLine>(disassemblyLines);
+            SortableBindingList<DisassemblyLine> disassemblyBindingList = new SortableBindingList<DisassemblyLine>(disassemblyLines);
 
             dataGridView.AutoGenerateColumns = true;
             dataGridView.DataSource = disassemblyBindingList;
@@ -60,6 +60,5 @@ namespace EmuNES.Debug
 
         private Dictionary<ushort, DisassemblyLine> disassemblyLineMap;
         private List<DisassemblyLine> disassemblyLines;
-        private SortableBindingList<DisassemblyLine> disassemblyBindingList;
     }
 }

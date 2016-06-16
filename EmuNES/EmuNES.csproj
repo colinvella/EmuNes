@@ -62,8 +62,8 @@
     <Compile Include="Diagnostics\CodeDisassemblyForm.Designer.cs">
       <DependentUpon>CodeDisassemblyForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Diagnostics\Dummy.cs" />
-    <Compile Include="Diagnostics\Dummy2.cs" />
+    <Compile Include="Diagnostics\DisassemblyLine.cs" />
+    <Compile Include="Diagnostics\SortableBindingList.cs" />
     <Compile Include="EmulatorConfiguration.cs" />
     <Compile Include="Input\KeyboardState.cs" />
     <Compile Include="Input\QuickConfigurationForm.cs">

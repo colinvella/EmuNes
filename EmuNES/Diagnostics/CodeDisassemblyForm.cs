@@ -35,10 +35,26 @@ namespace EmuNES.Diagnostics
                 DisassemblyLine disassemblyLine = new DisassemblyLine();
                 disassemblyLine.Address = Hex.Format(address);
 
+                // determine instruction meta data
                 Instruction instruction = console.Processor.InstructionSet[opCode];
-                disassemblyLine.Instruction 
-                    = instruction.Name + " " + FormatOperand((ushort)(address + 1), instruction.AddressingMode);
 
+                // machine code
+                ushort operandAddress = (ushort)(address + 1);
+                if (instruction.Size == 1)
+                    disassemblyLine.MachineCode = Hex.Format(opCode);
+                else if (instruction.Size == 2)
+                    disassemblyLine.MachineCode = Hex.Format(opCode)
+                        + " " + Hex.Format(processor.ReadByte(operandAddress));
+                else // 3
+                    disassemblyLine.MachineCode = Hex.Format(opCode)
+                        + " " + Hex.Format(processor.ReadByte(operandAddress))
+                        + " " + Hex.Format(processor.ReadByte((ushort)(operandAddress + 1)));
+
+                // format instruction source
+                disassemblyLine.Source
+                    = instruction.Name + " " + FormatOperand(operandAddress, instruction.AddressingMode);
+
+                // remarks
                 if (instruction.Name == "RTS")
                     disassemblyLine.Remarks = "----------------";
 

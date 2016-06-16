@@ -47,14 +47,14 @@
             this.dataGridView.RowHeadersVisible = false;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Lucida Console", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.dataGridView.RowsDefaultCellStyle = dataGridViewCellStyle1;
-            this.dataGridView.Size = new System.Drawing.Size(512, 321);
+            this.dataGridView.Size = new System.Drawing.Size(582, 403);
             this.dataGridView.TabIndex = 0;
             // 
             // CodeDisassemblyForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(512, 321);
+            this.ClientSize = new System.Drawing.Size(582, 403);
             this.ControlBox = false;
             this.Controls.Add(this.dataGridView);
             this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);

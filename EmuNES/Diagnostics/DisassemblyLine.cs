@@ -14,7 +14,10 @@ namespace EmuNES.Diagnostics
 
         public string Address { get; set; }
 
-        public string Instruction { get; set; }
+        [DisplayName("M Code")]
+        public string MachineCode { get; set; }
+
+        public string Source { get; set; }
 
         public string Remarks { get; set; }
     }

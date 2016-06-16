@@ -38,11 +38,12 @@ namespace EmuNES.Diagnostics
             {
                 disassemblyLineMap[address] = disassemblyLine;
                 disassemblyLines.Add(disassemblyLine);
+                lastDissaembly = DateTime.Now;
                 needsRefresh = true;
             }
             else
             {
-                if (needsRefresh)
+                if (needsRefresh && (DateTime.Now - lastDissaembly).TotalSeconds > 1)
                 {
                     dataGridView.DataSource = new SortableBindingList<DisassemblyLine>(disassemblyLines/*.OrderBy((x) => x.Address)*/);
                     needsRefresh = false;
@@ -70,6 +71,7 @@ namespace EmuNES.Diagnostics
 
         private Dictionary<ushort, DisassemblyLine> disassemblyLineMap;
         private List<DisassemblyLine> disassemblyLines;
+        private DateTime lastDissaembly;
         private bool needsRefresh;
     }
 }

@@ -39,12 +39,15 @@ namespace EmuNES.Diagnostics
                 disassemblyLine.Instruction 
                     = instruction.Name + " " + FormatOperand((ushort)(address + 1), instruction.AddressingMode);
 
+                if (instruction.Name == "RTS")
+                    disassemblyLine.Remarks = "----------------";
+
                 disassemblyLines[address] = disassemblyLine;  
                 needsRefresh = true;
             }
             else
             {
-                if (needsRefresh && (DateTime.Now - lastRefresh).TotalSeconds > 1)
+                if (needsRefresh && (DateTime.Now - lastRefresh).TotalSeconds > 2)
                 {
                     lastRefresh = DateTime.Now;
                     activeLines = disassemblyLines.Where((x) => x != null).ToArray();

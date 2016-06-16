@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace EmuNES.Input
 {
-    delegate void GameControllerEventHandler(object sender, GameControllerEventArgs gameControllerEventArgs);
+    public delegate void GameControllerEventHandler(object sender, GameControllerEventArgs gameControllerEventArgs);
 
-    class GameControllerEventArgs
+    public class GameControllerEventArgs
     {
         public GameControllerEventArgs(byte id, Button button)
         {

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace EmuNES.Input
 {
-    class GameControllerManager
+    public class GameControllerManager
     {
         public GameControllerManager()
         {
@@ -29,6 +29,8 @@ namespace EmuNES.Input
         }
 
         public byte Count { get { return (byte)gameControllers.Count; } }
+
+        public IEnumerable<GameController> Controllers { get { return gameControllers; } }
 
         public GameController this[ushort gameControllerIndex]
         {

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EmuNES.Input
 {
-    class GameController
+    public class GameController
     {      
         public GameController(byte id, int deviceId)
         {

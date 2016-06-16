@@ -13,30 +13,19 @@ namespace EmuNES.Input
 {
     public partial class QuickConfigurationForm : Form
     {
-        public QuickConfigurationForm(Joypad joypad, KeyboardState keyboardState)
+        public QuickConfigurationForm(Joypad joypad,
+            KeyboardState keyboardState, GameControllerManager gameControllerManager)
         {
             InitializeComponent();
 
             this.joypad = joypad;
             this.joypadConfigState = JoypadConfigState.Start;
             this.keyboardState = keyboardState;
+            this.gameControllerManager = gameControllerManager;
             this.configurationLabel.Text = "Press Start";
-        }
 
-        private KeyboardState keyboardState;
-        private JoypadConfigState joypadConfigState;
-        private Joypad joypad;
-
-        private enum JoypadConfigState
-        {
-            Start,
-            Select,
-            A,
-            B,
-            Up,
-            Down,
-            Left,
-            Right,
+            foreach (GameController gameController in gameControllerManager.Controllers)
+                gameController.ButtonPressed += OnControllerButtonPressed;
         }
 
         private void OnKeyDown(object sender, KeyEventArgs keyEventargs)
@@ -80,9 +69,36 @@ namespace EmuNES.Input
                     break;
                 case JoypadConfigState.Right:
                     joypad.Right = () => keyboardState[keyEventargs.KeyCode];
+
+                    foreach (GameController gameController in gameControllerManager.Controllers)
+                        gameController.ButtonPressed -= OnControllerButtonPressed;
+
                     Close();
                     break;
             }
         }
+
+        private void OnControllerButtonPressed(object sender, GameControllerEventArgs gameControllerEventArgs)
+        {
+
+        }
+
+        private KeyboardState keyboardState;
+        private GameControllerManager gameControllerManager;
+        private JoypadConfigState joypadConfigState;
+        private Joypad joypad;
+
+        private enum JoypadConfigState
+        {
+            Start,
+            Select,
+            A,
+            B,
+            Up,
+            Down,
+            Left,
+            Right,
+        }
+
     }
 }

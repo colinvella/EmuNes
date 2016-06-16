@@ -249,7 +249,7 @@ namespace EmuNES
 
         private void OnOptionsInput(object sender, EventArgs eventArgs)
         {
-            InputOptionsForm inputOptionsForm = new InputOptionsForm(Console, keyboardState);
+            InputOptionsForm inputOptionsForm = new InputOptionsForm(Console, keyboardState, gameControllerManager);
             inputOptionsForm.ShowDialog(this);
         }
 

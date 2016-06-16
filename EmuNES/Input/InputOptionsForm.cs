@@ -14,13 +14,14 @@ namespace EmuNES.Input
 {
     public partial class InputOptionsForm : Form
     {
-        public InputOptionsForm(NesCore.Console console, KeyboardState keyboardState)
+        public InputOptionsForm(NesCore.Console console, KeyboardState keyboardState, GameControllerManager gameControllerManager)
         {
             InitializeComponent();
 
             this.console = console;
             this.controllers = new Controller[4];
             this.keyboardState = keyboardState;
+            this.gameControllerManager = gameControllerManager;
         }
 
         private void OnFormLoad(object sender, EventArgs e)
@@ -31,7 +32,8 @@ namespace EmuNES.Input
         private void OnConfigureController(object sender, EventArgs eventArgs)
         {
             Joypad joypad = new Joypad();
-            QuickConfigurationForm quickConfigurationForm = new QuickConfigurationForm(joypad, keyboardState);
+            QuickConfigurationForm quickConfigurationForm 
+                = new QuickConfigurationForm(joypad, keyboardState, gameControllerManager);
             quickConfigurationForm.ShowDialog();
             controllers[controllerTypeComboBox.SelectedIndex] = joypad;
         }
@@ -49,6 +51,7 @@ namespace EmuNES.Input
 
         private NesCore.Console console;
         private KeyboardState keyboardState;
+        private GameControllerManager gameControllerManager;
 
         private Controller[] controllers;
     }

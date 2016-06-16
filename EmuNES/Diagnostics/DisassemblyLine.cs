@@ -6,13 +6,11 @@ using System.Threading.Tasks;
 
 namespace EmuNES.Diagnostics
 {
-    struct DisassemblyLine
+    class DisassemblyLine
     {
+        public string Label { get; set; }
+
         public string Address { get; set; }
-
-        public byte OpCode { get; set; }
-
-        public ushort Operand { get; set; }
 
         public string Instruction { get; set; }
     }

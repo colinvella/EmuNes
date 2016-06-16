@@ -77,7 +77,7 @@ namespace EmuNES
             // make space for checkboxes (disabled due to icons)
             ((ToolStripDropDownMenu)viewMenuItem.DropDown).ShowCheckMargin = true;
 
-            codeDisassemblyForm = new CodeDisassemblyForm();
+            codeDisassemblyForm = new CodeDisassemblyForm(Console);
 
             Application.Idle += TickWhileIdle;
 
@@ -267,7 +267,7 @@ namespace EmuNES
             else
             {
                 codeDisassemblyForm.Show(this);
-                Console.Processor.Trace = () => codeDisassemblyForm.Trace(Console);
+                Console.Processor.Trace = () => codeDisassemblyForm.Trace();
                 Console.Cartridge.Map.ProgramBankSwitch = (address, size) => codeDisassemblyForm.InvalidateMemoryRange(address, size);
             }
             diagnosticsCodeDisassemblyMenuItem.Checked = !diagnosticsCodeDisassemblyMenuItem.Checked;

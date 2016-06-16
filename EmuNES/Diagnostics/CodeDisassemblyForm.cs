@@ -16,36 +16,39 @@ namespace EmuNES.Diagnostics
 {
     public partial class CodeDisassemblyForm : Form
     {
-        public CodeDisassemblyForm()
+        public CodeDisassemblyForm(NesCore.Console console)
         {
-            InitializeComponent();            
+            InitializeComponent();
+
+            this.console = console;
+            this.processor = console.Processor;           
         }
 
-        public void Trace(NesCore.Console console)
+        public void Trace()
         {
             ushort address = console.Processor.State.ProgramCounter;
-            byte opCode = console.Memory[address];
 
-            DisassemblyLine disassemblyLine = new DisassemblyLine();
-            disassemblyLine.Address = Hex.Format(address);
-            disassemblyLine.OpCode = opCode;
-
-            Instruction instruction = console.Processor.InstructionSet[opCode];
-            disassemblyLine.Instruction = instruction.Name;
-
-
-            if (!disassemblyLineMap.ContainsKey(address))
+            if (disassemblyLines[address] == null)
             {
-                disassemblyLineMap[address] = disassemblyLine;
-                disassemblyLines.Add(disassemblyLine);                
+                byte opCode = console.Memory[address];
+
+                DisassemblyLine disassemblyLine = new DisassemblyLine();
+                disassemblyLine.Address = Hex.Format(address);
+
+                Instruction instruction = console.Processor.InstructionSet[opCode];
+                disassemblyLine.Instruction 
+                    = instruction.Name + " " + FormatOperand((ushort)(address + 1), instruction.AddressingMode);
+
+                disassemblyLines[address] = disassemblyLine;  
                 needsRefresh = true;
             }
             else
             {
-                if (needsRefresh && (DateTime.Now - lastRefresh).TotalSeconds > 5)
+                if (needsRefresh && (DateTime.Now - lastRefresh).TotalSeconds > 1)
                 {
                     lastRefresh = DateTime.Now;
-                    dataGridView.DataSource = new SortableBindingList<DisassemblyLine>(disassemblyLines.OrderBy((x) => x.Address));
+                    activeLines = disassemblyLines.Where((x) => x != null).ToArray();
+                    dataGridView.DataSource = activeLines;
                     needsRefresh = false;
                 }
             }
@@ -54,26 +57,19 @@ namespace EmuNES.Diagnostics
         public void InvalidateMemoryRange(ushort address, ushort size)
         {
             int endExclusive = address + size;
-            var invalidAddresses = disassemblyLineMap.Keys.Where((x) => x >= address && x < endExclusive).ToArray();
 
-            foreach (ushort invalidAddress in invalidAddresses)
-                disassemblyLineMap.Remove(invalidAddress);
-
-            disassemblyLines.Clear();
-            disassemblyLines.AddRange(disassemblyLineMap.Values);
+            for (int index = address; index < endExclusive; index++)
+                disassemblyLines[address] = null;
 
             needsRefresh = true;
         }
 
         private void OnFormLoad(object sender, EventArgs e)
         {
-            disassemblyLineMap = new Dictionary<ushort, DisassemblyLine>();
-            disassemblyLines = new List<DisassemblyLine>();
-            SortableBindingList<DisassemblyLine> disassemblyBindingList = new SortableBindingList<DisassemblyLine>(disassemblyLines);
+            disassemblyLines = new DisassemblyLine[0x10000];
+            activeLines = new DisassemblyLine[0];
 
             dataGridView.AutoGenerateColumns = true;
-            dataGridView.DataSource = disassemblyBindingList;
-            dataGridView.Sort(dataGridView.Columns[0], ListSortDirection.Ascending);
 
             lastRefresh = DateTime.Now;
             needsRefresh = true;
@@ -84,8 +80,31 @@ namespace EmuNES.Diagnostics
             formClosingEventArgs.Cancel = true;
         }
 
-        private Dictionary<ushort, DisassemblyLine> disassemblyLineMap;
-        private List<DisassemblyLine> disassemblyLines;
+        private string FormatOperand(ushort operandAddress, AddressingMode addressingMode)
+        {
+            switch (addressingMode)
+            {
+                case AddressingMode.Absolute: return Hex.Format(processor.ReadWord(operandAddress));
+                case AddressingMode.AbsoluteX: return Hex.Format(processor.ReadWord(operandAddress)) + ",X";
+                case AddressingMode.AbsoluteY: return Hex.Format(processor.ReadWord(operandAddress)) + ",Y";
+                case AddressingMode.Accumulator: return "A";
+                case AddressingMode.Immediate: return "#" + Hex.Format(processor.ReadByte(operandAddress));
+                case AddressingMode.Implied: return "";
+                case AddressingMode.IndexedIndirect: return "(" + Hex.Format(processor.ReadByte(operandAddress)) + ",X)";
+                case AddressingMode.Indirect: return "(" + Hex.Format(processor.ReadWord(operandAddress)) + ")";
+                case AddressingMode.IndirectIndexed: return "(" + Hex.Format(processor.ReadByte(operandAddress)) + "), Y";
+                case AddressingMode.Relative:
+                case AddressingMode.ZeroPage:
+                    return Hex.Format(processor.ReadByte(operandAddress));
+                case AddressingMode.ZeroPageX: return Hex.Format(processor.ReadByte(operandAddress)) + ",X";
+                case AddressingMode.ZeroPageY: return Hex.Format(processor.ReadByte(operandAddress)) + ",Y";
+                default: return "";
+            }
+        }
+
+        private NesCore.Console console;
+        private NesCore.Processor.Mos6502 processor;
+        private DisassemblyLine[] disassemblyLines, activeLines;
         private DateTime lastRefresh;
         private bool needsRefresh;
     }

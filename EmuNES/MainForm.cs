@@ -120,8 +120,11 @@ namespace EmuNES
             string[] files = (string[])dragEventArgs.Data.GetData(DataFormats.FileDrop);
 
             if (files.Length > 1)
+            {
                 MessageBox.Show(this, "Please drop only one ROM file at a time", "Open RIM file",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             string cartridgeRomPath = files[0];
             LoadCartridgeRom(cartridgeRomPath);
@@ -381,7 +384,7 @@ namespace EmuNES
                     break;
                 case GameState.Paused:
                     graphics.DrawImage(bitmapBuffer.Bitmap, leftCenteredMargin, 0, bufferSize.Width, bufferSize.Height);
-                    graphics.FillRectangle(new SolidBrush(Color.FromArgb(192, Color.Black)), leftCenteredMargin, 0, bufferSize.Width, bufferSize.Height);
+                    graphics.DrawImage(Properties.Resources.FilterPause, 0, 0, videoPanel.Width, videoPanel.Height);
                     DrawCenteredText(graphics, "Paused");
                     break;
                 case GameState.Running:
@@ -407,11 +410,11 @@ namespace EmuNES
         private void DrawCenteredText(Graphics graphics, string text)
         {
             if (resizedCaptionFont == null)
-                resizedCaptionFont = new Font(this.Font.FontFamily, videoPanel.Height / 20, GraphicsUnit.Pixel);
+                resizedCaptionFont = new Font(this.Font.FontFamily, videoPanel.Height / 10, FontStyle.Italic | FontStyle.Bold, GraphicsUnit.Pixel);
 
             SizeF textSize = graphics.MeasureString(text, resizedCaptionFont);
             float textX = (videoPanel.Width - textSize.Width) / 2;
-            float textY = (videoPanel.Height - videoPanel.Height / 10) / 2;
+            float textY = (videoPanel.Height - textSize.Height) / 2;
 
             // back outline
             graphics.DrawString(text, resizedCaptionFont, Brushes.Black, textX - 1, textY);

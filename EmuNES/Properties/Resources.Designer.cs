@@ -123,6 +123,16 @@ namespace EmuNES.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap FilterPause {
+            get {
+                object obj = ResourceManager.GetObject("FilterPause", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap FilterRaster {
             get {
                 object obj = ResourceManager.GetObject("FilterRaster", resourceCulture);

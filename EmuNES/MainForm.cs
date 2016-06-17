@@ -413,16 +413,26 @@ namespace EmuNES
                 resizedCaptionFont = new Font(this.Font.FontFamily, videoPanel.Height / 10, FontStyle.Italic | FontStyle.Bold, GraphicsUnit.Pixel);
 
             SizeF textSize = graphics.MeasureString(text, resizedCaptionFont);
+
+            int outlineThickness = videoPanel.Height / 120;
+            textSize.Width += outlineThickness;
+            textSize.Height += outlineThickness;
+
             float textX = (videoPanel.Width - textSize.Width) / 2;
             float textY = (videoPanel.Height - textSize.Height) / 2;
 
-            // back outline
-            graphics.DrawString(text, resizedCaptionFont, Brushes.Black, textX - 1, textY);
-            graphics.DrawString(text, resizedCaptionFont, Brushes.Black, textX + 1, textY);
-            graphics.DrawString(text, resizedCaptionFont, Brushes.Black, textX, textY - 1);
-            graphics.DrawString(text, resizedCaptionFont, Brushes.Black, textX, textY + 1);
+            Rectangle pathRectangle = new Rectangle((int)textX, (int)textY, (int)textSize.Width, (int)textSize.Height);
 
-            graphics.DrawString(text, resizedCaptionFont, Brushes.White, textX, textY);
+            using (GraphicsPath graphicsPath = new GraphicsPath())
+            using (Pen outlinePen = new Pen(Color.Black, outlineThickness) { LineJoin = LineJoin.Round })
+            using (LinearGradientBrush linearGradientBrush = new LinearGradientBrush(pathRectangle, Color.White, Color.LightSkyBlue, 90f))
+            {
+                graphicsPath.AddString("Paused", resizedCaptionFont.FontFamily, (int)resizedCaptionFont.Style,
+                    resizedCaptionFont.Size, pathRectangle, StringFormat.GenericDefault);
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.DrawPath(outlinePen, graphicsPath);
+                graphics.FillPath(linearGradientBrush, graphicsPath);
+            }
         }
 
         private void UpdateGameMenuItems()

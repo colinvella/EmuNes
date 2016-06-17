@@ -58,7 +58,7 @@ namespace EmuNES.Diagnostics
                 if (instruction.Name == "RTS")
                     disassemblyLine.Remarks = "----------------";
 
-                // if label ssigned by forward branching or jumping, assign to new disassembled line
+                // if label assigned by forward branching or jumping, assign to new disassembled line
                 if (addressLabels.ContainsKey(address))
                     disassemblyLine.Label = addressLabels[address] + ":";
 
@@ -68,18 +68,7 @@ namespace EmuNES.Diagnostics
                     ushort nextInstructionAddress = (ushort)(address + 2);
                     sbyte offset = (sbyte) processor.ReadByte(operandAddress);
                     ushort branchAddress = (ushort)(nextInstructionAddress + offset);
-                    string addressLabel = null;
-                    if (addressLabels.ContainsKey(branchAddress))
-                    {
-                        addressLabel = addressLabels[branchAddress];
-                    }
-                    else
-                    {
-                        addressLabel = "Label" + Hex.Format(branchAddress).Replace("$", "");
-                        addressLabels[branchAddress] = addressLabel;
-                        if (disassemblyLines[branchAddress] != null)
-                            disassemblyLines[branchAddress].Label = addressLabel + ":";
-                    }
+                    string addressLabel = GetAddressLabel(branchAddress);
                     disassemblyLine.Remarks = "branch to " + addressLabel;
                 }
 
@@ -110,6 +99,24 @@ namespace EmuNES.Diagnostics
                 addressLabels.Remove(addressToRemove);
 
             needsRefresh = true;
+        }
+
+        private string GetAddressLabel(ushort address)
+        {
+            if (addressLabels.ContainsKey(address))
+            {
+                return addressLabels[address];
+            }
+            else
+            {
+                String addressLabel = "Label" + Hex.Format(address).Replace("$", "");
+                addressLabels[address] = addressLabel;
+
+                // label destination if already disassembled (back reference)
+                if (disassemblyLines[address] != null)
+                    disassemblyLines[address].Label = addressLabel + ":";
+                return addressLabel;
+            }
         }
 
         private void OnFormLoad(object sender, EventArgs e)

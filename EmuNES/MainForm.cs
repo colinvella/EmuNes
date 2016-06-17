@@ -260,21 +260,21 @@ namespace EmuNES
 
             if (traceEnabled)
             {
-                codeDisassemblyForm.Hide();
-                Console.Processor.Trace = null;
-                if (Console.Cartridge != null)
-                {
-                    Console.Cartridge.Map.ProgramBankSwitch = null;
-                }
-            }
-            else
-            {
                 codeDisassemblyForm.Show(this);
                 Console.Processor.Trace = () => codeDisassemblyForm.Trace();
                 if (Console.Cartridge != null)
                 {
                     Console.Cartridge.Map.ProgramBankSwitch
                         = (address, size) => codeDisassemblyForm.InvalidateMemoryRange(address, size);
+                }
+            }
+            else
+            {
+                codeDisassemblyForm.Hide();
+                Console.Processor.Trace = null;
+                if (Console.Cartridge != null)
+                {
+                    Console.Cartridge.Map.ProgramBankSwitch = null;
                 }
             }
             diagnosticsCodeDisassemblyMenuItem.Checked = !diagnosticsCodeDisassemblyMenuItem.Checked;

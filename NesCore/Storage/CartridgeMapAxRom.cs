@@ -13,6 +13,7 @@ namespace NesCore.Storage
         {
             Cartridge = cartridge;
             programBank = 0;
+            programRam = new byte[0x6000 - 0x4100];
         }
 
         public override string Name { get { return "AxROM"; } }
@@ -31,6 +32,9 @@ namespace NesCore.Storage
 
                 if (address >= 0x6000)
                     return Cartridge.SaveRam[(ushort)(address - 0x6000)];
+
+                if (address >= 0x4100)
+                    return programRam[address - 0x4100];
 
                 throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
             }
@@ -56,11 +60,14 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0x6000)
                     Cartridge.SaveRam[(ushort)(address - 0x6000)] = value;
+                else if (address >= 0x4100)
+                    programRam[address - 0x4100] = value;
                 else
                     throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
             }
         }
 
         private int programBank;
+        private byte[] programRam;
     }
 }

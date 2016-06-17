@@ -58,7 +58,11 @@ namespace EmuNES.Diagnostics
                 if (instruction.Name == "RTS")
                     disassemblyLine.Remarks = "----------------";
 
-                // determine labels when applicable
+                // if label ssigned by forward branching or jumping, assign to new disassembled line
+                if (addressLabels.ContainsKey(address))
+                    disassemblyLine.Label = addressLabels[address] + ":";
+
+                // determine labels for relative branching
                 if (instruction.AddressingMode == AddressingMode.Relative)
                 {
                     ushort nextInstructionAddress = (ushort)(address + 2);
@@ -67,14 +71,14 @@ namespace EmuNES.Diagnostics
                     string addressLabel = null;
                     if (addressLabels.ContainsKey(branchAddress))
                     {
-                        addressLabel = addressLabels[branchAddress] + ":";
+                        addressLabel = addressLabels[branchAddress];
                     }
                     else
                     {
                         addressLabel = "Label" + Hex.Format(branchAddress).Replace("$", "");
                         addressLabels[branchAddress] = addressLabel;
                         if (disassemblyLines[branchAddress] != null)
-                            disassemblyLines[branchAddress].Label = addressLabel;
+                            disassemblyLines[branchAddress].Label = addressLabel + ":";
                     }
                     disassemblyLine.Remarks = "branch to " + addressLabel;
                 }

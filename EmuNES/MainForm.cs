@@ -88,6 +88,13 @@ namespace EmuNES
 #endif
         }
 
+        private void OnFormDeactivate(object sender, EventArgs eventArgs)
+        {
+            if (gameState == GameState.Running)
+                OnGameRunPause(sender, eventArgs);
+        }
+
+
         private void OnApplicationClosing(object sender, CancelEventArgs cancelEventArgs)
         {
             cancelEventArgs.Cancel = MessageBox.Show(

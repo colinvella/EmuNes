@@ -30,10 +30,10 @@ namespace EmuNES.Diagnostics
 
             if (disassemblyLines[address] == null)
             {
-                byte opCode = console.Memory[address];
-
                 DisassemblyLine disassemblyLine = new DisassemblyLine();
                 disassemblyLine.Address = Hex.Format(address);
+
+                byte opCode = console.Memory[address];
 
                 // determine instruction meta data
                 Instruction instruction = console.Processor.InstructionSet[opCode];

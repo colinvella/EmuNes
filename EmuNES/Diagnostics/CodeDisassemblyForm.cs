@@ -21,13 +21,50 @@ namespace EmuNES.Diagnostics
             InitializeComponent();
 
             this.console = console;
-            this.processor = console.Processor;           
+            this.processor = console.Processor;
+
+            disassemblyLines = new DisassemblyLine[0x10000];
+            activeLines = new DisassemblyLine[0];
+            addressLabels = new string[0x10000];
+            queuedAddresses = new bool[0x10000];
+            lastRefresh = DateTime.Now;
+            needsRefresh = true;
+
+            this.disassemblyQueue = new Queue<ushort>();
         }
 
         public void Trace()
         {
             ushort address = console.Processor.State.ProgramCounter;
 
+            if (disassemblyLines[address] == null && !queuedAddresses[address])
+            {
+                disassemblyQueue.Enqueue(address);
+                queuedAddresses[address] = true;
+            }
+        }
+
+        private void OnDisassemblyTick(object sender, EventArgs e)
+        {
+            if (disassemblyQueue.Count > 0)
+            {
+                ushort address = disassemblyQueue.Dequeue();
+                queuedAddresses[address] = false;
+                DisassembleLine(address);
+            }
+            
+            if (needsRefresh && (DateTime.Now - lastRefresh).TotalSeconds > 5)
+            {
+                lastRefresh = DateTime.Now;
+                activeLines = disassemblyLines.Where((x) => x != null).ToArray();
+                dataGridView.DataSource = activeLines;
+                needsRefresh = false;
+            }
+
+        }
+
+        private void DisassembleLine(ushort address)
+        {
             if (disassemblyLines[address] == null)
             {
                 DisassemblyLine disassemblyLine = new DisassemblyLine();
@@ -59,7 +96,7 @@ namespace EmuNES.Diagnostics
                     disassemblyLine.Remarks = "----------------";
 
                 // if label assigned by forward branching or jumping, assign to new disassembled line
-                if (addressLabels.ContainsKey(address))
+                if (addressLabels[address] != null)
                     disassemblyLine.Label = addressLabels[address] + ":";
 
                 // determine labels for relative branching
@@ -75,16 +112,7 @@ namespace EmuNES.Diagnostics
                 disassemblyLines[address] = disassemblyLine;  
                 needsRefresh = true;
             }
-            else
-            {
-                if (needsRefresh && (DateTime.Now - lastRefresh).TotalSeconds > 2)
-                {
-                    lastRefresh = DateTime.Now;
-                    activeLines = disassemblyLines.Where((x) => x != null).ToArray();
-                    dataGridView.DataSource = activeLines;
-                    needsRefresh = false;
-                }
-            }
+            
         }
 
         public void InvalidateMemoryRange(ushort address, ushort size)
@@ -92,43 +120,32 @@ namespace EmuNES.Diagnostics
             int endExclusive = address + size;
 
             for (int index = address; index < endExclusive; index++)
+            {
                 disassemblyLines[address] = null;
-
-            var labelAddressesToRemove = addressLabels.Keys.Where((x) => x >= address && x < endExclusive ).ToArray();
-            foreach (ushort addressToRemove in labelAddressesToRemove)
-                addressLabels.Remove(addressToRemove);
+                addressLabels[address] = null;
+            }
 
             needsRefresh = true;
         }
 
         private string GetAddressLabel(ushort address)
         {
-            if (addressLabels.ContainsKey(address))
-            {
+            String addressLabel = addressLabels[address];
+            if (addressLabel != null)
                 return addressLabels[address];
-            }
-            else
-            {
-                String addressLabel = "Label" + Hex.Format(address).Replace("$", "");
-                addressLabels[address] = addressLabel;
 
-                // label destination if already disassembled (back reference)
-                if (disassemblyLines[address] != null)
-                    disassemblyLines[address].Label = addressLabel + ":";
-                return addressLabel;
-            }
+            addressLabel = "Label" + Hex.Format(address).Replace("$", "");
+            addressLabels[address] = addressLabel;
+
+            // label destination if already disassembled (back reference)
+            if (disassemblyLines[address] != null)
+                disassemblyLines[address].Label = addressLabel + ":";
+            return addressLabel;
         }
 
         private void OnFormLoad(object sender, EventArgs e)
         {
-            disassemblyLines = new DisassemblyLine[0x10000];
-            activeLines = new DisassemblyLine[0];
-            addressLabels = new Dictionary<ushort, string>();
-
             dataGridView.AutoGenerateColumns = true;
-
-            lastRefresh = DateTime.Now;
-            needsRefresh = true;
         }
 
         private void OnFormClosing(object sender, FormClosingEventArgs formClosingEventArgs)
@@ -161,8 +178,11 @@ namespace EmuNES.Diagnostics
         private NesCore.Console console;
         private NesCore.Processor.Mos6502 processor;
         private DisassemblyLine[] disassemblyLines, activeLines;
-        private Dictionary<ushort, string> addressLabels;
+        private string[] addressLabels;
+        private bool[] queuedAddresses;
         private DateTime lastRefresh;
         private bool needsRefresh;
+
+        private Queue<ushort> disassemblyQueue;
     }
 }

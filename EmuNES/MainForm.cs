@@ -520,10 +520,10 @@ namespace EmuNES
                 // temporary - if there is a controller, accept both keyboard and joypad for controller 1
                 GameController gameController = gameControllerManager[0];
 
-                joypad.Start = () => keyboardState[Keys.Enter] || gameController.Buttons[9];
-                joypad.Select = () => keyboardState[Keys.Tab] || gameController.Buttons[8];
-                joypad.A = () => keyboardState[Keys.Z] || gameController.Buttons[1];
-                joypad.B = () => keyboardState[Keys.X] || gameController.Buttons[2];
+                joypad.Start = () => keyboardState[Keys.Enter] || gameController.FireButtons[9];
+                joypad.Select = () => keyboardState[Keys.Tab] || gameController.FireButtons[8];
+                joypad.A = () => keyboardState[Keys.Z] || gameController.FireButtons[1];
+                joypad.B = () => keyboardState[Keys.X] || gameController.FireButtons[2];
                 joypad.Up = () => keyboardState[Keys.Up] || gameController.Up;
                 joypad.Down = () => keyboardState[Keys.Down] || gameController.Down;
                 joypad.Left = () => keyboardState[Keys.Left] || gameController.Left;

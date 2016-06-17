@@ -18,8 +18,10 @@ namespace EmuNES.Input
             joyInfoEx.dwSize = Marshal.SizeOf(joyInfoEx);
             joyInfoEx.dwFlags = WindowsMultiMedia.JOY_RETURNALL;
 
-            oldButtonState = new bool[32];
-            buttonState = new bool[32];
+            buttonState = new bool[36];
+            oldButtonState = new bool[36];
+
+            fireButtonState = new bool[32];
         }
 
         public byte Id { get; private set; }
@@ -29,9 +31,12 @@ namespace EmuNES.Input
         public bool Up { get; private set; }
         public bool Down { get; private set; }
 
-        public event GameControllerEventHandler ButtonPressed;
+        public IReadOnlyList<bool> FireButtons { get { return fireButtonState; } }
 
-        public IReadOnlyList<bool> Buttons { get { return buttonState; } }
+        public bool this[Button button] { get { return buttonState[(int)button]; } }
+
+        public event GameControllerEventHandler ButtonPressed;
+        public event GameControllerEventHandler ButtonReleased;
 
         public void UpdateState()
         {
@@ -47,43 +52,49 @@ namespace EmuNES.Input
             }
 
             // detect button changes for event dispatch
-            bool oldLeft = Left;
-            bool oldRight = Right;
-            bool oldUp = Up;
-            bool oldDown = Down;
-
             Left = joyX < JoyCentreMinX;
             Right = joyX > JoyCentreMaxX;
             Up = joyY < JoyCentreMinY;
             Down = joyY > JoyCentreMaxY;
 
-            Array.Copy(Buttons.ToArray(), oldButtonState, oldButtonState.Length);
+            buttonState[(int)Button.Left] = Left;
+            buttonState[(int)Button.Right] = Right;
+            buttonState[(int)Button.Up] = Up;
+            buttonState[(int)Button.Down] = Down;
+
+
             for (int bitIndex = 0; bitIndex < 32; bitIndex++)
             {
-                buttonState[bitIndex] = (joyButtons & 1) == 1;
+                buttonState[4 + bitIndex] = (joyButtons & 1) == 1;
                 joyButtons >>= 1;
             }
 
-            // if event wired, fire it on any presses
+            // copy fire button part of button state into fire button state array
+            Array.Copy(buttonState, 4, fireButtonState, 0, fireButtonState.Length);
+
+            // if ButtonPressed event wired, fire it on any presses
             if (ButtonPressed != null)
             {
-                if (!oldLeft && Left)
-                    ButtonPressed(this, new GameControllerEventArgs(Id, Button.Left));
-                if (!oldRight && Right)
-                    ButtonPressed(this, new GameControllerEventArgs(Id, Button.Right));
-                if (!oldUp && Up)
-                    ButtonPressed(this, new GameControllerEventArgs(Id, Button.Up));
-                if (!oldDown && Down)
-                    ButtonPressed(this, new GameControllerEventArgs(Id, Button.Down));
-
-                for (int buttonIndex = 0; buttonIndex < 32; buttonIndex++)
-                    if (!oldButtonState[buttonIndex] && buttonState[buttonIndex])
-                        ButtonPressed(this, new GameControllerEventArgs(Id, Button.Button0 + buttonIndex));
+                for (int index = 0; index < buttonState.Length; index++)
+                    if (buttonState[index] && !oldButtonState[index])
+                        ButtonPressed(this, new GameControllerEventArgs(Id, (Button)index));
             }
+
+            // if ButtonReleased event wired, fire it on any input releases
+            if (ButtonReleased != null)
+            {
+                for (int index = 0; index < buttonState.Length; index++)
+                    if (!buttonState[index] && oldButtonState[index])
+                        ButtonReleased(this, new GameControllerEventArgs(Id, (Button)index));
+            }
+
+            // copy button states to detect changes in next iteration
+            Array.Copy(buttonState, oldButtonState, buttonState.Length);
         }
 
         private int deviceId;
         private WindowsMultiMedia.JOYINFOEX joyInfoEx;
+        private bool[] fireButtonState;
         private bool[] buttonState;
         private bool[] oldButtonState;
 

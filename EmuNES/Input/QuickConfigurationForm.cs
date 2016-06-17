@@ -80,7 +80,53 @@ namespace EmuNES.Input
 
         private void OnControllerButtonPressed(object sender, GameControllerEventArgs gameControllerEventArgs)
         {
+            GameController gameController = (GameController)sender;
+            switch (joypadConfigState)
+            {
+                case JoypadConfigState.Start:
+                    joypad.Start = () => gameController[gameControllerEventArgs.Button];
+                    ++joypadConfigState;
+                    configurationLabel.Text = "Press " + joypadConfigState;
+                    break;
+                case JoypadConfigState.Select:
+                    joypad.Select = () => gameController[gameControllerEventArgs.Button];
+                    ++joypadConfigState;
+                    configurationLabel.Text = "Press " + joypadConfigState;
+                    break;
+                case JoypadConfigState.A:
+                    joypad.A = () => gameController[gameControllerEventArgs.Button];
+                    ++joypadConfigState;
+                    configurationLabel.Text = "Press " + joypadConfigState;
+                    break;
+                case JoypadConfigState.B:
+                    joypad.B = () => gameController[gameControllerEventArgs.Button];
+                    ++joypadConfigState;
+                    configurationLabel.Text = "Press " + joypadConfigState;
+                    break;
+                case JoypadConfigState.Up:
+                    joypad.Up = () => gameController[gameControllerEventArgs.Button];
+                    ++joypadConfigState;
+                    configurationLabel.Text = "Press " + joypadConfigState;
+                    break;
+                case JoypadConfigState.Down:
+                    joypad.Down = () => gameController[gameControllerEventArgs.Button];
+                    ++joypadConfigState;
+                    configurationLabel.Text = "Press " + joypadConfigState;
+                    break;
+                case JoypadConfigState.Left:
+                    joypad.Left = () => gameController[gameControllerEventArgs.Button];
+                    ++joypadConfigState;
+                    configurationLabel.Text = "Press " + joypadConfigState;
+                    break;
+                case JoypadConfigState.Right:
+                    joypad.Right = () => gameController[gameControllerEventArgs.Button];
 
+                    foreach (GameController gameController2 in gameControllerManager.Controllers)
+                        gameController2.ButtonPressed -= OnControllerButtonPressed;
+
+                    Close();
+                    break;
+            }
         }
 
         private KeyboardState keyboardState;

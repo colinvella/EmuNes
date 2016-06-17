@@ -133,6 +133,7 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="Resources\FileExit.png" />
+    <None Include="Resources\FilterPause.png" />
     <None Include="Resources\OptionsInput.png" />
     <None Include="Resources\ViewTvAspect.png" />
     <None Include="Resources\ViewMotionBlur.png" />
@@ -142,7 +143,6 @@
     <None Include="Resources\FilterLcd.png" />
     <None Include="Resources\FileProperties.png" />
     <None Include="Resources\FileRecent.png" />
-    <None Include="Resources\FilterPause.png" />
     <Content Include="Resources\GameRun.png" />
     <Content Include="Resources\GameStop.png" />
     <Content Include="Resources\GamePause.png" />

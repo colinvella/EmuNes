@@ -396,6 +396,7 @@
             // 
             // MainForm
             // 
+            this.AllowDrop = true;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.ClientSize = new System.Drawing.Size(512, 508);
             this.Controls.Add(this.videoPanel);
@@ -413,6 +414,8 @@
             this.Text = "EmuNES";
             this.Deactivate += new System.EventHandler(this.OnFormDeactivate);
             this.Load += new System.EventHandler(this.OnFormLoad);
+            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.OnDragDrop);
+            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.OnDragEnter);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OnKeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnKeyUp);
             this.mainMenuStrip.ResumeLayout(false);

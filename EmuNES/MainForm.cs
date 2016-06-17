@@ -109,6 +109,24 @@ namespace EmuNES
                 StoreSaveRam();
         }
 
+        private void OnDragEnter(object sender, DragEventArgs dragEventArgs)
+        {
+            if (dragEventArgs.Data.GetDataPresent(DataFormats.FileDrop))
+                dragEventArgs.Effect = DragDropEffects.Copy;
+        }
+
+        private void OnDragDrop(object sender, DragEventArgs dragEventArgs)
+        {
+            string[] files = (string[])dragEventArgs.Data.GetData(DataFormats.FileDrop);
+
+            if (files.Length > 1)
+                MessageBox.Show(this, "Please drop only one ROM file at a time", "Open RIM file",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            string cartridgeRomPath = files[0];
+            LoadCartridgeRom(cartridgeRomPath);
+        }
+
         private void OnFileOpen(object sender, EventArgs eventArgs)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();

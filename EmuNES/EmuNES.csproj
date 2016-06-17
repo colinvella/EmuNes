@@ -64,6 +64,7 @@
     </Compile>
     <Compile Include="Diagnostics\DisassemblyLine.cs" />
     <Compile Include="EmulatorConfiguration.cs" />
+    <Compile Include="Settings\InputSettings.cs" />
     <Compile Include="Input\KeyboardState.cs" />
     <Compile Include="Input\QuickConfigurationForm.cs">
       <SubType>Form</SubType>
@@ -74,6 +75,7 @@
     <Compile Include="Input\Button.cs" />
     <Compile Include="Input\GameControllerEventArgs.cs" />
     <Compile Include="Input\WindowsMultiMedia.cs" />
+    <Compile Include="Settings\JoypadSettings.cs" />
     <Compile Include="Video\FastBitmap.cs" />
     <Compile Include="Input\GameController.cs" />
     <Compile Include="Input\GameControllerManager.cs" />

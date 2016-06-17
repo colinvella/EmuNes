@@ -58,6 +58,27 @@ namespace EmuNES.Diagnostics
                 if (instruction.Name == "RTS")
                     disassemblyLine.Remarks = "----------------";
 
+                // determine labels when applicable
+                if (instruction.AddressingMode == AddressingMode.Relative)
+                {
+                    ushort nextInstructionAddress = (ushort)(address + 2);
+                    sbyte offset = (sbyte) processor.ReadByte(operandAddress);
+                    ushort branchAddress = (ushort)(nextInstructionAddress + offset);
+                    string addressLabel = null;
+                    if (addressLabels.ContainsKey(branchAddress))
+                    {
+                        addressLabel = addressLabels[branchAddress] + ":";
+                    }
+                    else
+                    {
+                        addressLabel = "Label" + Hex.Format(branchAddress).Replace("$", "");
+                        addressLabels[branchAddress] = addressLabel;
+                        if (disassemblyLines[branchAddress] != null)
+                            disassemblyLines[branchAddress].Label = addressLabel;
+                    }
+                    disassemblyLine.Remarks = "branch to " + addressLabel;
+                }
+
                 disassemblyLines[address] = disassemblyLine;  
                 needsRefresh = true;
             }
@@ -80,6 +101,10 @@ namespace EmuNES.Diagnostics
             for (int index = address; index < endExclusive; index++)
                 disassemblyLines[address] = null;
 
+            var labelAddressesToRemove = addressLabels.Keys.Where((x) => x >= address && x < endExclusive ).ToArray();
+            foreach (ushort addressToRemove in labelAddressesToRemove)
+                addressLabels.Remove(addressToRemove);
+
             needsRefresh = true;
         }
 
@@ -87,6 +112,7 @@ namespace EmuNES.Diagnostics
         {
             disassemblyLines = new DisassemblyLine[0x10000];
             activeLines = new DisassemblyLine[0];
+            addressLabels = new Dictionary<ushort, string>();
 
             dataGridView.AutoGenerateColumns = true;
 
@@ -124,6 +150,7 @@ namespace EmuNES.Diagnostics
         private NesCore.Console console;
         private NesCore.Processor.Mos6502 processor;
         private DisassemblyLine[] disassemblyLines, activeLines;
+        private Dictionary<ushort, string> addressLabels;
         private DateTime lastRefresh;
         private bool needsRefresh;
     }

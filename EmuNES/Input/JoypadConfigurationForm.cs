@@ -1,4 +1,5 @@
-﻿using NesCore.Input;
+﻿using EmuNES.Settings;
+using NesCore.Input;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,14 +12,15 @@ using System.Windows.Forms;
 
 namespace EmuNES.Input
 {
-    public partial class QuickConfigurationForm : Form
+    public partial class JoypadConfigurationForm : Form
     {
-        public QuickConfigurationForm(Joypad joypad,
-            KeyboardState keyboardState, GameControllerManager gameControllerManager)
+        public JoypadConfigurationForm(JoypadSettings joypadSettings,
+            KeyboardState keyboardState,
+            GameControllerManager gameControllerManager)
         {
             InitializeComponent();
 
-            this.joypad = joypad;
+            this.joypadSettings = joypadSettings;
             this.joypadConfigState = JoypadConfigState.Start;
             this.keyboardState = keyboardState;
             this.gameControllerManager = gameControllerManager;
@@ -30,45 +32,46 @@ namespace EmuNES.Input
 
         private void OnKeyDown(object sender, KeyEventArgs keyEventargs)
         {
+            Keys keyCoke = keyEventargs.KeyCode;
             switch (joypadConfigState)
             {
                 case JoypadConfigState.Start:
-                    joypad.Start = () => keyboardState[keyEventargs.KeyCode];
+                    joypadSettings.Start = joypadSettings.EncodeKeyboardMapping(keyCoke);
                     ++joypadConfigState;
                     configurationLabel.Text = "Press " + joypadConfigState;
                     break;
                 case JoypadConfigState.Select:
-                    joypad.Select = () => keyboardState[keyEventargs.KeyCode];
+                    joypadSettings.Select = joypadSettings.EncodeKeyboardMapping(keyCoke);
                     ++joypadConfigState;
                     configurationLabel.Text = "Press " + joypadConfigState;
                     break;
                 case JoypadConfigState.A:
-                    joypad.A = () => keyboardState[keyEventargs.KeyCode];
+                    joypadSettings.A = joypadSettings.EncodeKeyboardMapping(keyCoke);
                     ++joypadConfigState;
                     configurationLabel.Text = "Press " + joypadConfigState;
                     break;
                 case JoypadConfigState.B:
-                    joypad.B = () => keyboardState[keyEventargs.KeyCode];
+                    joypadSettings.B = joypadSettings.EncodeKeyboardMapping(keyCoke);
                     ++joypadConfigState;
                     configurationLabel.Text = "Press " + joypadConfigState;
                     break;
                 case JoypadConfigState.Up:
-                    joypad.Up = () => keyboardState[keyEventargs.KeyCode];
+                    joypadSettings.Up = joypadSettings.EncodeKeyboardMapping(keyCoke);
                     ++joypadConfigState;
                     configurationLabel.Text = "Press " + joypadConfigState;
                     break;
                 case JoypadConfigState.Down:
-                    joypad.Down = () => keyboardState[keyEventargs.KeyCode];
+                    joypadSettings.Down = joypadSettings.EncodeKeyboardMapping(keyCoke);
                     ++joypadConfigState;
                     configurationLabel.Text = "Press " + joypadConfigState;
                     break;
                 case JoypadConfigState.Left:
-                    joypad.Left = () => keyboardState[keyEventargs.KeyCode];
+                    joypadSettings.Left = joypadSettings.EncodeKeyboardMapping(keyCoke);
                     ++joypadConfigState;
                     configurationLabel.Text = "Press " + joypadConfigState;
                     break;
                 case JoypadConfigState.Right:
-                    joypad.Right = () => keyboardState[keyEventargs.KeyCode];
+                    joypadSettings.Right = joypadSettings.EncodeKeyboardMapping(keyCoke);
 
                     foreach (GameController gameController in gameControllerManager.Controllers)
                         gameController.ButtonPressed -= OnControllerButtonPressed;
@@ -80,6 +83,7 @@ namespace EmuNES.Input
 
         private void OnControllerButtonPressed(object sender, GameControllerEventArgs gameControllerEventArgs)
         {
+            /*
             GameController gameController = (GameController)sender;
             switch (joypadConfigState)
             {
@@ -126,13 +130,13 @@ namespace EmuNES.Input
 
                     Close();
                     break;
-            }
+            }*/
         }
 
+        private JoypadSettings joypadSettings;
         private KeyboardState keyboardState;
         private GameControllerManager gameControllerManager;
         private JoypadConfigState joypadConfigState;
-        private Joypad joypad;
 
         private enum JoypadConfigState
         {

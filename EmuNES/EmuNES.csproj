@@ -66,11 +66,11 @@
     <Compile Include="EmulatorConfiguration.cs" />
     <Compile Include="Settings\InputSettings.cs" />
     <Compile Include="Input\KeyboardState.cs" />
-    <Compile Include="Input\QuickConfigurationForm.cs">
+    <Compile Include="Input\JoypadConfigurationForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Input\QuickConfigurationForm.Designer.cs">
-      <DependentUpon>QuickConfigurationForm.cs</DependentUpon>
+    <Compile Include="Input\JoypadConfigurationForm.Designer.cs">
+      <DependentUpon>JoypadConfigurationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Input\Button.cs" />
     <Compile Include="Input\GameControllerEventArgs.cs" />
@@ -100,8 +100,8 @@
     <EmbeddedResource Include="Diagnostics\CodeDisassemblyForm.resx">
       <DependentUpon>CodeDisassemblyForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Input\QuickConfigurationForm.resx">
-      <DependentUpon>QuickConfigurationForm.cs</DependentUpon>
+    <EmbeddedResource Include="Input\JoypadConfigurationForm.resx">
+      <DependentUpon>JoypadConfigurationForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Input\InputOptionsForm.resx">
       <DependentUpon>InputOptionsForm.cs</DependentUpon>

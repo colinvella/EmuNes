@@ -1,6 +1,6 @@
 ﻿namespace EmuNES.Input
 {
-    partial class QuickConfigurationForm
+    partial class JoypadConfigurationForm
     {
         /// <summary>
         /// Required designer variable.

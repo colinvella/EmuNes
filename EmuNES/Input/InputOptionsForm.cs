@@ -9,50 +9,55 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using NesCore;
 using NesCore.Input;
+using EmuNES.Settings;
 
 namespace EmuNES.Input
 {
     public partial class InputOptionsForm : Form
     {
-        public InputOptionsForm(NesCore.Console console, KeyboardState keyboardState, GameControllerManager gameControllerManager)
+        public InputOptionsForm(
+            NesCore.Console console,
+            KeyboardState keyboardState,
+            GameControllerManager gameControllerManager)
         {
             InitializeComponent();
 
             this.console = console;
-            this.controllers = new Controller[4];
             this.keyboardState = keyboardState;
             this.gameControllerManager = gameControllerManager;
         }
 
         private void OnFormLoad(object sender, EventArgs e)
         {
+            inputSettings = Properties.Settings.Default.InputSettings.Duplicate();
+
             controllerIdComboBox.SelectedIndex = controllerTypeComboBox.SelectedIndex = 0;
         }
 
         private void OnConfigureController(object sender, EventArgs eventArgs)
         {
-            Joypad joypad = new Joypad();
-            QuickConfigurationForm quickConfigurationForm 
-                = new QuickConfigurationForm(joypad, keyboardState, gameControllerManager);
+            JoypadSettings joypadSettings = inputSettings.Joypads[controllerIdComboBox.SelectedIndex];
+
+            JoypadConfigurationForm quickConfigurationForm 
+                = new JoypadConfigurationForm(joypadSettings, keyboardState, gameControllerManager);
             quickConfigurationForm.ShowDialog();
-            controllers[controllerTypeComboBox.SelectedIndex] = joypad;
         }
 
         private void OnOk(object sender, EventArgs eventArgs)
         {
-            for (int controllerIndex = 0; controllerIndex < 4; controllerIndex++)
-            {
-                Controller controller = controllers[controllerIndex];
-                if (controller != null)
-                    this.console.ConnectController((byte)(controllerIndex + 1), controller);
-            }
+            Properties.Settings.Default.InputSettings = inputSettings;
+            Properties.Settings.Default.Save();
+
+            foreach (JoypadSettings joypadSettings in inputSettings.Joypads)
+                console.ConnectController(joypadSettings.Port,
+                    joypadSettings.ConfigureJoypad(keyboardState, gameControllerManager));
+
             DialogResult = DialogResult.OK;
         }
 
+        private InputSettings inputSettings;
         private NesCore.Console console;
         private KeyboardState keyboardState;
         private GameControllerManager gameControllerManager;
-
-        private Controller[] controllers;
     }
 }

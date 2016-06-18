@@ -29,6 +29,8 @@ namespace EmuNES.Settings
             joypadSettings.Down = joypadSettings.EncodeKeyboardMapping(Keys.Down);
             joypadSettings.Left = joypadSettings.EncodeKeyboardMapping(Keys.Left);
             joypadSettings.Right = joypadSettings.EncodeKeyboardMapping(Keys.Right);
+
+            Joypads.Add(joypadSettings);
         }
 
         public List<JoypadSettings> Joypads { get; private set; }

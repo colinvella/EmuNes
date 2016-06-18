@@ -1,6 +1,7 @@
 ﻿using EmuNES.Audio;
 using EmuNES.Diagnostics;
 using EmuNES.Input;
+using EmuNES.Settings;
 using NAudio.Wave;
 using NesCore.Input;
 using NesCore.Storage;
@@ -48,8 +49,9 @@ namespace EmuNES
 
             ConfigureVideo();
             ConfigureAudio();
-            ConfigureDefaultController();
+            ConfigureControllers();
 
+ 
             gameState = GameState.Stopped;
 
             bitmapBuffer = new FastBitmap(256, 240);
@@ -511,38 +513,30 @@ namespace EmuNES
             };
         }
 
-        private void ConfigureDefaultController()
+        private void ConfigureControllers()
         {
-            Joypad joypad = new Joypad();
+            // load input settings
+            InputSettings inputSettings = Properties.Settings.Default.InputSettings;
 
-            if (gameControllerManager.Count > 0)
+            // if never set, create and save
+            if (inputSettings == null)
             {
-                // temporary - if there is a controller, accept both keyboard and joypad for controller 1
-                GameController gameController = gameControllerManager[0];
-
-                joypad.Start = () => keyboardState[Keys.Enter] || gameController.FireButtons[9];
-                joypad.Select = () => keyboardState[Keys.Tab] || gameController.FireButtons[8];
-                joypad.A = () => keyboardState[Keys.Z] || gameController.FireButtons[1];
-                joypad.B = () => keyboardState[Keys.X] || gameController.FireButtons[2];
-                joypad.Up = () => keyboardState[Keys.Up] || gameController.Up;
-                joypad.Down = () => keyboardState[Keys.Down] || gameController.Down;
-                joypad.Left = () => keyboardState[Keys.Left] || gameController.Left;
-                joypad.Right = () => keyboardState[Keys.Right] || gameController.Right;
-            }
-            else
-            {
-                // temporary - otherwise, just keyboard input
-                joypad.Start = () => keyboardState[Keys.Enter];
-                joypad.Select = () => keyboardState[Keys.Tab];
-                joypad.A = () => keyboardState[Keys.Z];
-                joypad.B = () => keyboardState[Keys.X];
-                joypad.Up = () => keyboardState[Keys.Up];
-                joypad.Down = () => keyboardState[Keys.Down];
-                joypad.Left = () => keyboardState[Keys.Left];
-                joypad.Right = () => keyboardState[Keys.Right];
+                inputSettings = new InputSettings();
+                Properties.Settings.Default.InputSettings = inputSettings;
+                Properties.Settings.Default.Save();
             }
 
-            Console.ConnectController(1, joypad);
+            // if no joypad set, configure default keyboard controls
+            if (inputSettings.Joypads.Count == 0)
+            {
+                inputSettings.BuildDefaultSettings();
+                Properties.Settings.Default.Save();
+            }
+
+            // assign joypads
+            foreach (JoypadSettings joyPadSettings in inputSettings.Joypads)
+                Console.ConnectController(joyPadSettings.Port,
+                    joyPadSettings.ConfigureJoypad(keyboardState, gameControllerManager));
         }
 
         private void LoadRecentRom(object sender, EventArgs eventArgs)

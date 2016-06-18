@@ -15,7 +15,7 @@ namespace EmuNES.Settings
     {
         public JoypadSettings() { }
 
-        public byte Id { get; set; }
+        public byte Port { get; set; }
         public string Start { get; set; }
         public string Select { get; set; }
         public string A { get; set; }
@@ -28,7 +28,7 @@ namespace EmuNES.Settings
         public JoypadSettings Duplicate()
         {
             JoypadSettings copy = new JoypadSettings();
-            copy.Id = Id;
+            copy.Port = Port;
             copy.Start = Start;
             copy.Select = Select;
             copy.A = A;

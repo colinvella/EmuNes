@@ -87,8 +87,16 @@ namespace EmuNES.Settings
             string[] tokens = mapping.Trim().Split(new char[] { ':' });
             byte controllerId = byte.Parse(tokens[1]);
             EmuNES.Input.Button button = (EmuNES.Input.Button)Enum.Parse(typeof(EmuNES.Input.Button), tokens[2]);
-            GameController gameController = gameControllerManager[controllerId];
-            return () => gameController[button];
+            if (controllerId < gameControllerManager.Count)
+            {
+                GameController gameController = gameControllerManager[controllerId];
+                return () => gameController[button];
+            }
+            else
+            {
+                // may have been unplugged
+                return () => false;
+            }
         }
     }
 }

@@ -31,16 +31,33 @@ namespace EmuNES.Input
         {
             inputSettings = Properties.Settings.Default.InputSettings.Duplicate();
 
-            controllerIdComboBox.SelectedIndex = controllerTypeComboBox.SelectedIndex = 0;
+            controllerIdComboBox.SelectedIndex = 0;
         }
 
-        private void OnConfigureController(object sender, EventArgs eventArgs)
+        private void OnPortChanged(object sender, EventArgs eventArgs)
         {
-            JoypadSettings joypadSettings = inputSettings.Joypads[controllerIdComboBox.SelectedIndex];
+            byte port = (byte)(controllerIdComboBox.SelectedIndex + 1);
+            ControllerSettings controllerSettimgs = inputSettings[port];
+
+            if (controllerSettimgs != null)
+                TypeDescriptor.AddAttributes(controllerSettimgs, new Attribute[] { new ReadOnlyAttribute(true) });
+            mappingsPropertyGrid.SelectedObject = controllerSettimgs;
+        }
+
+        private void OnConfigureJoypad(object sender, EventArgs eventArgs)
+        {
+            //JoypadSettings joypadSettings = inputSettings.Joypads[controllerIdComboBox.SelectedIndex];
+            byte port = (byte)(controllerIdComboBox.SelectedIndex + 1);
+            JoypadSettings joypadSettings = new JoypadSettings();
+            joypadSettings.Port = port;
 
             JoypadConfigurationForm quickConfigurationForm 
                 = new JoypadConfigurationForm(joypadSettings, keyboardState, gameControllerManager);
             quickConfigurationForm.ShowDialog();
+
+            inputSettings[port] = joypadSettings;
+
+            OnPortChanged(sender, eventArgs);
         }
 
         private void OnOk(object sender, EventArgs eventArgs)

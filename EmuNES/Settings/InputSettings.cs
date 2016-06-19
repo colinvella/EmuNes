@@ -13,6 +13,7 @@ namespace EmuNES.Settings
     {
         public InputSettings()
         {
+            controllerMap = null;
             Joypads = new List<JoypadSettings>();
         }
 
@@ -33,6 +34,34 @@ namespace EmuNES.Settings
             Joypads.Add(joypadSettings);
         }
 
+        public ControllerSettings GetControllerForPort(byte port)
+        {
+            foreach (JoypadSettings joypadSettings in Joypads)
+                if (joypadSettings.Port == port)
+                    return joypadSettings;
+
+            // TODO: check for zappers etc. 
+
+            return null;
+        }
+
+        public ControllerSettings this[byte port]
+        {
+            get
+            {
+                EnsureMapInitialised();
+                ControllerSettings controllerSettings = null;
+                controllerMap.TryGetValue(port, out controllerSettings);
+                return controllerSettings;
+            }
+            set
+            {
+                EnsureMapInitialised();
+                controllerMap[port] = value;
+                UpdateControllerLists();
+            }
+        }
+
         public List<JoypadSettings> Joypads { get; private set; }
 
         public InputSettings Duplicate()
@@ -42,5 +71,31 @@ namespace EmuNES.Settings
                 copy.Joypads.Add(joypad.Duplicate());
             return copy;
         }
+
+        private void EnsureMapInitialised()
+        {
+            if (controllerMap == null)
+            {
+                controllerMap = new Dictionary<byte, ControllerSettings>();
+
+                // TODO for all controller types
+                foreach (JoypadSettings joypadSettings in Joypads)
+                    controllerMap[joypadSettings.Port] = joypadSettings;
+            }
+        }
+
+        private void UpdateControllerLists()
+        {
+            Joypads.Clear();
+            foreach (ControllerSettings controllerSettings in controllerMap.Values)
+            {
+                if (controllerSettings is JoypadSettings)
+                    Joypads.Add((JoypadSettings)controllerSettings);
+            }
+
+            // TODO: repeat for zappers etc.
+        }
+
+        private Dictionary<byte, ControllerSettings> controllerMap;
     }
 }

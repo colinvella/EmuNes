@@ -64,6 +64,7 @@
     </Compile>
     <Compile Include="Diagnostics\DisassemblyLine.cs" />
     <Compile Include="EmulatorConfiguration.cs" />
+    <Compile Include="Settings\ControllerSettings.cs" />
     <Compile Include="Settings\InputSettings.cs" />
     <Compile Include="Input\KeyboardState.cs" />
     <Compile Include="Input\JoypadConfigurationForm.cs">

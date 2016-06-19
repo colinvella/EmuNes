@@ -530,6 +530,7 @@ namespace EmuNES
             if (inputSettings.Joypads.Count == 0)
             {
                 inputSettings.BuildDefaultSettings();
+                Properties.Settings.Default.InputSettings = inputSettings;
                 Properties.Settings.Default.Save();
             }
 

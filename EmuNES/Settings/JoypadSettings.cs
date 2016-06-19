@@ -11,11 +11,10 @@ using System.Windows.Forms;
 namespace EmuNES.Settings
 {
     [Serializable]
-    public class JoypadSettings
+    public class JoypadSettings: ControllerSettings
     {
         public JoypadSettings() { }
 
-        public byte Port { get; set; }
         public string Start { get; set; }
         public string Select { get; set; }
         public string A { get; set; }

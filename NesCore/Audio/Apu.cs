@@ -89,6 +89,14 @@ namespace NesCore.Audio
             {
                 framePeriod = (byte)(4 + ((value >> 7) & 1));
                 frameIrq = ((value >> 6) & 1) == 0;
+
+                // clock immediatly when $80 is written to frame counter port
+                if (value == 0x80)
+                {
+                    Pulse1.LengthValue = Pulse2.LengthValue
+                        = Triangle.LengthValue = Noise.LengthValue = 0;
+                    Dmc.CurrentLength = 0;
+                }
             }
         }
 

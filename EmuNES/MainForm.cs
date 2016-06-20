@@ -307,7 +307,6 @@ namespace EmuNES
                     Console.Cartridge.Map.ProgramBankSwitch = null;
                 }
             }
-            diagnosticsCodeDisassemblyMenuItem.Checked = !diagnosticsCodeDisassemblyMenuItem.Checked;
             this.Focus();
         }
 

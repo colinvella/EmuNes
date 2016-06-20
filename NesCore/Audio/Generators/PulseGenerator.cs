@@ -78,6 +78,8 @@ namespace NesCore.Audio.Generators
         {
             set
             {
+                if (!Enabled) return;
+
                 LengthValue = lengthTable[value >> 3];
                 TimerPeriod = (ushort)((TimerPeriod & 0x00FF) | ((value & 7) << 8));
                 EnvelopeStart = true;

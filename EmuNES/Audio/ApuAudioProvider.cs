@@ -13,16 +13,27 @@ namespace EmuNES.Audio
         {
             cyclicBuffer = new float[4096];
             readIndex = writeIndex = 0;
+            Enabled = true;
         }
+
+        public bool Enabled { get; set; }
 
         public override int Read(float[] buffer, int offset, int sampleCount)
         {
-            //lock (queueLock)
+            lock (queueLock)
             {
+                if (!Enabled)
+                {
+                    buffer[offset] = 0;
+                    return 1;
+                }
+
                 for (int n = 0; n < sampleCount; n++)
                 {
                     if (size == 0)
-                        return Math.Max(n, 1);
+                    {
+                        return 1;
+                    }
 
                     buffer[n + offset] = cyclicBuffer[readIndex++];
                     readIndex %= cyclicBuffer.Length;
@@ -34,7 +45,7 @@ namespace EmuNES.Audio
 
         public void Queue(float[] sampleValues)
         {
-            //lock (queueLock)
+            lock (queueLock)
             {
                 for (int index = 0; index < sampleValues.Length; index++)
                 {

@@ -175,20 +175,21 @@ namespace EmuNES
                     Console.Reset();
                     gameTickDateTime = DateTime.Now;
                     averageDeltaTime = 1.0 / 60.0;
+                    apuAudioProvider.Enabled = true;
                     gameState = GameState.Running;
                     waveOut.Play();
                     break;
                 case GameState.Running:
                     // pause
-                    waveOut.Pause();
+                    apuAudioProvider.Enabled = false;
                     gameState = GameState.Paused;
                     break;
                 case GameState.Paused:
                     // resume;
                     gameTickDateTime = DateTime.Now;
                     averageDeltaTime = 1.0 / 60.0;
+                    apuAudioProvider.Enabled = true;
                     gameState = GameState.Running;
-                    waveOut.Resume();
                     break;
             }
 
@@ -198,8 +199,6 @@ namespace EmuNES
 
         private void OnGameReset(object sender, EventArgs eventArgs)
         {
-            waveOut.Stop();
-            waveOut.Play();
             OnGameStop(sender, eventArgs);
             Console.Reset();
             OnGameRunPause(sender, eventArgs);

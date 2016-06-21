@@ -93,8 +93,18 @@ namespace NesCore.Audio
                 // clock immediatly when $80 is written to frame counter port
                 if (value == 0x80)
                 {
-                    Pulse1.LengthValue = Pulse2.LengthValue
-                        = Triangle.LengthValue = Noise.LengthValue = 0;
+                    if (Pulse1.LengthEnabled)
+                        Pulse1.LengthValue = 0;
+
+                    if (Pulse2.LengthEnabled)
+                        Pulse2.LengthValue = 0;
+
+                    if (Triangle.LengthEnabled)
+                        Triangle.LengthValue = 0;
+
+                    if (Noise.LengthEnabled)
+                        Noise.LengthValue = 0;
+
                     Dmc.CurrentLength = 0;
                 }
             }

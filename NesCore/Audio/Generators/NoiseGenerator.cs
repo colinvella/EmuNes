@@ -55,6 +55,8 @@ namespace NesCore.Audio.Generators
         {
             set
             {
+                if (!Enabled) return;
+
                 LengthValue = lengthTable[value >> 3];
                 EnvelopeStart = true;
             }

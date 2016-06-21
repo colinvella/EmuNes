@@ -90,6 +90,11 @@ namespace EmuNES
                 OnGameRunPause(sender, eventArgs);
         }
 
+        private void OnFormMove(object sender, EventArgs eventArgs)
+        {
+            if (gameState == GameState.Running)
+                OnGameRunPause(sender, eventArgs);
+        }
 
         private void OnApplicationClosing(object sender, CancelEventArgs cancelEventArgs)
         {
@@ -774,17 +779,13 @@ namespace EmuNES
         private string cartridgeSaveRamFilename;
         private RecentFileManager recentFileManager;
 
-        private FastBitmap bitmapBuffer;
+        // execution state
         private GameState gameState;
+
+        // video system
+        private FastBitmap bitmapBuffer;
         private DateTime gameTickDateTime;
         private Icon gameIcon;
-
-        private Image resizedScreenFilter;
-        private Font resizedCaptionFont;
-
-        // frame rate handling
-        private DateTime frameDateTime;
-        private double averageDeltaTime;
 
         // view size
         private Size applicationMargin;
@@ -795,6 +796,13 @@ namespace EmuNES
         private bool tvAspect;
         private ScreenFilter screenFilter;
         private bool motionBlur;
+
+        private Image resizedScreenFilter;
+        private Font resizedCaptionFont;
+
+        // frame rate handling
+        private DateTime frameDateTime;
+        private double averageDeltaTime;
 
         // audio system
         private WaveOut waveOut;
@@ -807,5 +815,6 @@ namespace EmuNES
         // debug
         private CodeDisassemblyForm codeDisassemblyForm;
         private bool traceEnabled;
+
     }
 }

@@ -412,6 +412,7 @@
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.OnDragEnter);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OnKeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.OnKeyUp);
+            this.Move += new System.EventHandler(this.OnFormMove);
             this.mainMenuStrip.ResumeLayout(false);
             this.mainMenuStrip.PerformLayout();
             this.statusStrip.ResumeLayout(false);

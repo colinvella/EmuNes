@@ -42,6 +42,7 @@ namespace EmuNES.Diagnostics
                 disassemblyQueue.Enqueue(address);
                 queuedAddresses[address] = true;
             }
+            lastTrace = DateTime.Now;
         }
 
         private void OnDisassemblyTick(object sender, EventArgs e)
@@ -52,15 +53,26 @@ namespace EmuNES.Diagnostics
                 queuedAddresses[address] = false;
                 DisassembleLine(address);
             }
-            
+
             if (needsRefresh && (DateTime.Now - lastRefresh).TotalSeconds > 5)
             {
-                lastRefresh = DateTime.Now;
-                activeLines = disassemblyLines.Where((x) => x != null).ToArray();
-                dataGridView.DataSource = activeLines;
-                needsRefresh = false;
+                    lastRefresh = DateTime.Now;
+                    activeLines = disassemblyLines.Where((x) => x != null).ToArray();
+                    dataGridView.DataSource = activeLines;
+                    needsRefresh = false;                
             }
 
+            if ((DateTime.Now - lastTrace).TotalSeconds > 1 && dataGridView.SelectedRows.Count == 0)
+            {
+                string programCounterHex = Hex.Format(processor.State.ProgramCounter);
+                for (int i = 0; i < activeLines.Length; i++)
+                if (activeLines[i].Address == programCounterHex)
+                {
+                    dataGridView.Rows[i].Selected = true;
+                    dataGridView.CurrentCell = dataGridView.Rows[i].Cells[0];
+                    break;
+                }
+            }
         }
 
         private void DisassembleLine(ushort address)
@@ -180,7 +192,7 @@ namespace EmuNES.Diagnostics
         private DisassemblyLine[] disassemblyLines, activeLines;
         private string[] addressLabels;
         private bool[] queuedAddresses;
-        private DateTime lastRefresh;
+        private DateTime lastRefresh, lastTrace;
         private bool needsRefresh;
 
         private Queue<ushort> disassemblyQueue;

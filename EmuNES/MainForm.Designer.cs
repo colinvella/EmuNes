@@ -352,6 +352,7 @@
             this.videoPanel.Name = "videoPanel";
             this.videoPanel.Size = new System.Drawing.Size(512, 462);
             this.videoPanel.TabIndex = 1;
+            this.videoPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnVideoPanelMouseDown);
             // 
             // statusStrip
             // 

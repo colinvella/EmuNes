@@ -369,6 +369,12 @@ namespace EmuNES
             this.Icon = gameIcon;
         }
 
+        private void OnVideoPanelMouseDown(object sender, MouseEventArgs mouseEventArgs)
+        {
+            if (gameState == GameState.Paused)
+                OnGameRunPause(sender, EventArgs.Empty);
+        }
+
         private void OnVideoPanelPaint(object sender, PaintEventArgs paintEventArgs)
         {
             Graphics graphics = paintEventArgs.Graphics;

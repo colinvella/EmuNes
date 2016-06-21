@@ -136,6 +136,7 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="Resources\FileExit.png" />
+    <None Include="Resources\ViewNoSpriteOverflow.png" />
     <None Include="Resources\FilterPause.png" />
     <None Include="Resources\OptionsInput.png" />
     <None Include="Resources\ViewTvAspect.png" />

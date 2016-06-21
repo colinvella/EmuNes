@@ -275,6 +275,12 @@ namespace EmuNES
             SetMotionBlur(!motionBlur);
         }
 
+        private void OnViewNoSpriteOverflow(object sender, EventArgs eventArgs)
+        {
+            Console.Video.NoSpriteOverflow = !Console.Video.NoSpriteOverflow;
+            viewNoSpriteOverflowMenuItem.Checked = Console.Video.NoSpriteOverflow;
+        }
+
         private void OnOptionsInput(object sender, EventArgs eventArgs)
         {
             InputOptionsForm inputOptionsForm = new InputOptionsForm(Console, keyboardState, gameControllerManager);

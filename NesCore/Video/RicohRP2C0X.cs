@@ -28,6 +28,7 @@ namespace NesCore.Video
         {
             Memory = new ConfigurableMemoryMap(0x10000);
             paletteTints = new PaletteTints();
+            sprites = new List<Sprite>();
 
             // VRM is actually $4000, but is configured to wrap around whole addressable space
             Memory.ConfigureAddressMirroring(0x000, 0x4000, 0x10000);
@@ -45,6 +46,13 @@ namespace NesCore.Video
         }
 
         public ConfigurableMemoryMap Memory { get; private set; }
+
+        /// <summary>
+        /// Property for disabling sprite overflow and flickering when there are more
+        /// than 8 on a single scan line. This is not part of the PPU spec and is implemented
+        /// as an aesthetic feature.
+        /// </summary>
+        public bool NoSpriteOverflow { get; set; }
 
         // properties exposed for cartridge mapper stepping
         public int Cycle { get; private set; }              // 0-340
@@ -408,7 +416,7 @@ namespace NesCore.Video
                     if (visibleLine)
                         EvaluateSprites();
                     else
-                        spriteCount = 0;
+                        sprites.Clear();
                 }
             }
 
@@ -457,9 +465,9 @@ namespace NesCore.Video
             binaryWriter.Write(highTileByte);
             binaryWriter.Write(tileData);
 
-            binaryWriter.Write(spriteCount);
-            for (int spriteIndex = 0; spriteIndex < spriteCount; spriteIndex++)
-                sprites[spriteIndex].SaveState(binaryWriter);
+            binaryWriter.Write(sprites.Count);
+            foreach (Sprite sprite in sprites)
+                sprite.SaveState(binaryWriter);
 
             binaryWriter.Write(nameTable);
             binaryWriter.Write((byte)vramIncrement);
@@ -518,9 +526,14 @@ namespace NesCore.Video
             highTileByte = binaryReader.ReadByte();
             tileData = binaryReader.ReadUInt64();
 
-            spriteCount = binaryReader.ReadInt32();
-            for (int spriteIndex = 0; spriteIndex < spriteCount; spriteIndex++)
-                sprites[spriteIndex].LoadState(binaryReader);
+            int spriteCount = binaryReader.ReadInt32();
+            sprites.Clear();
+            while (spriteCount-- > 0)
+            {
+                Sprite sprite = new Sprite();
+                sprite.LoadState(binaryReader);
+                sprites.Add(sprite);
+            }
 
             nameTable = binaryReader.ReadByte();
             vramIncrement = (VramIncrement)binaryReader.ReadByte();
@@ -732,7 +745,7 @@ namespace NesCore.Video
             if (!ShowSprites)
                 return 0;
 
-	        for (int index = 0; index < spriteCount; index++)
+	        for (int index = 0; index < sprites.Count; index++)
             {
                 int offset = (Cycle - 1) - sprites[index].PositionX;
                 if (offset < 0 || offset > 7)
@@ -784,7 +797,7 @@ namespace NesCore.Video
                     if (sprites[spriteIndex].Index == 0 && x < 255)
                         spriteZeroHit = true;
 
-                    // determine if sprite or backgroubnd pixel prevails
+                    // determine if sprite or background pixel prevails
                     if (sprites[spriteIndex].Priority == 0)
                         colourIndex = (byte)(spritePixel | 0x10);
                     else
@@ -888,7 +901,7 @@ namespace NesCore.Video
         {
             int spriteHeight = spriteSize == SpriteSize.Size8x16 ? 16 : 8;
 
-            int count = 0;
+            sprites.Clear();
             for (int index = 0; index < 64; index++)
             {
                 byte spriteY = oamData[index * 4 + 0];
@@ -900,22 +913,18 @@ namespace NesCore.Video
                 if (row < 0 || row >= spriteHeight)
                     continue;
 
-                if (count < 8)
+                if (NoSpriteOverflow || sprites.Count < SpriteOverflowLimit)
                 {
-                    sprites[count].Pattern = FetchSpritePattern(index, row);
-                    sprites[count].PositionX = spriteX;
-                    sprites[count].Priority = (byte)((spriteAttributes >> 5) & 1);
-                    sprites[count].Index = (byte)index;
+                    Sprite sprite = new Sprite();
+                    sprite.Pattern = FetchSpritePattern(index, row);
+                    sprite.PositionX = spriteX;
+                    sprite.Priority = (byte)((spriteAttributes >> 5) & 1);
+                    sprite.Index = (byte)index;
+                    sprites.Add(sprite);
                 }
-                ++count;
+                else
+                    spriteOverflow = true;
             }
-
-            if (count > 8)
-            {
-                count = 8;
-                spriteOverflow = true;
-            }
-            spriteCount = count;
         }
 
         // tick updates Cycle, ScanLine and Frame counters
@@ -991,8 +1000,7 @@ namespace NesCore.Video
         private ulong tileData;
 
         // sprite temporary variables
-        private int spriteCount;
-        private Sprite[] sprites = new Sprite[8];
+        private List<Sprite> sprites;
 
         // $2000 PPUCTRL
         private byte nameTable;                         // 0: $2000; 1: $2400; 2: $2800; 3: $2C00
@@ -1027,6 +1035,8 @@ namespace NesCore.Video
             new ushort[]{1, 1, 1, 1},
             new ushort[]{0, 1, 2, 3}
         };
+
+        private const int SpriteOverflowLimit = 8;
 
         private enum WriteToggle
         {

@@ -65,7 +65,6 @@
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.emulatorStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.frameRateStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.gameTimer = new System.Windows.Forms.Timer(this.components);
             this.iconTimer = new System.Windows.Forms.Timer(this.components);
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
@@ -383,11 +382,6 @@
             this.frameRateStatusLabel.Text = "0 FPS";
             this.frameRateStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // gameTimer
-            // 
-            this.gameTimer.Interval = 50;
-            this.gameTimer.Tick += new System.EventHandler(this.OnGameTick);
-            // 
             // iconTimer
             // 
             this.iconTimer.Enabled = true;
@@ -434,7 +428,6 @@
         private System.Windows.Forms.ToolStripMenuItem fileOpenMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fileExitMenuItem;
         private System.Windows.Forms.Panel videoPanel;
-        private System.Windows.Forms.Timer gameTimer;
         private System.Windows.Forms.ToolStripMenuItem gameMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gameRunMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gameResetMenuItem;

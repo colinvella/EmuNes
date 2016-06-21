@@ -82,12 +82,6 @@ namespace EmuNES
             codeDisassemblyForm = new CodeDisassemblyForm(Console);
 
             Application.Idle += TickWhileIdle;
-
-#if DEBUG
-            gameTimer.Interval = 20;
-#else
-            gameTimer.Interval = 1;
-#endif
         }
 
         private void OnFormDeactivate(object sender, EventArgs eventArgs)

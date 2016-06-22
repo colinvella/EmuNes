@@ -30,6 +30,12 @@ namespace NesCore.Storage
         {
             get
             {
+                if (address == 0x5205)
+                    return productLow;
+
+                if (address == 0x5206)
+                    return productHigh;
+
                 if (address >= 0x5C00 && address < 0x6000)
                 {
                     // expansion ram - all modes
@@ -48,13 +54,15 @@ namespace NesCore.Storage
                             throw new Exception("MMC5 Invalid expansion ram mode");
                     }
                 }
-                else if (address >= 0x6000 && address < 0x8000)
+
+                if (address >= 0x6000 && address < 0x8000)
                 {
                     // all bank modes - 8K switchable RAM bank
                     int offset = address % 0x2000;
                     return programRam[programRamBank * 0x2000 + offset];
                 }
-                else if (address >= 0x8000)
+
+                if (address >= 0x8000)
                 {
                     // program banks for all modes
                     switch (programBankMode)
@@ -126,8 +134,9 @@ namespace NesCore.Storage
                             throw new Exception("MMC5 Invalid program bank mode");
                     }
                 }
-                else
-                    throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
+
+                // invalid / unhandled addresses
+                throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
             }
 
             set
@@ -201,6 +210,19 @@ namespace NesCore.Storage
                     return;
                 }
 
+                if (address == 0x5205)
+                {
+                    factor1 = value;
+                    EvaluateProduct();
+                    return;
+                }
+                if (address == 0x5206)
+                {
+                    factor2 = value;
+                    EvaluateProduct();
+                    return;
+                }
+
                 throw new NotImplementedException();
             }
         }
@@ -208,6 +230,13 @@ namespace NesCore.Storage
         public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
         {
             ppuRendering = scanLine >= 0 && scanLine < 240;
+        }
+
+        private void EvaluateProduct()
+        {
+            int product = factor1 * factor2;
+            productLow = (byte)product;
+            productHigh = (byte)(product >> 8);
         }
 
         private byte[] programRam;
@@ -230,5 +259,10 @@ namespace NesCore.Storage
         private byte programRomBank;
 
         private bool ppuRendering;
+
+        private byte factor1;
+        private byte factor2;
+        private byte productLow;
+        private byte productHigh;
     }
 }

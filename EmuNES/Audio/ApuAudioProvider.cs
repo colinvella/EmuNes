@@ -22,19 +22,16 @@ namespace EmuNES.Audio
         {
             lock (queueLock)
             {
-                if (!Enabled)
+                if (!Enabled || size == 0)
                 {
                     buffer[offset] = 0;
                     return 1;
                 }
 
+                sampleCount = Math.Min(sampleCount, size);
+                
                 for (int n = 0; n < sampleCount; n++)
                 {
-                    if (size == 0)
-                    {
-                        return 1;
-                    }
-
                     buffer[n + offset] = cyclicBuffer[readIndex++];
                     readIndex %= cyclicBuffer.Length;
                     --size;
@@ -60,7 +57,7 @@ namespace EmuNES.Audio
             }
         }
 
-        private float[] cyclicBuffer = new float[4096];
+        private float[] cyclicBuffer = new float[8192];
         private int readIndex;
         private int writeIndex;
         private int size;

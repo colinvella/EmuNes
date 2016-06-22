@@ -41,6 +41,8 @@ namespace NesCore.Storage
                             return (byte)(address >> 8);
                         case 2:
                             // expansion ram mode 2 - 1K r/w memory
+                        case 3:
+                            // expansion ram mode 3 - 1K ROM
                             return extendedRam[address % 0x400];
                         default:
                             throw new Exception("MMC5 Invalid expansion ram mode");

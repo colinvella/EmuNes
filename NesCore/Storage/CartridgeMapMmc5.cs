@@ -149,15 +149,18 @@ namespace NesCore.Storage
                 }
                 if (address == 0x5101)
                 {
-                    throw new NotImplementedException("CHR mode");
+                    characterBankMode = (byte)(value & 0x03);
+                    return;
                 }
                 if (address == 0x5102)
                 {
-                    throw new NotImplementedException("PRG ram protect 1");
+                    programRamProtect1 = value == 2;
+                    return;
                 }
                 if (address == 0x5103)
                 {
-                    throw new NotImplementedException("PRG ram protect 2");
+                    programRamProtect2 = value == 1;
+                    return;
                 }
                 if (address == 0x5104)
                 {
@@ -166,15 +169,21 @@ namespace NesCore.Storage
                 }
                 if (address == 0x5105)
                 {
-                    throw new NotImplementedException("name table mapping");
+                    nameTableA = (byte)(value & 0x03);
+                    nameTableB = (byte)((value >> 2) & 0x03);
+                    nameTableC = (byte)((value >> 4) & 0x03);
+                    nameTableD = (byte)((value >> 6) & 0x03);
+                    return;
                 }
                 if (address == 0x5106)
                 {
-                    throw new NotImplementedException("fill mode tile");
+                    fillModeTile = value;
+                    return;
                 }
                 if (address == 0x5107)
                 {
-                    throw new NotImplementedException("fill mode colour");
+                    fillModeAttributes = (byte)(value & 0x03);
+                    return;
                 }
                 if (address == 0x5113)
                 {
@@ -260,13 +269,15 @@ namespace NesCore.Storage
             productHigh = (byte)(product >> 8);
         }
 
+        // program ram
         private byte[] programRam;
-        private byte[] extendedRam;
 
+        // program bank mode and switching
         private byte programBankMode;
-        private byte extendedRamMode;
 
         private byte programRamBank;
+        private bool programRamProtect1;
+        private bool programRamProtect2;
 
         private byte programBank0;
         private bool readOnly0;
@@ -279,8 +290,25 @@ namespace NesCore.Storage
 
         private byte programRomBank;
 
+        // extended ram
+        private byte[] extendedRam;
+        private byte extendedRamMode;
         private bool ppuRendering;
 
+        // character bank mode and switching
+        private byte characterBankMode;
+
+        // nametables
+        private byte nameTableA;
+        private byte nameTableB;
+        private byte nameTableC;
+        private byte nameTableD;
+
+        // fill mode
+        byte fillModeTile;
+        byte fillModeAttributes;
+
+        // multiplication
         private byte factor1;
         private byte factor2;
         private byte productLow;

@@ -80,7 +80,11 @@ namespace NesCore.Storage
                             {
                                 // PRG mode 1 - first 16k switchable ROM/RAM bank
                                 int offset = address % 0x4000;
-                                return Cartridge.ProgramRom[programBank1 * 0x4000 + offset];
+                                int flatAddress = programBank1 * 0x4000 + offset;
+                                if (romMode1)
+                                    return Cartridge.ProgramRom[flatAddress];
+                                else
+                                    return programRam[flatAddress];
                             }
                             else // if (address >= 0xC000)
                             {
@@ -93,13 +97,21 @@ namespace NesCore.Storage
                             {
                                 // PRG mode 2 - 16k switchable ROM/RAM bank
                                 int offset = address % 0x4000;
-                                return Cartridge.ProgramRom[programBank1 * 0x4000 + offset];
+                                int flatAddress = programBank1 * 0x4000 + offset;
+                                if (romMode1)
+                                    return Cartridge.ProgramRom[flatAddress];
+                                else
+                                    return programRam[flatAddress];
                             }
                             else if (address < 0xE000)
                             {
                                 // PRG mode 2 - first 8k switchable ROM/RAM bank
                                 int offset = address % 0x2000;
-                                return Cartridge.ProgramRom[programBank2 * 0x2000 + offset];
+                                int flatAddress = programBank2 * 0x2000 + offset;
+                                if (romMode2)
+                                    return Cartridge.ProgramRom[flatAddress];
+                                else
+                                    return programRam[flatAddress];
                             }
                             else // if (address >= 0xE000 )
                             {
@@ -112,23 +124,35 @@ namespace NesCore.Storage
                             {
                                 // PRG mode 3 - first 8k switchable ROM/RAM bank
                                 int offset = address % 0x2000;
-                                return Cartridge.ProgramRom[programBank0 * 0x2000 + offset];
+                                int flatAddress = programBank0 * 0x2000 + offset;
+                                if (romMode0)
+                                    return Cartridge.ProgramRom[flatAddress];
+                                else
+                                    return programRam[flatAddress];
                             }
                             else if (address < 0xC000)
                             {
                                 // PRG mode 3 - second 8k switchable ROM/RAM bank
                                 int offset = address % 0x2000;
-                                return Cartridge.ProgramRom[programBank1 * 0x2000 + offset];
+                                int flatAddress = programBank1 * 0x2000 + offset;
+                                if (romMode1)
+                                    return Cartridge.ProgramRom[flatAddress];
+                                else
+                                    return programRam[flatAddress];
                             }
                             else if (address < 0xE000 )
                             {
                                 // PRG mode 3 - third 8k switchable ROM/RAM bank
                                 int offset = address % 0x2000;
-                                return Cartridge.ProgramRom[programBank2 * 0x2000 + offset];
+                                int flatAddress = programBank2 * 0x2000 + offset;
+                                if (romMode2)
+                                    return Cartridge.ProgramRom[flatAddress];
+                                else
+                                    return programRam[flatAddress];
                             }
                             else // if (address >= 0xE000)
                             {
-                                // PRG mode 3 - fourth 8k switchable ROM/RAM bank
+                                // PRG mode 3 - fourth 8k switchable ROM bank
                                 int offset = address % 0x2000;
                                 return Cartridge.ProgramRom[programRomBank * 0x2000 + offset];
                             }

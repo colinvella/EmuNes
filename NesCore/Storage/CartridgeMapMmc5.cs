@@ -138,7 +138,7 @@ namespace NesCore.Storage
                 }
 
                 // invalid / unhandled addresses
-                throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
+                throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
             }
 
             set
@@ -161,11 +161,13 @@ namespace NesCore.Storage
                 if (address == 0x5102)
                 {
                     programRamProtect1 = value == 2;
+                    programRamProtect = programRamProtect1 && programRamProtect2;
                     return;
                 }
                 if (address == 0x5103)
                 {
                     programRamProtect2 = value == 1;
+                    programRamProtect = programRamProtect1 && programRamProtect2;
                     return;
                 }
                 if (address == 0x5104)
@@ -200,21 +202,21 @@ namespace NesCore.Storage
                 if (address == 0x5114)
                 {
                     //RBBB BBBB : R - ROM mode, BBBBBBB - bank number 
-                    readOnly0 = (value & 0x80) != 0;
+                    romMode0 = (value & 0x80) != 0;
                     programBank0 = (byte)(value & 0x7F);
                     return;
                 }
                 if (address == 0x5115)
                 {
                     //RBBB BBBB : R - ROM mode, BBBBBBB - bank number 
-                    readOnly1 = (value & 0x80) != 0;
+                    romMode1 = (value & 0x80) != 0;
                     programBank1 = (byte)(value & 0x7F);
                     return;
                 }
                 if (address == 0x5116)
                 {
                     //RBBB BBBB : R - ROM mode, BBBBBBB - bank number 
-                    readOnly2 = (value & 0x80) != 0;
+                    romMode2 = (value & 0x80) != 0;
                     programBank2 = (byte)(value & 0x7F);
                     return;
                 }
@@ -236,6 +238,7 @@ namespace NesCore.Storage
                     characterBank %= characterBankCount;
                     // assign to corresponding bank switch
                     characterBanks[address - 0x5120] = characterBank;
+                    return;
                 }
 
                 if (address == 0x5130)
@@ -244,6 +247,7 @@ namespace NesCore.Storage
                     characterBankUpper = value;
                     characterBankUpper &= 0x03;
                     characterBankUpper <<= 8;
+                    return;
                 }
 
                 if (address == 0x5205)
@@ -280,7 +284,145 @@ namespace NesCore.Storage
                             throw new Exception("MMC5 Invalid expansion ram mode");
                     }
                 }
-                throw new NotImplementedException();
+
+                if (address >= 0x8000)
+                {
+                    // program banks for all modes
+                    switch (programBankMode)
+                    {
+                        case 0:
+                            {
+                                // PRG mode 0 - single 32k switchable ROM bank
+                                throw new Exception("Cannot write to MMC5 ROM range $8000-$FFFF in PRG mode 0");
+                            }
+                        case 1:
+                            if (address < 0xC000)
+                            {
+                                // PRG mode 1 - first 16k switchable ROM/RAM bank
+                                if (romMode1)
+                                    throw new Exception("Cannot write to MMC5 range $8000-$BFFF in PRG mode 1 in ROM mode");
+                                else
+                                {
+                                    if (programRamProtect)
+                                        throw new Exception("Cannot write to MMC5 RAM range $C000-$FFFF in PRG mode 1 with Write Protect 1/2");
+                                    else
+                                    {
+                                        int offset = address % 0x4000;
+                                        programRam[programBank1 * 0x4000 + offset] = value;
+                                        return;
+                                    }
+                                }
+                            }
+                            else // if (address >= 0xC000)
+                            {
+                                // PRG mode 1 - second 16k switchable ROM bank
+                                throw new Exception("Cannot write to MMC5 ROM range C8000-$FFFF in PRG mode 1");
+                            }
+                        case 2:
+                            if (address < 0xC000)
+                            {
+                                // PRG mode 2 - 16k switchable ROM/RAM bank
+                                if (romMode1)
+                                    throw new Exception("Cannot write to MMC5 range $8000-$BFFF in PRG mode 2 in ROM mode");
+                                else
+                                {
+                                    if (programRamProtect)
+                                        throw new Exception("Cannot write to MMC5 RAM range $8000-$BFFF in PRG mode 2 with Write Protect 1/2");
+                                    else
+                                    {
+                                        int offset = address % 0x4000;
+                                        programRam[programBank1 * 0x4000 + offset] = value;
+                                        return;
+                                    }
+                                }
+                            }
+                            else if (address < 0xE000)
+                            {
+                                // PRG mode 2 - first 8k switchable ROM/RAM bank
+                                if (romMode2)
+                                    throw new Exception("Cannot write to MMC5 range $C000-$DFFF in PRG mode 2 in ROM mode");
+                                else
+                                {
+                                    if (programRamProtect)
+                                        throw new Exception("Cannot write to MMC5 RAM range $C000-$DFFF in PRG mode 2 with Write Protect 1/2");
+                                    else
+                                    {
+                                        int offset = address % 0x2000;
+                                        programRam[programBank2 * 0x2000 + offset] = value;
+                                        return;
+                                    }
+                                }
+                            }
+                            else // if (address >= 0xE000 )
+                            {
+                                // PRG mode 2 - second 8k switchable ROM bank
+                                throw new Exception("Cannot write to MMC5 ROM range $E000-$FFFF in PRG mode 2");
+                            }
+                        case 3:
+                            if (address < 0xA000)
+                            {
+                                // PRG mode 3 - first 8k switchable ROM/RAM bank
+                                if (romMode0)
+                                    throw new Exception("Cannot write to MMC5 range $8000-$9FFF in PRG mode 3 in ROM mode");
+                                else
+                                {
+                                    if (programRamProtect)
+                                        throw new Exception("Cannot write to MMC5 RAM range $8000-$9FFF in PRG mode 3 with Write Protect 1/2");
+                                    else
+                                    {
+                                        int offset = address % 0x2000;
+                                        programRam[programBank0 * 0x2000 + offset] = value;
+                                        return;
+                                    }
+                                }
+                            }
+                            else if (address < 0xC000)
+                            {
+                                // PRG mode 3 - second 8k switchable ROM/RAM bank
+                                if (romMode1)
+                                    throw new Exception("Cannot write to MMC5 range $A000-$BFFF in PRG mode 3 in ROM mode");
+                                else
+                                {
+                                    if (programRamProtect)
+                                        throw new Exception("Cannot write to MMC5 RAM range $A000-$BFFF in PRG mode 3 with Write Protect 1/2");
+                                    else
+                                    {
+                                        int offset = address % 0x2000;
+                                        programRam[programBank1 * 0x2000 + offset] = value;
+                                        return;
+                                    }
+                                }
+                            }
+                            else if (address < 0xE000)
+                            {
+                                // PRG mode 3 - third 8k switchable ROM/RAM bank
+                                if (romMode2)
+                                    throw new Exception("Cannot write to MMC5 range $C000-$DFFF in PRG mode 3 in ROM mode");
+                                else
+                                {
+                                    if (programRamProtect)
+                                        throw new Exception("Cannot write to MMC5 RAM range $C000-$DFFF in PRG mode 3 with Write Protect 1/2");
+                                    else
+                                    {
+                                        int offset = address % 0x2000;
+                                        programRam[programBank2 * 0x2000 + offset] = value;
+                                        return;
+                                    }
+                                }
+                            }
+                            else // if (address >= 0xE000)
+                            {
+                                // PRG mode 3 - fourth 8k switchable ROM bank
+                                throw new Exception("Cannot write to MMC5 ROM range $E000-$FFFF in PRG mode 3");
+                            }
+                        default:
+                            throw new Exception("MMC5 Invalid program bank mode");
+                    }
+                }
+
+                // invalid / unhandled addresses
+                throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
+
             }
         }
 
@@ -305,15 +447,16 @@ namespace NesCore.Storage
         private byte programRamBank;
         private bool programRamProtect1;
         private bool programRamProtect2;
+        private bool programRamProtect;
 
         private byte programBank0;
-        private bool readOnly0;
+        private bool romMode0;
 
         private byte programBank1;
-        private bool readOnly1;
+        private bool romMode1;
 
         private byte programBank2;
-        private bool readOnly2;
+        private bool romMode2;
 
         private byte programRomBank;
 

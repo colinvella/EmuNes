@@ -223,6 +223,27 @@ namespace NesCore.Storage
                     return;
                 }
 
+                if (address >= 0x5C00 && address < 0x6000)
+                {
+                    // expansion ram - all modes
+                    switch (extendedRamMode)
+                    {
+                        case 0:
+                        case 1:
+                            // expansion ram mode 0/1 - writes allowed when ppu rendering, otherwise zero written
+                            extendedRam[address % 0x400] = ppuRendering ? value : (byte)0;
+                            return;
+                        case 2:
+                            // expansion ram mode 2 - 1K r/w memory
+                            extendedRam[address % 0x400] = value;
+                            return;
+                        case 3:
+                            // expansion ram mode 3 - 1K ROM (read only - do nothing?)
+                            return;
+                        default:
+                            throw new Exception("MMC5 Invalid expansion ram mode");
+                    }
+                }
                 throw new NotImplementedException();
             }
         }

@@ -20,6 +20,8 @@ namespace NesCore.Storage
             extendedRam = new byte[0x400];
 
             programBankMode = 0;
+
+            characterBanks = new ushort[12];
         }
 
         public Cartridge Cartridge { get; private set; }
@@ -150,6 +152,10 @@ namespace NesCore.Storage
                 if (address == 0x5101)
                 {
                     characterBankMode = (byte)(value & 0x03);
+
+                    // compute character bank count and size depending on mode
+                    characterBankSize = (ushort)(2 ^ (3 - characterBankMode));
+                    characterBankCount = (ushort)(Cartridge.CharacterRom.Length / characterBankSize);
                     return;
                 }
                 if (address == 0x5102)
@@ -217,6 +223,27 @@ namespace NesCore.Storage
                     //-BBB BBBB : BBBBBBB - bank number 
                     programRomBank = (byte)(value & 0x7F);
                     return;
+                }
+
+                if (address >= 0x5120 && address <= 0x512B)
+                {
+                    ushort characterBank = 0;
+                    // merge low bits
+                    characterBank |= value;
+                    // merge high bits
+                    characterBank |= characterBankUpper;
+                    // ensure within available banks
+                    characterBank %= characterBankCount;
+                    // assign to corresponding bank switch
+                    characterBanks[address - 0x5120] = characterBank;
+                }
+
+                if (address == 0x5130)
+                {
+                    // upper 2 bits (bit 8, 9) for character bank selection (all banks)
+                    characterBankUpper = value;
+                    characterBankUpper &= 0x03;
+                    characterBankUpper <<= 8;
                 }
 
                 if (address == 0x5205)
@@ -297,6 +324,10 @@ namespace NesCore.Storage
 
         // character bank mode and switching
         private byte characterBankMode;
+        private ushort characterBankSize;
+        private ushort characterBankCount;
+        private ushort[] characterBanks;
+        private ushort characterBankUpper;
 
         // nametables
         private byte nameTableA;

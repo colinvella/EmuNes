@@ -19,7 +19,7 @@ namespace NesCore.Storage
             // 1K expansion ram
             extendedRam = new byte[0x400];
 
-            programBankMode = 0;
+            programBankMode = 3;
             SetCharacterBankMode(0);
 
             characterBanks = new ushort[12];

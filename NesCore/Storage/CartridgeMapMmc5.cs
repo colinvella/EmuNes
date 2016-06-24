@@ -43,7 +43,7 @@ namespace NesCore.Storage
                     int bankRange = address / characterBankSize;
 
                     // determine stride between bank registers, given CHR mode: 8K: 8, 4K: 4, 2K: 2, 1K: 1
-                    int indexStride = characterBankSize / 0x1000;
+                    int indexStride = characterBankSize / 0x0400;
 
                     // determine bank index: 8K: [7], 4k: [3, 7], 2K: [1, 3, 5, 7], 8K: [0..7]
                     int bankIndex = (bankRange + 1) * indexStride - 1;
@@ -224,7 +224,7 @@ namespace NesCore.Storage
                     int bankRange = address / characterBankSize;
 
                     // determine stride between bank registers, given CHR mode: 8K: 8, 4K: 4, 2K: 2, 1K: 1
-                    int indexStride = characterBankSize / 0x1000;
+                    int indexStride = characterBankSize / 0x0400;
 
                     // determine bank index: 8K: [7], 4k: [3, 7], 2K: [1, 3, 5, 7], 8K: [0..7]
                     int bankIndex = (bankRange + 1) * indexStride - 1;
@@ -552,7 +552,7 @@ namespace NesCore.Storage
             characterBankMode = (byte)(newCharacterBankMode & 0x03);
 
             // compute character bank count and size depending on mode
-            characterBankSize = (ushort)(0x1000 * 2 ^ (3 - characterBankMode));
+            characterBankSize = (ushort)(0x0400 * Math.Pow(2,(3 - characterBankMode)));
             characterBankCount = (ushort)(Cartridge.CharacterRom.Length / characterBankSize);
 
         }

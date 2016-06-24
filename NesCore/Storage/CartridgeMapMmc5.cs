@@ -337,6 +337,9 @@ namespace NesCore.Storage
 
                 if (address >= 0x5120 && address <= 0x512B)
                 {
+                    if (characterBankCount == 0)
+                        return;
+
                     ushort characterBank = 0;
                     // merge low bits
                     characterBank |= value;

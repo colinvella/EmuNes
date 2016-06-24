@@ -257,10 +257,18 @@ namespace NesCore.Storage
                 }
                 if (address == 0x5105)
                 {
-                    nameTableA = (byte)(value & 0x03);
-                    nameTableB = (byte)((value >> 2) & 0x03);
-                    nameTableC = (byte)((value >> 4) & 0x03);
-                    nameTableD = (byte)((value >> 6) & 0x03);
+                    // DD CC BB AA
+                    if (value == 0x50) // 01 01 00 00
+                        Cartridge.MirrorMode = MirrorMode.Horizontal;
+                    if (value == 0x44) // 01 00 01 00
+                        Cartridge.MirrorMode = MirrorMode.Vertical;
+                    if (value == 0x00) // 00 00 00 00
+                        Cartridge.MirrorMode = MirrorMode.Single0;
+                    if (value == 0x55) // 01 01 01 01
+                        Cartridge.MirrorMode = MirrorMode.Single1;
+
+                    //TODO: more modes
+
                     return;
                 }
                 if (address == 0x5106)
@@ -547,12 +555,6 @@ namespace NesCore.Storage
         private ushort characterBankCount;
         private ushort[] characterBanks;
         private ushort characterBankUpper;
-
-        // nametables
-        private byte nameTableA;
-        private byte nameTableB;
-        private byte nameTableC;
-        private byte nameTableD;
 
         // fill mode
         byte fillModeTile;

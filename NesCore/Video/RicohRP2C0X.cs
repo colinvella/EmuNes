@@ -1029,11 +1029,18 @@ namespace NesCore.Video
         private PaletteTints paletteTints;
 
         private static readonly ushort[][] mirrorLookup = {
-            new ushort[]{0, 0, 1, 1},
-            new ushort[]{0, 1, 0, 1},
-            new ushort[]{0, 0, 0, 0},
-            new ushort[]{1, 1, 1, 1},
-            new ushort[]{0, 1, 2, 3}
+            new ushort[]{0, 0, 1, 1}, // horizontal
+            new ushort[]{0, 1, 0, 1}, // vertical
+            new ushort[]{0, 0, 0, 0}, // single page 0
+            new ushort[]{1, 1, 1, 1}, // single page 1
+            new ushort[]{2, 2, 2, 2}, // MMC5 ExRam (must also handled from mapper) 
+            new ushort[]{3, 3, 3, 3}, // MMC5 fill mode (must also handled from mapper) 
+            new ushort[]{0, 1, 1, 0}, // MMC5 diagonal 
+            new ushort[]{0, 1, 1, 1}, // MMC5 L shaped
+            new ushort[]{0, 1, 2, 2}, // MMC5 3-screen horizontal 
+            new ushort[]{0, 2, 1, 2}, // MMC5 3-screen vertical 
+            new ushort[]{0, 1, 1, 2}, // MMC5 3-screen diagonal 
+            new ushort[]{0, 1, 2, 3}, // MMC5 pseudo four 
         };
 
         private const int SpriteOverflowLimit = 8;

@@ -121,14 +121,14 @@ namespace NesCore.Storage
                             {
                                 // PRG mode 0 - single 32k switchable ROM bank
                                 int offset = address % 0x8000;
-                                return Cartridge.ProgramRom[programRomBank * 0x8000 + offset];
+                                return Cartridge.ProgramRom[(programRomBank >> 2) * 0x8000 + offset];
                             }
                         case 1:
                             if (address < 0xC000)
                             {
                                 // PRG mode 1 - first 16k switchable ROM/RAM bank
                                 int offset = address % 0x4000;
-                                int flatAddress = programBank1 * 0x4000 + offset;
+                                int flatAddress = (programBank1 >> 1) * 0x4000 + offset;
                                 if (romMode1)
                                     return Cartridge.ProgramRom[flatAddress];
                                 else
@@ -145,7 +145,7 @@ namespace NesCore.Storage
                             {
                                 // PRG mode 2 - 16k switchable ROM/RAM bank
                                 int offset = address % 0x4000;
-                                int flatAddress = programBank1 * 0x4000 + offset;
+                                int flatAddress = (programBank1 >> 1) * 0x4000 + offset;
                                 if (romMode1)
                                     return Cartridge.ProgramRom[flatAddress];
                                 else
@@ -434,7 +434,7 @@ namespace NesCore.Storage
                                 if (!romMode1 && !programRamProtect)
                                 {
                                     int offset = address % 0x4000;
-                                    programRam[programBank1 * 0x4000 + offset] = value;
+                                    programRam[(programBank1 >> 1) * 0x4000 + offset] = value;
                                 }
                                 return;
                             }
@@ -450,7 +450,7 @@ namespace NesCore.Storage
                                 if (!romMode1 && !programRamProtect)
                                 {
                                     int offset = address % 0x4000;
-                                    programRam[programBank1 * 0x4000 + offset] = value;
+                                    programRam[(programBank1 >> 1) * 0x4000 + offset] = value;
                                 }
                                 return;
                             }

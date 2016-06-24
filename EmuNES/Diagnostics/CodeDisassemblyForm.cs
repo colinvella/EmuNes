@@ -31,6 +31,10 @@ namespace EmuNES.Diagnostics
             needsRefresh = true;
 
             this.disassemblyQueue = new Queue<ushort>();
+
+#if DEBUG
+            disassemblyTimer.Enabled = false;
+#endif
         }
 
         public void Trace()
@@ -43,6 +47,10 @@ namespace EmuNES.Diagnostics
                 queuedAddresses[address] = true;
             }
             lastTrace = DateTime.Now;
+
+#if DEBUG
+            OnDisassemblyTick(this, EventArgs.Empty);
+#endif
         }
 
         private void OnDisassemblyTick(object sender, EventArgs e)
@@ -123,6 +131,10 @@ namespace EmuNES.Diagnostics
 
                 disassemblyLines[address] = disassemblyLine;  
                 needsRefresh = true;
+
+#if DEBUG
+                System.Console.WriteLine(disassemblyLine);
+#endif
             }
             
         }

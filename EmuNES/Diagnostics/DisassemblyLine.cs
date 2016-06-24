@@ -20,5 +20,25 @@ namespace EmuNES.Diagnostics
         public string Source { get; set; }
 
         public string Remarks { get; set; }
+
+        public override string ToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            if (Label != null)
+            {
+                stringBuilder.Append(Label);
+                stringBuilder.Append(":\r\n");
+            }
+            stringBuilder.Append("    ");
+            stringBuilder.Append(Address);
+            stringBuilder.Append(" ");
+            stringBuilder.Append(MachineCode.PadRight(12, ' '));
+            stringBuilder.Append(" ");
+            stringBuilder.Append(Source);
+            stringBuilder.Append(" ;");
+            stringBuilder.Append(Remarks);
+
+            return stringBuilder.ToString();
+        }
     }
 }

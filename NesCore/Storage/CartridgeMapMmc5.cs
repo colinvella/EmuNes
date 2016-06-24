@@ -52,6 +52,17 @@ namespace NesCore.Storage
                     return Cartridge.CharacterRom[addressBase + bankOffset];
                 }
 
+                if (address >= 0x5000 && address <= 0x5007)
+                {
+                    // TODO: pulse generators 1 and 2
+                    return 0x00;
+                }
+                if (address == 0x5010 || address == 0x5011 || address == 0x5015)
+                {
+                    // TODO: irq, pcm, status
+                    return 0x00;
+                }
+
                 // read-only IRQ counter - return open bus?
                 if (address == 0x5203)
                     return 0x52;
@@ -224,6 +235,17 @@ namespace NesCore.Storage
                 }
 
                 // registers
+                if (address >= 0x5000 && address <= 0x5007)
+                {
+                    // TODO: pulse generators 1 and 2
+                    return;
+                }
+                if (address == 0x5010 || address == 0x5011 || address == 0x5015)
+                {
+                    // TODO: irq, pcm, status
+                    return;
+                }
+
                 if (address == 0x5100)
                 {
                     programBankMode = (byte)(value & 0x03);

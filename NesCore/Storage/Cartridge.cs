@@ -63,6 +63,7 @@ namespace NesCore.Storage
                 case 2: Map = new CartridgeMapUxRom(this); break;
                 case 3: Map = new CartridgeMapCnRom(this); break;
                 case 4: Map = new CartridgeMapMmc3(this); break;
+                case 5: Map = new CartridgeMapMmc5(this); break;
                 case 7: Map = new CartridgeMapAxRom(this); break;
                 case 9: Map = new CartridgeMapMmc2(this); break;
                 case 10: Map = new CartridgeMapMmc4(this); break;

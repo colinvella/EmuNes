@@ -52,6 +52,21 @@ namespace NesCore.Storage
                     return Cartridge.CharacterRom[addressBase + bankOffset];
                 }
 
+                // read-only IRQ counter - return open bus?
+                if (address == 0x5203)
+                    return 0x52;
+
+                if (address == 0x5204)
+                {
+                    byte value = 0x00;
+                    if (irqPending)
+                        value |= 0x80;
+                    if (ppuRendering)
+                        value |= 0x40;
+                    irqPending = false;
+                    return value;
+                }
+
                 if (address == 0x5205)
                     return productLow;
 
@@ -205,6 +220,7 @@ namespace NesCore.Storage
                     int addressBase = characterBank * characterBankSize;
                     int bankOffset = address % characterBankSize;
                     Cartridge.CharacterRom[addressBase + bankOffset] = value;
+                    return;
                 }
 
                 // registers
@@ -311,6 +327,18 @@ namespace NesCore.Storage
                     characterBankUpper = value;
                     characterBankUpper &= 0x03;
                     characterBankUpper <<= 8;
+                    return;
+                }
+
+                if (address == 0x5203)
+                {
+                    irqScanline = value;
+                    return;
+                }
+
+                if (address == 0x5204)
+                {
+                    irqEnabled = (value & 0x80) != 0;
                     return;
                 }
 
@@ -450,7 +478,33 @@ namespace NesCore.Storage
 
         public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
         {
-            ppuRendering = scanLine >= 0 && scanLine < 240;
+            ppuRendering = scanLine >= 0 && scanLine < 240 && (showBackground || showSprites);
+
+            if (!ppuRendering)
+                irqCounter = 0;
+
+            if (cycle != 0)
+                return;
+
+            if (scanLine == 0)
+            {
+                irqPending = false;
+                irqCounter = 0;
+            }
+            else if (scanLine > 0)
+                ++irqCounter;
+
+            if (irqCounter == scanLine)
+            {
+                irqPending = true;
+                if (irqEnabled)
+                    TriggerInterruptRequest?.Invoke();
+            }
+
+            if (scanLine > 239)
+            {
+                irqPending = false;
+            }
         }
 
         private void EvaluateProduct()
@@ -503,6 +557,12 @@ namespace NesCore.Storage
         // fill mode
         byte fillModeTile;
         byte fillModeAttributes;
+
+        // IRQ
+        bool irqEnabled;
+        bool irqPending;
+        byte irqCounter;
+        byte irqScanline;
 
         // multiplication
         private byte factor1;

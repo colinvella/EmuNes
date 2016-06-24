@@ -121,7 +121,7 @@ namespace NesCore.Storage
                             {
                                 // PRG mode 0 - single 32k switchable ROM bank
                                 int offset = address % 0x8000;
-                                return Cartridge.ProgramRom[programBank0 * 0x8000 + offset];
+                                return Cartridge.ProgramRom[programRomBank * 0x8000 + offset];
                             }
                         case 1:
                             if (address < 0xC000)

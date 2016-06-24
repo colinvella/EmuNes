@@ -21,6 +21,7 @@ namespace NesCore.Storage
 
             programBankMode = 3;
             SetCharacterBankMode(0);
+            programRomBank = (byte)(Cartridge.ProgramRom.Count / 0x2000 - 1);
 
             characterBanks = new ushort[12];
         }
@@ -357,6 +358,15 @@ namespace NesCore.Storage
                     return;
                 }
 
+                if (address == 0x5200)
+                {
+                    //ES-W WWWW
+                    verticalSplitModeEnabled = (value & 0x80) != 0;
+                    verticalSplitSide = (VerticalSplitSide)((value >> 6) & 0x01);
+                    verticalSplitStartStopTile = (byte)(value & 0x1F);
+                    return;
+                }
+
                 if (address == 0x5203)
                 {
                     irqScanline = value;
@@ -595,10 +605,21 @@ namespace NesCore.Storage
         byte irqCounter;
         byte irqScanline;
 
+        // vertical split mode
+        bool verticalSplitModeEnabled;
+        VerticalSplitSide verticalSplitSide;
+        byte verticalSplitStartStopTile;
+
         // multiplication
         private byte factor1;
         private byte factor2;
         private byte productLow;
         private byte productHigh;
+
+        private enum VerticalSplitSide
+        {
+            Left,
+            Right
+        }
     }
 }

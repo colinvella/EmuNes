@@ -20,6 +20,7 @@ namespace NesCore.Storage
             extendedRam = new byte[0x400];
 
             programBankMode = 0;
+            SetCharacterBankMode(0);
 
             characterBanks = new ushort[12];
         }
@@ -253,11 +254,7 @@ namespace NesCore.Storage
                 }
                 if (address == 0x5101)
                 {
-                    characterBankMode = (byte)(value & 0x03);
-
-                    // compute character bank count and size depending on mode
-                    characterBankSize = (ushort)(0x1000 * 2 ^ (3 - characterBankMode));
-                    characterBankCount = (ushort)(Cartridge.CharacterRom.Length / characterBankSize);
+                    SetCharacterBankMode((byte)(value & 0x03));
                     return;
                 }
                 if (address == 0x5102)
@@ -535,6 +532,16 @@ namespace NesCore.Storage
             {
                 irqPending = false;
             }
+        }
+
+        private void SetCharacterBankMode(byte newCharacterBankMode)
+        {
+            characterBankMode = (byte)(newCharacterBankMode & 0x03);
+
+            // compute character bank count and size depending on mode
+            characterBankSize = (ushort)(0x1000 * 2 ^ (3 - characterBankMode));
+            characterBankCount = (ushort)(Cartridge.CharacterRom.Length / characterBankSize);
+
         }
 
         private void EvaluateProduct()

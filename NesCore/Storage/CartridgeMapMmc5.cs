@@ -494,7 +494,7 @@ namespace NesCore.Storage
             else if (scanLine > 0)
                 ++irqCounter;
 
-            if (irqCounter == scanLine)
+            if (irqCounter == irqScanline)
             {
                 irqPending = true;
                 if (irqEnabled)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NesCore.Video;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,5 +22,9 @@ namespace NesCore.Storage
         public abstract byte this[ushort address] { get; set; }
 
         public virtual void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites) { }
+
+        public SpriteSize SpriteSize { get; set; }
+
+        public bool AccessingSpriteCharacters { get; set; }
     }
 }

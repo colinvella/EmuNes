@@ -48,6 +48,14 @@ namespace NesCore.Storage
                     // determine bank index: 8K: [7], 4k: [3, 7], 2K: [1, 3, 5, 7], 8K: [0..7]
                     int bankIndex = (bankRange + 1) * indexStride - 1;
 
+                    // if sprite mode is 8x16 and chr access if for background, use upper
+                    // bank switching register indexes  8K: [11], 4k: [11], 2K: [9, 11], 8K: [8..11]
+                    if (SpriteSize == Video.SpriteSize.Size8x16 && !AccessingSpriteCharacters)
+                    {
+                        bankIndex %= 4;
+                        bankIndex += 8;
+                    }
+
                     int characterBank = characterBanks[bankIndex];
                     int addressBase = characterBank * characterBankSize;
                     int bankOffset = address % characterBankSize;

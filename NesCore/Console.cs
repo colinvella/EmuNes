@@ -106,6 +106,16 @@ namespace NesCore
 
             // wire IRQ triggering for MMC3
             cartridge.Map.TriggerInterruptRequest = () => Processor.TriggerInterruptRequest();
+
+            // write sprite size change for MMC5
+            Video.SpriteSizeChanged = (SpriteSize spriteSize) => cartridge.Map.SpriteSize = spriteSize;
+
+            // wire sprite and background evaluation hooks for MMC5
+            Video.EvaluatingSpriteData = () =>
+                cartridge.Map.AccessingSpriteCharacters = true;
+            Video.EvaluatingBackgroundData = () =>
+                cartridge.Map.AccessingSpriteCharacters = false;
+
             Cartridge = cartridge;
         }
 

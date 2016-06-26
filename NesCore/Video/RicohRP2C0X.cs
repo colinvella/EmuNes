@@ -21,6 +21,8 @@ namespace NesCore.Video
         // delegate for writing pixel in a frame buffer implementation
         public delegate void WritePixelHandler(byte x, byte y, Colour colour);
 
+        public delegate void SpriteSizeChangedHandler(SpriteSize spriteSize);
+
         /// <summary>
         /// Constructs a new PPU
         /// </summary>
@@ -80,6 +82,21 @@ namespace NesCore.Video
         public Action ShowFrame { get; set; }
 
         /// <summary>
+        /// Called when sprite size set or changed
+        /// </summary>
+        public SpriteSizeChangedHandler SpriteSizeChanged { get; set; }
+
+        /// <summary>
+        /// Called before accessing character tiles for sprites
+        /// </summary>
+        public Action EvaluatingSpriteData { get; set; }
+
+        /// <summary>
+        /// Called before accessing character tiles for backgrounds
+        /// </summary>
+        public Action EvaluatingBackgroundData { get; set; }
+
+        /// <summary>
         /// Control register ($2000 PPUCTRL)
         /// </summary>
         public byte Control
@@ -102,6 +119,8 @@ namespace NesCore.Video
                 NmiChange();
                 // t: ....BA.. ........ = d: ......BA
                 tempAddress = (ushort)((tempAddress & 0xF3FF) | ((value & 0x03) << 10));
+
+                SpriteSizeChanged?.Invoke(spriteSize);
             }
         }
 
@@ -362,6 +381,9 @@ namespace NesCore.Video
 
                 if (renderLine && fetchCycle)
                 {
+                    // notify that background data is being fetched
+                    EvaluatingBackgroundData?.Invoke();
+
                     tileData <<= 4;
 
                     switch (Cycle % 8)
@@ -899,6 +921,8 @@ namespace NesCore.Video
 
         private void EvaluateSprites()
         {
+            EvaluatingSpriteData?.Invoke();
+
             int spriteHeight = spriteSize == SpriteSize.Size8x16 ? 16 : 8;
 
             sprites.Clear();
@@ -1051,17 +1075,18 @@ namespace NesCore.Video
             Second
         }
 
-        private enum SpriteSize
-        {
-            Size8x8,
-            Size8x16
-        }
-
         private enum VramIncrement
         {
             Across,
             Down
         }
     }
+
+    public enum SpriteSize
+    {
+        Size8x8,
+        Size8x16
+    }
+
 
 }

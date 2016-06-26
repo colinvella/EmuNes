@@ -50,7 +50,10 @@ namespace NesCore.Storage
 
                     // if sprite mode is 8x16 and chr access if for background, use upper
                     // bank switching register indexes  8K: [11], 4k: [11], 2K: [9, 11], 8K: [8..11]
-                    if (SpriteSize == Video.SpriteSize.Size8x16 && !AccessingSpriteCharacters)
+                    // or
+                    // sprite mode is 8x8 and last register banks written are upper
+                    if ((SpriteSize == Video.SpriteSize.Size8x16 && !AccessingSpriteCharacters)
+                        || (SpriteSize == Video.SpriteSize.Size8x8 && characterBankLastWrittenUpper))
                     {
                         bankIndex %= 4;
                         bankIndex += 8;
@@ -237,6 +240,17 @@ namespace NesCore.Storage
                     // determine bank index: 8K: [7], 4k: [3, 7], 2K: [1, 3, 5, 7], 8K: [0..7]
                     int bankIndex = (bankRange + 1) * indexStride - 1;
 
+                    // if sprite mode is 8x16 and chr access if for background, use upper
+                    // bank switching register indexes  8K: [11], 4k: [11], 2K: [9, 11], 8K: [8..11]
+                    // or
+                    // sprite mode is 8x8 and last register banks written are upper
+                    if ((SpriteSize == Video.SpriteSize.Size8x16 && !AccessingSpriteCharacters)
+                        || (SpriteSize == Video.SpriteSize.Size8x8 && characterBankLastWrittenUpper))
+                    {
+                        bankIndex %= 4;
+                        bankIndex += 8;
+                    }
+
                     int characterBank = characterBanks[bankIndex];
                     int addressBase = characterBank * characterBankSize;
                     int bankOffset = address % characterBankSize;
@@ -347,6 +361,8 @@ namespace NesCore.Storage
                 {
                     if (characterBankCount == 0)
                         return;
+
+                    characterBankLastWrittenUpper = address > 0x5127;
 
                     ushort characterBank = 0;
                     // merge low bits
@@ -605,6 +621,7 @@ namespace NesCore.Storage
         private ushort characterBankCount;
         private ushort[] characterBanks;
         private ushort characterBankUpper;
+        private bool characterBankLastWrittenUpper;
 
         // fill mode
         byte fillModeTile;

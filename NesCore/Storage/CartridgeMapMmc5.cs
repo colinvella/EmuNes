@@ -318,7 +318,9 @@ namespace NesCore.Storage
                 }
                 if (address == 0x5107)
                 {
-                    fillModeAttributes = (byte)(value & 0x03);
+                    int attrbibutes = value & 0x03;
+                    // replicate bits 0,1 to rest of byte ------AB -> ABABABAB
+                    fillModeAttributes = (byte)(attrbibutes | (attrbibutes << 2) | (attrbibutes << 4) | (attrbibutes << 6));
                     return;
                 }
                 if (address == 0x5113)
@@ -571,13 +573,19 @@ namespace NesCore.Storage
 
         public override byte ReadNameTableC(ushort address)
         {
-            return extendedRam[address];
+            return extendedRam[address % 0x400];
         }
 
         public override void WriteNameTableC(ushort address, byte value)
         {
             // NOTE: not sure if need to implement ex ram mode logic here as well
-            extendedRam[address] = value;
+            extendedRam[address % 0x400] = value;
+        }
+
+        public override byte ReadNameTableD(ushort address)
+        {
+            address %= 0x400;
+            return address < 0x3C0 ? fillModeTile : fillModeAttributes;
         }
 
         private void SetCharacterBankMode(byte newCharacterBankMode)

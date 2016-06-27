@@ -14,6 +14,7 @@ namespace NesCore.Storage
             this.Cartridge = cartridge;
             bankMode = 0;
             programRam = new byte[0x2000];
+            prevMirrorMode = this.Cartridge.MirrorMode;
         }
 
         public Cartridge Cartridge { get; private set; }
@@ -103,10 +104,10 @@ namespace NesCore.Storage
                         ProgramBankSwitch?.Invoke(0x8000, 0x8000);
 
                     MirrorMode mirrorMode = (value & 0x40) != 0 ? MirrorMode.Horizontal : MirrorMode.Vertical;
-                    if (Cartridge.MirrorMode != mirrorMode)
+                    if (mirrorMode != prevMirrorMode)
                     {
-                        Cartridge.MirrorMode = mirrorMode;
-                        Cartridge.MirrorModeChanged?.Invoke();
+                        prevMirrorMode = mirrorMode;
+                        MirrorModeChanged?.Invoke(mirrorMode);
                     }
                     return;
                 }
@@ -124,5 +125,6 @@ namespace NesCore.Storage
         private int programRomBank;
         private int subBank;
         private byte[] programRam;
+        private MirrorMode prevMirrorMode;
     }
 }

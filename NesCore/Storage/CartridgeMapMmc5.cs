@@ -24,6 +24,8 @@ namespace NesCore.Storage
             programRomBank = (byte)(Cartridge.ProgramRom.Count / 0x2000 - 1);
 
             characterBanks = new ushort[12];
+
+            prevMirrorMode = cartridge.MirrorMode;
         }
 
         public Cartridge Cartridge { get; private set; }
@@ -300,32 +302,11 @@ namespace NesCore.Storage
                 if (address == 0x5105)
                 {
                     // DD CC BB AA
-
-                    MirrorMode mirrorMode = MirrorMode.Single0;
-
-                    switch (value)
+                    MirrorMode mirrorMode = (MirrorMode)value;
+                    if (mirrorMode != prevMirrorMode)
                     {
-                        case 0x50: mirrorMode = MirrorMode.Horizontal;        break; // 01 01 00 00
-                        case 0x44: mirrorMode = MirrorMode.Vertical;          break; // 01 00 01 00
-                        case 0x00: mirrorMode = MirrorMode.Single0;           break; // 00 00 00 00
-                        case 0x55: mirrorMode = MirrorMode.Single1;           break; // 01 01 01 01
-                        case 0xAA: mirrorMode = MirrorMode.ExRam;             break; // 10 10 10 10
-                        case 0xFF: mirrorMode = MirrorMode.FillMode;          break; // 11 11 11 11
-                        case 0x14: mirrorMode = MirrorMode.Diagonal;          break; // 00 01 01 00
-                        case 0x54: mirrorMode = MirrorMode.LShaped;           break; // 01 01 01 00
-                        case 0xA4: mirrorMode = MirrorMode.Horizontal3Screen; break; // 10 10 01 00
-                        case 0x98: mirrorMode = MirrorMode.Vertical3Screen;   break; // 10 01 10 00
-                        case 0x94: mirrorMode = MirrorMode.Diagonal3Screen;   break; // 10 01 01 00
-                        case 0xE4: mirrorMode = MirrorMode.PseudoFour;        break; // 11 10 01 00
-                        default: // unimplemented
-                            Cartridge.MirrorMode = MirrorMode.Single0;
-                            break;
-                    }
-
-                    if (Cartridge.MirrorMode != mirrorMode)
-                    {
-                        Cartridge.MirrorMode = mirrorMode;
-                        Cartridge.MirrorModeChanged?.Invoke();
+                        prevMirrorMode = mirrorMode;
+                        MirrorModeChanged?.Invoke(mirrorMode);
                     }
 
                     return;
@@ -650,6 +631,9 @@ namespace NesCore.Storage
         private ushort[] characterBanks;
         private ushort characterBankUpper;
         private bool characterBankLastWrittenUpper;
+
+        // CHR mirroring
+        private MirrorMode prevMirrorMode;
 
         // fill mode
         byte fillModeTile;

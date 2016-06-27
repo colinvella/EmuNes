@@ -19,6 +19,7 @@ namespace NesCore.Storage
             latch0 = 0xFD;
             latch1 = 0xFE;
             programRam = new byte[0x2000];
+            prevMirrorMode = cartridge.MirrorMode;
         }
 
         public override string Name { get { return "MMC4"; } }
@@ -120,8 +121,12 @@ namespace NesCore.Storage
                         characterBank3 = (byte)(value & 0x1F);
                     else //address >= 0xF000
                     {
-                        Cartridge.MirrorMode = ((value & 1) == 1) ? MirrorMode.Horizontal : MirrorMode.Vertical;
-                        Cartridge.MirrorModeChanged?.Invoke();
+                        MirrorMode mirrorMode = ((value & 1) == 1) ? MirrorMode.Horizontal : MirrorMode.Vertical;
+                        if (mirrorMode != prevMirrorMode)
+                        {
+                            prevMirrorMode = mirrorMode;
+                            MirrorModeChanged?.Invoke(mirrorMode);
+                        }
                     }
                     return;
                 }
@@ -150,5 +155,6 @@ namespace NesCore.Storage
         private byte latch0;
         private byte latch1;
         private byte[] programRam;
+        private MirrorMode prevMirrorMode;
     }
 }

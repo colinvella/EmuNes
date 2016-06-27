@@ -9,9 +9,13 @@ namespace NesCore.Storage
 {
     public abstract class CartridgeMap
     {
+        public delegate void MirrorModeChangedHandler(MirrorMode mirrorMode);
+
         public delegate void BankSwitchHandler(ushort address, ushort size);
 
         public abstract string Name { get;  }
+
+        public MirrorModeChangedHandler MirrorModeChanged { get; set; }
 
         public virtual Action TriggerInterruptRequest { get; set; }
 

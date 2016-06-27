@@ -101,8 +101,9 @@ namespace NesCore
             // name table mirroring mode determined from cartridge rom
             // first time round on loading cartridge (for simple mappers)
             Video.ConfigureNameTableMirroringMode(cartridge.MirrorMode);
+
             // wired to mirror mode changes (for more complex mappers like MMC1)
-            cartridge.MirrorModeChanged = () => Video.ConfigureNameTableMirroringMode(cartridge.MirrorMode);
+            cartridge.Map.MirrorModeChanged = Video.ConfigureNameTableMirroringMode;
 
             // wire IRQ triggering for MMC3
             cartridge.Map.TriggerInterruptRequest = () => Processor.TriggerInterruptRequest();

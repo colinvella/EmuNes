@@ -154,7 +154,7 @@ namespace EmuNES
                 = "Program Rom Size: " + cartridge.ProgramRom.Count + "k\r\n"
                 + "Character rom Size: " + cartridge.CharacterRom.Length + "k\r\n"
                 + "Mapper Type: " + cartridge.MapperType + " (" + cartridge.Map.Name + ")\r\n"
-                + "Mirroring Mode: " + cartridge.MirrorMode + "\r\n"
+                + "Initial Mirroring Mode: " + cartridge.MirrorMode + "\r\n"
                 + "Battery Present: " + (cartridge.BatteryPresent ? "Yes" : "No");
 
             MessageBox.Show(this, cartridgeProperties, this.cartridgeRomFilename + " Properties", MessageBoxButtons.OK, MessageBoxIcon.Information);

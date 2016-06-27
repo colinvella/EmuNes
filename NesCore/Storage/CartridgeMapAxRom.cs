@@ -14,6 +14,7 @@ namespace NesCore.Storage
             Cartridge = cartridge;
             programBank = 0;
             programRam = new byte[0x6000 - 0x4100];
+            prevMirrorMode = Cartridge.MirrorMode;
         }
 
         public override string Name { get { return "AxROM"; } }
@@ -50,9 +51,13 @@ namespace NesCore.Storage
                     // ---M-PPP
                     programBank = value & 7;
 
-                    Cartridge.MirrorMode = (value & 0x10) == 0x10
-                        ? MirrorMode.Single1 : MirrorMode.Single0;
-                    Cartridge.MirrorModeChanged?.Invoke();
+                    // mirror mode
+                    MirrorMode mirrorMode = (value & 0x10) == 0x10 ? MirrorMode.Single1 : MirrorMode.Single0;
+                    if (mirrorMode != prevMirrorMode)
+                    {
+                        prevMirrorMode = mirrorMode;
+                        MirrorModeChanged?.Invoke(mirrorMode);
+                    }
 
                     // invalidate address region
                     if (programBank != oldProgramBank)
@@ -69,5 +74,6 @@ namespace NesCore.Storage
 
         private int programBank;
         private byte[] programRam;
+        private MirrorMode prevMirrorMode;
     }
 }

@@ -17,6 +17,8 @@ namespace NesCore.Storage
 
             shiftRegister = 0x10;
             programBankOffsets[1] = GetProgramBankOffset(-1);
+
+            prevMirrorMode = cartridge.MirrorMode;
         }
 
         public override string Name { get { return "MMC1"; } }
@@ -110,17 +112,23 @@ namespace NesCore.Storage
             programBankMode = (byte)((value >> 2) & 3);
             int mirror = value & 3;
 
-            switch (mirror)
-            {
-                case 0: Cartridge.MirrorMode = MirrorMode.Single0; break;
-                case 1: Cartridge.MirrorMode = MirrorMode.Single1; break;
-                case 2: Cartridge.MirrorMode = MirrorMode.Vertical; break;
-                case 3: Cartridge.MirrorMode = MirrorMode.Horizontal; break;
-            }
             UpdateOffsets();
 
-            // call mirrir mode change hook
-            Cartridge.MirrorModeChanged?.Invoke();
+            // mirror mode
+            MirrorMode mirrorMode = MirrorMode.Single0;
+            switch(mirror)
+            {
+                case 0: mirrorMode = MirrorMode.Single0; break;
+                case 1: mirrorMode = MirrorMode.Single1; break;
+                case 2: mirrorMode = MirrorMode.Vertical; break;
+                case 3: mirrorMode = MirrorMode.Horizontal; break;
+            }
+            if (mirrorMode != prevMirrorMode)
+            {
+                prevMirrorMode = mirrorMode;
+                MirrorModeChanged?.Invoke(mirrorMode);
+            }
+
         }
 
         // CHR bank 0 (internal, $A000-$BFFF)
@@ -213,5 +221,6 @@ namespace NesCore.Storage
         private byte characterBank1;
         private int[] programBankOffsets;
         private int[] characterBankOffsets;
+        private MirrorMode prevMirrorMode;
     }
 }

@@ -22,6 +22,8 @@ namespace NesCore.Storage
             programBankOffsets[1] = GetProgramBankOffset(1);
             programBankOffsets[2] = GetProgramBankOffset(-2);
             programBankOffsets[3] = GetProgramBankOffset(-1);
+
+            prevMirrorMode = cartridge.MirrorMode;
         }
 
         public Cartridge Cartridge { get; private set; }
@@ -168,7 +170,12 @@ namespace NesCore.Storage
 
         private void WriteMirror(byte value)
         {
-            Cartridge.MirrorMode = ((value & 1) == 0) ? MirrorMode.Vertical : MirrorMode.Horizontal;
+            MirrorMode mirrorMode = ((value & 1) == 0) ? MirrorMode.Vertical : MirrorMode.Horizontal;
+            if (mirrorMode != prevMirrorMode)
+            {
+                prevMirrorMode = mirrorMode;
+                MirrorModeChanged?.Invoke(mirrorMode);
+            }
         }
 
         private void WriteProtect(byte value)
@@ -271,6 +278,6 @@ namespace NesCore.Storage
         private byte reload;
         private byte counter;
         private bool irqEnable;
-
+        private MirrorMode prevMirrorMode;
     }
 }

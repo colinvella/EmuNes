@@ -8,17 +8,17 @@ namespace NesCore.Storage
 {
     public enum MirrorMode
     {
-        Horizontal = 0,
-        Vertical = 1,
-        Single0 = 2,
-        Single1 = 3,
-        ExRam = 4,
-        FillMode = 5,
-        Diagonal = 6,
-        LShaped = 7,
-        Horizontal3Screen = 8,
-        Vertical3Screen = 9,
-        Diagonal3Screen = 10,
-        PseudoFour = 11
+        Single0        = 0x00,
+        Diagonal       = 0x14,
+        Vertical       = 0x44,
+        Horizontal     = 0x50,
+        LShaped        = 0x54,
+        Single1        = 0x55,
+        Diagonal3      = 0x94,
+        Vertical3      = 0x98,
+        Horizontal3    = 0xA4,
+        SingleExRam    = 0xAA,
+        Pseudo4        = 0xE4,
+        SingleFillMode = 0xFF
     }
 }

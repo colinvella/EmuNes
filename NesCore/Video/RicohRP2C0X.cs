@@ -378,7 +378,7 @@ namespace NesCore.Video
                     else
                         return ReadNameTableD(nameTableOffset);
                 },
-                (address, value) => 
+                (address, value) =>
                 {
                     ushort mirroredAddress = MirrorAddress(mirrorMode, address);
                     ushort nameTableOffset = (ushort)(mirroredAddress % 0x400);
@@ -1043,7 +1043,10 @@ namespace NesCore.Video
             address = (ushort)((address - 0x2000) % 0x1000);
             int table = address / 0x0400;
             int offset = address % 0x0400;
-            return (ushort)(0x2000 + mirrorLookup[(int)mirrorMode][table] * 0x0400 + offset);
+
+            int nameTableIndex = ((int)mirrorMode >> (table * 2)) & 0x03;
+
+            return (ushort)(0x2000 + nameTableIndex * 0x0400 + offset);
         }
 
         // storage variables

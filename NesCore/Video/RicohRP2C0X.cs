@@ -348,8 +348,8 @@ namespace NesCore.Video
         {
             // $2000-$3EFF
             Memory.ConfigureMemoryAccessRange(0x2000, 0x1F00,
-                (address) => nameTableData[MirrorAddress(mirrorMode, address) % 2048],
-                (address, value) => nameTableData[MirrorAddress(mirrorMode, address) % 2048] = value);
+                (address) => nameTableData[MirrorAddress(mirrorMode, address) % 0x800],
+                (address, value) => nameTableData[MirrorAddress(mirrorMode, address) % 0x800] = value);
         }
 
         /// <summary>

@@ -12,13 +12,13 @@ namespace NesCore.Storage
         Vertical = 1,
         Single0 = 2,
         Single1 = 3,
-        ExRam = 5,
-        FillMode = 6,
-        Diagonal = 7,
-        LShaped = 8,
-        Horizontal3Screen = 9,
-        Vertical3Screen = 10,
-        Diagonal3Screen = 11,
-        PseudoFour = 12
+        ExRam = 4,
+        FillMode = 5,
+        Diagonal = 6,
+        LShaped = 7,
+        Horizontal3Screen = 8,
+        Vertical3Screen = 9,
+        Diagonal3Screen = 10,
+        PseudoFour = 11
     }
 }

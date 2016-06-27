@@ -20,6 +20,8 @@ namespace NesCore.Video
 
         public delegate void WriteByteHandler(ushort address, byte value);
 
+        public delegate byte ReadExternalNameTableHandler(ushort address, byte internalValue);
+
         /// <summary>
         /// delegate for writing pixel in a frame buffer implementation
         /// </summary>
@@ -111,7 +113,7 @@ namespace NesCore.Video
         /// Called when reading from name table C.
         /// Example: MMC5 NameTable 2: ExRam, NameTable 3: Fill Mode;
         /// </summary>
-        public ReadByteHandler ReadNameTableC;
+        public ReadExternalNameTableHandler ReadNameTableC;
 
         public WriteByteHandler WriteNameTableC;
 
@@ -119,7 +121,7 @@ namespace NesCore.Video
         /// Called when reading from name table D.
         /// Example: MMC5 NameTable 3: Fill Mode;
         /// </summary>
-        public ReadByteHandler ReadNameTableD;
+        public ReadExternalNameTableHandler ReadNameTableD;
 
         public WriteByteHandler WriteNameTableD;
 
@@ -371,12 +373,13 @@ namespace NesCore.Video
                     ushort mirroredAddress = MirrorAddress(mirrorMode, address);
                     ushort nameTableOffset = (ushort)(mirroredAddress % 0x400);
 
+                    byte defaultValue = nameTableData[MirrorAddress(mirrorMode, address) % 0x800];
                     if (mirroredAddress < 0x2800)
-                        return nameTableData[MirrorAddress(mirrorMode, address) % 0x800];
+                        return defaultValue;
                     else if (mirroredAddress < 0x2C00)
-                        return ReadNameTableC(nameTableOffset);
+                        return ReadNameTableC(nameTableOffset, defaultValue);
                     else
-                        return ReadNameTableD(nameTableOffset);
+                        return ReadNameTableD(nameTableOffset, defaultValue);
                 },
                 (address, value) =>
                 {

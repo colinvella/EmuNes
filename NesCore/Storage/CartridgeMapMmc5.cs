@@ -571,8 +571,9 @@ namespace NesCore.Storage
             }
         }
 
-        public override byte ReadNameTableC(ushort address)
+        public override byte ReadNameTableC(ushort address, byte defaultValue)
         {
+            // TODO: depending on Ex mode
             return extendedRam[address % 0x400];
         }
 
@@ -582,7 +583,7 @@ namespace NesCore.Storage
             extendedRam[address % 0x400] = value;
         }
 
-        public override byte ReadNameTableD(ushort address)
+        public override byte ReadNameTableD(ushort address, byte defaultValue)
         {
             address %= 0x400;
             return address < 0x3C0 ? fillModeTile : fillModeAttributes;

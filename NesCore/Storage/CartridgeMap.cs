@@ -31,11 +31,11 @@ namespace NesCore.Storage
 
         public bool AccessingSpriteCharacters { get; set; }
 
-        public virtual byte ReadNameTableC(ushort address) { return 0; }
+        public virtual byte ReadNameTableC(ushort address, byte defaultValue) { return defaultValue; }
 
         public virtual void WriteNameTableC(ushort address, byte value) { }
 
-        public virtual byte ReadNameTableD(ushort address) { return 0; }
+        public virtual byte ReadNameTableD(ushort address, byte defaultValue) { return defaultValue; }
 
         public virtual void WriteNameTableD(ushort address, byte value) { }
     }

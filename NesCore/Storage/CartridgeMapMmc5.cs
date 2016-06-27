@@ -300,16 +300,25 @@ namespace NesCore.Storage
                 if (address == 0x5105)
                 {
                     // DD CC BB AA
-                    if (value == 0x50) // 01 01 00 00
-                        Cartridge.MirrorMode = MirrorMode.Horizontal;
-                    if (value == 0x44) // 01 00 01 00
-                        Cartridge.MirrorMode = MirrorMode.Vertical;
-                    if (value == 0x00) // 00 00 00 00
-                        Cartridge.MirrorMode = MirrorMode.Single0;
-                    if (value == 0x55) // 01 01 01 01
-                        Cartridge.MirrorMode = MirrorMode.Single1;
 
-                    //TODO: more modes
+                    switch (value)
+                    {
+                        case 0x50: Cartridge.MirrorMode = MirrorMode.Horizontal;        break; // 01 01 00 00
+                        case 0x44: Cartridge.MirrorMode = MirrorMode.Vertical;          break; // 01 00 01 00
+                        case 0x00: Cartridge.MirrorMode = MirrorMode.Single0;           break; // 00 00 00 00
+                        case 0x55: Cartridge.MirrorMode = MirrorMode.Single1;           break; // 01 01 01 01
+                        case 0xAA: Cartridge.MirrorMode = MirrorMode.ExRam;             break; // 10 10 10 10
+                        case 0xFF: Cartridge.MirrorMode = MirrorMode.FillMode;          break; // 11 11 11 11
+                        case 0x14: Cartridge.MirrorMode = MirrorMode.Diagonal;          break; // 00 01 01 00
+                        case 0x54: Cartridge.MirrorMode = MirrorMode.LShaped;           break; // 01 01 01 00
+                        case 0xA4: Cartridge.MirrorMode = MirrorMode.Horizontal3Screen; break; // 10 10 01 00
+                        case 0x98: Cartridge.MirrorMode = MirrorMode.Vertical3Screen;   break; // 10 01 10 00
+                        case 0x94: Cartridge.MirrorMode = MirrorMode.Diagonal3Screen;   break; // 10 01 01 00
+                        case 0xE4: Cartridge.MirrorMode = MirrorMode.PseudoFour;        break; // 11 10 01 00
+                        default: // unimplemented
+                            Cartridge.MirrorMode = MirrorMode.Single0;
+                            break;
+                    }
 
                     return;
                 }

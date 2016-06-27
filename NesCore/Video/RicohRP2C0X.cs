@@ -18,9 +18,18 @@ namespace NesCore.Video
         /// <returns></returns>
         public delegate byte ReadByteHandler(ushort address);
 
-        // delegate for writing pixel in a frame buffer implementation
+        /// <summary>
+        /// delegate for writing pixel in a frame buffer implementation
+        /// </summary>
+        /// <param name="x">screen buffer x coordinate</param>
+        /// <param name="y">screen buffer y coordinate</param>
+        /// <param name="colour">pixel colour</param>
         public delegate void WritePixelHandler(byte x, byte y, Colour colour);
 
+        /// <summary>
+        /// delegate called when sprite mode is changed
+        /// </summary>
+        /// <param name="spriteSize"></param>
         public delegate void SpriteSizeChangedHandler(SpriteSize spriteSize);
 
         /// <summary>

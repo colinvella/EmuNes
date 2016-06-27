@@ -26,5 +26,13 @@ namespace NesCore.Storage
         public SpriteSize SpriteSize { get; set; }
 
         public bool AccessingSpriteCharacters { get; set; }
+
+        public byte ReadNameTableC(ushort address) { return 0; }
+
+        public void WriteNameTableC(ushort address, byte value) { }
+
+        public byte ReadNameTableD(ushort address) { return 0; }
+
+        public void WriteNameTableD(ushort address, byte value) { }
     }
 }

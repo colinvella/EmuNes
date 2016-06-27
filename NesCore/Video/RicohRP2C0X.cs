@@ -12,11 +12,13 @@ namespace NesCore.Video
     public class RicohRP2C0X
     {
         /// <summary>
-        /// delegate for reading a byte from a given address within main memory
+        /// delegate for reading a byte from a given address within main memory or external name table memory
         /// </summary>
-        /// <param name="address">16bit main memory address of the byte to read</param>
+        /// <param name="address">16bit address of the byte to read</param>
         /// <returns></returns>
         public delegate byte ReadByteHandler(ushort address);
+
+        public delegate void WriteByteHandler(ushort address, byte value);
 
         /// <summary>
         /// delegate for writing pixel in a frame buffer implementation
@@ -104,6 +106,22 @@ namespace NesCore.Video
         /// Called before accessing character tiles for backgrounds
         /// </summary>
         public Action EvaluatingBackgroundData { get; set; }
+
+        /// <summary>
+        /// Called when reading from name table C.
+        /// Example: MMC5 NameTable 2: ExRam, NameTable 3: Fill Mode;
+        /// </summary>
+        public ReadByteHandler ReadNameTableC;
+
+        public WriteByteHandler WriteNameTableC;
+
+        /// <summary>
+        /// Called when reading from name table D.
+        /// Example: MMC5 NameTable 3: Fill Mode;
+        /// </summary>
+        public ReadByteHandler ReadNameTableD;
+
+        public WriteByteHandler WriteNameTableD;
 
         /// <summary>
         /// Control register ($2000 PPUCTRL)
@@ -348,8 +366,30 @@ namespace NesCore.Video
         {
             // $2000-$3EFF
             Memory.ConfigureMemoryAccessRange(0x2000, 0x1F00,
-                (address) => nameTableData[MirrorAddress(mirrorMode, address) % 0x800],
-                (address, value) => nameTableData[MirrorAddress(mirrorMode, address) % 0x800] = value);
+                (address) =>
+                {
+                    ushort mirroredAddress = MirrorAddress(mirrorMode, address);
+                    ushort nameTableOffset = (ushort)(mirroredAddress % 0x400);
+
+                    if (mirroredAddress < 0x2800)
+                        return nameTableData[MirrorAddress(mirrorMode, address) % 0x800];
+                    else if (mirroredAddress < 0x2C00)
+                        return ReadNameTableC(nameTableOffset);
+                    else
+                        return ReadNameTableD(nameTableOffset);
+                },
+                (address, value) => 
+                {
+                    ushort mirroredAddress = MirrorAddress(mirrorMode, address);
+                    ushort nameTableOffset = (ushort)(mirroredAddress % 0x400);
+
+                    if (mirroredAddress < 0x2800)
+                        nameTableData[MirrorAddress(mirrorMode, address) % 0x800] = value;
+                    else if (mirroredAddress < 0x2C00)
+                        WriteNameTableC(nameTableOffset, value);
+                    else
+                        WriteNameTableD(nameTableOffset, value);
+                });
         }
 
         /// <summary>

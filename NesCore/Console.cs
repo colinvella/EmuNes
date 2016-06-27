@@ -116,6 +116,14 @@ namespace NesCore
             Video.EvaluatingBackgroundData = () =>
                 cartridge.Map.AccessingSpriteCharacters = false;
 
+            // wire extended name table C
+            Video.ReadNameTableC = cartridge.Map.ReadNameTableC;
+            Video.WriteNameTableC = cartridge.Map.WriteNameTableC;
+
+            // wire extended name table D
+            Video.ReadNameTableD = cartridge.Map.ReadNameTableD;
+            Video.WriteNameTableD = cartridge.Map.WriteNameTableD;
+
             Cartridge = cartridge;
         }
 

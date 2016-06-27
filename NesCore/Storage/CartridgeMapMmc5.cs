@@ -588,6 +588,17 @@ namespace NesCore.Storage
             }
         }
 
+        public override byte ReadNameTableC(ushort address)
+        {
+            return extendedRam[address];
+        }
+
+        public override void WriteNameTableC(ushort address, byte value)
+        {
+            // NOTE: not sure if need to implement ex ram mode logic here as well
+            extendedRam[address] = value;
+        }
+
         private void SetCharacterBankMode(byte newCharacterBankMode)
         {
             characterBankMode = (byte)(newCharacterBankMode & 0x03);

@@ -548,7 +548,7 @@ namespace NesCore.Storage
             if (cycle != 256)
                 return;
 
-            if (scanLine >= 0 && scanLine < 240 )
+            if (ppuRendering)
             {
                 if ((irqStatus & 0x40) == 0x40)
                 {

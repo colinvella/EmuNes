@@ -401,6 +401,7 @@ namespace NesCore.Storage
                 if (address == 0x5203)
                 {
                     irqLatch = value;
+                    irqCounter = 0;
                     return;
                 }
 

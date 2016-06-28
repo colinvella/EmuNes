@@ -233,6 +233,12 @@ namespace NesCore.Processor
             if (!State.InterruptDisableFlag)
                 State.InterruptType = InterruptType.Request;
         }
+
+        public void CancelInterruptRequest()
+        {
+            if (State.InterruptType == InterruptType.Request)
+                State.InterruptType = InterruptType.None;
+        }
         
         // returns true if address pages differ (differ by high byte)
         public bool PagesDiffer(ushort addressOne, ushort addressTwo)

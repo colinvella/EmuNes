@@ -87,7 +87,7 @@ namespace NesCore.Storage
                 {
                     byte result = irqStatus;
                     irqStatus &= 0x7F;
-                    // request CPU to cancel irq??
+                    CancelInterruptRequest?.Invoke();
                     return result;
                 }
 
@@ -565,7 +565,7 @@ namespace NesCore.Storage
                 {
                     irqStatus = 0x40;
                     irqCounter = 0;
-                    //cpu.RequestInterrupt(InterruptNone)      
+                    CancelInterruptRequest?.Invoke();     
                 }
             }
             else

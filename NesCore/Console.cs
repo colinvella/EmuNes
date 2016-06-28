@@ -105,8 +105,9 @@ namespace NesCore
             // wired to mirror mode changes (for more complex mappers like MMC1)
             cartridge.Map.MirrorModeChanged = Video.ConfigureNameTableMirroringMode;
 
-            // wire IRQ triggering for MMC3
+            // wire IRQ triggering for MMC3, MMC5 etc.
             cartridge.Map.TriggerInterruptRequest = () => Processor.TriggerInterruptRequest();
+            cartridge.Map.CancelInterruptRequest = () => Processor.CancelInterruptRequest();
 
             // write sprite size change for MMC5
             Video.SpriteSizeChanged = (SpriteSize spriteSize) => cartridge.Map.SpriteSize = spriteSize;

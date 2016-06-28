@@ -85,8 +85,12 @@ namespace NesCore.Storage
 
                 if (address == 0x5204)
                 {
-                    byte result = irqStatus;
-                    irqStatus &= 0x7F;
+                    byte result = 0;
+                    if (irqPending)
+                        result |= 0x80;
+                    if (inFrame)
+                        result |= 0x40;
+                    irqPending = false;
                     CancelInterruptRequest?.Invoke();
                     return result;
                 }
@@ -397,7 +401,6 @@ namespace NesCore.Storage
                 if (address == 0x5203)
                 {
                     irqLatch = value;
-                    irqCounter = 0;
                     return;
                 }
 
@@ -545,32 +548,31 @@ namespace NesCore.Storage
         {
             ppuRendering = scanLine >= 0 && scanLine < 240 && (showBackground || showSprites);
 
-            if (cycle != 256)
+            if (cycle != 0)
                 return;
 
             if (ppuRendering)
             {
-                if ((irqStatus & 0x40) == 0x40)
+                if (!inFrame)
+                {
+                    inFrame = true;
+                    irqCounter = 0;
+                    CancelInterruptRequest?.Invoke();
+                }
+                else
                 {
                     ++irqCounter;
-        
                     if (irqCounter == irqLatch)
                     {
-                        irqStatus |= 0x80;
+                        irqPending = true;
                         if (irqEnabled)
                             TriggerInterruptRequest?.Invoke();
                     }
                 }
-                else
-                {
-                    irqStatus = 0x40;
-                    irqCounter = 0;
-                    CancelInterruptRequest?.Invoke();     
-                }
             }
             else
             {
-                irqStatus &= 0xBF;
+                inFrame = false;
             }
         }
 
@@ -653,9 +655,10 @@ namespace NesCore.Storage
 
         // IRQ
         bool irqEnabled;
-        byte irqStatus;
         byte irqCounter;
         byte irqLatch;
+        bool irqPending;
+        bool inFrame;
 
         // vertical split mode
         bool verticalSplitModeEnabled;

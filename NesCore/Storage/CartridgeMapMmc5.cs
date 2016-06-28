@@ -85,13 +85,10 @@ namespace NesCore.Storage
 
                 if (address == 0x5204)
                 {
-                    byte value = 0x00;
-                    if (irqPending)
-                        value |= 0x80;
-                    if (ppuRendering)
-                        value |= 0x40;
-                    irqPending = false;
-                    return value;
+                    byte result = irqStatus;
+                    irqStatus &= 0x7F;
+                    // request CPU to cancel irq??
+                    return result;
                 }
 
                 if (address == 0x5205)
@@ -399,7 +396,8 @@ namespace NesCore.Storage
 
                 if (address == 0x5203)
                 {
-                    irqScanline = value;
+                    irqLatch = value;
+                    irqCounter = 0;
                     return;
                 }
 
@@ -547,30 +545,32 @@ namespace NesCore.Storage
         {
             ppuRendering = scanLine >= 0 && scanLine < 240 && (showBackground || showSprites);
 
-            if (!ppuRendering)
-                irqCounter = 0;
-
             if (cycle != 0)
                 return;
 
-            if (scanLine == 0)
+            if (scanLine >= 0 && scanLine < 240 )
             {
-                irqPending = false;
-                irqCounter = 0;
+                if ((irqStatus & 0x40) == 0x40)
+                {
+                    ++irqCounter;
+        
+                    if (irqCounter == irqLatch)
+                    {
+                        irqStatus |= 0x80;
+                        if (irqEnabled)
+                            TriggerInterruptRequest?.Invoke();
+                    }
+                }
+                else
+                {
+                    irqStatus = 0x40;
+                    irqCounter = 0;
+                    //cpu.RequestInterrupt(InterruptNone)      
+                }
             }
-            else if (scanLine > 0)
-                ++irqCounter;
-
-            if (irqCounter == irqScanline)
+            else
             {
-                irqPending = true;
-                if (irqEnabled)
-                    TriggerInterruptRequest?.Invoke();
-            }
-
-            if (scanLine > 239)
-            {
-                irqPending = false;
+                irqStatus &= 0xBF;
             }
         }
 
@@ -653,9 +653,9 @@ namespace NesCore.Storage
 
         // IRQ
         bool irqEnabled;
-        bool irqPending;
+        byte irqStatus;
         byte irqCounter;
-        byte irqScanline;
+        byte irqLatch;
 
         // vertical split mode
         bool verticalSplitModeEnabled;

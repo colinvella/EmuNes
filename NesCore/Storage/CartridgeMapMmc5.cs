@@ -299,7 +299,7 @@ namespace NesCore.Storage
                 if (address == 0x5104)
                 {
                     extendedRamMode = (byte)(value & 0x03);
-                    Debug.WriteLine("ExRamMode ($5104) = " + Hex.Format((byte)extendedRamMode) + " (" + Bin.Format((byte)extendedRamMode) + ")");
+                    Debug.WriteLine("MMC5 ExRamMode ($5104) = " + Hex.Format((byte)extendedRamMode) + " (" + Bin.Format((byte)extendedRamMode) + ")");
                     return;
                 }
                 if (address == 0x5105)
@@ -310,7 +310,7 @@ namespace NesCore.Storage
                     {
                         prevMirrorMode = mirrorMode;
                         MirrorModeChanged?.Invoke(mirrorMode);
-                        Debug.WriteLine("Mirror Mode ($5105) = "+ mirrorMode + "(" + Hex.Format((byte)mirrorMode) + ") (" + Bin.Format((byte)mirrorMode) + ")");
+                        Debug.WriteLine("MMC5 Mirror Mode ($5105) = "+ mirrorMode + " (" + Hex.Format((byte)mirrorMode) + ") (" + Bin.Format((byte)mirrorMode) + ")");
                     }
 
                     return;
@@ -402,12 +402,14 @@ namespace NesCore.Storage
                 {
                     irqLatch = value;
                     irqCounter = 0;
+                    Debug.WriteLine("MMC5 IRQ Counter($5203) = " + irqLatch);
                     return;
                 }
 
                 if (address == 0x5204)
                 {
                     irqEnabled = (value & 0x80) != 0;
+                    Debug.WriteLine("MMC5 IRQ ($5204) = " + (irqEnabled ? "Enabled" : "Disabled"));
                     return;
                 }
 

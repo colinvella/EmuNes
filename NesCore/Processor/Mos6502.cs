@@ -118,14 +118,15 @@ namespace NesCore.Processor
                 return 1;
             }
 
-            // handle any NMI or IRQ and clear interrupt
-            if (State.InterruptType != InterruptType.None)
+            // handle any NMI or IRQ
+            if (State.InterruptType == InterruptType.NonMaskable)
             {
-                if (State.InterruptType == InterruptType.NonMaskable)
-                    HandleInterrupt(NmiVector);
-                else
+                HandleInterrupt(NmiVector);
+            }
+            else if (State.InterruptType == InterruptType.Request)
+            {
+                if (!State.InterruptDisableFlag)
                     HandleInterrupt(IrqVector);
-                State.InterruptType = InterruptType.None;
             }
 
             // run tracer if set
@@ -230,14 +231,12 @@ namespace NesCore.Processor
         // causes an IRQ interrupt to occur on the next cycle
         public void TriggerInterruptRequest()
         {
-            if (!State.InterruptDisableFlag)
-                State.InterruptType = InterruptType.Request;
+            State.InterruptType = InterruptType.Request;
         }
 
         public void CancelInterruptRequest()
         {
-            if (State.InterruptType == InterruptType.Request)
-                State.InterruptType = InterruptType.None;
+            State.InterruptType = InterruptType.None;
         }
         
         // returns true if address pages differ (differ by high byte)
@@ -268,6 +267,7 @@ namespace NesCore.Processor
             State.ProgramCounter = ReadWord(interruptVector);
             State.InterruptDisableFlag = true;
             State.Cycles += 7;
+            State.InterruptType = InterruptType.None;
         }
 
     }

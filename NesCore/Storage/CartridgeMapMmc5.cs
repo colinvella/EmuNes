@@ -401,7 +401,6 @@ namespace NesCore.Storage
                 if (address == 0x5203)
                 {
                     irqLatch = value;
-                    irqCounter = 0;
                     Debug.WriteLine("MMC5 IRQ Counter($5203) = " + irqLatch);
                     return;
                 }
@@ -550,9 +549,6 @@ namespace NesCore.Storage
         public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
         {
             ppuRendering = scanLine >= 0 && scanLine < 240 && (showBackground || showSprites);
-
-            if (!ppuRendering)
-                inFrame = false;
 
             if (cycle != 0)
                 return;

@@ -545,7 +545,7 @@ namespace NesCore.Storage
         {
             ppuRendering = scanLine >= 0 && scanLine < 240 && (showBackground || showSprites);
 
-            if (cycle != 0)
+            if (cycle != 256)
                 return;
 
             if (scanLine >= 0 && scanLine < 240 )

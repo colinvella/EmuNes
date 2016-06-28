@@ -1,6 +1,7 @@
 ﻿using NesCore.Utility;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -297,6 +298,7 @@ namespace NesCore.Storage
                 if (address == 0x5104)
                 {
                     extendedRamMode = (byte)(value & 0x03);
+                    Debug.WriteLine("ExRamMode ($5104) = " + Hex.Format((byte)extendedRamMode) + " (" + Bin.Format((byte)extendedRamMode) + ")");
                     return;
                 }
                 if (address == 0x5105)
@@ -307,6 +309,7 @@ namespace NesCore.Storage
                     {
                         prevMirrorMode = mirrorMode;
                         MirrorModeChanged?.Invoke(mirrorMode);
+                        Debug.WriteLine("Mirror Mode ($5105) = "+ mirrorMode + "(" + Hex.Format((byte)mirrorMode) + ") (" + Bin.Format((byte)mirrorMode) + ")");
                     }
 
                     return;

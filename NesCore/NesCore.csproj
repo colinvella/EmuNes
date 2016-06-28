@@ -82,7 +82,6 @@
     <Compile Include="Utility\AssemblerException.cs" />
     <Compile Include="Utility\Bin.cs" />
     <Compile Include="Utility\Hex.cs" />
-    <Compile Include="Utility\Logger.cs" />
     <Compile Include="Video\Colour.cs" />
     <Compile Include="Video\Palette.cs" />
     <Compile Include="Video\PaletteTints.cs" />

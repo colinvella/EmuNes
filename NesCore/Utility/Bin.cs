@@ -10,7 +10,7 @@ namespace NesCore.Utility
     {
         public static string Format(byte value)
         {
-            return Convert.ToString(value, 2).PadLeft(8, '0');
+            return "%" + Convert.ToString(value, 2).PadLeft(8, '0');
         }
     }
 }

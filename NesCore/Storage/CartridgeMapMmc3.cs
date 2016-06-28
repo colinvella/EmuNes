@@ -98,8 +98,8 @@ namespace NesCore.Storage
                 binaryWriter.Write(programBankOffsets[index]);
             for (int index = 0; index < 8; index++)
                 binaryWriter.Write(characterBankOffsets[index]);
-            binaryWriter.Write(reload);
-            binaryWriter.Write(counter);
+            binaryWriter.Write(irqReload);
+            binaryWriter.Write(irqCounter);
             binaryWriter.Write(irqEnable);
         }
 
@@ -113,19 +113,19 @@ namespace NesCore.Storage
                 programBankOffsets[index] = binaryReader.ReadInt32();
             for (int index = 0; index < 8; index++)
                 characterBankOffsets[index] = binaryReader.ReadInt32();
-            reload = binaryReader.ReadByte();
-            counter = binaryReader.ReadByte();
+            irqReload = binaryReader.ReadByte();
+            irqCounter = binaryReader.ReadByte();
             irqEnable = binaryReader.ReadBoolean();
         }
 
         private void HandleScanLine()
         {
-            if (counter == 0)
-                counter = reload;
+            if (irqCounter == 0)
+                irqCounter = irqReload;
             else
             {
-                --counter;
-                if (counter == 0 && irqEnable)
+                --irqCounter;
+                if (irqCounter == 0 && irqEnable)
                     TriggerInterruptRequest?.Invoke();
             }
         }
@@ -184,12 +184,12 @@ namespace NesCore.Storage
 
         private void WriteIRQLatch(byte value)
         {
-            reload = value;
+            irqReload = value;
         }
 
         private void WriteIRQReload(byte value)
         {
-            counter = 0;
+            irqCounter = 0;
         }
 
         private void WriteIRQDisable(byte value)
@@ -275,8 +275,8 @@ namespace NesCore.Storage
         private byte characterBankMode;
         private int[] programBankOffsets;
         private int[] characterBankOffsets;
-        private byte reload;
-        private byte counter;
+        private byte irqReload;
+        private byte irqCounter;
         private bool irqEnable;
         private MirrorMode prevMirrorMode;
     }

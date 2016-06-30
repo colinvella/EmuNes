@@ -588,8 +588,32 @@ namespace NesCore.Storage
 
         public override byte ReadNameTableC(ushort address, byte defaultValue)
         {
+            int offset = address % 0x400;
             // TODO: depending on Ex mode
-            return extendedRam[address % 0x400];
+            switch (extendedRamMode)
+            {
+                case 0: return extendedRam[offset];
+                case 1:
+                    // AACC - CCCC - exram byte
+                    // ---- - --UU - $5130 upper 
+                    if (offset < 0x3C0) // nametable tile
+                    {
+                        // tile = UUCC CCCC
+                        byte value = extendedRam[offset];
+                        value &= 0x3F;
+                        value |= (byte)(characterBankUpper >> 6);
+                        return value;
+                    }
+                    else // tile attribute
+                    {
+                        // attribute = AA
+                        byte value = extendedRam[offset];
+                        value >>= 6;
+                        return value;
+                    }
+                default: // 2, 3
+                    return 0x00;
+            }
         }
 
         public override void WriteNameTableC(ushort address, byte value)

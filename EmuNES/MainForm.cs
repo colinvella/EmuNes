@@ -63,6 +63,27 @@ namespace EmuNES
             waveOut.Init(apuAudioProvider);
         }
 
+        /// <summary>
+        /// Windows message handler
+        /// </summary>
+        /// <param name="message">Windows message to process</param>
+        protected override void WndProc(ref Message message)
+        {
+            // check if screen saver message dispatched
+            if (message.Msg == WM_SYSCOMMAND && (int)message.WParam == SC_SCREENSAVE)
+            {
+                // if game is running, suppress screen saver request
+                if (gameState == GameState.Running)
+                {
+                    message.Result = (IntPtr)(-1);
+                    return;
+                }
+            }
+
+            // fall back to default message processor
+            base.WndProc(ref message);
+        }
+
         private void OnFormLoad(object sender, EventArgs eventArgs)
         {
             recentFileManager = new RecentFileManager(
@@ -828,5 +849,8 @@ namespace EmuNES
         private CodeDisassemblyForm codeDisassemblyForm;
         private bool traceEnabled;
 
+        // window message processing
+        private static readonly int SC_SCREENSAVE = 0xF140;
+        private static readonly int WM_SYSCOMMAND = 0x0112;
     }
 }

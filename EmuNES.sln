@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmuNES", "EmuNES\EmuNES.csproj", "{2024F253-DE99-411D-B87F-9D96C8D30846}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpNES", "EmuNES\SharpNES.csproj", "{2024F253-DE99-411D-B87F-9D96C8D30846}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NesCore", "NesCore\NesCore.csproj", "{D0BB9378-43C2-4B6D-A13C-CAD4F7739785}"
 EndProject

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmuNES
+namespace SharpNes
 {
     class WindowsUser32
     {

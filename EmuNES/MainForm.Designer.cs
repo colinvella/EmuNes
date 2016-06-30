@@ -1,4 +1,4 @@
-﻿namespace EmuNES
+﻿namespace SharpNes
 {
     partial class MainForm
     {
@@ -115,7 +115,7 @@
             // 
             // fileOpenMenuItem
             // 
-            this.fileOpenMenuItem.Image = global::EmuNES.Properties.Resources.FileOpen;
+            this.fileOpenMenuItem.Image = global::SharpNes.Properties.Resources.FileOpen;
             this.fileOpenMenuItem.Name = "fileOpenMenuItem";
             this.fileOpenMenuItem.Size = new System.Drawing.Size(171, 26);
             this.fileOpenMenuItem.Text = "&Open";
@@ -124,7 +124,7 @@
             // filePropertiesMenuItem
             // 
             this.filePropertiesMenuItem.Enabled = false;
-            this.filePropertiesMenuItem.Image = global::EmuNES.Properties.Resources.FileProperties;
+            this.filePropertiesMenuItem.Image = global::SharpNes.Properties.Resources.FileProperties;
             this.filePropertiesMenuItem.Name = "filePropertiesMenuItem";
             this.filePropertiesMenuItem.Size = new System.Drawing.Size(171, 26);
             this.filePropertiesMenuItem.Text = "&Properties...";
@@ -132,14 +132,14 @@
             // 
             // fileRecentFilesMenuItem
             // 
-            this.fileRecentFilesMenuItem.Image = global::EmuNES.Properties.Resources.FileRecent;
+            this.fileRecentFilesMenuItem.Image = global::SharpNes.Properties.Resources.FileRecent;
             this.fileRecentFilesMenuItem.Name = "fileRecentFilesMenuItem";
             this.fileRecentFilesMenuItem.Size = new System.Drawing.Size(171, 26);
             this.fileRecentFilesMenuItem.Text = "Recent Files...";
             // 
             // fileExitMenuItem
             // 
-            this.fileExitMenuItem.Image = global::EmuNES.Properties.Resources.FileExit;
+            this.fileExitMenuItem.Image = global::SharpNes.Properties.Resources.FileExit;
             this.fileExitMenuItem.Name = "fileExitMenuItem";
             this.fileExitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
             this.fileExitMenuItem.Size = new System.Drawing.Size(171, 26);
@@ -159,7 +159,7 @@
             // 
             // gameRunMenuItem
             // 
-            this.gameRunMenuItem.Image = global::EmuNES.Properties.Resources.GameRun;
+            this.gameRunMenuItem.Image = global::SharpNes.Properties.Resources.GameRun;
             this.gameRunMenuItem.Name = "gameRunMenuItem";
             this.gameRunMenuItem.Size = new System.Drawing.Size(166, 26);
             this.gameRunMenuItem.Text = "&Run";
@@ -167,7 +167,7 @@
             // 
             // gameResetMenuItem
             // 
-            this.gameResetMenuItem.Image = global::EmuNES.Properties.Resources.GameReset;
+            this.gameResetMenuItem.Image = global::SharpNes.Properties.Resources.GameReset;
             this.gameResetMenuItem.Name = "gameResetMenuItem";
             this.gameResetMenuItem.Size = new System.Drawing.Size(166, 26);
             this.gameResetMenuItem.Text = "Reset";
@@ -175,7 +175,7 @@
             // 
             // gameStopMenuItem
             // 
-            this.gameStopMenuItem.Image = global::EmuNES.Properties.Resources.GameStop;
+            this.gameStopMenuItem.Image = global::SharpNes.Properties.Resources.GameStop;
             this.gameStopMenuItem.Name = "gameStopMenuItem";
             this.gameStopMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
             this.gameStopMenuItem.Size = new System.Drawing.Size(166, 26);
@@ -203,7 +203,7 @@
             this.viewScreenSizeX4MenuItem,
             this.viewScreenSizeSeparator,
             this.viewScreenSizeFullScreenMenuItem});
-            this.viewScreenSizeMenuItem.Image = global::EmuNES.Properties.Resources.ViewScreenSize;
+            this.viewScreenSizeMenuItem.Image = global::SharpNes.Properties.Resources.ViewScreenSize;
             this.viewScreenSizeMenuItem.Name = "viewScreenSizeMenuItem";
             this.viewScreenSizeMenuItem.Size = new System.Drawing.Size(264, 26);
             this.viewScreenSizeMenuItem.Text = "Screen &Size";
@@ -247,7 +247,7 @@
             // 
             // viewScreenSizeFullScreenMenuItem
             // 
-            this.viewScreenSizeFullScreenMenuItem.Image = global::EmuNES.Properties.Resources.ViewScreenSizeFull;
+            this.viewScreenSizeFullScreenMenuItem.Image = global::SharpNes.Properties.Resources.ViewScreenSizeFull;
             this.viewScreenSizeFullScreenMenuItem.Name = "viewScreenSizeFullScreenMenuItem";
             this.viewScreenSizeFullScreenMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.E)));
             this.viewScreenSizeFullScreenMenuItem.Size = new System.Drawing.Size(201, 26);
@@ -256,7 +256,7 @@
             // 
             // viewTvAspectMenuItem
             // 
-            this.viewTvAspectMenuItem.Image = global::EmuNES.Properties.Resources.ViewTvAspect;
+            this.viewTvAspectMenuItem.Image = global::SharpNes.Properties.Resources.ViewTvAspect;
             this.viewTvAspectMenuItem.Name = "viewTvAspectMenuItem";
             this.viewTvAspectMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
             this.viewTvAspectMenuItem.Size = new System.Drawing.Size(264, 26);
@@ -269,7 +269,7 @@
             this.viewScreenFilterNoneMenuItem,
             this.viewScreenFilterRasterMenuItem,
             this.viewScreenFilterLcdMenuItem});
-            this.viewScreenFilterMenuItem.Image = global::EmuNES.Properties.Resources.ViewScreenFilter;
+            this.viewScreenFilterMenuItem.Image = global::SharpNes.Properties.Resources.ViewScreenFilter;
             this.viewScreenFilterMenuItem.Name = "viewScreenFilterMenuItem";
             this.viewScreenFilterMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
             this.viewScreenFilterMenuItem.Size = new System.Drawing.Size(264, 26);
@@ -299,7 +299,7 @@
             // 
             // viewMotionBlurMenuItem
             // 
-            this.viewMotionBlurMenuItem.Image = global::EmuNES.Properties.Resources.ViewMotionBlur;
+            this.viewMotionBlurMenuItem.Image = global::SharpNes.Properties.Resources.ViewMotionBlur;
             this.viewMotionBlurMenuItem.Name = "viewMotionBlurMenuItem";
             this.viewMotionBlurMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.B)));
             this.viewMotionBlurMenuItem.Size = new System.Drawing.Size(264, 26);
@@ -308,7 +308,7 @@
             // 
             // viewNoSpriteOverflowMenuItem
             // 
-            this.viewNoSpriteOverflowMenuItem.Image = global::EmuNES.Properties.Resources.ViewNoSpriteOverflow;
+            this.viewNoSpriteOverflowMenuItem.Image = global::SharpNes.Properties.Resources.ViewNoSpriteOverflow;
             this.viewNoSpriteOverflowMenuItem.Name = "viewNoSpriteOverflowMenuItem";
             this.viewNoSpriteOverflowMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
             this.viewNoSpriteOverflowMenuItem.Size = new System.Drawing.Size(264, 26);
@@ -330,7 +330,7 @@
             // 
             // optionsInputMenuItem
             // 
-            this.optionsInputMenuItem.Image = global::EmuNES.Properties.Resources.OptionsInput;
+            this.optionsInputMenuItem.Image = global::SharpNes.Properties.Resources.OptionsInput;
             this.optionsInputMenuItem.Name = "optionsInputMenuItem";
             this.optionsInputMenuItem.Size = new System.Drawing.Size(127, 26);
             this.optionsInputMenuItem.Text = "&Input...";
@@ -417,7 +417,7 @@
             this.Name = "MainForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "EmuNES";
+            this.Text = "SharpNes";
             this.Deactivate += new System.EventHandler(this.OnFormDeactivate);
             this.Load += new System.EventHandler(this.OnFormLoad);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.OnDragDrop);

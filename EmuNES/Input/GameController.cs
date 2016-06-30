@@ -6,7 +6,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmuNES.Input
+namespace SharpNes.Input
 {
     public class GameController
     {      

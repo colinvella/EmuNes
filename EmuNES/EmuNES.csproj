@@ -7,8 +7,8 @@
     <ProjectGuid>{2024F253-DE99-411D-B87F-9D96C8D30846}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EmuNES</RootNamespace>
-    <AssemblyName>EmuNES</AssemblyName>
+    <RootNamespace>SharpNes</RootNamespace>
+    <AssemblyName>SharpNES</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

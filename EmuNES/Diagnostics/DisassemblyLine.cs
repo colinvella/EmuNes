@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmuNES.Diagnostics
+namespace SharpNes.Diagnostics
 {
     class DisassemblyLine
     {

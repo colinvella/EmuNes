@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace EmuNES.Input
+namespace SharpNes.Input
 {
     public class KeyboardState
     {

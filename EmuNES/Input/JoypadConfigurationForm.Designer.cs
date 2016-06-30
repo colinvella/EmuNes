@@ -1,4 +1,4 @@
-﻿namespace EmuNES.Input
+﻿namespace SharpNes.Input
 {
     partial class JoypadConfigurationForm
     {

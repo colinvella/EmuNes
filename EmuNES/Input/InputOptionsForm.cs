@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using NesCore;
 using NesCore.Input;
-using EmuNES.Settings;
+using SharpNes.Settings;
 
-namespace EmuNES.Input
+namespace SharpNes.Input
 {
     public partial class InputOptionsForm : Form
     {

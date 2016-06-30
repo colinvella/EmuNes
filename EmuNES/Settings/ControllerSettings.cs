@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmuNES.Settings
+namespace SharpNes.Settings
 {
     [Serializable]
     public class ControllerSettings

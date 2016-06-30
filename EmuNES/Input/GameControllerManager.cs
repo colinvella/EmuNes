@@ -1,4 +1,4 @@
-﻿using EmuNES.Input;
+﻿using SharpNes.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmuNES.Input
+namespace SharpNes.Input
 {
     public class GameControllerManager
     {

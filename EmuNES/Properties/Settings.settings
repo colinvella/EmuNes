@@ -1,8 +1,8 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="EmuNES.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SharpNes.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="InputSettings" Type="EmuNES.Settings.InputSettings" Scope="User">
+    <Setting Name="InputSettings" Type="SharpNes.Settings.InputSettings" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

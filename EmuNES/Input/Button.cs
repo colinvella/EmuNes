@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmuNES.Input
+namespace SharpNes.Input
 {
     public enum Button
     {

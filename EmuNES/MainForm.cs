@@ -1,7 +1,7 @@
-﻿using EmuNES.Audio;
-using EmuNES.Diagnostics;
-using EmuNES.Input;
-using EmuNES.Settings;
+﻿using SharpNes.Audio;
+using SharpNes.Diagnostics;
+using SharpNes.Input;
+using SharpNes.Settings;
 using NAudio.Wave;
 using NesCore.Input;
 using NesCore.Storage;
@@ -21,7 +21,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace EmuNES
+namespace SharpNes
 {
     public partial class MainForm : Form
     {

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace EmuNES.Properties {
+namespace SharpNes.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,9 +25,9 @@ namespace EmuNES.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::EmuNES.Settings.InputSettings InputSettings {
+        public global::SharpNes.Settings.InputSettings InputSettings {
             get {
-                return ((global::EmuNES.Settings.InputSettings)(this["InputSettings"]));
+                return ((global::SharpNes.Settings.InputSettings)(this["InputSettings"]));
             }
             set {
                 this["InputSettings"] = value;

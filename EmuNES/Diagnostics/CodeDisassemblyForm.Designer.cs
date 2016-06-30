@@ -1,4 +1,4 @@
-﻿namespace EmuNES.Diagnostics
+﻿namespace SharpNes.Diagnostics
 {
     partial class CodeDisassemblyForm
     {

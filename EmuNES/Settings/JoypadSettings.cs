@@ -1,4 +1,4 @@
-﻿using EmuNES.Input;
+﻿using SharpNes.Input;
 using NesCore.Input;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace EmuNES.Settings
+namespace SharpNes.Settings
 {
     [Serializable]
     public class JoypadSettings: ControllerSettings
@@ -45,7 +45,7 @@ namespace EmuNES.Settings
             return "key:" + key;
         }
 
-        public string EncodeJoystickMapping(byte controllerId, EmuNES.Input.Button button)
+        public string EncodeJoystickMapping(byte controllerId, SharpNes.Input.Button button)
         {
             return "joy:" + controllerId + ":" + button;
         }
@@ -86,7 +86,7 @@ namespace EmuNES.Settings
         {
             string[] tokens = mapping.Trim().Split(new char[] { ':' });
             byte controllerId = byte.Parse(tokens[1]);
-            EmuNES.Input.Button button = (EmuNES.Input.Button)Enum.Parse(typeof(EmuNES.Input.Button), tokens[2]);
+            SharpNes.Input.Button button = (SharpNes.Input.Button)Enum.Parse(typeof(SharpNes.Input.Button), tokens[2]);
             if (controllerId < gameControllerManager.Count)
             {
                 GameController gameController = gameControllerManager[controllerId];

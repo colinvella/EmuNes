@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace EmuNES.Diagnostics
+namespace SharpNes.Diagnostics
 {
     public partial class CodeDisassemblyForm : Form
     {

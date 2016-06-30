@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmuNES.Audio
+namespace SharpNes.Audio
 {
     public class ApuAudioProvider : WaveProvider32
     {

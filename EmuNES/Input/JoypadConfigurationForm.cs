@@ -1,4 +1,4 @@
-﻿using EmuNES.Settings;
+﻿using SharpNes.Settings;
 using NesCore.Input;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace EmuNES.Input
+namespace SharpNes.Input
 {
     public partial class JoypadConfigurationForm : Form
     {

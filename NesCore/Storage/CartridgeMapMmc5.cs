@@ -447,6 +447,14 @@ namespace NesCore.Storage
                     }
                 }
 
+                if (address >= 0x6000 && address < 0x8000)
+                {
+                    // all bank modes - 8K switchable RAM bank
+                    int offset = address % 0x2000;
+                    programRam[programRamBank * 0x2000 + offset] = value;
+                    return;
+                }
+
                 if (address >= 0x8000)
                 {
                     // program banks for all modes

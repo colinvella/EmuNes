@@ -417,7 +417,7 @@
             this.Name = "MainForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "SharpNes";
+            this.Text = "SharpNES";
             this.Deactivate += new System.EventHandler(this.OnFormDeactivate);
             this.Load += new System.EventHandler(this.OnFormLoad);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.OnDragDrop);

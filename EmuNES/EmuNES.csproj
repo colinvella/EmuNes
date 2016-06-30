@@ -33,8 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>
-    </ApplicationIcon>
+    <ApplicationIcon>Nes.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NAudio">
@@ -135,6 +134,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="Nes.ico" />
     <Content Include="Resources\FileExit.png" />
     <None Include="Resources\ViewNoSpriteOverflow.png" />
     <None Include="Resources\FilterPause.png" />

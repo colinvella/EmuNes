@@ -26,7 +26,7 @@ namespace NesCore.Storage
 
             characterBanks = new ushort[12];
 
-            prevMirrorMode = cartridge.MirrorMode;
+            mirrorMode = cartridge.MirrorMode;
         }
 
         public Cartridge Cartridge { get; private set; }
@@ -277,40 +277,45 @@ namespace NesCore.Storage
                 if (address == 0x5100)
                 {
                     programBankMode = (byte)(value & 0x03);
+                    Debug.WriteLine("MMC5 PRG Bank Mode ($5100) = " + Hex.Format(programBankMode));
                     return;
                 }
                 if (address == 0x5101)
                 {
                     SetCharacterBankMode((byte)(value & 0x03));
+
+                    Debug.WriteLine("MMC5 CHR Bank Mode ($5101) = " + Hex.Format(characterBankMode) + " (" + characterBankCount + " " + characterBankSize + "b Banks)");
                     return;
                 }
                 if (address == 0x5102)
                 {
                     programRamProtect1 = value == 2;
                     programRamProtect = programRamProtect1 && programRamProtect2;
+                    Debug.WriteLine("MMC5 Ram Protect 1 ($5103) = " + (programRamProtect1 ? "Enabled" : "Disabled") + " (P1 && P2 = " + programRamProtect + ")");
                     return;
                 }
                 if (address == 0x5103)
                 {
                     programRamProtect2 = value == 1;
                     programRamProtect = programRamProtect1 && programRamProtect2;
+                    Debug.WriteLine("MMC5 Ram Protect 2 ($5103) = " + (programRamProtect2 ? "Enabled" : "Disabled") + " (P1 && P2 = " + programRamProtect + ")");
                     return;
                 }
                 if (address == 0x5104)
                 {
                     extendedRamMode = (byte)(value & 0x03);
-                    Debug.WriteLine("MMC5 ExRamMode ($5104) = " + Hex.Format((byte)extendedRamMode) + " (" + Bin.Format((byte)extendedRamMode) + ")");
+                    Debug.WriteLine("MMC5 ExRamMode ($5104) = " + Hex.Format((byte)extendedRamMode));
                     return;
                 }
                 if (address == 0x5105)
                 {
                     // DD CC BB AA
-                    MirrorMode mirrorMode = (MirrorMode)value;
-                    if (mirrorMode != prevMirrorMode)
+                    MirrorMode newMirrorMode = (MirrorMode)value;
+                    if (newMirrorMode != mirrorMode)
                     {
-                        prevMirrorMode = mirrorMode;
-                        MirrorModeChanged?.Invoke(mirrorMode);
-                        Debug.WriteLine("MMC5 Mirror Mode ($5105) = "+ mirrorMode + " (" + Hex.Format((byte)mirrorMode) + ") (" + Bin.Format((byte)mirrorMode) + ")");
+                        mirrorMode = newMirrorMode;
+                        MirrorModeChanged?.Invoke(newMirrorMode);
+                        Debug.WriteLine("MMC5 Mirror Mode ($5105) = "+ newMirrorMode + " (" + Hex.Format((byte)newMirrorMode) + ") (" + Bin.Format((byte)newMirrorMode) + ")");
                     }
 
                     return;
@@ -318,6 +323,7 @@ namespace NesCore.Storage
                 if (address == 0x5106)
                 {
                     fillModeTile = value;
+                    Debug.WriteLine("MMC5 Fill Mode Tile ($5106) = " + Hex.Format(fillModeTile));
                     return;
                 }
                 if (address == 0x5107)
@@ -325,12 +331,14 @@ namespace NesCore.Storage
                     int attrbibutes = value & 0x03;
                     // replicate bits 0,1 to rest of byte ------AB -> ABABABAB
                     fillModeAttributes = (byte)(attrbibutes | (attrbibutes << 2) | (attrbibutes << 4) | (attrbibutes << 6));
+                    Debug.WriteLine("MMC5 Fill Mode Attributes ($5107) = " + Hex.Format((byte)attrbibutes));
                     return;
                 }
                 if (address == 0x5113)
                 {
                     //---- -CBB : C: chip, BB: bank within chip (CBB can be treated as 8 banks) 
                     programRamBank = (byte)(value & 0x07);
+                    Debug.WriteLine("MMC5 PRG RAM Bank ($5113) = " + Hex.Format(programRamBank));
                     return;
                 }
                 if (address == 0x5114)
@@ -338,6 +346,7 @@ namespace NesCore.Storage
                     //RBBB BBBB : R - ROM mode, BBBBBBB - bank number 
                     romMode0 = (value & 0x80) != 0;
                     programBank0 = (byte)(value & 0x7F);
+                    Debug.WriteLine("MMC5 PRG ROM/RAM Bank 0 ($5114) = " + Hex.Format(programBank0) + " in " + (romMode0 ? "ROM" : "RAM") + " mode");
                     return;
                 }
                 if (address == 0x5115)
@@ -345,6 +354,7 @@ namespace NesCore.Storage
                     //RBBB BBBB : R - ROM mode, BBBBBBB - bank number 
                     romMode1 = (value & 0x80) != 0;
                     programBank1 = (byte)(value & 0x7F);
+                    Debug.WriteLine("MMC5 PRG ROM/RAM Bank 1 ($5115) = " + Hex.Format(programBank1) + " in " + (romMode1 ? "ROM" : "RAM") + " mode");
                     return;
                 }
                 if (address == 0x5116)
@@ -352,12 +362,14 @@ namespace NesCore.Storage
                     //RBBB BBBB : R - ROM mode, BBBBBBB - bank number 
                     romMode2 = (value & 0x80) != 0;
                     programBank2 = (byte)(value & 0x7F);
+                    Debug.WriteLine("MMC5 PRG ROM/RAM Bank 2 ($5116) = " + Hex.Format(programBank2) + " in " + (romMode2 ? "ROM" : "RAM") + " mode");
                     return;
                 }
                 if (address == 0x5117)
                 {
                     //-BBB BBBB : BBBBBBB - bank number 
                     programRomBank = (byte)(value & 0x7F);
+                    Debug.WriteLine("MMC5 PRG ROM Bank Register ($5117) = " + Hex.Format(programRomBank));
                     return;
                 }
 
@@ -377,6 +389,9 @@ namespace NesCore.Storage
                     characterBank %= characterBankCount;
                     // assign to corresponding bank switch
                     characterBanks[address - 0x5120] = characterBank;
+
+                    Debug.WriteLine("MMC5 CHR Bank Register (" + Hex.Format(address) + ") = " + Hex.Format(value) + " (" + Hex.Format(characterBank) + ")");
+
                     return;
                 }
 
@@ -385,6 +400,7 @@ namespace NesCore.Storage
                     // upper 2 bits (bit 8, 9) for character bank selection (all banks)
                     characterBankUpper = value;
                     characterBankUpper &= 0x03;
+                    Debug.WriteLine("MMC5 Upper CHR Bits ($5130) = " + Bin.Format((byte)characterBankUpper));
                     characterBankUpper <<= 8;
                     return;
                 }
@@ -416,18 +432,22 @@ namespace NesCore.Storage
                 {
                     factor1 = value;
                     EvaluateProduct();
+                    Debug.WriteLine("MMC5 Mul Factor 1 ($5205) = " + Hex.Format(factor1) + " (Result High: " + Hex.Format(productHigh) + ", Low: " + Hex.Format(productLow) + ")");
                     return;
                 }
                 if (address == 0x5206)
                 {
                     factor2 = value;
                     EvaluateProduct();
+                    Debug.WriteLine("MMC5 Mul Factor 2 ($5205) = " + Hex.Format(factor1) + " (Result High: " + Hex.Format(productHigh) + ", Low: " + Hex.Format(productLow) + ")");
                     return;
                 }
 
                 if (address >= 0x5C00 && address < 0x6000)
                 {
                     // expansion ram - all modes
+                    Debug.WriteLine("MMC5 Write to Extended RAM (" + Hex.Format(address) + ") = " + Hex.Format(value));
+
                     switch (extendedRamMode)
                     {
                         case 0:
@@ -635,7 +655,6 @@ namespace NesCore.Storage
             // compute character bank count and size depending on mode
             characterBankSize = (ushort)(0x0400 * Math.Pow(2,(3 - characterBankMode)));
             characterBankCount = (ushort)(Cartridge.CharacterRom.Length / characterBankSize);
-
         }
 
         private void EvaluateProduct()
@@ -681,7 +700,7 @@ namespace NesCore.Storage
         private bool characterBankLastWrittenUpper;
 
         // CHR mirroring
-        private MirrorMode prevMirrorMode;
+        private MirrorMode mirrorMode;
 
         // fill mode
         byte fillModeTile;

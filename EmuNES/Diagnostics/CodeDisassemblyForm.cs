@@ -85,57 +85,84 @@ namespace SharpNes.Diagnostics
 
         private void DisassembleLine(ushort address)
         {
-            if (disassemblyLines[address] == null)
+            if (disassemblyLines[address] != null)
+                return;
+
+            // prepare main labels
+            ushort resetVector = processor.ReadWord(Mos6502.ResetVector);
+            addressLabels[resetVector] = "Start";
+            ushort irqVector = processor.ReadWord(Mos6502.IrqVector);
+            addressLabels[irqVector] = "IrqHandler";
+            ushort nmiVector = processor.ReadWord(Mos6502.NmiVector);
+            addressLabels[nmiVector] = "NmiHandler";
+
+            DisassemblyLine disassemblyLine = new DisassemblyLine();
+            disassemblyLine.Address = Hex.Format(address);
+
+            byte opCode = console.Memory[address];
+
+            // determine instruction meta data
+            Instruction instruction = console.Processor.InstructionSet[opCode];
+
+            // machine code
+            ushort operandAddress = (ushort)(address + 1);
+            if (instruction.Size == 1)
+                disassemblyLine.MachineCode = Hex.Format(opCode);
+            else if (instruction.Size == 2)
+                disassemblyLine.MachineCode = Hex.Format(opCode)
+                    + " " + Hex.Format(processor.ReadByte(operandAddress));
+            else // 3
+                disassemblyLine.MachineCode = Hex.Format(opCode)
+                    + " " + Hex.Format(processor.ReadByte(operandAddress))
+                    + " " + Hex.Format(processor.ReadByte((ushort)(operandAddress + 1)));
+
+            // format instruction source
+            disassemblyLine.Source
+                = instruction.Name + " " + FormatOperand(operandAddress, instruction.AddressingMode);
+
+            // remarks
+            if (instruction.Name == "RTS")
+                disassemblyLine.Remarks = "----------------";
+
+            // if label assigned by forward branching or jumping, assign to new disassembled line
+            if (addressLabels[address] != null)
+                disassemblyLine.Label = addressLabels[address] + ":";
+
+            // determine labels for relative branching
+            if (instruction.AddressingMode == AddressingMode.Relative)
             {
-                DisassemblyLine disassemblyLine = new DisassemblyLine();
-                disassemblyLine.Address = Hex.Format(address);
+                ushort nextInstructionAddress = (ushort)(address + 2);
+                sbyte offset = (sbyte) processor.ReadByte(operandAddress);
+                ushort branchAddress = (ushort)(nextInstructionAddress + offset);
+                string addressLabel = GetAddressLabel("RelBr", branchAddress);
+                disassemblyLine.Remarks = "branch to " + addressLabel;
+            }
 
-                byte opCode = console.Memory[address];
-
-                // determine instruction meta data
-                Instruction instruction = console.Processor.InstructionSet[opCode];
-
-                // machine code
-                ushort operandAddress = (ushort)(address + 1);
-                if (instruction.Size == 1)
-                    disassemblyLine.MachineCode = Hex.Format(opCode);
-                else if (instruction.Size == 2)
-                    disassemblyLine.MachineCode = Hex.Format(opCode)
-                        + " " + Hex.Format(processor.ReadByte(operandAddress));
-                else // 3
-                    disassemblyLine.MachineCode = Hex.Format(opCode)
-                        + " " + Hex.Format(processor.ReadByte(operandAddress))
-                        + " " + Hex.Format(processor.ReadByte((ushort)(operandAddress + 1)));
-
-                // format instruction source
-                disassemblyLine.Source
-                    = instruction.Name + " " + FormatOperand(operandAddress, instruction.AddressingMode);
-
-                // remarks
-                if (instruction.Name == "RTS")
-                    disassemblyLine.Remarks = "----------------";
-
-                // if label assigned by forward branching or jumping, assign to new disassembled line
-                if (addressLabels[address] != null)
-                    disassemblyLine.Label = addressLabels[address] + ":";
-
-                // determine labels for relative branching
-                if (instruction.AddressingMode == AddressingMode.Relative)
+            // determine lables for absolute jumps
+            if (instruction.Name == "JMP" || instruction.Name == "JSR")
+            {
+                if (instruction.AddressingMode == AddressingMode.Absolute)
                 {
-                    ushort nextInstructionAddress = (ushort)(address + 2);
-                    sbyte offset = (sbyte) processor.ReadByte(operandAddress);
-                    ushort branchAddress = (ushort)(nextInstructionAddress + offset);
-                    string addressLabel = GetAddressLabel(branchAddress);
-                    disassemblyLine.Remarks = "branch to " + addressLabel;
+                    ushort destAddress = processor.ReadWord(operandAddress);
+                    if (instruction.Name == "JMP")
+                    {
+                        string addressLabel = GetAddressLabel("AbsBr", destAddress);
+                        disassemblyLine.Remarks = "jump tp " + addressLabel;
+                    }
+                    else
+                    {
+                        string addressLabel = GetAddressLabel("SubRt", destAddress);
+                        disassemblyLine.Remarks = "call subroutine at " + addressLabel;
+                    }
                 }
+            }
 
-                disassemblyLines[address] = disassemblyLine;  
-                needsRefresh = true;
+            disassemblyLines[address] = disassemblyLine;  
+            needsRefresh = true;
 
 #if DEBUG
-                System.Console.WriteLine(disassemblyLine);
+            System.Console.WriteLine(disassemblyLine);
 #endif
-            }
             
         }
 
@@ -152,13 +179,13 @@ namespace SharpNes.Diagnostics
             needsRefresh = true;
         }
 
-        private string GetAddressLabel(ushort address)
+        private string GetAddressLabel(string labelType, ushort address)
         {
             String addressLabel = addressLabels[address];
             if (addressLabel != null)
                 return addressLabels[address];
 
-            addressLabel = "Label" + Hex.Format(address).Replace("$", "");
+            addressLabel = labelType + Hex.Format(address).Replace("$", "");
             addressLabels[address] = addressLabel;
 
             // label destination if already disassembled (back reference)

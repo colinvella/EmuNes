@@ -10,9 +10,10 @@ namespace NesCore.Storage
 {
     class CartridgeMapMmc3 : CartridgeMap
     {
-        public CartridgeMapMmc3(Cartridge cartridge)
+        public CartridgeMapMmc3(Cartridge cartridge, bool mmc3AVariant = false)
         {
             Cartridge = cartridge;
+            this.mmc3AVariant = mmc3AVariant;
 
             registers = new byte[8];
             programBankOffsets = new int[4];
@@ -28,7 +29,7 @@ namespace NesCore.Storage
 
         public Cartridge Cartridge { get; private set; }
 
-        public override string Name { get { return "MMC3"; } }
+        public override string Name { get { return mmc3AVariant ? "MMC3A" : "MMC3"; } }
 
         public override byte this[ushort address]
         {
@@ -38,19 +39,37 @@ namespace NesCore.Storage
                 {
                     int bank = address / 0x0400;
                     int offset = address % 0x0400;
-                    return Cartridge.CharacterRom[characterBankOffsets[bank] + offset];
+
+                    int flatAddress = characterBankOffsets[bank] + offset;
+
+                    // MMC3A variant
+                    if (mmc3AVariant)
+                    {
+                        if (bank < 4)
+                            flatAddress += leftUpperChr;
+                        else
+                            flatAddress += rightUpperChr;
+                    }
+
+                    return Cartridge.CharacterRom[flatAddress];
+                }
+                else if (address >= 0x4100 && address < 0x5FFF)
+                {
+                    // return open bus?
+                    return (byte)(address >> 8);
                 }
                 else if (address >= 0x8000)
                 {
                     address -= 0x8000;
                     int bank = address / 0x2000;
                     int offset = address % 0x2000;
+
                     return Cartridge.ProgramRom[programBankOffsets[bank] + offset];
                 }
                 else if (address >= 0x6000)
                     return Cartridge.SaveRam[(ushort)(address - 0x6000)];
                 else
-                    throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
+                    throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
             }
 
             set
@@ -59,11 +78,33 @@ namespace NesCore.Storage
                 {
                     int bank = address / 0x0400;
                     int offset = address % 0x0400;
-                    Cartridge.CharacterRom[characterBankOffsets[bank] + offset] = value;
+
+                    int flatAddress = characterBankOffsets[bank] + offset;
+
+                    // MMC3A variant
+                    if (mmc3AVariant)
+                    {
+                        if (bank < 4)
+                            flatAddress += leftUpperChr;
+                        else
+                            flatAddress += rightUpperChr;
+                    }
+
+                    Cartridge.CharacterRom[flatAddress] = value;
                 }
                 else if (address >= 0x4100 && address < 0x6000)
                 {
                     // absorbing writes (e.g. Somari homebrew ROM writes to $4100 for some reason)
+
+                    if (mmc3AVariant)
+                    {
+                        // ---R ---L
+                        leftUpperChr = value & 0x01;
+                        leftUpperChr *= 0x100 * 0x400;
+
+                        rightUpperChr = (value >> 4) & 0x01;
+                        rightUpperChr *= 0x100 * 0x400;
+                    }
                 }
                 else if (address >= 0x8000)
                     WriteRegister(address, value);
@@ -221,6 +262,7 @@ namespace NesCore.Storage
                 index -= 0x100;
 
             index %= Cartridge.CharacterRom.Length / 0x0400;
+
             int offset = index * 0x0400;
             if (offset < 0)
                 offset += Cartridge.CharacterRom.Length;
@@ -269,6 +311,9 @@ namespace NesCore.Storage
             }
         }
 
+        private bool mmc3AVariant;
+        private int leftUpperChr;
+        private int rightUpperChr;
         private byte registerIndex;
         private byte[] registers;
         private byte programBankMode;

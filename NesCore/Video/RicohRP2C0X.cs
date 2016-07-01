@@ -1,7 +1,9 @@
 ﻿using NesCore.Memory;
 using NesCore.Storage;
+using NesCore.Utility;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -150,6 +152,8 @@ namespace NesCore.Video
                 tempAddress = (ushort)((tempAddress & 0xF3FF) | ((value & 0x03) << 10));
 
                 SpriteSizeChanged?.Invoke(spriteSize);
+
+                Debug.WriteLine("PPUCTRL ($2000) = " + Hex.Format(value) + " (SprieSize: " + spriteSize +")");
             }
         }
 

@@ -226,7 +226,9 @@ namespace NesCore.Storage
                 }
 
                 // invalid / unhandled addresses
-                throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
+                //throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
+                // return open bus for unhandled read
+                return (byte)(address >> 8);
             }
 
             set

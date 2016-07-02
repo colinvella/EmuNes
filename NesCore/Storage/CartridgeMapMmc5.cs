@@ -62,10 +62,21 @@ namespace NesCore.Storage
                         bankIndex += 8;
                     }
 
-                    int characterBank = characterBanks[bankIndex];
-                    int addressBase = characterBank * characterBankSize;
                     int bankOffset = address % characterBankSize;
-                    return Cartridge.CharacterRom[addressBase + bankOffset];
+
+                    if (extendedRamMode == 1 && !AccessingSpriteCharacters)
+                    {
+                        int characterBank = extendedRam[bankOffset];
+                        characterBank &= 0x3F;
+                        int addressBase = characterBank * characterBankSize;
+                        return Cartridge.CharacterRom[addressBase + bankOffset];
+                    }
+                    else
+                    {
+                        int characterBank = characterBanks[bankIndex];
+                        int addressBase = characterBank * characterBankSize;
+                        return Cartridge.CharacterRom[addressBase + bankOffset];
+                    }
                 }
 
                 if (address >= 0x5000 && address <= 0x5007)

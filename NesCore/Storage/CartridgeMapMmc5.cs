@@ -21,7 +21,7 @@ namespace NesCore.Storage
             extendedRam = new byte[0x400];
 
             programBankMode = 3;
-            SetCharacterBankMode(3);
+            SetCharacterBankMode(0);
             programRomBank = (byte)(Cartridge.ProgramRom.Count / 0x2000 - 1);
 
             characterBanks = new ushort[12];
@@ -62,17 +62,18 @@ namespace NesCore.Storage
                         bankIndex += 8;
                     }
 
-                    int bankOffset = address % characterBankSize;
-
                     if (extendedRamMode == 1 && !AccessingSpriteCharacters)
                     {
-                        int characterBank = extendedRam[bankOffset];
+                        int bankOffset = address % 0x1000;
+                        int characterBank = extendedRam[address % 0x400];
                         characterBank &= 0x3F;
-                        int addressBase = characterBank * characterBankSize;
+                        characterBank |= (characterBankUpper >> 2);
+                        int addressBase = characterBank * 0x1000;
                         return Cartridge.CharacterRom[addressBase + bankOffset];
                     }
                     else
                     {
+                        int bankOffset = address % characterBankSize;
                         int characterBank = characterBanks[bankIndex];
                         int addressBase = characterBank * characterBankSize;
                         return Cartridge.CharacterRom[addressBase + bankOffset];
@@ -265,6 +266,24 @@ namespace NesCore.Storage
                         bankIndex %= 4;
                         bankIndex += 8;
                     }
+
+                    /*
+                    if (extendedRamMode == 1 && !AccessingSpriteCharacters)
+                    {
+                        int bankOffset = address % 0x1000;
+                        int characterBank = extendedRam[bankOffset % 0x400];
+                        characterBank &= 0x3F;
+                        characterBank |= (characterBankUpper >> 2);
+                        int addressBase = characterBank * 0x1000;
+                        Cartridge.CharacterRom[addressBase + bankOffset] = value;
+                    }
+                    else
+                    {
+                        int bankOffset = address % characterBankSize;
+                        int characterBank = characterBanks[bankIndex];
+                        int addressBase = characterBank * characterBankSize;
+                        Cartridge.CharacterRom[addressBase + bankOffset] = value;
+                    }*/
 
                     int characterBank = characterBanks[bankIndex];
                     int addressBase = characterBank * characterBankSize;

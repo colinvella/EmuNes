@@ -21,7 +21,7 @@ namespace NesCore.Storage
             extendedRam = new byte[0x400];
 
             programBankMode = 3;
-            SetCharacterBankMode(0);
+            SetCharacterBankMode(3);
             programRomBank = (byte)(Cartridge.ProgramRom.Count / 0x2000 - 1);
 
             characterBanks = new ushort[12];
@@ -646,6 +646,17 @@ namespace NesCore.Storage
         {
             address %= 0x400;
             return address < 0x3C0 ? fillModeTile : fillModeAttributes;
+        }
+
+        public override byte EnhanceTileAttributes(ushort address, byte defaultTileAttriutes)
+        {
+            if (extendedRamMode != 1)
+                return base.EnhanceTileAttributes(address, defaultTileAttriutes);
+
+            byte attributes = extendedRam[address % 0x400];
+            attributes >>= 6;
+            attributes <<= 2;
+            return attributes;
         }
 
         private void SetCharacterBankMode(byte newCharacterBankMode)

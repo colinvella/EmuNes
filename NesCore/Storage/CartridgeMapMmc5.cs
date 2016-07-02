@@ -62,22 +62,11 @@ namespace NesCore.Storage
                         bankIndex += 8;
                     }
 
-                    if (extendedRamMode == 1 && !AccessingSpriteCharacters)
-                    {
-                        int bankOffset = address % 0x1000;
-                        int characterBank = extendedRam[address % 0x400];
-                        characterBank &= 0x3F;
-                        characterBank |= (characterBankUpper >> 2);
-                        int addressBase = characterBank * 0x1000;
-                        return Cartridge.CharacterRom[addressBase + bankOffset];
-                    }
-                    else
-                    {
-                        int bankOffset = address % characterBankSize;
-                        int characterBank = characterBanks[bankIndex];
-                        int addressBase = characterBank * characterBankSize;
-                        return Cartridge.CharacterRom[addressBase + bankOffset];
-                    }
+                    int bankOffset = address % characterBankSize;
+                    int characterBank = characterBanks[bankIndex];
+                    int addressBase = characterBank * characterBankSize;
+                    return Cartridge.CharacterRom[addressBase + bankOffset];
+
                 }
 
                 if (address >= 0x5000 && address <= 0x5007)
@@ -266,24 +255,6 @@ namespace NesCore.Storage
                         bankIndex %= 4;
                         bankIndex += 8;
                     }
-
-                    /*
-                    if (extendedRamMode == 1 && !AccessingSpriteCharacters)
-                    {
-                        int bankOffset = address % 0x1000;
-                        int characterBank = extendedRam[bankOffset % 0x400];
-                        characterBank &= 0x3F;
-                        characterBank |= (characterBankUpper >> 2);
-                        int addressBase = characterBank * 0x1000;
-                        Cartridge.CharacterRom[addressBase + bankOffset] = value;
-                    }
-                    else
-                    {
-                        int bankOffset = address % characterBankSize;
-                        int characterBank = characterBanks[bankIndex];
-                        int addressBase = characterBank * characterBankSize;
-                        Cartridge.CharacterRom[addressBase + bankOffset] = value;
-                    }*/
 
                     int characterBank = characterBanks[bankIndex];
                     int addressBase = characterBank * characterBankSize;
@@ -678,12 +649,24 @@ namespace NesCore.Storage
             return address < 0x3C0 ? fillModeTile : fillModeAttributes;
         }
 
-        public override byte EnhanceTileAttributes(ushort address, byte defaultTileAttriutes)
+        public override byte EnhanceTileIndex(ushort characterAddress, ushort nameTableAddress, byte defaultTileIndex)
         {
             if (extendedRamMode != 1)
-                return base.EnhanceTileAttributes(address, defaultTileAttriutes);
+                return defaultTileIndex;
 
-            byte attributes = extendedRam[address % 0x400];
+            int characterBank = extendedRam[nameTableAddress % 0x400];
+            characterBank &= 0x3F;
+            characterBank |= (characterBankUpper >> 2);
+            int addressBase = characterBank * 0x1000;
+            return Cartridge.CharacterRom[addressBase + characterAddress];
+        }
+
+        public override byte EnhanceTileAttributes(ushort nameTableAddress, byte defaultTileAttributes)
+        {
+            if (extendedRamMode != 1)
+                return defaultTileAttributes;
+
+            byte attributes = extendedRam[nameTableAddress % 0x400];
             attributes >>= 6;
             attributes <<= 2;
             return attributes;

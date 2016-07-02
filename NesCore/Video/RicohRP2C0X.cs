@@ -24,7 +24,8 @@ namespace NesCore.Video
 
         public delegate byte ReadExternalNameTableHandler(ushort address, byte internalValue);
 
-        public delegate byte EnhanceTileAttributesHandler(ushort address, byte defaultAttributes);
+        public delegate byte EnhanceTileByteHandler(ushort characterAddress, ushort nametableAddress, byte defaultValue);
+        public delegate byte EnhanceTileAttributesHandler(ushort characterAddress, byte defaultValue);
 
         /// <summary>
         /// delegate for writing pixel in a frame buffer implementation
@@ -129,6 +130,7 @@ namespace NesCore.Video
 
         public WriteByteHandler WriteNameTableD;
 
+        public EnhanceTileByteHandler EnhanceTileByte { get; set; }
         public EnhanceTileAttributesHandler EnhanceTileAttributes { get; set; }
 
         /// <summary>
@@ -780,6 +782,8 @@ namespace NesCore.Video
             int fineY = (vramAddress >> 12) & 7;
             ushort address = (ushort)(backgroundPatternTableAddress + nameTableByte * 16 + fineY);
             lowTileByte = Memory[address];
+
+            lowTileByte = EnhanceTileByte(address, vramAddress, lowTileByte);
         }
 
         private void FetchHighTileByte()
@@ -787,6 +791,8 @@ namespace NesCore.Video
             int fineY = (vramAddress >> 12) & 7;
             ushort address = (ushort)(backgroundPatternTableAddress + nameTableByte * 16 + fineY + 8);
             highTileByte = Memory[address];
+
+            highTileByte = EnhanceTileByte(address, vramAddress, highTileByte);
         }
 
         private void StoreTileData()

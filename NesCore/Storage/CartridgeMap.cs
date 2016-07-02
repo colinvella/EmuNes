@@ -41,6 +41,8 @@ namespace NesCore.Storage
 
         public virtual void WriteNameTableD(ushort address, byte value) { }
 
-        public virtual byte EnhanceTileAttributes(ushort address, byte defaultTileAttriutes) { return defaultTileAttriutes; }
+        public virtual byte EnhanceTileIndex(ushort characterAddress, ushort nameTableAddress, byte defaultTileIndex) { return defaultTileIndex; }
+
+        public virtual byte EnhanceTileAttributes(ushort characterAddress, byte defaultTileAttriutes) { return defaultTileAttriutes; }
     }
 }

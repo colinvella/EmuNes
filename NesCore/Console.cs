@@ -126,7 +126,8 @@ namespace NesCore
             Video.ReadNameTableD = cartridge.Map.ReadNameTableD;
             Video.WriteNameTableD = cartridge.Map.WriteNameTableD;
 
-            // wire enhance tile attributes (e.g. for MMC5 ExRam Mode 1)
+            // wire enhance nametable tile and attributes (e.g. for MMC5 ExRam Mode 1)
+            Video.EnhanceTileByte = cartridge.Map.EnhanceTileIndex;
             Video.EnhanceTileAttributes = cartridge.Map.EnhanceTileAttributes;
 
             Cartridge = cartridge;

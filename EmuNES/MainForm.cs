@@ -75,7 +75,7 @@ namespace SharpNes
                 // if game is running, suppress screen saver request
                 if (gameState == GameState.Running)
                 {
-                    message.Result = (IntPtr)(-1);
+                    message.Result = INVALID_HANDLE_VALUE;
                     return;
                 }
             }
@@ -852,5 +852,6 @@ namespace SharpNes
         // window message processing
         private static readonly int SC_SCREENSAVE = 0xF140;
         private static readonly int WM_SYSCOMMAND = 0x0112;
+        private static readonly IntPtr INVALID_HANDLE_VALUE = (IntPtr)(-1);
     }
 }

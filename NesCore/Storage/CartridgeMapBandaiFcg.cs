@@ -1,0 +1,118 @@
+﻿using NesCore.Utility;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NesCore.Storage
+{
+    class CartridgeMapBandaiFcg : CartridgeMap
+    {
+        public CartridgeMapBandaiFcg(Cartridge cartridge)
+        {
+            Cartridge = cartridge;
+            programBankCount = cartridge.ProgramRom.Count / 0x4000;
+            programBank = 0;
+            lastProgramBankBase = (programBankCount - 1) * 0x4000;
+
+            characterBank = new int[8];
+        }
+
+        public override string Name { get { return "Bandai FCG"; } }
+
+        public Cartridge Cartridge { get; private set; }
+
+        public override byte this[ushort address]
+        {
+            get
+            {
+                if (address < 0x2000)
+                {
+                    int bankindex = address / 0x400;
+                    int bankOffset = address % 0x400;
+                    // 8K bank in 1K portion of CHAR rom - weird
+                    return Cartridge.CharacterRom[characterBank[bankindex] * 0x2000 + bankOffset];
+                }
+                    
+                if (address >= 0x8000 && address < 0xC000)
+                {
+                    int bankOffset = address %= 0x4000;
+                    return Cartridge.ProgramRom[programBank * 0x4000 + bankOffset];
+                }
+
+                if (address >= 0xC000)
+                {
+                    // fixed at last bank
+                    int lastBankOffset = address %= 0x4000;
+                    return Cartridge.ProgramRom[lastProgramBankBase + lastBankOffset];
+                }
+
+                //if (address >= 0x6000)
+                //    return Cartridge.SaveRam[(ushort)(address - 0x6000)];
+
+                throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
+            }
+
+            set
+            {
+                if (address < 0x2000)
+                {
+                    // CHR bank switches for 8 0x400 ranges
+                    int bankindex = address / 0x400;
+                    int bankOffset = address % 0x400;
+                    Cartridge.CharacterRom[characterBank[bankindex] * 0x2000 + bankOffset] = value;
+                }
+                else if (address >= 0x6000 && address < 0x7FFF)
+                {
+                    int registerAddress = address % 0x10;
+                    if (registerAddress < 0x08)
+                    {
+                        // CHR bank switch
+                        characterBank[registerAddress] = value;
+                    }
+                    else if (registerAddress == 0x08)
+                    {
+                        // program bank switch
+                        int oldProgramBank = programBank;
+                        programBank = value & 0x07;
+                        programBank %= programBankCount; // probably not needed, but anyhow
+
+                        // invalidate address region
+                        if (programBank != oldProgramBank)
+                            ProgramBankSwitch?.Invoke(0x8000, 0x4000);
+                    }
+                    else if (registerAddress == 0x09)
+                    {
+                        // mirroring mode
+                        MirrorMode newMirrorMode = mirrorMode;
+                        switch (value & 0x03)
+                        {
+                            case 0: mirrorMode = MirrorMode.Vertical; break;
+                            case 1: mirrorMode = MirrorMode.Horizontal; break;
+                            case 2: mirrorMode = MirrorMode.Single0; break;
+                            case 3: mirrorMode = MirrorMode.Single1; break;
+                        }
+
+                        if (newMirrorMode != mirrorMode)
+                        {
+                            mirrorMode = newMirrorMode;
+                            MirrorModeChanged?.Invoke(mirrorMode);
+                        }
+                    }
+                    // TODO: A: IRQ control, B,C IRQ counter
+                    // TODO: D: eeprom/PRG ramenable
+                    // TODO: variants
+                }
+                else
+                    throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
+            }
+        }
+
+        private int programBankCount;
+        private int[] characterBank;
+        private int programBank;
+        private int lastProgramBankBase;
+        private MirrorMode mirrorMode;
+    }
+}

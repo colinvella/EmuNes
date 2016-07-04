@@ -15,8 +15,8 @@ namespace NesCore.Storage
             programBankCount = cartridge.ProgramRom.Count / 0x4000;
             programBank = 0;
             lastProgramBankBase = (programBankCount - 1) * 0x4000;
-
             characterBank = new int[8];
+            mirrorMode = cartridge.MirrorMode;
         }
 
         public override string Name { get { return "Bandai FCG"; } }
@@ -98,10 +98,10 @@ namespace NesCore.Storage
                         MirrorMode newMirrorMode = mirrorMode;
                         switch (value & 0x03)
                         {
-                            case 0: mirrorMode = MirrorMode.Vertical; break;
-                            case 1: mirrorMode = MirrorMode.Horizontal; break;
-                            case 2: mirrorMode = MirrorMode.Single0; break;
-                            case 3: mirrorMode = MirrorMode.Single1; break;
+                            case 0: newMirrorMode = MirrorMode.Vertical; break;
+                            case 1: newMirrorMode = MirrorMode.Horizontal; break;
+                            case 2: newMirrorMode = MirrorMode.Single0; break;
+                            case 3: newMirrorMode = MirrorMode.Single1; break;
                         }
 
                         if (newMirrorMode != mirrorMode)

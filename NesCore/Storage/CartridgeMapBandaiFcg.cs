@@ -32,7 +32,7 @@ namespace NesCore.Storage
                     int bankindex = address / 0x400;
                     int bankOffset = address % 0x400;
                     // 8K bank in 1K portion of CHAR rom - weird
-                    return Cartridge.CharacterRom[characterBank[bankindex] * 0x2000 + bankOffset];
+                    return Cartridge.CharacterRom[characterBank[bankindex] * 0x400 + bankOffset];
                 }
                     
                 if (address >= 0x8000 && address < 0xC000)
@@ -61,9 +61,9 @@ namespace NesCore.Storage
                     // CHR bank switches for 8 0x400 ranges
                     int bankindex = address / 0x400;
                     int bankOffset = address % 0x400;
-                    Cartridge.CharacterRom[characterBank[bankindex] * 0x2000 + bankOffset] = value;
+                    Cartridge.CharacterRom[characterBank[bankindex] * 0x400 + bankOffset] = value;
                 }
-                else if (address >= 0x6000 && address < 0x7FFF)
+                else if (address >= 0x6000 /*&& address < 0x7FFF*/)
                 {
                     int registerAddress = address % 0x10;
                     if (registerAddress < 0x08)
@@ -100,7 +100,21 @@ namespace NesCore.Storage
                             MirrorModeChanged?.Invoke(mirrorMode);
                         }
                     }
-                    // TODO: A: IRQ control, B,C IRQ counter
+                    else if (registerAddress == 0x0A)
+                    {
+                        irqEnabled = (value & 0x01) != 0;
+                        CancelInterruptRequest?.Invoke();
+                    }
+                    else if (registerAddress == 0x0B)
+                    {
+                        irqCounter &= 0xFF00;
+                        irqCounter |= value;
+                    }
+                    else if (registerAddress == 0x0C)
+                    {
+                        irqCounter &= 0x00FF;
+                        irqCounter |= (ushort)(value << 8);
+                    }
                     // TODO: D: eeprom/PRG ramenable
                     // TODO: variants
                 }
@@ -109,10 +123,26 @@ namespace NesCore.Storage
             }
         }
 
+        public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
+        {
+            cpuClock++;
+            cpuClock %= 3;
+
+            if (irqEnabled && cpuClock == 0)
+            {
+                --irqCounter;
+                if (irqCounter == 0)
+                    TriggerInterruptRequest();
+            }
+        }
+
         private int programBankCount;
         private int[] characterBank;
         private int programBank;
         private int lastProgramBankBase;
         private MirrorMode mirrorMode;
+        private bool irqEnabled;
+        private ushort irqCounter;
+        private ushort cpuClock;
     }
 }

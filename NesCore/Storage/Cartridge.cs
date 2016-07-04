@@ -79,6 +79,7 @@ namespace NesCore.Storage
                 case 12: Map = new CartridgeMapMmc3(this, true); break;
                 case 13: Map = new CartridgeMapCpRom(this); break;
                 case 15: Map = new CartridgeMap100In1(this); break;
+                case 16: Map = new CartridgeMapBandaiFcg(this); break;
                 case 66: Map = new CartridgeMapGxRom(this); break;
                 case 71: Map = new CartridgeMapCamerica71(this); break;
                 default: throw new NotSupportedException(

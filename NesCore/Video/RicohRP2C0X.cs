@@ -996,9 +996,13 @@ namespace NesCore.Video
             sprites.Clear();
             for (int index = 0; index < 64; index++)
             {
-                byte spriteY = oamData[index * 4 + 0];
+                int spriteY = oamData[index * 4 + 0];
                 byte spriteAttributes = oamData[index * 4 + 2];
                 byte spriteX = oamData[index * 4 + 3];
+
+                // attempt to emulate sprites going off the top of the screen
+                if (spriteY >= 240)
+                    spriteY -= 256;
 
                 int row = ScanLine - spriteY;
 

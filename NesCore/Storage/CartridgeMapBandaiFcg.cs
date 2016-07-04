@@ -34,7 +34,13 @@ namespace NesCore.Storage
                     // 8K bank in 1K portion of CHAR rom - weird
                     return Cartridge.CharacterRom[characterBank[bankindex] * 0x400 + bankOffset];
                 }
-                    
+                
+                if (address >= 0x6000 && address < 0x7FFF)
+                {
+                    // due to FCG board variants, simplest to just return 0 (EEPROM not emulated)
+                    return 0x00;
+                }   
+                 
                 if (address >= 0x8000 && address < 0xC000)
                 {
                     int bankOffset = address %= 0x4000;
@@ -51,7 +57,9 @@ namespace NesCore.Storage
                 //if (address >= 0x6000)
                 //    return Cartridge.SaveRam[(ushort)(address - 0x6000)];
 
-                throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
+                //throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
+                // return open bus?
+                return (byte)(address >> 8);
             }
 
             set
@@ -63,8 +71,10 @@ namespace NesCore.Storage
                     int bankOffset = address % 0x400;
                     Cartridge.CharacterRom[characterBank[bankindex] * 0x400 + bankOffset] = value;
                 }
-                else if (address >= 0x6000 /*&& address < 0x7FFF*/)
+                else if (address >= 0x6000)
                 {
+                    // NOTE: FCG variants vary register base between $6000 and $8000
+                    // it is sufficient to mirror these bases to get most games to work
                     int registerAddress = address % 0x10;
                     if (registerAddress < 0x08)
                     {
@@ -75,7 +85,7 @@ namespace NesCore.Storage
                     {
                         // program bank switch
                         int oldProgramBank = programBank;
-                        programBank = value & 0x07;
+                        programBank = value & 0x0F;
                         programBank %= programBankCount; // probably not needed, but anyhow
 
                         // invalidate address region
@@ -115,11 +125,14 @@ namespace NesCore.Storage
                         irqCounter &= 0x00FF;
                         irqCounter |= (ushort)(value << 8);
                     }
-                    // TODO: D: eeprom/PRG ramenable
+                    // TODO: D: eeprom/PRG ram enable
                     // TODO: variants
                 }
                 else
+                {
                     throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
+                    //ignore writes?
+                }
             }
         }
 

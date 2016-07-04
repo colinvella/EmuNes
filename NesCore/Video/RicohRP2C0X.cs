@@ -1000,10 +1000,6 @@ namespace NesCore.Video
                 byte spriteAttributes = oamData[index * 4 + 2];
                 byte spriteX = oamData[index * 4 + 3];
 
-                // attempt to emulate sprites going off the top of the screen
-                if (spriteY >= 240)
-                    spriteY -= 256;
-
                 int row = ScanLine - spriteY;
 
                 if (row < 0 || row >= spriteHeight)

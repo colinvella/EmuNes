@@ -494,6 +494,9 @@ namespace SharpNes
         {
             Console.Video.WritePixel = (x, y, colour) =>
             {
+                if (y < 8 || y > 231)
+                    colour = Colour.Black;
+
                 int offset = (y * 256 + x) * 4;
 
                 if (motionBlur)

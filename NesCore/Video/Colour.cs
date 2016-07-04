@@ -18,5 +18,7 @@ namespace NesCore.Video
         public byte Red { get; private set; }
         public byte Green { get; private set; }
         public byte Blue { get; private set; }
+
+        public static readonly Colour Black = new Colour(0, 0, 0);
     }
 }

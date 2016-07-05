@@ -79,7 +79,10 @@ namespace NesCore.Storage
                     if (registerAddress < 0x08)
                     {
                         // CHR bank switch
+                        int oldCharacterBank = characterBank[registerAddress];
                         characterBank[registerAddress] = value;
+                        if (value != oldCharacterBank)
+                            CharacterBankSwitch?.Invoke((ushort)(registerAddress * 0x400), 0x400);
                     }
                     else if (registerAddress == 0x08)
                     {

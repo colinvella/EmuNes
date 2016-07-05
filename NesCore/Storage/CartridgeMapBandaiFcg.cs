@@ -31,7 +31,6 @@ namespace NesCore.Storage
                 {
                     int bankindex = address / 0x400;
                     int bankOffset = address % 0x400;
-                    // 8K bank in 1K portion of CHAR rom - weird
                     return Cartridge.CharacterRom[characterBank[bankindex] * 0x400 + bankOffset];
                 }
                 
@@ -43,14 +42,14 @@ namespace NesCore.Storage
                  
                 if (address >= 0x8000 && address < 0xC000)
                 {
-                    int bankOffset = address %= 0x4000;
+                    int bankOffset = address % 0x4000;
                     return Cartridge.ProgramRom[programBank * 0x4000 + bankOffset];
                 }
 
                 if (address >= 0xC000)
                 {
                     // fixed at last bank
-                    int lastBankOffset = address %= 0x4000;
+                    int lastBankOffset = address % 0x4000;
                     return Cartridge.ProgramRom[lastProgramBankBase + lastBankOffset];
                 }
 
@@ -79,7 +78,10 @@ namespace NesCore.Storage
                     if (registerAddress < 0x08)
                     {
                         // CHR bank switch
+                        int oldCharacterBank = characterBank[registerAddress];
                         characterBank[registerAddress] = value;
+                        if (value != oldCharacterBank)
+                            CharacterBankSwitch?.Invoke((ushort)(registerAddress * 0x400), 0x400);
                     }
                     else if (registerAddress == 0x08)
                     {

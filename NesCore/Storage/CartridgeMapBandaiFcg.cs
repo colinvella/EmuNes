@@ -31,7 +31,6 @@ namespace NesCore.Storage
                 {
                     int bankindex = address / 0x400;
                     int bankOffset = address % 0x400;
-                    // 8K bank in 1K portion of CHAR rom - weird
                     return Cartridge.CharacterRom[characterBank[bankindex] * 0x400 + bankOffset];
                 }
                 

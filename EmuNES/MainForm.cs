@@ -20,6 +20,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using NesCore.Utility;
 
 namespace SharpNes
 {
@@ -176,7 +177,8 @@ namespace SharpNes
                 + "Character rom Size: " + cartridge.CharacterRom.Length + "k\r\n"
                 + "Mapper Type: " + cartridge.MapperType + " (" + cartridge.Map.Name + ")\r\n"
                 + "Initial Mirroring Mode: " + cartridge.MirrorMode + "\r\n"
-                + "Battery Present: " + (cartridge.BatteryPresent ? "Yes" : "No");
+                + "Battery Present: " + (cartridge.BatteryPresent ? "Yes" : "No")
+                + "\r\nCRC: " + Hex.Format(cartridge.Crc).Replace("$", "");
 
             MessageBox.Show(this, cartridgeProperties, this.cartridgeRomFilename + " Properties", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }

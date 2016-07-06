@@ -12,6 +12,8 @@ namespace NesCore.Storage
     {
         public Cartridge(BinaryReader romBinaryReader)
         {
+            List<byte> romBody = new List<byte>();
+
             SaveRam = new SaveRam();
 
             uint magicNumber = romBinaryReader.ReadUInt32();
@@ -52,16 +54,28 @@ namespace NesCore.Storage
             if ((controlBits1 & 0x04) == 0x04)
             {
                 byte[] trainer = romBinaryReader.ReadBytes(512);
+                romBody.AddRange(trainer);
             }
 
             // read prg-rom bank(s)
             byte[] programData = romBinaryReader.ReadBytes(programBankCount * 0x4000);
             ProgramRom = new List<byte>(programData);
+            romBody.AddRange(programData);
 
             // read chr-rom bank(s)
-            CharacterRom = characterBankCount == 0
-                ? new byte[0x2000] // at least one default empty bank if there are none
-                : romBinaryReader.ReadBytes(characterBankCount * 0x2000);
+            if (characterBankCount == 0)
+            {
+                CharacterRom = new byte[0x2000]; // at least one default empty bank if there are none
+            }
+            else
+            {
+                CharacterRom = romBinaryReader.ReadBytes(characterBankCount * 0x2000);
+                romBody.AddRange(CharacterRom);
+            }
+
+            // compute CRC
+            Crc32 crc32 = new Crc32();
+            Crc = crc32.ComputeChecksum(romBody.ToArray());
 
             // instantiate appropriate mapper
             switch (MapperType)
@@ -93,6 +107,7 @@ namespace NesCore.Storage
         public byte MapperType { get; private set; }
         public MirrorMode MirrorMode { get; private set; }
         public bool BatteryPresent { get; private set; }
+        public uint Crc { get; private set; }
 
         public CartridgeMap Map { get; private set; }
 

@@ -27,6 +27,7 @@ namespace NesCore.Storage
 
             // build name dynamically from variants
             // and determine variant characteristics
+            outerProgramBankSupported = false;
             characterBanksSupported = true;
             registerBase = 0x6000; // mapper 16 lumps FCG1/2, LZ93D50 and LZ93D50with24C02 together, so assume $6000 to catch all register cases
             List<String> variantNames = new List<string>();
@@ -42,6 +43,8 @@ namespace NesCore.Storage
                     }
                     if (variant == Variant.LZ93D50_with_SRAM)
                     {
+                        outerProgramBankSupported = true;
+                        characterBanksSupported = false;
                         registerBase = 0x8000; // SRAM variant has registers based at $8000 so that SRAM us based in $6000-$7FFF
                     }
                 }
@@ -95,7 +98,7 @@ namespace NesCore.Storage
                 if (address >= 0x8000 && address < 0xC000)
                 {
                     int bankOffset = address % 0x4000;
-                    return Cartridge.ProgramRom[programBank * 0x4000 + bankOffset];
+                    return Cartridge.ProgramRom[outerProgramBank + programBank * 0x4000 + bankOffset];
                 }
 
                 if (address >= 0xC000)
@@ -140,7 +143,15 @@ namespace NesCore.Storage
                     // NOTE: FCG variants vary register base between $6000 and $8000
                     // variants lumped under mapper 16 require mirroring these bases to get most games to work
                     int registerAddress = address % 0x10;
-                    if (registerAddress < 0x08)
+                    if (outerProgramBankSupported && registerAddress < 0x04)
+                    {
+                        // outer program bank (mapper 153 only)
+                        if ((value & 0x01) != 0)
+                            outerProgramBank = 0x40000;
+                        else
+                            outerProgramBank = 0;
+                    }
+                    else if (characterBanksSupported && registerAddress < 0x08)
                     {
                         // CHR bank switch
                         int oldCharacterBank = characterBank[registerAddress];
@@ -219,11 +230,13 @@ namespace NesCore.Storage
         private Variant variants;
         private string variantName;
 
+        private bool outerProgramBankSupported;
         private bool characterBanksSupported;
         private bool saveRamSupported;
         private ushort registerBase;
 
         private int programBankCount;
+        private int outerProgramBank;
         private int[] characterBank;
         private int programBank;
         private int lastProgramBankBase;

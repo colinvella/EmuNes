@@ -129,6 +129,10 @@ namespace NesCore.Storage
             // Dragon Ball Z - Gekitou Tenkaichi Budou Kai (J)
             if (Crc == 0x19E81461)
                 MapperType = 157;
+
+            // Famicom Jump 2
+            if (Crc == 0x3F15D20D)
+                MapperType = 153;
         }
 
         private const uint InesMagicNumber = 0x1a53454e;

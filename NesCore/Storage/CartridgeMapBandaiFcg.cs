@@ -9,9 +9,10 @@ namespace NesCore.Storage
 {
     class CartridgeMapBandaiFcg : CartridgeMap
     {
-        public CartridgeMapBandaiFcg(Cartridge cartridge)
+        public CartridgeMapBandaiFcg(Cartridge cartridge, bool datachJointRomSystemVariant)
         {
             Cartridge = cartridge;
+            this.datachJointRomSystemVariant = datachJointRomSystemVariant;
             programBankCount = cartridge.ProgramRom.Count / 0x4000;
             programBank = 0;
             lastProgramBankBase = (programBankCount - 1) * 0x4000;
@@ -19,7 +20,7 @@ namespace NesCore.Storage
             mirrorMode = cartridge.MirrorMode;
         }
 
-        public override string Name { get { return "Bandai FCG"; } }
+        public override string Name { get { return datachJointRomSystemVariant ? "Datach Joint ROM System" : "Bandai FCG"; } }
 
         public Cartridge Cartridge { get; private set; }
 
@@ -29,9 +30,16 @@ namespace NesCore.Storage
             {
                 if (address < 0x2000)
                 {
-                    int bankindex = address / 0x400;
-                    int bankOffset = address % 0x400;
-                    return Cartridge.CharacterRom[characterBank[bankindex] * 0x400 + bankOffset];
+                    if (datachJointRomSystemVariant)
+                    {
+                        return Cartridge.CharacterRom[address];
+                    }
+                    else
+                    {
+                        int bankindex = address / 0x400;
+                        int bankOffset = address % 0x400;
+                        return Cartridge.CharacterRom[characterBank[bankindex] * 0x400 + bankOffset];
+                    }
                 }
                 
                 if (address >= 0x6000 && address < 0x7FFF)
@@ -66,9 +74,17 @@ namespace NesCore.Storage
                 if (address < 0x2000)
                 {
                     // CHR bank switches for 8 0x400 ranges
-                    int bankindex = address / 0x400;
-                    int bankOffset = address % 0x400;
-                    Cartridge.CharacterRom[characterBank[bankindex] * 0x400 + bankOffset] = value;
+                    if (datachJointRomSystemVariant)
+                    {
+                        Cartridge.CharacterRom[address] = value;
+                    }
+                    else
+                    {
+                        // set CHR bank for corresponding 0x400 range
+                        int bankindex = address / 0x400;
+                        int bankOffset = address % 0x400;
+                        Cartridge.CharacterRom[characterBank[bankindex] * 0x400 + bankOffset] = value;
+                    }
                 }
                 else if (address >= 0x6000)
                 {
@@ -151,6 +167,7 @@ namespace NesCore.Storage
             }
         }
 
+        private bool datachJointRomSystemVariant;
         private int programBankCount;
         private int[] characterBank;
         private int programBank;

@@ -77,6 +77,8 @@ namespace NesCore.Storage
             Crc32 crc32 = new Crc32();
             Crc = crc32.ComputeChecksum(romBody.ToArray());
 
+            EffectMapperOverrides();
+
             // instantiate appropriate mapper
             switch (MapperType)
             {
@@ -93,9 +95,10 @@ namespace NesCore.Storage
                 case 12: Map = new CartridgeMapMmc3(this, true); break;
                 case 13: Map = new CartridgeMapCpRom(this); break;
                 case 15: Map = new CartridgeMap100In1(this); break;
-                case 16: Map = new CartridgeMapBandaiFcg(this); break;
+                case 16: Map = new CartridgeMapBandaiFcg(this, false); break;
                 case 66: Map = new CartridgeMapGxRom(this); break;
                 case 71: Map = new CartridgeMapCamerica71(this); break;
+                case 157: Map = new CartridgeMapBandaiFcg(this, true); break;
                 default: throw new NotSupportedException(
                     "Mapper Type " + Utility.Hex.Format(MapperType) + " not supported");
             }
@@ -118,6 +121,13 @@ namespace NesCore.Storage
                 + "b, Mapper Type: " + Hex.Format(MapperType)
                 + ", Mirror Mode:" + MirrorMode + " (" + (byte)MirrorMode + ")"
                 + ", Battery: " + (BatteryPresent ? "Yes" : "No");
+        }
+
+        private void EffectMapperOverrides()
+        {
+            // Dragon Ball Z - Gekitou Tenkaichi Budou Kai (J)
+            if (Crc == 0x19E81461)
+                MapperType = 157;
         }
 
         private const uint InesMagicNumber = 0x1a53454e;

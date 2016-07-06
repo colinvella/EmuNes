@@ -9,10 +9,36 @@ namespace NesCore.Storage
 {
     class CartridgeMapBandaiFcg : CartridgeMap
     {
-        public CartridgeMapBandaiFcg(Cartridge cartridge, bool datachJointRomSystemVariant)
+        public enum Variant
+        {
+            FCG1and2 = 1,
+            LZ93D50 = 2,
+            LZ93D50with24C01 = 4,
+            LZ93D50with24C02 = 8,
+            LZ93D50withSRam = 16,
+            DatachJointRomSystem = 32
+        }
+
+        public CartridgeMapBandaiFcg(Cartridge cartridge, Variant variants)
         {
             Cartridge = cartridge;
-            this.datachJointRomSystemVariant = datachJointRomSystemVariant;
+
+            this.variants = variants;
+
+            // build name dynamically from variants
+            characterBanksSupported = true;
+            List<String> variantNames = new List<string>();
+            foreach (Variant variant in Enum.GetValues(typeof(Variant)))
+            {
+                if ((variants & variant) != 0)
+                {
+                    variantNames.Add(variant.ToString());
+                    if (variant == Variant.DatachJointRomSystem)
+                        characterBanksSupported = false;
+                }
+            }
+            this.variantName = string.Join(" / ", variantNames);
+
             programBankCount = cartridge.ProgramRom.Count / 0x4000;
             programBank = 0;
             lastProgramBankBase = (programBankCount - 1) * 0x4000;
@@ -20,7 +46,13 @@ namespace NesCore.Storage
             mirrorMode = cartridge.MirrorMode;
         }
 
-        public override string Name { get { return datachJointRomSystemVariant ? "Datach Joint ROM System" : "Bandai FCG"; } }
+        public override string Name
+        {
+            get
+            {
+                return this.variantName;
+            }
+        }
 
         public Cartridge Cartridge { get; private set; }
 
@@ -30,15 +62,17 @@ namespace NesCore.Storage
             {
                 if (address < 0x2000)
                 {
-                    if (datachJointRomSystemVariant)
+                    if (characterBanksSupported)
                     {
-                        return Cartridge.CharacterRom[address];
-                    }
-                    else
-                    {
+                        // get data from corresponding 1K bank
                         int bankindex = address / 0x400;
                         int bankOffset = address % 0x400;
                         return Cartridge.CharacterRom[characterBank[bankindex] * 0x400 + bankOffset];
+                    }
+                    else
+                    {
+                        // for Datach Joint ROM System - treat as flat CHR RAM
+                        return Cartridge.CharacterRom[address];
                     }
                 }
                 
@@ -73,17 +107,18 @@ namespace NesCore.Storage
             {
                 if (address < 0x2000)
                 {
-                    // CHR bank switches for 8 0x400 ranges
-                    if (datachJointRomSystemVariant)
+                    if (characterBanksSupported)
                     {
-                        Cartridge.CharacterRom[address] = value;
-                    }
-                    else
-                    {
+                        // CHR bank switches for 8 0x400 ranges
                         // set CHR bank for corresponding 0x400 range
                         int bankindex = address / 0x400;
                         int bankOffset = address % 0x400;
                         Cartridge.CharacterRom[characterBank[bankindex] * 0x400 + bankOffset] = value;
+                    }
+                    else
+                    {
+                        // for Datach Joint ROM System - treat as flat CHR RAM
+                        Cartridge.CharacterRom[address] = value;
                     }
                 }
                 else if (address >= 0x6000)
@@ -167,7 +202,10 @@ namespace NesCore.Storage
             }
         }
 
-        private bool datachJointRomSystemVariant;
+        private Variant variants;
+        private string variantName;
+        private bool characterBanksSupported;
+
         private int programBankCount;
         private int[] characterBank;
         private int programBank;

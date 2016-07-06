@@ -38,7 +38,11 @@ namespace NesCore.Storage
                     if (variant == Variant.Datach_Joint_Rom_System)
                     {
                         characterBanksSupported = false;
-                        registerBase = 0x8000; // safe to assume registers are based at $8000
+                        registerBase = 0x8000; // Datach has registers based at $8000
+                    }
+                    if (variant == Variant.LZ93D50_with_SRAM)
+                    {
+                        registerBase = 0x8000; // SRAM variant has registers based at $8000 so that SRAM us based in $6000-$7FFF
                     }
                 }
             }

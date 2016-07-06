@@ -95,10 +95,11 @@ namespace NesCore.Storage
                 case 12: Map = new CartridgeMapMmc3(this, true); break;
                 case 13: Map = new CartridgeMapCpRom(this); break;
                 case 15: Map = new CartridgeMap100In1(this); break;
-                case 16: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.FCG1and2 | CartridgeMapBandaiFcg.Variant.LZ93D50); break;
+                case 16: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.Bandai_FCG_1_and_2 | CartridgeMapBandaiFcg.Variant.LZ93D50); break;
                 case 66: Map = new CartridgeMapGxRom(this); break;
                 case 71: Map = new CartridgeMapCamerica71(this); break;
-                case 157: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.DatachJointRomSystem); break;
+                case 153: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.LZ93D50_with_SRAM); break;
+                case 157: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.Datach_Joint_Rom_System); break;
                 default: throw new NotSupportedException(
                     "Mapper Type " + Utility.Hex.Format(MapperType) + " not supported");
             }

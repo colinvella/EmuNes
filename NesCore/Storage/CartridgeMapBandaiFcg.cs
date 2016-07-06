@@ -11,12 +11,12 @@ namespace NesCore.Storage
     {
         public enum Variant
         {
-            FCG1and2 = 1,
+            Bandai_FCG_1_and_2 = 1,
             LZ93D50 = 2,
-            LZ93D50with24C01 = 4,
-            LZ93D50with24C02 = 8,
-            LZ93D50withSRam = 16,
-            DatachJointRomSystem = 32
+            LZ93D50_with_24C01 = 4,
+            LZ93D50_with_24C02 = 8,
+            LZ93D50_with_SRAM = 16,
+            Datach_Joint_Rom_System = 32
         }
 
         public CartridgeMapBandaiFcg(Cartridge cartridge, Variant variants)
@@ -34,8 +34,8 @@ namespace NesCore.Storage
             {
                 if ((variants & variant) != 0)
                 {
-                    variantNames.Add(variant.ToString());
-                    if (variant == Variant.DatachJointRomSystem)
+                    variantNames.Add(variant.ToString().Replace("_", " "));
+                    if (variant == Variant.Datach_Joint_Rom_System)
                     {
                         characterBanksSupported = false;
                         registerBase = 0x8000; // safe to assume registers are based at $8000
@@ -43,6 +43,7 @@ namespace NesCore.Storage
                 }
             }
             this.variantName = string.Join(" / ", variantNames);
+            this.saveRamSupported = this.variants == Variant.LZ93D50_with_SRAM;
 
             programBankCount = cartridge.ProgramRom.Count / 0x4000;
             programBank = 0;
@@ -83,8 +84,8 @@ namespace NesCore.Storage
                 
                 if (address >= 0x6000 && address < 0x7FFF)
                 {
-                    // due to FCG board variants, simplest to just return 0 (EEPROM not emulated)
-                    return 0x00;
+                    // return SRAM or open bus depending on variant
+                    return saveRamSupported ? Cartridge.SaveRam[(ushort)(address - 0x6000)] : (byte)(address >> 8);
                 }   
                  
                 if (address >= 0x8000 && address < 0xC000)
@@ -125,6 +126,10 @@ namespace NesCore.Storage
                         // for Datach Joint ROM System - treat as flat CHR RAM
                         Cartridge.CharacterRom[address] = value;
                     }
+                }
+                else if (saveRamSupported && address >= 0x6000 && address < 0x8000)
+                {
+                    Cartridge.SaveRam[(ushort)(address - 0x6000)] = value;
                 }
                 else if (address >= registerBase)
                 {
@@ -211,6 +216,7 @@ namespace NesCore.Storage
         private string variantName;
 
         private bool characterBanksSupported;
+        private bool saveRamSupported;
         private ushort registerBase;
 
         private int programBankCount;

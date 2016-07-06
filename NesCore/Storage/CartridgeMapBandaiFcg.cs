@@ -26,7 +26,9 @@ namespace NesCore.Storage
             this.variants = variants;
 
             // build name dynamically from variants
+            // and determine variant characteristics
             characterBanksSupported = true;
+            registerBase = 0x6000; // mapper 16 lumps FCG1/2, LZ93D50 and LZ93D50with24C02 together, so assume $6000 to catch all register cases
             List<String> variantNames = new List<string>();
             foreach (Variant variant in Enum.GetValues(typeof(Variant)))
             {
@@ -34,7 +36,10 @@ namespace NesCore.Storage
                 {
                     variantNames.Add(variant.ToString());
                     if (variant == Variant.DatachJointRomSystem)
+                    {
                         characterBanksSupported = false;
+                        registerBase = 0x8000; // safe to assume registers are based at $8000
+                    }
                 }
             }
             this.variantName = string.Join(" / ", variantNames);
@@ -121,10 +126,10 @@ namespace NesCore.Storage
                         Cartridge.CharacterRom[address] = value;
                     }
                 }
-                else if (address >= 0x6000)
+                else if (address >= registerBase)
                 {
                     // NOTE: FCG variants vary register base between $6000 and $8000
-                    // it is sufficient to mirror these bases to get most games to work
+                    // variants lumped under mapper 16 require mirroring these bases to get most games to work
                     int registerAddress = address % 0x10;
                     if (registerAddress < 0x08)
                     {
@@ -204,7 +209,9 @@ namespace NesCore.Storage
 
         private Variant variants;
         private string variantName;
+
         private bool characterBanksSupported;
+        private ushort registerBase;
 
         private int programBankCount;
         private int[] characterBank;

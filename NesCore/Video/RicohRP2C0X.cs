@@ -159,7 +159,7 @@ namespace NesCore.Video
 
                 SpriteSizeChanged?.Invoke(spriteSize);
 
-                Debug.WriteLine("PPUCTRL ($2000) = " + Hex.Format(value) + " (SprieSize: " + spriteSize +")");
+                Debug.WriteLine("PPUCTRL ($2000) = " + Hex.Format(value) + " (Sprite Size: " + spriteSize +")");
             }
         }
 

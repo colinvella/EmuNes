@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -86,7 +87,10 @@ namespace SharpNes.Diagnostics
         private void DisassembleLine(ushort address)
         {
             if (disassemblyLines[address] != null)
+            {
+                Debug.WriteLine(disassemblyLines[address]);
                 return;
+            }
 
             // prepare main labels
             ushort resetVector = processor.ReadWord(Mos6502.ResetVector);
@@ -126,7 +130,7 @@ namespace SharpNes.Diagnostics
 
             // if label assigned by forward branching or jumping, assign to new disassembled line
             if (addressLabels[address] != null)
-                disassemblyLine.Label = addressLabels[address] + ":";
+                disassemblyLine.Label = addressLabels[address];
 
             // determine labels for relative branching
             if (instruction.AddressingMode == AddressingMode.Relative)
@@ -160,9 +164,7 @@ namespace SharpNes.Diagnostics
             disassemblyLines[address] = disassemblyLine;  
             needsRefresh = true;
 
-#if DEBUG
-            System.Console.WriteLine(disassemblyLine);
-#endif
+            Debug.WriteLine(disassemblyLine);
             
         }
 

@@ -67,7 +67,7 @@ namespace SharpNes
 
             // NST database
             nstDatabase = XDocument.Parse(Properties.Resources.NstDatabase);
-            Cartridge.DetermineMapperType = DetermineCartridgeMapperType;
+            Cartridge.DetermineMapperId = DetermineCartridgeMapperId;
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace SharpNes
             string cartridgeProperties
                 = "Program Rom Size: " + cartridge.ProgramRom.Count + "k\r\n"
                 + "Character rom Size: " + cartridge.CharacterRom.Length + "k\r\n"
-                + "Mapper Type: " + cartridge.MapperType + " (" + cartridge.Map.Name + ")\r\n"
+                + "Mapper ID: " + cartridge.MapperId + " (" + cartridge.Map.Name + ")\r\n"
                 + "Initial Mirroring Mode: " + cartridge.MirrorMode + "\r\n"
                 + "Battery Present: " + (cartridge.BatteryPresent ? "Yes" : "No")
                 + "\r\nCRC: " + Hex.Format(cartridge.Crc).Replace("$", "");
@@ -825,31 +825,31 @@ namespace SharpNes
             return destImage;
         }
 
-        private byte DetermineCartridgeMapperType(uint romCrc, byte romMapperType)
+        private byte DetermineCartridgeMapperId(uint romCrc, byte romMapperId)
         {
             string romCrcString = Hex.Format(romCrc).Replace("$", "");
             var cartridgeElements = nstDatabase.Descendants().Where(e => e.Name.LocalName.ToLower() == "cartridge");
 
             var matchingCartridgeElement = cartridgeElements.FirstOrDefault(e => e.Attribute("crc").Value.ToUpper() == romCrcString);
             if (matchingCartridgeElement == null)
-                return romMapperType;
+                return romMapperId;
 
             var boardElement = matchingCartridgeElement.Descendants().FirstOrDefault(e => e.Name.LocalName.ToLower() == "board");
             if (boardElement == null)
-                return romMapperType;
+                return romMapperId;
 
-            var mapperTypeAttribute = boardElement.Attribute("mapper");
-            if (mapperTypeAttribute == null)
-                return romMapperType;
+            var mapperIdAttribute = boardElement.Attribute("mapper");
+            if (mapperIdAttribute == null)
+                return romMapperId;
 
-            byte overriddenMapperType = romMapperType;
+            byte overriddenMapperId = romMapperId;
 
-            byte.TryParse(mapperTypeAttribute.Value, out overriddenMapperType);
+            byte.TryParse(mapperIdAttribute.Value, out overriddenMapperId);
 
-            if (overriddenMapperType != romMapperType)
-                emulatorStatusLabel.Text = "Incorrect Mapper Type detected (" + romMapperType + "), should be " + overriddenMapperType;
+            if (overriddenMapperId != romMapperId)
+                emulatorStatusLabel.Text = "Incorrect Mapper ID detected (" + romMapperId + "), should be " + overriddenMapperId;
 
-            return overriddenMapperType;
+            return overriddenMapperId;
         }
 
         public NesCore.Console Console { get; private set; }

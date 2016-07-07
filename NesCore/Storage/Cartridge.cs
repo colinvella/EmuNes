@@ -10,7 +10,7 @@ namespace NesCore.Storage
 {
     public class Cartridge
     {
-        public delegate byte DetermineMapperTypeHandler(uint romCrc, byte romMapperType);
+        public delegate byte DetermineMapperIdHandler(uint romCrc, byte romMapperId);
 
         public Cartridge(BinaryReader romBinaryReader)
         {
@@ -31,10 +31,10 @@ namespace NesCore.Storage
             byte programRamSize = romBinaryReader.ReadByte();
             romBinaryReader.ReadBytes(7); // unused 7 bytes
 
-            // determine mapper type from control bits
-            int mapperTypeLowerNybble = controlBits1 >> 4;
-            int mapperTypeHigherNybble = controlBits2 >> 4;
-            MapperType = (byte)((mapperTypeHigherNybble << 4) | mapperTypeLowerNybble);
+            // determine mapper id from control bits
+            int mapperIdLowerNybble = controlBits1 >> 4;
+            int mapperIdHigherNybble = controlBits2 >> 4;
+            MapperId = (byte)((mapperIdHigherNybble << 4) | mapperIdLowerNybble);
 
             // determine mirroring mode
             int mirrorLowBit = controlBits1 & 1;
@@ -80,11 +80,11 @@ namespace NesCore.Storage
             Crc = crc32.ComputeChecksum(romBody.ToArray());
 
             //EffectMapperOverrides();
-            if (DetermineMapperType != null)
-                MapperType = DetermineMapperType(Crc, MapperType);
+            if (DetermineMapperId != null)
+                MapperId = DetermineMapperId(Crc, MapperId);
 
             // instantiate appropriate mapper
-            switch (MapperType)
+            switch (MapperId)
             {
                 case 0: Map = new CartridgeMapNRom(this); break;
                 case 1: Map = new CartridgeMapMmc1(this); break;
@@ -105,16 +105,16 @@ namespace NesCore.Storage
                 case 153: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.LZ93D50_with_SRAM); break;
                 case 157: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.Datach_Joint_Rom_System); break;
                 default: throw new NotSupportedException(
-                    "Mapper Type " + Utility.Hex.Format(MapperType) + " not supported");
+                    "Mapper ID " + MapperId + " not supported");
             }
         }
 
-        public static DetermineMapperTypeHandler DetermineMapperType { get; set; }
+        public static DetermineMapperIdHandler DetermineMapperId { get; set; }
 
         public IReadOnlyList<byte> ProgramRom { get; private set; }
         public byte[] CharacterRom { get; private set; }
         public SaveRam SaveRam { get; }
-        public byte MapperType { get; private set; }
+        public byte MapperId { get; private set; }
         public MirrorMode MirrorMode { get; private set; }
         public bool BatteryPresent { get; private set; }
         public uint Crc { get; private set; }
@@ -125,7 +125,7 @@ namespace NesCore.Storage
         {
             return "PRG: " + Hex.Format((uint)ProgramRom.Count)
                 + "b, CHR: " + Hex.Format((uint)CharacterRom.Length)
-                + "b, Mapper Type: " + Hex.Format(MapperType)
+                + "b, Mapper ID: " + MapperId
                 + ", Mirror Mode:" + MirrorMode + " (" + (byte)MirrorMode + ")"
                 + ", Battery: " + (BatteryPresent ? "Yes" : "No");
         }

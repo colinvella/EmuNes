@@ -191,6 +191,27 @@ namespace SharpNes.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        ///&lt;database version=&quot;1.0&quot; conformance=&quot;loose&quot;&gt;
+        ///    &lt;game&gt;
+        ///        &lt;cartridge system=&quot;NES-PAL&quot; dump=&quot;ok&quot; crc=&quot;001388B3&quot; sha1=&quot;4BCD36C05FCAF45C74001257C65AFB7EC5FA53D7&quot;&gt;
+        ///            &lt;board type=&quot;NES-TLROM&quot; mapper=&quot;4&quot;&gt;
+        ///                &lt;prg size=&quot;256k&quot; /&gt;
+        ///                &lt;chr size=&quot;128k&quot; /&gt;
+        ///                &lt;chip type=&quot;MMC3C&quot; /&gt;
+        ///            &lt;/board&gt;
+        ///        &lt;/cartridge&gt;
+        ///    &lt;/game&gt;
+        ///    &lt;game&gt;
+        ///        &lt;cartridge system=&quot;Famicom&quot; dump=&quot;unknown&quot; crc=&quot;0021ED29&quot; sha1=&quot; [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string NstDatabase {
+            get {
+                return ResourceManager.GetString("NstDatabase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap OptionsInput {

@@ -59,8 +59,6 @@ namespace NesCore.Storage
             else
                 lastProgramBankBase = (programBankCount - 1) * 0x4000;
 
-            outerProgramBank = new int[4];
-
             characterBank = new int[8];
             mirrorMode = cartridge.MirrorMode;
         }
@@ -81,8 +79,6 @@ namespace NesCore.Storage
             {
                 if (address < 0x2000)
                 {
-                    outerProgramBankIndex = (address >> 10) & 0x03;
-
                     if (characterBanksSupported)
                     {
                         // get data from corresponding 1K bank
@@ -106,14 +102,14 @@ namespace NesCore.Storage
                 if (address >= 0x8000 && address < 0xC000)
                 {
                     int bankOffset = address % 0x4000;
-                    return Cartridge.ProgramRom[outerProgramBank[outerProgramBankIndex] + programBank * 0x4000 + bankOffset];
+                    return Cartridge.ProgramRom[outerProgramBank + programBank * 0x4000 + bankOffset];
                 }
 
                 if (address >= 0xC000)
                 {
                     // fixed at last bank
                     int lastBankOffset = address % 0x4000;
-                    return Cartridge.ProgramRom[outerProgramBank[outerProgramBankIndex] + lastProgramBankBase + lastBankOffset];
+                    return Cartridge.ProgramRom[outerProgramBank + lastProgramBankBase + lastBankOffset];
                 }
 
                 //if (address >= 0x6000)
@@ -128,8 +124,6 @@ namespace NesCore.Storage
             {
                 if (address < 0x2000)
                 {
-                    outerProgramBankIndex = (address >> 10) & 0x03;
-
                     if (characterBanksSupported)
                     {
                         // CHR bank switches for 8 0x400 ranges
@@ -157,9 +151,9 @@ namespace NesCore.Storage
                     {
                         // outer program bank (mapper 153 only)
                         if ((value & 0x01) != 0)
-                            outerProgramBank[registerAddress] = 0x40000;
+                            outerProgramBank = 0x40000;
                         else
-                            outerProgramBank[registerAddress] = 0;
+                            outerProgramBank = 0;
                     }
                     else if (characterBanksSupported && registerAddress < 0x08)
                     {
@@ -246,8 +240,7 @@ namespace NesCore.Storage
         private ushort registerBase;
 
         private int programBankCount;
-        private int[] outerProgramBank;
-        private int outerProgramBankIndex;
+        private int outerProgramBank;
         private int[] characterBank;
         private int programBank;
         private int lastProgramBankBase;

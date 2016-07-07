@@ -21,6 +21,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NesCore.Utility;
+using System.Xml.Linq;
+using System.Globalization;
 
 namespace SharpNes
 {
@@ -62,6 +64,10 @@ namespace SharpNes
 
             apuAudioProvider = new ApuAudioProvider();
             waveOut.Init(apuAudioProvider);
+
+            // NST database
+            nstDatabase = XDocument.Parse(Properties.Resources.NstDatabase);
+            Cartridge.DetermineMapperType = DetermineCartridgeMapperType;
         }
 
         /// <summary>
@@ -819,6 +825,33 @@ namespace SharpNes
             return destImage;
         }
 
+        private byte DetermineCartridgeMapperType(uint romCrc, byte romMapperType)
+        {
+            string romCrcString = Hex.Format(romCrc).Replace("$", "");
+            var cartridgeElements = nstDatabase.Descendants().Where(e => e.Name.LocalName.ToLower() == "cartridge");
+
+            var matchingCartridgeElement = cartridgeElements.FirstOrDefault(e => e.Attribute("crc").Value.ToUpper() == romCrcString);
+            if (matchingCartridgeElement == null)
+                return romMapperType;
+
+            var boardElement = matchingCartridgeElement.Descendants().FirstOrDefault(e => e.Name.LocalName.ToLower() == "board");
+            if (boardElement == null)
+                return romMapperType;
+
+            var mapperTypeAttribute = boardElement.Attribute("mapper");
+            if (mapperTypeAttribute == null)
+                return romMapperType;
+
+            byte overriddenMapperType = romMapperType;
+
+            byte.TryParse(mapperTypeAttribute.Value, out overriddenMapperType);
+
+            if (overriddenMapperType != romMapperType)
+                emulatorStatusLabel.Text = "Incorrect Mapper Type detected (" + romMapperType + "), should be " + overriddenMapperType;
+
+            return overriddenMapperType;
+        }
+
         public NesCore.Console Console { get; private set; }
 
         private Cartridge cartridge;
@@ -867,5 +900,8 @@ namespace SharpNes
         private static readonly int SC_SCREENSAVE = 0xF140;
         private static readonly int WM_SYSCOMMAND = 0x0112;
         private static readonly IntPtr INVALID_HANDLE_VALUE = (IntPtr)(-1);
+
+        // NST database
+        private XDocument nstDatabase;
     }
 }

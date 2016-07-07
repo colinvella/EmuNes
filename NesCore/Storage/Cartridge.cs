@@ -10,6 +10,8 @@ namespace NesCore.Storage
 {
     public class Cartridge
     {
+        public delegate byte DetermineMapperTypeHandler(uint romCrc, byte romMapperType);
+
         public Cartridge(BinaryReader romBinaryReader)
         {
             List<byte> romBody = new List<byte>();
@@ -77,7 +79,9 @@ namespace NesCore.Storage
             Crc32 crc32 = new Crc32();
             Crc = crc32.ComputeChecksum(romBody.ToArray());
 
-            EffectMapperOverrides();
+            //EffectMapperOverrides();
+            if (DetermineMapperType != null)
+                MapperType = DetermineMapperType(Crc, MapperType);
 
             // instantiate appropriate mapper
             switch (MapperType)
@@ -105,6 +109,8 @@ namespace NesCore.Storage
             }
         }
 
+        public static DetermineMapperTypeHandler DetermineMapperType { get; set; }
+
         public IReadOnlyList<byte> ProgramRom { get; private set; }
         public byte[] CharacterRom { get; private set; }
         public SaveRam SaveRam { get; }
@@ -122,17 +128,6 @@ namespace NesCore.Storage
                 + "b, Mapper Type: " + Hex.Format(MapperType)
                 + ", Mirror Mode:" + MirrorMode + " (" + (byte)MirrorMode + ")"
                 + ", Battery: " + (BatteryPresent ? "Yes" : "No");
-        }
-
-        private void EffectMapperOverrides()
-        {
-            // Dragon Ball Z - Gekitou Tenkaichi Budou Kai (J)
-            if (Crc == 0x19E81461)
-                MapperType = 157;
-
-            // Famicom Jump 2
-            if (Crc == 0x3F15D20D)
-                MapperType = 153;
         }
 
         private const uint InesMagicNumber = 0x1a53454e;

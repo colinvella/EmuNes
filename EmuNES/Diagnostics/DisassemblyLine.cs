@@ -9,7 +9,6 @@ namespace SharpNes.Diagnostics
 {
     class DisassemblyLine
     {
-        
         public string Label { get; set; }
 
         public string Address { get; set; }
@@ -34,9 +33,12 @@ namespace SharpNes.Diagnostics
             stringBuilder.Append(" ");
             stringBuilder.Append(MachineCode.PadRight(12, ' '));
             stringBuilder.Append(" ");
-            stringBuilder.Append(Source);
-            stringBuilder.Append(" ;");
-            stringBuilder.Append(Remarks);
+            stringBuilder.Append(Source.PadRight(11, ' '));
+            if (Remarks != null && Remarks.Trim() != "")
+            {
+                stringBuilder.Append(" ; ");
+                stringBuilder.Append(Remarks);
+            }
 
             return stringBuilder.ToString();
         }

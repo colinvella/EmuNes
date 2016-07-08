@@ -53,6 +53,10 @@ namespace SharpNes.Diagnostics
 #if DEBUG
             OnDisassemblyTick(this, EventArgs.Empty);
 #endif
+
+            if (disassemblyLines[address] != null)
+                Debug.WriteLine(disassemblyLines[address]);
+
         }
 
         private void OnDisassemblyTick(object sender, EventArgs e)
@@ -131,10 +135,7 @@ namespace SharpNes.Diagnostics
         private void DisassembleLine(ushort address)
         {
             if (disassemblyLines[address] != null)
-            {
-                Debug.WriteLine(disassemblyLines[address]);
                 return;
-            }
 
             // prepare main labels
             ushort resetVector = processor.ReadWord(Mos6502.ResetVector);
@@ -208,8 +209,7 @@ namespace SharpNes.Diagnostics
             disassemblyLineSource[address] = disassemblyLine.ToString();
             needsRefresh = true;
 
-            Debug.WriteLine(disassemblyLine);
-            
+            Debug.WriteLine(disassemblyLine);            
         }
 
         public void InvalidateMemoryRange(ushort address, ushort size)

@@ -142,11 +142,10 @@ namespace NesCore.Processor
 
             // general instruction operations (documented)
 
-            // instructor that locks up processor
+            // instruction that locks up processor
             Execute Lockup = (address) =>
             {
-                if (Processor.Lockup != null)
-                    Processor.Lockup();
+                Processor.Lockup?.Invoke();
             };
 
             // no operation
@@ -1220,6 +1219,5 @@ namespace NesCore.Processor
 
         // instruction variants
         private Dictionary<string, List<Instruction>> instructionVariants = new Dictionary<string, List<Instruction>>();
-
     }
 }

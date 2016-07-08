@@ -50,6 +50,7 @@ namespace SharpNes
 
             Console = new NesCore.Console();
 
+            ConfigureProcessor();
             ConfigureVideo();
             ConfigureAudio();
             ConfigureControllers();
@@ -496,6 +497,19 @@ namespace SharpNes
                     break;
             }
             gameStopMenuItem.Enabled = gameState != GameState.Stopped;
+        }
+
+        private void ConfigureProcessor()
+        {
+            Console.Processor.Lockup = () =>
+            {
+                Console.Halt();
+                OnGameStop(this, EventArgs.Empty);
+                MessageBox.Show(this,
+                    "KIL instruction enountered at address " +
+                    Hex.Format(Console.Processor.State.ProgramCounter) +
+                    ". There may be a problem with the ROM or a software bug in the emulator", "Processor Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            };
         }
 
         private void ConfigureVideo()

@@ -138,6 +138,8 @@ namespace NesCore
         /// </summary>
         public void Reset()
         {
+            halted = false;
+
             Processor.Reset();
             Video.Reset();
 
@@ -152,6 +154,8 @@ namespace NesCore
         /// <returns>cycles consumed</returns>
         public ulong Step()
         {
+            if (halted) return 0;
+
             // cpu emulation
             ulong cpuCycles = Processor.ExecuteInstruction();
 
@@ -182,12 +186,23 @@ namespace NesCore
             ulong consumedCycles = 0;
             while (allocatedCycles > 0)
             {
+                if (halted)
+                    return consumedCycles;
+
                 ulong stepCycles = Step();
                 allocatedCycles -= (long)stepCycles;
                 consumedCycles += stepCycles;
             }
 
             return consumedCycles;
+        }
+
+        /// <summary>
+        /// Halts the console
+        /// </summary>
+        public void Halt()
+        {
+            halted = true;
         }
 
         private void ConfigureMemoryMap()
@@ -329,6 +344,7 @@ namespace NesCore
         }
 
         private long allocatedCycles;
+        private bool halted;
 
         private const uint MemorySize = ushort.MaxValue + 1;
     }

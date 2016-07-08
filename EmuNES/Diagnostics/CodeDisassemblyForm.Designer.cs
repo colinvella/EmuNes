@@ -36,7 +36,6 @@
             // disassemblyTimer
             // 
             this.disassemblyTimer.Enabled = true;
-            this.disassemblyTimer.Interval = 10;
             this.disassemblyTimer.Tick += new System.EventHandler(this.OnDisassemblyTick);
             // 
             // disassemblyRichTextBox

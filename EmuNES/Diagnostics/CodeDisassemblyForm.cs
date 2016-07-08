@@ -57,7 +57,8 @@ namespace SharpNes.Diagnostics
 
         private void OnDisassemblyTick(object sender, EventArgs e)
         {
-            if (disassemblyQueue.Count > 0)
+            int linesToDisassemble = Math.Min(10, disassemblyQueue.Count);
+            if (linesToDisassemble-- > 0)
             {
                 ushort address = disassemblyQueue.Dequeue();
                 queuedAddresses[address] = false;
@@ -71,10 +72,19 @@ namespace SharpNes.Diagnostics
                 SuspendRedraw(disassemblyRichTextBox);
 
                 disassemblyRichTextBox.Clear();
-                foreach (DisassemblyLine disassemblyLine in disassemblyLines)
+                for (int address = 0; address < 0x10000; address++)
                 {
+                    if (queuedAddresses[address])
+                    {
+                        disassemblyRichTextBox.SelectionColor = Color.Gray;
+                        disassemblyRichTextBox.AppendText("Queued for disassembly...\r\n");
+                        continue;
+                    }
+
+                    DisassemblyLine disassemblyLine = disassemblyLines[address];
                     if (disassemblyLine == null)
                         continue;
+
                     string label = disassemblyLine.Label;
                     if (label != null)
                     {

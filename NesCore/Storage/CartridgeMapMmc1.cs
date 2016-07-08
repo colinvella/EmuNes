@@ -148,7 +148,9 @@ namespace NesCore.Storage
 
             CharacterBankSwitch?.Invoke(0x1000, 0x1000);
 
-            HandleSxRomVariants(value);
+            // only in 4k CHAR mode
+            if (characterBankMode == 1)
+                HandleSxRomVariants(value);
         }
 
         private void HandleSxRomVariants(byte value)

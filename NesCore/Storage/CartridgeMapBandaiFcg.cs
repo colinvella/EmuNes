@@ -149,11 +149,15 @@ namespace NesCore.Storage
                     int registerAddress = address % 0x10;
                     if (outerProgramBankSupported && registerAddress < 0x04)
                     {
+                        int oldOuterProgramBank = outerProgramBank;
                         // outer program bank (mapper 153 only)
                         if ((value & 0x01) != 0)
                             outerProgramBank = 0x40000;
                         else
                             outerProgramBank = 0;
+
+                        if (outerProgramBank != oldOuterProgramBank)
+                            ProgramBankSwitch?.Invoke(0x8000, 0x8000);
                     }
                     else if (characterBanksSupported && registerAddress < 0x08)
                     {

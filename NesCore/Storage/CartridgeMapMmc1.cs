@@ -40,7 +40,7 @@ namespace NesCore.Storage
                     address -= 0x8000;
                     int bank = address / 0x4000;
                     int offset = address % 0x4000;
-                    return Cartridge.ProgramRom[programBankOffsets[bank] + offset];
+                    return Cartridge.ProgramRom[outerProgramBank + programBankOffsets[bank] + offset];
                 }
                 else if (address >= 0x6000)
                     return Cartridge.SaveRam[(ushort)(address - 0x6000)];
@@ -55,7 +55,8 @@ namespace NesCore.Storage
                     int bank = address / 0x1000;
                     int offset = address % 0x1000;
                     Cartridge.CharacterRom[characterBankOffsets[bank] + offset] = value;
-                    ProgramBankSwitch?.Invoke((ushort)characterBankOffsets[bank], 0x1000);
+
+                    CharacterBankSwitch?.Invoke((ushort)characterBankOffsets[bank], 0x1000);
                 }
                 else if (address >= 0x8000)
                 {
@@ -134,8 +135,9 @@ namespace NesCore.Storage
             characterBank0 = value;
             UpdateOffsets();
 
-            ProgramBankSwitch?.Invoke(0xA000, 0x2000);
+            CharacterBankSwitch?.Invoke(0x0000, 0x1000);
 
+            HandleSxRomVariants(value);
         }
 
         // CHR bank 1 (internal, $C000-$DFFF)
@@ -144,7 +146,21 @@ namespace NesCore.Storage
             characterBank1 = value;
             UpdateOffsets();
 
-            ProgramBankSwitch?.Invoke(0xC000, 0x2000);
+            CharacterBankSwitch?.Invoke(0x1000, 0x1000);
+
+            HandleSxRomVariants(value);
+        }
+
+        private void HandleSxRomVariants(byte value)
+        {
+            // try to determine if SUROM variant
+            if (Cartridge.ProgramRom.Count <= 0x40000)
+                return;
+
+            // outer bank is determined by bit 4 of char bank register 0 / 1
+            outerProgramBank = (value & 0x10) != 0 ? 0x40000 : 0x0000;
+
+            // TODO: switchable RAM at $6000-$7FFF
         }
 
         // PRG bank (internal, $E000-$FFFF)
@@ -161,10 +177,12 @@ namespace NesCore.Storage
             if (index >= 0x80)
                 index -= 0x100;
 
-            index %= (Cartridge.ProgramRom.Count / 0x4000);
+            int outerBankSize = Math.Min(0x40000, Cartridge.ProgramRom.Count);
+
+            index %= (outerBankSize / 0x4000);
             int offset = index * 0x4000;
             if (offset < 0)
-                offset += Cartridge.ProgramRom.Count;
+                offset += outerBankSize;
             return offset;
         }
 
@@ -225,6 +243,7 @@ namespace NesCore.Storage
         private byte characterBank1;
         private int[] programBankOffsets;
         private int[] characterBankOffsets;
+        private int outerProgramBank;
         private MirrorMode prevMirrorMode;
     }
 }

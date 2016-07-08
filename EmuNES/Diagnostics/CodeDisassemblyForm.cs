@@ -48,15 +48,13 @@ namespace SharpNes.Diagnostics
                 disassemblyQueue.Enqueue(address);
                 queuedAddresses[address] = true;
             }
-            lastTrace = DateTime.Now;
 
 #if DEBUG
-            OnDisassemblyTick(this, EventArgs.Empty);
+            DisassembleLine(address);
+            Debug.WriteLine(disassemblyLines[address]);
 #endif
 
-            if (disassemblyLines[address] != null)
-                Debug.WriteLine(disassemblyLines[address]);
-
+            lastTrace = DateTime.Now;
         }
 
         private void OnDisassemblyTick(object sender, EventArgs e)
@@ -208,8 +206,6 @@ namespace SharpNes.Diagnostics
             disassemblyLines[address] = disassemblyLine;
             disassemblyLineSource[address] = disassemblyLine.ToString();
             needsRefresh = true;
-
-            Debug.WriteLine(disassemblyLine);            
         }
 
         public void InvalidateMemoryRange(ushort address, ushort size)

@@ -170,6 +170,8 @@ namespace NesCore.Storage
             UpdateOffsets();
 
             ProgramBankSwitch?.Invoke(0xE000, 0x2000);
+
+            // TODO: ram chip enable
         }
 
         private int GetProgramBankOffset(int index)
@@ -208,14 +210,17 @@ namespace NesCore.Storage
             {
                 case 0:
                 case 1:
+                    // emulate 16K switchable bank
                     programBankOffsets[0] = GetProgramBankOffset(programBank & 0xFE);
                     programBankOffsets[1] = GetProgramBankOffset(programBank | 0x01);
                     break;
                 case 2:
+                    // range $8000-$BFFF fixed to first bank, $C000-$FFFF switchable
                     programBankOffsets[0] = 0;
                     programBankOffsets[1] = GetProgramBankOffset(programBank);
                     break;
                 case 3:
+                    // range $8000-$BFFF switchable, $C000-$FFFF fixed to last bank
                     programBankOffsets[0] = GetProgramBankOffset(programBank);
                     programBankOffsets[1] = GetProgramBankOffset(-1);
                     break;
@@ -224,10 +229,12 @@ namespace NesCore.Storage
             switch (characterBankMode)
             {
                 case 0:
+                    // emulate 8K switchable bank
                     characterBankOffsets[0] = GetCharacterBankOffset(characterBank0 & 0xFE);
                     characterBankOffsets[1] = GetCharacterBankOffset(characterBank0 | 0x01);
                     break;
                 case 1:
+                    // emulate individual 4K banks
                     characterBankOffsets[0] = GetCharacterBankOffset(characterBank0);
                     characterBankOffsets[1] = GetCharacterBankOffset(characterBank1);
                     break;

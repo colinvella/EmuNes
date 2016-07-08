@@ -55,14 +55,11 @@ namespace NesCore.Storage
                     int bank = address / 0x1000;
                     int offset = address % 0x1000;
                     Cartridge.CharacterRom[characterBankOffsets[bank] + offset] = value;
+                    ProgramBankSwitch?.Invoke((ushort)characterBankOffsets[bank], 0x1000);
                 }
                 else if (address >= 0x8000)
                 {
                     LoadRegister(address, value);
-
-                    // invalidate address regions (may need refining)
-                    ProgramBankSwitch?.Invoke(0x0000, 0x2000);
-                    ProgramBankSwitch?.Invoke(0x8000, 0x8000);
                 }
                 else if (address >= 0x6000)
                 {
@@ -136,6 +133,9 @@ namespace NesCore.Storage
         {
             characterBank0 = value;
             UpdateOffsets();
+
+            ProgramBankSwitch?.Invoke(0xA000, 0x2000);
+
         }
 
         // CHR bank 1 (internal, $C000-$DFFF)
@@ -143,6 +143,8 @@ namespace NesCore.Storage
         {
             characterBank1 = value;
             UpdateOffsets();
+
+            ProgramBankSwitch?.Invoke(0xC000, 0x2000);
         }
 
         // PRG bank (internal, $E000-$FFFF)
@@ -150,6 +152,8 @@ namespace NesCore.Storage
         {
             programBank = (byte)(value & 0x0F);
             UpdateOffsets();
+
+            ProgramBankSwitch?.Invoke(0xE000, 0x2000);
         }
 
         private int GetProgramBankOffset(int index)

@@ -147,7 +147,7 @@ namespace NesCore.Storage
                     // NOTE: FCG variants vary register base between $6000 and $8000
                     // variants lumped under mapper 16 require mirroring these bases to get most games to work
                     int registerAddress = address % 0x10;
-                    if (outerProgramBankSupported && registerAddress < 0x04)
+                    if (outerProgramBankSupported && address >=0x8000 && address < 0x8004)
                     {
                         int oldOuterProgramBank = outerProgramBank;
                         // outer program bank (mapper 153 only)

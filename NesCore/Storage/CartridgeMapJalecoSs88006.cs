@@ -1,5 +1,7 @@
-﻿using System;
+﻿using NesCore.Utility;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,7 +20,7 @@ namespace NesCore.Storage
             characterRomBankLatch = new int[8];
             characterRomBank = new int[8];
 
-            programRomBank[0] = programRomBank[1] = programRomBank[2] = 0x000;
+            programRomBank[0] = programRomBank[1] = programRomBank[2] = 0x0000;
             programRomBank[3] = (cartridge.ProgramRom.Count / 0x2000) - 1;
 
             this.mirrorMode = cartridge.MirrorMode;
@@ -71,8 +73,12 @@ namespace NesCore.Storage
 
                         programRomBank[programBankIndex] = SetHigherNybble(programRomBankLatch[programBankIndex], value);
 
+                        Debug.WriteLine("Program Bank " + programBankIndex + " (" + Hex.Format(address) + ") = " + programRomBank[programBankIndex]);
+
                         if (programRomBank[programBankIndex] != oldProgramBank)
+                        {
                             ProgramBankSwitch?.Invoke((ushort)(0x8000 + programBankIndex * 0x2000), 0x2000);
+                        }
                     }
                 }
                 else if (address >= 0xA000 && address < 0xE000)
@@ -92,8 +98,12 @@ namespace NesCore.Storage
 
                         characterRomBank[characterBankIndex] = SetHigherNybble(characterRomBankLatch[characterBankIndex], value);
 
+                        Debug.WriteLine("Character Bank " + characterBankIndex + " (" + Hex.Format(address) +") = " + characterRomBank[characterBankIndex]);
+
                         if (characterRomBank[characterBankIndex] != oldCharacterBank)
+                        {
                             CharacterBankSwitch?.Invoke((ushort)(characterBankIndex * 0x400), 0x400);
+                        }
                     }
                 }
                 else if (address == 0xE000)

@@ -159,12 +159,12 @@ namespace NesCore
             // cpu emulation
             ulong cpuCycles = Processor.ExecuteInstruction();
 
-            // vidoe emulation
+            // video emulation
             ulong ppuCycles = cpuCycles * 3;
 	        for (ulong index = 0; index < ppuCycles; index++)
             {
                 Video.Step();
-                Cartridge.Map.StepVideo(Video.ScanLine, Video.Cycle, Video.ShowBackground, Video.ShowSprites);
+                Cartridge?.Map.StepVideo(Video.ScanLine, Video.Cycle, Video.ShowBackground, Video.ShowSprites);
 	        }
 
             // audio emulation

@@ -38,7 +38,7 @@ namespace NesCore.Storage
                     int offset = address % 0x400;
                     return Cartridge.CharacterRom[characterRomBank[bank] * 0x400 + offset];
                 }
-                else if (address > 0x8000)
+                else if (address >= 0x8000)
                 {
                     int bank = (address - 0x8000) / 0x2000;
                     int offset = address % 0x2000;

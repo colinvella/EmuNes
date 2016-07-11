@@ -131,7 +131,7 @@ namespace NesCore.Storage
 
                     int counterBits = (value >> 1) & 0x07;
 
-                    switch (value)
+                    switch (counterBits)
                     {
                         case 0: irqFixedMask = 0x0000; break;
                         case 1: irqFixedMask = 0xF000; break;

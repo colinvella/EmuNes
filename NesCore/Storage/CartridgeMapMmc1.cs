@@ -15,6 +15,11 @@ namespace NesCore.Storage
             programBankOffsets = new int[2];
             characterBankOffsets = new int[2];
 
+            outerProgramRomBankSupported = cartridge.ProgramRom.Count > 0x40000;
+            programRamBanksSupported = cartridge.CharacterRom.Count() == 0x2000;
+            if (programRamBanksSupported)
+                programRam = new byte[0x2000 * 0x04];
+
             shiftRegister = 0x10;
             programBankOffsets[1] = GetProgramBankOffset(-1);
 
@@ -40,10 +45,16 @@ namespace NesCore.Storage
                     address -= 0x8000;
                     int bank = address / 0x4000;
                     int offset = address % 0x4000;
-                    return Cartridge.ProgramRom[outerProgramBank + programBankOffsets[bank] + offset];
+                    return Cartridge.ProgramRom[outerProgramRomBank + programBankOffsets[bank] + offset];
                 }
                 else if (address >= 0x6000)
-                    return Cartridge.SaveRam[(ushort)(address - 0x6000)];
+                {
+                    ushort offset = (ushort)(address - 0x6000);
+                    if (programRamBanksSupported)
+                        return programRam[programRamBank * 0x2000 + offset];
+                    else
+                        return Cartridge.SaveRam[offset];
+                }
                 else
                     throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
             }
@@ -64,7 +75,11 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0x6000)
                 {
-                    Cartridge.SaveRam[(ushort)(address - 0x6000)] = value;
+                    ushort offset = (ushort)(address - 0x6000);
+                    if (programRamBanksSupported)
+                        programRam[programRamBank * 0x2000 + offset] = value;
+                    else
+                        Cartridge.SaveRam[offset] = value;
                 }
             }
         }
@@ -137,6 +152,7 @@ namespace NesCore.Storage
 
             CharacterBankSwitch?.Invoke(0x0000, 0x1000);
 
+            // both chr modes
             HandleSxRomVariants(value);
         }
 
@@ -148,7 +164,7 @@ namespace NesCore.Storage
 
             CharacterBankSwitch?.Invoke(0x1000, 0x1000);
 
-            // only in 4k CHAR mode
+            // ignored in 8k CHAR mode
             if (characterBankMode == 1)
                 HandleSxRomVariants(value);
         }
@@ -156,13 +172,17 @@ namespace NesCore.Storage
         private void HandleSxRomVariants(byte value)
         {
             // try to determine if SUROM variant
-            if (Cartridge.ProgramRom.Count <= 0x40000)
-                return;
+            if (outerProgramRomBankSupported)
+            {
+                // outer bank is determined by bit 4 of char bank register 0 / 1
+                outerProgramRomBank = (value & 0x10) != 0 ? 0x40000 : 0x0000;
+            }
 
-            // outer bank is determined by bit 4 of char bank register 0 / 1
-            outerProgramBank = (value & 0x10) != 0 ? 0x40000 : 0x0000;
-
-            // TODO: switchable RAM at $6000-$7FFF
+            // switchable RAM bank at $6000-$7FFF controlled by bits 3 and 2 (4 banks)
+            if (programRamBanksSupported)
+            {
+                programRamBank = (value & 0x0C) >> 2;
+            }
         }
 
         // PRG bank (internal, $E000-$FFFF)
@@ -243,6 +263,8 @@ namespace NesCore.Storage
             }
         }
 
+        private bool outerProgramRomBankSupported;
+        private bool programRamBanksSupported;
         private byte shiftRegister;
         private byte control;
         private byte programBankMode;
@@ -252,7 +274,9 @@ namespace NesCore.Storage
         private byte characterBank1;
         private int[] programBankOffsets;
         private int[] characterBankOffsets;
-        private int outerProgramBank;
+        private int outerProgramRomBank;
+        private int programRamBank;
+        private byte[] programRam;
         private MirrorMode prevMirrorMode;
     }
 }

@@ -20,8 +20,12 @@ namespace NesCore.Storage
             characterRomBankLatch = new int[8];
             characterRomBank = new int[8];
 
-            programRomBank[0] = programRomBank[1] = programRomBank[2] = 0x0000;
-            programRomBank[3] = (cartridge.ProgramRom.Count / 0x2000) - 1;
+            int programBankCount = cartridge.ProgramRom.Count / 0x2000;
+
+            programRomBank[0] = 0;
+            programRomBank[1] = 1;
+            programRomBank[2] = programBankCount - 2;
+            programRomBank[3] = programBankCount - 1;
 
             this.mirrorMode = cartridge.MirrorMode;
         }

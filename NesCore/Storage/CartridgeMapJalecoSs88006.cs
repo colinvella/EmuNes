@@ -131,6 +131,7 @@ namespace NesCore.Storage
                     irqCounter = irqReload;
                     Debug.WriteLine("IRQ Reloaded to " + irqReload);
                     CancelInterruptRequest?.Invoke();
+                    irqPrimed = false;
                 }
                 else if (address == 0xF001)
                 {
@@ -149,6 +150,7 @@ namespace NesCore.Storage
                     irqCounterMask = 0xFFFF - irqFixedMask; // complement
 
                     CancelInterruptRequest?.Invoke();
+                    irqPrimed = false;
                 }
                 else if (address == 0xF002)
                 {
@@ -176,6 +178,13 @@ namespace NesCore.Storage
             cpuClock++;
             cpuClock %= 3;
 
+            // using priming variable synchronises IRQ timing and prevents jitter
+            if (irqPrimed && cycle == 0)
+            {
+                TriggerInterruptRequest?.Invoke();
+                irqPrimed = false;
+            }
+
             if (!irqCounterEnabled || cpuClock != 0)
                 return;
 
@@ -184,7 +193,7 @@ namespace NesCore.Storage
             ushort counterbits = (ushort)(irqCounter & irqCounterMask);
 
             if (counterbits == 0)
-                TriggerInterruptRequest?.Invoke();
+                irqPrimed = true;
 
             --counterbits;
 
@@ -213,6 +222,7 @@ namespace NesCore.Storage
         private int irqFixedMask;
         private int irqCounterMask;
         private ushort irqCounter;
+        private bool irqPrimed;
         private MirrorMode mirrorMode;
     }
 }

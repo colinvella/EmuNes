@@ -17,6 +17,8 @@ namespace NesCore.Storage
 
             programRomBank[0] = programRomBank[1] = programRomBank[2] = 0x000;
             programRomBank[3] = (cartridge.ProgramRom.Count / 0x2000) - 1;
+
+            this.mirrorMode = cartridge.MirrorMode;
         }
 
         public Cartridge Cartridge { get; private set; }
@@ -57,10 +59,15 @@ namespace NesCore.Storage
                     if (programBankIndex > 2)
                         return;
 
+                    int oldProgramBank = programRomBank[programBankIndex];
+
                     if (offset1000 % 2 == 0)
                         programRomBank[programBankIndex] = SetLowerNybble(programRomBank[programBankIndex], value);
                     else
                         programRomBank[programBankIndex] = SetHigherNybble(programRomBank[programBankIndex], value);
+
+                    if (programRomBank[programBankIndex] != oldProgramBank)
+                        ProgramBankSwitch?.Invoke((ushort)(0x8000 + programBankIndex * 0x2000), 0x2000);
                 }
                 else if (address >= 0xA000 && address < 0xE000)
                 {
@@ -76,19 +83,94 @@ namespace NesCore.Storage
                     else
                         characterRomBank[characterBankIndex] = SetHigherNybble(characterRomBank[characterBankIndex], value);
                 }
+                else if (address == 0xE000)
+                {
+                    // bits 0..3 of IRQ counter reload
+                    irqReload &= 0xFFF0;
+                    irqReload |= (byte)(value & 0x0F);
+                }
+                else if (address == 0xE001)
+                {
+                    // bits 4..7 of IRQ counter reload
+                    irqReload &= 0xFF0F;
+                    irqReload |= (byte)((value & 0x0F) << 4);
+                }
+                else if (address == 0xE002)
+                {
+                    // bits 8..11 of IRQ counter reload
+                    irqReload &= 0xF0FF;
+                    irqReload |= (byte)((value & 0x0F) << 8);
+                }
+                else if (address == 0xE003)
+                {
+                    // bits 12..15 of IRQ counter reload
+                    irqReload &= 0x0FFF;
+                    irqReload |= (byte)((value & 0x0F) << 12);
+                }
                 else if (address == 0xF000)
                 {
-                    throw new NotImplementedException("$F000");
+                    irqCounter = irqReload;
+                    CancelInterruptRequest?.Invoke();
                 }
                 else if (address == 0xF001)
                 {
-                    throw new NotImplementedException("$F001");
+                    irqCounterEnabled = (value & 0x01) != 0;
+
+                    int counterBits = (value >> 1) & 0x07;
+
+                    switch (value)
+                    {
+                        case 0: irqFixedMask = 0x0000; break;
+                        case 1: irqFixedMask = 0xF000; break;
+                        case 2:
+                        case 3: irqFixedMask = 0xFF00; break;
+                        default: irqFixedMask = 0xFFF0; break;
+                    }
+                    irqCounterMask = 0xFFFF - irqFixedMask; // complement
+
+                    CancelInterruptRequest?.Invoke();
+                }
+                else if (address == 0xF002)
+                {
+                    MirrorMode newMirrorMode = mirrorMode;
+                    switch (value & 0x03)
+                    {
+                        case 0x00: newMirrorMode = MirrorMode.Horizontal; break;
+                        case 0x01: newMirrorMode = MirrorMode.Vertical; break;
+                        case 0x02: newMirrorMode = MirrorMode.Single0; break;
+                        case 0x03: newMirrorMode = MirrorMode.Single1; break;
+                    }
+                    if (newMirrorMode != mirrorMode)
+                    {
+                        mirrorMode = newMirrorMode;
+                        MirrorModeChanged?.Invoke(mirrorMode);
+                    }
                 }
             }
         }
 
         public override string Name { get { return "Jaleco SS88006"; } }
 
+        public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
+        {
+            cpuClock++;
+            cpuClock %= 3;
+
+            if (!irqCounterEnabled || cpuClock != 0)
+                return;
+
+            ushort fixedBits = (ushort)(irqCounter & irqFixedMask);
+
+            ushort counterbits = (ushort)(irqCounter & irqCounterMask);
+
+            if (counterbits == 0)
+                TriggerInterruptRequest?.Invoke();
+
+            --counterbits;
+
+            irqCounter = (ushort)(fixedBits | (counterbits & irqCounterMask));
+
+        }
         private int SetLowerNybble(int currentValue, byte nybble)
         {
             currentValue &= 0xF0;
@@ -104,7 +186,13 @@ namespace NesCore.Storage
         }
 
         private int[] programRomBank;
-
         private int[] characterRomBank;
+        private ushort cpuClock;
+        private bool irqCounterEnabled;
+        private ushort irqReload;
+        private int irqFixedMask;
+        private int irqCounterMask;
+        private ushort irqCounter;
+        private MirrorMode mirrorMode;
     }
 }

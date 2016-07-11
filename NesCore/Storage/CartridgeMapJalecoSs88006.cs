@@ -110,29 +110,30 @@ namespace NesCore.Storage
                 {
                     // bits 0..3 of IRQ counter reload
                     irqReload &= 0xFFF0;
-                    irqReload |= (byte)(value & 0x0F);
+                    irqReload |= (ushort)(value & 0x0F);
                 }
                 else if (address == 0xE001)
                 {
                     // bits 4..7 of IRQ counter reload
                     irqReload &= 0xFF0F;
-                    irqReload |= (byte)((value & 0x0F) << 4);
+                    irqReload |= (ushort)((value & 0x0F) << 4);
                 }
                 else if (address == 0xE002)
                 {
                     // bits 8..11 of IRQ counter reload
                     irqReload &= 0xF0FF;
-                    irqReload |= (byte)((value & 0x0F) << 8);
+                    irqReload |= (ushort)((value & 0x0F) << 8);
                 }
                 else if (address == 0xE003)
                 {
                     // bits 12..15 of IRQ counter reload
                     irqReload &= 0x0FFF;
-                    irqReload |= (byte)((value & 0x0F) << 12);
+                    irqReload |= (ushort)((value & 0x0F) << 12);
                 }
                 else if (address == 0xF000)
                 {
                     irqCounter = irqReload;
+                    Debug.WriteLine("IRQ Reloaded to " + irqReload);
                     CancelInterruptRequest?.Invoke();
                 }
                 else if (address == 0xF001)

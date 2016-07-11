@@ -12,7 +12,10 @@ namespace NesCore.Storage
         {
             this.Cartridge = cartridge;
 
+            programRomBankLatch = new int[4];
             programRomBank = new int[4];
+
+            characterRomBankLatch = new int[8];
             characterRomBank = new int[8];
 
             programRomBank[0] = programRomBank[1] = programRomBank[2] = 0x000;
@@ -59,15 +62,18 @@ namespace NesCore.Storage
                     if (programBankIndex > 2)
                         return;
 
-                    int oldProgramBank = programRomBank[programBankIndex];
 
                     if (offset1000 % 2 == 0)
-                        programRomBank[programBankIndex] = SetLowerNybble(programRomBank[programBankIndex], value);
+                        programRomBankLatch[programBankIndex] = value & 0x0F;
                     else
-                        programRomBank[programBankIndex] = SetHigherNybble(programRomBank[programBankIndex], value);
+                    {
+                        int oldProgramBank = programRomBank[programBankIndex];
 
-                    if (programRomBank[programBankIndex] != oldProgramBank)
-                        ProgramBankSwitch?.Invoke((ushort)(0x8000 + programBankIndex * 0x2000), 0x2000);
+                        programRomBank[programBankIndex] = SetHigherNybble(programRomBankLatch[programBankIndex], value);
+
+                        if (programRomBank[programBankIndex] != oldProgramBank)
+                            ProgramBankSwitch?.Invoke((ushort)(0x8000 + programBankIndex * 0x2000), 0x2000);
+                    }
                 }
                 else if (address >= 0xA000 && address < 0xE000)
                 {
@@ -79,9 +85,16 @@ namespace NesCore.Storage
                     int characterBankIndex = bankIndex1000 * 2 + offset1000 / 2;
 
                     if (offset1000 % 2 == 0)
-                        characterRomBank[characterBankIndex] = SetLowerNybble(characterRomBank[characterBankIndex], value);
+                        characterRomBankLatch[characterBankIndex] = value & 0x0F;
                     else
-                        characterRomBank[characterBankIndex] = SetHigherNybble(characterRomBank[characterBankIndex], value);
+                    {
+                        int oldCharacterBank = characterRomBank[characterBankIndex];
+
+                        characterRomBank[characterBankIndex] = SetHigherNybble(characterRomBankLatch[characterBankIndex], value);
+
+                        if (characterRomBank[characterBankIndex] != oldCharacterBank)
+                            CharacterBankSwitch?.Invoke((ushort)(characterBankIndex * 0x400), 0x400);
+                    }
                 }
                 else if (address == 0xE000)
                 {
@@ -185,7 +198,9 @@ namespace NesCore.Storage
             return currentValue;
         }
 
+        private int[] programRomBankLatch;
         private int[] programRomBank;
+        private int[] characterRomBankLatch;
         private int[] characterRomBank;
         private ushort cpuClock;
         private bool irqCounterEnabled;

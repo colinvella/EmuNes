@@ -14,10 +14,7 @@ namespace NesCore.Storage
         {
             this.Cartridge = cartridge;
 
-            programRomBankLatch = new int[4];
             programRomBank = new int[4];
-
-            characterRomBankLatch = new int[8];
             characterRomBank = new int[8];
 
             int programBankCount = cartridge.ProgramRom.Count / 0x2000;
@@ -68,21 +65,18 @@ namespace NesCore.Storage
                     if (programBankIndex > 2)
                         return;
 
+                    int oldProgramBank = programRomBank[programBankIndex];
 
                     if (offset1000 % 2 == 0)
-                        programRomBankLatch[programBankIndex] = value & 0x0F;
+                        programRomBank[programBankIndex] = SetLowerNybble(programRomBank[programBankIndex], value);
                     else
+                        programRomBank[programBankIndex] = SetHigherNybble(programRomBank[programBankIndex], value);
+
+
+                    if (programRomBank[programBankIndex] != oldProgramBank)
                     {
-                        int oldProgramBank = programRomBank[programBankIndex];
-
-                        programRomBank[programBankIndex] = SetHigherNybble(programRomBankLatch[programBankIndex], value);
-
                         Debug.WriteLine("Program Bank " + programBankIndex + " (" + Hex.Format(address) + ") = " + programRomBank[programBankIndex]);
-
-                        if (programRomBank[programBankIndex] != oldProgramBank)
-                        {
-                            ProgramBankSwitch?.Invoke((ushort)(0x8000 + programBankIndex * 0x2000), 0x2000);
-                        }
+                        ProgramBankSwitch?.Invoke((ushort)(0x8000 + programBankIndex * 0x2000), 0x2000);
                     }
                 }
                 else if (address >= 0xA000 && address < 0xE000)
@@ -90,24 +84,22 @@ namespace NesCore.Storage
                     int offset1000 = address % 0x1000;
                     if (offset1000 >= 4)
                         return;
+
                     int bankIndex1000 = (address - 0xA000) / 0x1000;
 
                     int characterBankIndex = bankIndex1000 * 2 + offset1000 / 2;
 
+                    int oldCharacterBank = characterRomBank[characterBankIndex];
+
                     if (offset1000 % 2 == 0)
-                        characterRomBankLatch[characterBankIndex] = value & 0x0F;
+                        characterRomBank[characterBankIndex] = SetLowerNybble(characterRomBank[characterBankIndex], value);
                     else
+                        characterRomBank[characterBankIndex] = SetHigherNybble(characterRomBank[characterBankIndex], value);
+
+                    if (characterRomBank[characterBankIndex] != oldCharacterBank)
                     {
-                        int oldCharacterBank = characterRomBank[characterBankIndex];
-
-                        characterRomBank[characterBankIndex] = SetHigherNybble(characterRomBankLatch[characterBankIndex], value);
-
-                        Debug.WriteLine("Character Bank " + characterBankIndex + " (" + Hex.Format(address) +") = " + characterRomBank[characterBankIndex]);
-
-                        if (characterRomBank[characterBankIndex] != oldCharacterBank)
-                        {
-                            CharacterBankSwitch?.Invoke((ushort)(characterBankIndex * 0x400), 0x400);
-                        }
+                        Debug.WriteLine("Character Bank " + characterBankIndex + " (" + Hex.Format(address) + ") = " + characterRomBank[characterBankIndex]);
+                        CharacterBankSwitch?.Invoke((ushort)(characterBankIndex * 0x400), 0x400);
                     }
                 }
                 else if (address == 0xE000)
@@ -213,9 +205,7 @@ namespace NesCore.Storage
             return currentValue;
         }
 
-        private int[] programRomBankLatch;
         private int[] programRomBank;
-        private int[] characterRomBankLatch;
         private int[] characterRomBank;
         private ushort cpuClock;
         private bool irqCounterEnabled;

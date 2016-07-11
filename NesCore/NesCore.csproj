@@ -66,6 +66,7 @@
     <Compile Include="Storage\CartridgeMapGxRom.cs" />
     <Compile Include="Storage\CartridgeMapCpRom.cs" />
     <Compile Include="Storage\CartridgeMapColourDreams.cs" />
+    <Compile Include="Storage\CartridgeMapJalecoSs88006.cs" />
     <Compile Include="Storage\CartridgeMapMmc1.cs" />
     <Compile Include="Storage\CartridgeMapMmc4.cs" />
     <Compile Include="Storage\CartridgeMapMmc3.cs" />

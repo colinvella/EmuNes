@@ -320,6 +320,12 @@ namespace SharpNes
 
         private void OnRecordVideoStart(object sender, EventArgs eventArgs)
         {
+            if (gameState == GameState.Stopped)
+                return;
+
+            if (File.Exists(videoPath))
+                File.Delete(videoPath);
+
             videoRecording = true;                 
             gifEncoder = new GifEncoder(File.OpenWrite(this.videoPath));
             recordVideoStartMenuItem.Enabled = !videoRecording;
@@ -457,6 +463,11 @@ namespace SharpNes
                     {
                         graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
                         graphics.DrawImage(bitmapBuffer.Bitmap, leftCenteredMargin, 0, bufferSize.Width, bufferSize.Height);
+                    }
+
+                    if (videoRecording && gameTickDateTime.Second % 2 == 0)
+                    {
+                        graphics.FillEllipse(Brushes.Red, leftCenteredMargin + bufferSize.Width - 24, bufferSize.Height - 24, 16, 16);
                     }
 
                     break;

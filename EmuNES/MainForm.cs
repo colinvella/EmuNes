@@ -23,6 +23,7 @@ using System.Windows.Forms;
 using NesCore.Utility;
 using System.Xml.Linq;
 using System.Globalization;
+using BumpKit;
 
 namespace SharpNes
 {
@@ -317,6 +318,23 @@ namespace SharpNes
             inputOptionsForm.ShowDialog(this);
         }
 
+        private void OnRecordVideoStart(object sender, EventArgs eventArgs)
+        {
+            videoRecording = true;                 
+            gifEncoder = new GifEncoder(File.OpenWrite(this.videoPath));
+            recordVideoStartMenuItem.Enabled = !videoRecording;
+            recordVideoStopMenuItem.Enabled = videoRecording;
+        }
+
+        private void OnRecordVideoStop(object sender, EventArgs eventArgs)
+        {
+            videoRecording = false;
+            gifEncoder.Dispose();
+            gifEncoder = null;
+            recordVideoStartMenuItem.Enabled = !videoRecording;
+            recordVideoStopMenuItem.Enabled = videoRecording;
+        }
+
         private void OnDiagnosticsCodeDisassembly(object sender, EventArgs eventArgs)
         {
             traceEnabled = !traceEnabled;
@@ -555,6 +573,11 @@ namespace SharpNes
                 averageDeltaTime = averageDeltaTime * 0.9 + currentDeltaTime * 0.1;
                 int frameRate = (int)(1.0 / averageDeltaTime);
                 frameRateStatusLabel.Text = frameRate + " FPS";
+
+                if (videoRecording)
+                {
+                    gifEncoder.AddFrame(bitmapBuffer.Bitmap, 0, 0, TimeSpan.FromMilliseconds(16));
+                }
             };
         }
 
@@ -656,6 +679,8 @@ namespace SharpNes
                 OnGameRunPause(this, EventArgs.Empty);
 
                 recentFileManager.AddRecentFile(cartridgeRomPath);
+
+                this.videoPath = cartridgeRomPath.Replace(".nes", ".gif").Replace(".zip", ".gif");
 
                 return true;
             }
@@ -917,5 +942,10 @@ namespace SharpNes
 
         // NST database
         private XDocument nstDatabase;
+
+        // video capture
+        GifEncoder gifEncoder;
+        string videoPath;
+        bool videoRecording;
     }
 }

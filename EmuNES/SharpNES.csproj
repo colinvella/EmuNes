@@ -36,6 +36,9 @@
     <ApplicationIcon>Nes.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BumpKit">
+      <HintPath>..\Libraries\BumpKit\BumpKit.dll</HintPath>
+    </Reference>
     <Reference Include="NAudio">
       <HintPath>..\Libraries\NAudio\NAudio.dll</HintPath>
     </Reference>

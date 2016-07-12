@@ -225,6 +225,7 @@ namespace SharpNes
 
             videoPanel.Invalidate();
             UpdateGameMenuItems();
+            UpdateRecordMenuItems();
         }
 
         private void OnGameReset(object sender, EventArgs eventArgs)
@@ -247,7 +248,12 @@ namespace SharpNes
             if (this.cartridge.SaveRam.Modified)
                 StoreSaveRam();
 
+            // stop recording if active
+            if (videoRecording)
+                OnRecordVideoStartStop(this, EventArgs.Empty);
+
             UpdateGameMenuItems();
+            UpdateRecordMenuItems();
         }
 
         private void OnViewScreenSizeX1(object sender, EventArgs eventArgs)
@@ -318,27 +324,29 @@ namespace SharpNes
             inputOptionsForm.ShowDialog(this);
         }
 
-        private void OnRecordVideoStart(object sender, EventArgs eventArgs)
+        private void OnRecordVideoStartStop(object sender, EventArgs eventArgs)
         {
-            if (gameState == GameState.Stopped)
-                return;
+            if (videoRecording)
+            {
+                videoRecording = false;
+                gifEncoder.Dispose();
+                gifEncoder = null;
 
-            if (File.Exists(videoPath))
-                File.Delete(videoPath);
+                recordVideoStartStopMenuItem.Text = "&Start";
+            }
+            else // not recording
+            {
+                if (gameState == GameState.Stopped)
+                    return;
 
-            videoRecording = true;                 
-            gifEncoder = new GifEncoder(File.OpenWrite(this.videoPath));
-            recordVideoStartMenuItem.Enabled = !videoRecording;
-            recordVideoStopMenuItem.Enabled = videoRecording;
-        }
+                if (File.Exists(videoPath))
+                    File.Delete(videoPath);
 
-        private void OnRecordVideoStop(object sender, EventArgs eventArgs)
-        {
-            videoRecording = false;
-            gifEncoder.Dispose();
-            gifEncoder = null;
-            recordVideoStartMenuItem.Enabled = !videoRecording;
-            recordVideoStopMenuItem.Enabled = videoRecording;
+                videoRecording = true;
+                gifEncoder = new GifEncoder(File.OpenWrite(this.videoPath));
+
+                recordVideoStartStopMenuItem.Text = "&Stop";
+            }
         }
 
         private void OnDiagnosticsCodeDisassembly(object sender, EventArgs eventArgs)
@@ -465,6 +473,7 @@ namespace SharpNes
                         graphics.DrawImage(bitmapBuffer.Bitmap, leftCenteredMargin, 0, bufferSize.Width, bufferSize.Height);
                     }
 
+                    // video recording indicator
                     if (videoRecording && gameTickDateTime.Second % 2 == 0)
                     {
                         graphics.FillEllipse(Brushes.Red, leftCenteredMargin + bufferSize.Width - 24, bufferSize.Height - 24, 16, 16);
@@ -526,6 +535,11 @@ namespace SharpNes
                     break;
             }
             gameStopMenuItem.Enabled = gameState != GameState.Stopped;
+        }
+
+        private void UpdateRecordMenuItems()
+        {
+            recordMenuItem.Enabled = gameState == GameState.Running;
         }
 
         private void ConfigureProcessor()

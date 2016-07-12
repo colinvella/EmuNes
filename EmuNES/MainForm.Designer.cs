@@ -60,6 +60,9 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsInputMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recordMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recordVideoMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recordVideoStartStopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.diagnosticsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.diagnosticsCodeDisassemblyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.videoPanel = new System.Windows.Forms.Panel();
@@ -67,10 +70,6 @@
             this.emulatorStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.frameRateStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.iconTimer = new System.Windows.Forms.Timer(this.components);
-            this.recordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.videoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.recordVideoStartMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.recordVideoStopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mainMenuStrip.SuspendLayout();
@@ -80,12 +79,12 @@
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(153, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(146, 6);
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(153, 6);
+            toolStripSeparator2.Size = new System.Drawing.Size(146, 6);
             // 
             // mainMenuStrip
             // 
@@ -96,7 +95,7 @@
             this.viewMenuItem,
             this.toolStripMenuItem1,
             this.optionsMenuItem,
-            this.recordToolStripMenuItem,
+            this.recordMenuItem,
             this.diagnosticsMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
@@ -122,7 +121,7 @@
             // 
             this.fileOpenMenuItem.Image = global::SharpNes.Properties.Resources.FileOpen;
             this.fileOpenMenuItem.Name = "fileOpenMenuItem";
-            this.fileOpenMenuItem.Size = new System.Drawing.Size(156, 26);
+            this.fileOpenMenuItem.Size = new System.Drawing.Size(149, 26);
             this.fileOpenMenuItem.Text = "&Open";
             this.fileOpenMenuItem.Click += new System.EventHandler(this.OnFileOpen);
             // 
@@ -131,7 +130,7 @@
             this.filePropertiesMenuItem.Enabled = false;
             this.filePropertiesMenuItem.Image = global::SharpNes.Properties.Resources.FileProperties;
             this.filePropertiesMenuItem.Name = "filePropertiesMenuItem";
-            this.filePropertiesMenuItem.Size = new System.Drawing.Size(156, 26);
+            this.filePropertiesMenuItem.Size = new System.Drawing.Size(149, 26);
             this.filePropertiesMenuItem.Text = "&Properties...";
             this.filePropertiesMenuItem.Click += new System.EventHandler(this.OnFileProperties);
             // 
@@ -139,7 +138,7 @@
             // 
             this.fileRecentFilesMenuItem.Image = global::SharpNes.Properties.Resources.FileRecent;
             this.fileRecentFilesMenuItem.Name = "fileRecentFilesMenuItem";
-            this.fileRecentFilesMenuItem.Size = new System.Drawing.Size(156, 26);
+            this.fileRecentFilesMenuItem.Size = new System.Drawing.Size(149, 26);
             this.fileRecentFilesMenuItem.Text = "Recent Files...";
             // 
             // fileExitMenuItem
@@ -147,7 +146,7 @@
             this.fileExitMenuItem.Image = global::SharpNes.Properties.Resources.FileExit;
             this.fileExitMenuItem.Name = "fileExitMenuItem";
             this.fileExitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.fileExitMenuItem.Size = new System.Drawing.Size(156, 26);
+            this.fileExitMenuItem.Size = new System.Drawing.Size(149, 26);
             this.fileExitMenuItem.Text = "Exit";
             this.fileExitMenuItem.Click += new System.EventHandler(this.OnFileExit);
             // 
@@ -166,7 +165,7 @@
             // 
             this.gameRunMenuItem.Image = global::SharpNes.Properties.Resources.GameRun;
             this.gameRunMenuItem.Name = "gameRunMenuItem";
-            this.gameRunMenuItem.Size = new System.Drawing.Size(143, 26);
+            this.gameRunMenuItem.Size = new System.Drawing.Size(156, 26);
             this.gameRunMenuItem.Text = "&Run";
             this.gameRunMenuItem.Click += new System.EventHandler(this.OnGameRunPause);
             // 
@@ -174,7 +173,7 @@
             // 
             this.gameResetMenuItem.Image = global::SharpNes.Properties.Resources.GameReset;
             this.gameResetMenuItem.Name = "gameResetMenuItem";
-            this.gameResetMenuItem.Size = new System.Drawing.Size(143, 26);
+            this.gameResetMenuItem.Size = new System.Drawing.Size(156, 26);
             this.gameResetMenuItem.Text = "Reset";
             this.gameResetMenuItem.Click += new System.EventHandler(this.OnGameReset);
             // 
@@ -183,7 +182,7 @@
             this.gameStopMenuItem.Image = global::SharpNes.Properties.Resources.GameStop;
             this.gameStopMenuItem.Name = "gameStopMenuItem";
             this.gameStopMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
-            this.gameStopMenuItem.Size = new System.Drawing.Size(143, 26);
+            this.gameStopMenuItem.Size = new System.Drawing.Size(156, 26);
             this.gameStopMenuItem.Text = "Stop";
             this.gameStopMenuItem.Click += new System.EventHandler(this.OnGameStop);
             // 
@@ -337,9 +336,34 @@
             // 
             this.optionsInputMenuItem.Image = global::SharpNes.Properties.Resources.OptionsInput;
             this.optionsInputMenuItem.Name = "optionsInputMenuItem";
-            this.optionsInputMenuItem.Size = new System.Drawing.Size(156, 26);
+            this.optionsInputMenuItem.Size = new System.Drawing.Size(115, 26);
             this.optionsInputMenuItem.Text = "&Input...";
             this.optionsInputMenuItem.Click += new System.EventHandler(this.OnOptionsInput);
+            // 
+            // recordMenuItem
+            // 
+            this.recordMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.recordVideoMenuItem});
+            this.recordMenuItem.Enabled = false;
+            this.recordMenuItem.Name = "recordMenuItem";
+            this.recordMenuItem.Size = new System.Drawing.Size(56, 20);
+            this.recordMenuItem.Text = "&Record";
+            // 
+            // recordVideoMenuItem
+            // 
+            this.recordVideoMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.recordVideoStartStopMenuItem});
+            this.recordVideoMenuItem.Name = "recordVideoMenuItem";
+            this.recordVideoMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.recordVideoMenuItem.Text = "&Video (GIF)";
+            // 
+            // recordVideoStartStopMenuItem
+            // 
+            this.recordVideoStartStopMenuItem.Name = "recordVideoStartStopMenuItem";
+            this.recordVideoStartStopMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
+            this.recordVideoStartStopMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.recordVideoStartStopMenuItem.Text = "Start";
+            this.recordVideoStartStopMenuItem.Click += new System.EventHandler(this.OnRecordVideoStartStop);
             // 
             // diagnosticsMenuItem
             // 
@@ -404,40 +428,6 @@
             this.iconTimer.Enabled = true;
             this.iconTimer.Interval = 250;
             this.iconTimer.Tick += new System.EventHandler(this.OnIconTick);
-            // 
-            // recordToolStripMenuItem
-            // 
-            this.recordToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.videoToolStripMenuItem});
-            this.recordToolStripMenuItem.Name = "recordToolStripMenuItem";
-            this.recordToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
-            this.recordToolStripMenuItem.Text = "&Record";
-            // 
-            // videoToolStripMenuItem
-            // 
-            this.videoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.recordVideoStartMenuItem,
-            this.recordVideoStopMenuItem});
-            this.videoToolStripMenuItem.Name = "videoToolStripMenuItem";
-            this.videoToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.videoToolStripMenuItem.Text = "&Video (GIF)";
-            // 
-            // recordVideoStartMenuItem
-            // 
-            this.recordVideoStartMenuItem.Name = "recordVideoStartMenuItem";
-            this.recordVideoStartMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-            this.recordVideoStartMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.recordVideoStartMenuItem.Text = "Start";
-            this.recordVideoStartMenuItem.Click += new System.EventHandler(this.OnRecordVideoStart);
-            // 
-            // recordVideoStopMenuItem
-            // 
-            this.recordVideoStopMenuItem.Enabled = false;
-            this.recordVideoStopMenuItem.Name = "recordVideoStopMenuItem";
-            this.recordVideoStopMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-            this.recordVideoStopMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.recordVideoStopMenuItem.Text = "Stop";
-            this.recordVideoStopMenuItem.Click += new System.EventHandler(this.OnRecordVideoStop);
             // 
             // MainForm
             // 
@@ -510,10 +500,9 @@
         private System.Windows.Forms.ToolStripMenuItem diagnosticsMenuItem;
         private System.Windows.Forms.ToolStripMenuItem diagnosticsCodeDisassemblyMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewNoSpriteOverflowMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem recordToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem videoToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem recordVideoStartMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem recordVideoStopMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem recordMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem recordVideoMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem recordVideoStartStopMenuItem;
     }
 }
 

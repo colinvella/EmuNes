@@ -735,12 +735,7 @@ namespace NesCore.Video
 
             if (nmi && !nmiPrevious)
             {
-                // TODO: this fixes some games but the delay shouldn't have to be so
-                // long, so the timings are off somewhere
-                //nmiDelay = 35; // seems better than 15 - not sure what I'm doing here!
-                //if (evenFrame)
-                //    nmiDelay -= 5;
-                nmiDelay = 15;
+                nmiDelay = 21; // 7 cpu cycles = 7 * 3 ppu cycles ?
             }
             nmiPrevious = nmi;
         }

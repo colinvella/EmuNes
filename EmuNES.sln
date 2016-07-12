@@ -35,6 +35,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BumpKit", "BumpKit", "{CC62
 		Libraries\BumpKit\BumpKit.dll = Libraries\BumpKit\BumpKit.dll
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AForge", "AForge", "{2166E4D0-2D5E-465E-8E8C-4AF7F8F0576B}"
+	ProjectSection(SolutionItems) = preProject
+		Libraries\AForge\AForge.Video.dll = Libraries\AForge\AForge.Video.dll
+		Libraries\AForge\AForge.Video.FFMPEG.dll = Libraries\AForge\AForge.Video.FFMPEG.dll
+		Libraries\AForge\avcodec-53.dll = Libraries\AForge\avcodec-53.dll
+		Libraries\AForge\avdevice-53.dll = Libraries\AForge\avdevice-53.dll
+		Libraries\AForge\avfilter-2.dll = Libraries\AForge\avfilter-2.dll
+		Libraries\AForge\avformat-53.dll = Libraries\AForge\avformat-53.dll
+		Libraries\AForge\avutil-51.dll = Libraries\AForge\avutil-51.dll
+		Libraries\AForge\postproc-52.dll = Libraries\AForge\postproc-52.dll
+		Libraries\AForge\swresample-0.dll = Libraries\AForge\swresample-0.dll
+		Libraries\AForge\swscale-2.dll = Libraries\AForge\swscale-2.dll
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,5 +74,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{A03867BD-D87D-40D5-92DB-E443CCA4200D} = {6E224CFE-3372-466E-8516-66B14E2D0F10}
 		{CC62A1B5-015E-4F50-89F2-2F4EB37791C3} = {6E224CFE-3372-466E-8516-66B14E2D0F10}
+		{2166E4D0-2D5E-465E-8E8C-4AF7F8F0576B} = {6E224CFE-3372-466E-8516-66B14E2D0F10}
 	EndGlobalSection
 EndGlobal

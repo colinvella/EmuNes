@@ -24,6 +24,7 @@ using NesCore.Utility;
 using System.Xml.Linq;
 using System.Globalization;
 using BumpKit;
+using AForge.Video.FFMPEG;
 
 namespace SharpNes
 {
@@ -250,7 +251,7 @@ namespace SharpNes
 
             // stop recording if active
             if (videoRecording)
-                OnRecordVideoStartStop(this, EventArgs.Empty);
+                OnRecordVideoMp4StartStop(this, EventArgs.Empty);
 
             UpdateGameMenuItems();
             UpdateRecordMenuItems();
@@ -324,28 +325,70 @@ namespace SharpNes
             inputOptionsForm.ShowDialog(this);
         }
 
-        private void OnRecordVideoStartStop(object sender, EventArgs eventArgs)
+        private void OnRecordVideoMp4StartStop(object sender, EventArgs eventArgs)
         {
             if (videoRecording)
             {
+                // stop
                 videoRecording = false;
-                gifEncoder.Dispose();
-                gifEncoder = null;
+                videoRecordingMp4 = false;
 
-                recordVideoStartStopMenuItem.Text = "&Start";
+                mp4VideoEncoder.Close();
+                mp4VideoEncoder = null;
+
+                recordVideoMp4StartStopMenuItem.Text = "&Start";
+                recordVideoGifMenuItem.Enabled = true;
             }
             else // not recording
             {
+                // start
                 if (gameState == GameState.Stopped)
                     return;
 
-                if (File.Exists(videoPath))
-                    File.Delete(videoPath);
+                if (File.Exists(videoPathMp4))
+                    File.Delete(videoPathMp4);
 
                 videoRecording = true;
-                gifEncoder = new GifEncoder(File.OpenWrite(this.videoPath));
+                videoRecordingMp4 = true;
 
-                recordVideoStartStopMenuItem.Text = "&Stop";
+                mp4VideoEncoder = new VideoFileWriter();
+                mp4VideoEncoder.Open(videoPathMp4, bitmapBuffer.Width, bitmapBuffer.Height, 60, VideoCodec.MPEG4);
+
+                recordVideoMp4StartStopMenuItem.Text = "&Stop";
+                recordVideoGifMenuItem.Enabled = false;
+            }
+        }
+
+        private void OnRecordVideoGifStartStop(object sender, EventArgs eventArgs)
+        {
+            if (videoRecording)
+            {
+                // stop
+                videoRecording = false;
+                videoRecordingGif = false;
+
+                gifVideoEncoder.Dispose();
+                gifVideoEncoder = null;
+        
+                recordVideoGifStartStopMenuItem.Text = "&Start";
+                recordVideoMp4MenuItem.Enabled = true;
+            }
+            else // not recording
+            {
+                // start
+                if (gameState == GameState.Stopped)
+                    return;
+
+                if (File.Exists(videoPathGif))
+                    File.Delete(videoPathGif);
+
+                videoRecording = true;
+                videoRecordingGif = true;
+
+                gifVideoEncoder = new GifEncoder(File.OpenWrite(videoPathGif));
+                
+                recordVideoGifStartStopMenuItem.Text = "&Stop";
+                recordVideoMp4MenuItem.Enabled = false;
             }
         }
 
@@ -599,10 +642,14 @@ namespace SharpNes
                 int frameRate = (int)(1.0 / averageDeltaTime);
                 frameRateStatusLabel.Text = frameRate + " FPS";
 
-                if (videoRecording)
-                {
-                    gifEncoder.AddFrame(bitmapBuffer.Bitmap, 0, 0, TimeSpan.FromMilliseconds(16));
-                }
+                // MP4 recording
+                if (videoRecordingMp4)
+                    mp4VideoEncoder.WriteVideoFrame(bitmapBuffer.Bitmap);
+
+                // GIF recording
+                if (videoRecordingGif)
+                    gifVideoEncoder.AddFrame(bitmapBuffer.Bitmap, 0, 0, TimeSpan.FromMilliseconds(16));
+
             };
         }
 
@@ -705,7 +752,9 @@ namespace SharpNes
 
                 recentFileManager.AddRecentFile(cartridgeRomPath);
 
-                this.videoPath = cartridgeRomPath.Replace(".nes", ".gif").Replace(".zip", ".gif");
+                // set video file paths
+                this.videoPathMp4 = cartridgeRomPath.Replace(".nes", ".mp4").Replace(".zip", ".mp4");
+                this.videoPathGif = cartridgeRomPath.Replace(".nes", ".gif").Replace(".zip", ".gif");
 
                 return true;
             }
@@ -969,8 +1018,12 @@ namespace SharpNes
         private XDocument nstDatabase;
 
         // video capture
-        GifEncoder gifEncoder;
-        string videoPath;
-        bool videoRecording;
+        private VideoFileWriter mp4VideoEncoder;
+        private string videoPathMp4;
+        private GifEncoder gifVideoEncoder;
+        private string videoPathGif;
+        private bool videoRecording;
+        private bool videoRecordingMp4;
+        private bool videoRecordingGif;
     }
 }

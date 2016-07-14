@@ -11,9 +11,8 @@ namespace NesCore.Storage
     class CartridgeMapJalecoSs88006 : CartridgeMap
     {
         public CartridgeMapJalecoSs88006(Cartridge cartridge)
+            : base(cartridge)
         {
-            this.Cartridge = cartridge;
-
             programRomBank = new int[4];
             characterRomBank = new int[8];
 
@@ -23,11 +22,7 @@ namespace NesCore.Storage
             programRomBank[1] = 1;
             programRomBank[2] = programBankCount - 2;
             programRomBank[3] = programBankCount - 1;
-
-            this.mirrorMode = cartridge.MirrorMode;
         }
-
-        public Cartridge Cartridge { get; private set; }
 
         public override byte this[ushort address]
         {
@@ -154,18 +149,13 @@ namespace NesCore.Storage
                 }
                 else if (address == 0xF002)
                 {
-                    MirrorMode newMirrorMode = mirrorMode;
+                    // mirror mode
                     switch (value & 0x03)
                     {
-                        case 0x00: newMirrorMode = MirrorMode.Horizontal; break;
-                        case 0x01: newMirrorMode = MirrorMode.Vertical; break;
-                        case 0x02: newMirrorMode = MirrorMode.Single0; break;
-                        case 0x03: newMirrorMode = MirrorMode.Single1; break;
-                    }
-                    if (newMirrorMode != mirrorMode)
-                    {
-                        mirrorMode = newMirrorMode;
-                        MirrorModeChanged?.Invoke(mirrorMode);
+                        case 0x00: MirrorMode = MirrorMode.Horizontal; break;
+                        case 0x01: MirrorMode = MirrorMode.Vertical; break;
+                        case 0x02: MirrorMode = MirrorMode.Single0; break;
+                        case 0x03: MirrorMode = MirrorMode.Single1; break;
                     }
                 }
             }
@@ -224,6 +214,5 @@ namespace NesCore.Storage
         private int irqCounterMask;
         private ushort irqCounter;
         private bool irqPrimed;
-        private MirrorMode mirrorMode;
     }
 }

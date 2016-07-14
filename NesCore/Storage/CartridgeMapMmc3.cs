@@ -11,8 +11,8 @@ namespace NesCore.Storage
     class CartridgeMapMmc3 : CartridgeMap
     {
         public CartridgeMapMmc3(Cartridge cartridge, bool mmc3AVariant = false)
+            : base(cartridge)
         {
-            Cartridge = cartridge;
             this.mmc3AVariant = mmc3AVariant;
 
             registers = new byte[8];
@@ -23,11 +23,7 @@ namespace NesCore.Storage
             programBankOffsets[1] = GetProgramBankOffset(1);
             programBankOffsets[2] = GetProgramBankOffset(-2);
             programBankOffsets[3] = GetProgramBankOffset(-1);
-
-            prevMirrorMode = cartridge.MirrorMode;
         }
-
-        public Cartridge Cartridge { get; private set; }
 
         public override string Name { get { return mmc3AVariant ? "MMC3A" : "MMC3"; } }
 
@@ -211,12 +207,7 @@ namespace NesCore.Storage
 
         private void WriteMirror(byte value)
         {
-            MirrorMode mirrorMode = ((value & 1) == 0) ? MirrorMode.Vertical : MirrorMode.Horizontal;
-            if (mirrorMode != prevMirrorMode)
-            {
-                prevMirrorMode = mirrorMode;
-                MirrorModeChanged?.Invoke(mirrorMode);
-            }
+            MirrorMode = ((value & 1) == 0) ? MirrorMode.Vertical : MirrorMode.Horizontal;
         }
 
         private void WriteProtect(byte value)
@@ -323,6 +314,5 @@ namespace NesCore.Storage
         private byte irqReload;
         private byte irqCounter;
         private bool irqEnable;
-        private MirrorMode prevMirrorMode;
     }
 }

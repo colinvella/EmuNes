@@ -55,7 +55,13 @@ namespace NesCore.Video
 
             // $0000 - $1FFF mapped to CHR when cartridge loaded
 
-            // $2000 - $3EFF mirroring configured when cartridge loaded
+            // $2000 - $2FFF nametable mirroring configured when cartridge loaded
+            // and eventually my mirroring registers for some mappers
+
+            // $3000-$3EFF mirrors of $2000-$2EFF (practically unused)
+            Memory.ConfigureMemoryAccessRange(0x3000, 0x0F00,
+                (address) => Memory[(ushort)(address - 0x1000)],
+                (address, value) => Memory[(ushort)(address - 0x1000)] = value);
 
             // $3F00 - $3FFF - palette
             Memory.ConfigureMemoryAccessRange(0x3F00, 0x0100,
@@ -369,42 +375,7 @@ namespace NesCore.Video
                     oamData[oamAddress++] = ReadByte(address++);
             }
         }
-
-        /// <summary>
-        /// Configures name table data mirroring mode
-        /// </summary>
-        /// <param name="mirrorMode">mirroring mode from cartridge ROM</param>
-        public void ConfigureNameTableMirroringMode(MirrorMode mirrorMode)
-        {
-            // $2000-$3EFF
-            Memory.ConfigureMemoryAccessRange(0x2000, 0x1F00,
-                (address) =>
-                {
-                    ushort mirroredAddress = MirrorAddress(mirrorMode, address);
-                    ushort nameTableOffset = (ushort)(mirroredAddress % 0x400);
-
-                    byte defaultValue = nameTableData[MirrorAddress(mirrorMode, address) % 0x800];
-                    if (mirroredAddress < 0x2800)
-                        return defaultValue;
-                    else if (mirroredAddress < 0x2C00)
-                        return ReadNameTableC(nameTableOffset, defaultValue);
-                    else
-                        return ReadNameTableD(nameTableOffset, defaultValue);
-                },
-                (address, value) =>
-                {
-                    ushort mirroredAddress = MirrorAddress(mirrorMode, address);
-                    ushort nameTableOffset = (ushort)(mirroredAddress % 0x400);
-
-                    if (mirroredAddress < 0x2800)
-                        nameTableData[MirrorAddress(mirrorMode, address) % 0x800] = value;
-                    else if (mirroredAddress < 0x2C00)
-                        WriteNameTableC(nameTableOffset, value);
-                    else
-                        WriteNameTableD(nameTableOffset, value);
-                });
-        }
-
+        
         /// <summary>
         /// resets the PPU
         /// </summary>
@@ -1050,17 +1021,6 @@ namespace NesCore.Video
                     evenFrame = !evenFrame;
                 }
             }
-        }
-
-        private ushort MirrorAddress(MirrorMode mirrorMode, ushort address)
-        {
-            address = (ushort)((address - 0x2000) % 0x1000);
-            int table = address / 0x0400;
-            int offset = address % 0x0400;
-
-            int nameTableIndex = ((int)mirrorMode >> (table * 2)) & 0x03;
-
-            return (ushort)(0x2000 + nameTableIndex * 0x0400 + offset);
         }
 
         // storage variables

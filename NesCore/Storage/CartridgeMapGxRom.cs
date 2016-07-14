@@ -10,15 +10,13 @@ namespace NesCore.Storage
     class CartridgeMapGxRom : CartridgeMap
     {
         public CartridgeMapGxRom(Cartridge cartridge)
+            : base(cartridge)
         {
-            Cartridge = cartridge;
             programBank = 0;
             characterBank = 0;
         }
 
         public override string Name { get { return "GxROM"; } }
-
-        public Cartridge Cartridge { get; private set; }
         
         public override byte this[ushort address]
         {

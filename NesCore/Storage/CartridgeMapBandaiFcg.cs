@@ -20,9 +20,8 @@ namespace NesCore.Storage
         }
 
         public CartridgeMapBandaiFcg(Cartridge cartridge, Variant variants)
+            : base(cartridge)
         {
-            Cartridge = cartridge;
-
             this.variants = variants;
 
             // build name dynamically from variants
@@ -60,7 +59,6 @@ namespace NesCore.Storage
                 lastProgramBankBase = (programBankCount - 1) * 0x4000;
 
             characterBank = new int[8];
-            mirrorMode = cartridge.MirrorMode;
         }
 
         public override string Name
@@ -70,8 +68,6 @@ namespace NesCore.Storage
                 return this.variantName;
             }
         }
-
-        public Cartridge Cartridge { get; private set; }
 
         public override byte this[ushort address]
         {
@@ -181,19 +177,12 @@ namespace NesCore.Storage
                     else if (registerAddress == 0x09)
                     {
                         // mirroring mode
-                        MirrorMode newMirrorMode = mirrorMode;
                         switch (value & 0x03)
                         {
-                            case 0: newMirrorMode = MirrorMode.Vertical; break;
-                            case 1: newMirrorMode = MirrorMode.Horizontal; break;
-                            case 2: newMirrorMode = MirrorMode.Single0; break;
-                            case 3: newMirrorMode = MirrorMode.Single1; break;
-                        }
-
-                        if (newMirrorMode != mirrorMode)
-                        {
-                            mirrorMode = newMirrorMode;
-                            MirrorModeChanged?.Invoke(mirrorMode);
+                            case 0: MirrorMode = MirrorMode.Vertical; break;
+                            case 1: MirrorMode = MirrorMode.Horizontal; break;
+                            case 2: MirrorMode = MirrorMode.Single0; break;
+                            case 3: MirrorMode = MirrorMode.Single1; break;
                         }
                     }
                     else if (registerAddress == 0x0A)
@@ -248,7 +237,6 @@ namespace NesCore.Storage
         private int[] characterBank;
         private int programBank;
         private int lastProgramBankBase;
-        private MirrorMode mirrorMode;
         private bool irqEnabled;
         private ushort irqCounter;
         private ushort cpuClock;

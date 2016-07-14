@@ -11,9 +11,8 @@ namespace NesCore.Storage
     class CartridgeMapNamco163 : CartridgeMap
     {
         public CartridgeMapNamco163(Cartridge cartridge)
+            : base(cartridge)
         {
-            Cartridge = cartridge;
-
             programRam = new byte[0x2000];
 
             programRomBank = new int[4];
@@ -28,8 +27,6 @@ namespace NesCore.Storage
 
             programRomBank[3] = programBankCount - 1;
         }
-
-        private Cartridge Cartridge { get; set; }
 
         public override byte this[ushort address]
         {

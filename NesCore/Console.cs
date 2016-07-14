@@ -98,12 +98,11 @@ namespace NesCore
                 (address) => cartridge.Map[address],
                 (address, value) => cartridge.Map[address] = value);
 
-            // name table mirroring mode determined from cartridge rom
-            // first time round on loading cartridge (for simple mappers)
-            Video.ConfigureNameTableMirroringMode(cartridge.MirrorMode);
-
-            // wired to mirror mode changes (for more complex mappers like MMC1)
-            cartridge.Map.MirrorModeChanged = Video.ConfigureNameTableMirroringMode;
+            // connect $1000 -$2FFF to mapper's nametable to allow advanced control
+            // e.g. MMC5 extended attributes, Namco 163 CHR nametable RAM etc.
+            Video.Memory.ConfigureMemoryAccessRange(0x2000, 0x1000,
+                (address) => cartridge.Map.ReadNameTableByte(address),
+                (address, value) => cartridge.Map.WriteNameTableByte(address, value));
 
             // wire IRQ triggering for MMC3, MMC5 etc.
             cartridge.Map.TriggerInterruptRequest = Processor.TriggerInterruptRequest;
@@ -117,14 +116,6 @@ namespace NesCore
                 cartridge.Map.AccessingSpriteCharacters = true;
             Video.EvaluatingBackgroundData = () =>
                 cartridge.Map.AccessingSpriteCharacters = false;
-
-            // wire extended name table C
-            Video.ReadNameTableC = cartridge.Map.ReadNameTableC;
-            Video.WriteNameTableC = cartridge.Map.WriteNameTableC;
-
-            // wire extended name table D
-            Video.ReadNameTableD = cartridge.Map.ReadNameTableD;
-            Video.WriteNameTableD = cartridge.Map.WriteNameTableD;
 
             // wire enhance nametable tile and attributes (e.g. for MMC5 ExRam Mode 1)
             Video.EnhanceTileByte = cartridge.Map.EnhanceTileIndex;

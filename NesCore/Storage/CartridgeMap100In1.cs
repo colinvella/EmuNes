@@ -10,14 +10,11 @@ namespace NesCore.Storage
     class CartridgeMap100In1 : CartridgeMap
     {
         public CartridgeMap100In1(Cartridge cartridge)
+            : base(cartridge)
         {
-            this.Cartridge = cartridge;
             bankMode = 0;
             programRam = new byte[0x2000];
-            prevMirrorMode = this.Cartridge.MirrorMode;
         }
-
-        public Cartridge Cartridge { get; private set; }
 
         public override byte this[ushort address]
         {
@@ -103,12 +100,8 @@ namespace NesCore.Storage
                     if (bankMode != oldBankMode)
                         ProgramBankSwitch?.Invoke(0x8000, 0x8000);
 
-                    MirrorMode mirrorMode = (value & 0x40) != 0 ? MirrorMode.Horizontal : MirrorMode.Vertical;
-                    if (mirrorMode != prevMirrorMode)
-                    {
-                        prevMirrorMode = mirrorMode;
-                        MirrorModeChanged?.Invoke(mirrorMode);
-                    }
+                    MirrorMode = (value & 0x40) != 0 ? MirrorMode.Horizontal : MirrorMode.Vertical;
+
                     return;
                 }
 
@@ -125,6 +118,5 @@ namespace NesCore.Storage
         private int programRomBank;
         private int subBank;
         private byte[] programRam;
-        private MirrorMode prevMirrorMode;
     }
 }

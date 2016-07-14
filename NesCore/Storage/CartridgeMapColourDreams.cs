@@ -10,16 +10,14 @@ namespace NesCore.Storage
     class CartridgeMapColourDreams : CartridgeMap
     {
         public CartridgeMapColourDreams(Cartridge cartridge)
+            : base(cartridge)
         {
-            Cartridge = cartridge;
             int programBankCount = cartridge.ProgramRom.Count / 0x4000;
             characterBank = 0;
             programBank = 0;
         }
 
         public override string Name { get { return "Color Dreams"; } }
-
-        public Cartridge Cartridge { get; private set; }
 
         public override byte this[ushort address]
         {

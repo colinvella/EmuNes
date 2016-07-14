@@ -10,20 +10,17 @@ namespace NesCore.Storage
     class CartridgeMapMmc2 : CartridgeMap
     {
         public CartridgeMapMmc2(Cartridge cartridge)
+            : base(cartridge)
         {
-            Cartridge = cartridge;
             programBankCount = (byte)(Cartridge.ProgramRom.Count / 0x2000);
             programBank = 0;
             characterBank1 = 0;
             characterBank2 = 0;
             latch0 = 0xFD;
             latch1 = 0xFE;
-            prevMirrorMode = cartridge.MirrorMode;
         }
 
         public override string Name { get { return "MMC2"; } }
-
-        public Cartridge Cartridge { get; private set; }
 
         public override byte this[ushort address]
         {
@@ -113,12 +110,7 @@ namespace NesCore.Storage
                         characterBank3 = (byte)(value & 0x1F);
                     else //address >= 0xF000
                     {
-                        MirrorMode mirrorMode = ((value & 1) == 1) ? MirrorMode.Horizontal : MirrorMode.Vertical;
-                        if (mirrorMode != prevMirrorMode)
-                        {
-                            prevMirrorMode = mirrorMode;
-                            MirrorModeChanged?.Invoke(mirrorMode);
-                        }
+                        MirrorMode = ((value & 1) == 1) ? MirrorMode.Horizontal : MirrorMode.Vertical;
                     }
                     return;
                 }
@@ -146,6 +138,5 @@ namespace NesCore.Storage
         private byte selectedCharacterBank1;
         private byte latch0;
         private byte latch1;
-        private MirrorMode prevMirrorMode;
     }
 }

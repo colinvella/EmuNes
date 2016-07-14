@@ -10,16 +10,14 @@ namespace NesCore.Storage
     class CartridgeMapNRom : CartridgeMap
     {
         public CartridgeMapNRom(Cartridge cartridge)
+            : base(cartridge)
         {
-            Cartridge = cartridge;
             programBankCount = cartridge.ProgramRom.Count / 0x4000;
             programBank1 = 0;
             programBank2 = programBankCount - 1;
         }
 
         public override string Name { get { return "NROM"; } }
-
-        public Cartridge Cartridge { get; private set; }
 
         public override byte this[ushort address]
         {

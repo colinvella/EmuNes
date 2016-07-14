@@ -10,17 +10,15 @@ namespace NesCore.Storage
     class CartridgeMapCpRom : CartridgeMap
     {
         public CartridgeMapCpRom(Cartridge cartridge)
+            : base(cartridge)
         {
-            Cartridge = cartridge;
             characterBank = 0;
             // CHR bank 2 and 3
             characterRam = new byte[0x2000];
-    }
+        }
 
         public override string Name { get { return "CPROM"; } }
-
-        public Cartridge Cartridge { get; private set; }
-
+        
         public override byte this[ushort address]
         {
             get

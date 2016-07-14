@@ -10,8 +10,8 @@ namespace NesCore.Storage
     class CartridgeMapMmc1 : CartridgeMap
     {
         public CartridgeMapMmc1(Cartridge cartridge)
+            : base(cartridge)
         {
-            Cartridge = cartridge;
             programBankOffsets = new int[2];
             characterBankOffsets = new int[2];
 
@@ -22,13 +22,9 @@ namespace NesCore.Storage
 
             shiftRegister = 0x10;
             programBankOffsets[1] = GetProgramBankOffset(-1);
-
-            prevMirrorMode = cartridge.MirrorMode;
         }
 
         public override string Name { get { return "MMC1"; } }
-
-        public Cartridge Cartridge { get; private set; }
 
         public override byte this[ushort address]
         {
@@ -123,23 +119,16 @@ namespace NesCore.Storage
             control = value;
             characterBankMode = (byte)((value >> 4) & 1);
             programBankMode = (byte)((value >> 2) & 3);
-            int mirror = value & 3;
 
             UpdateOffsets();
 
             // mirror mode
-            MirrorMode mirrorMode = MirrorMode.Single0;
-            switch(mirror)
+            switch (value & 3)
             {
-                case 0: mirrorMode = MirrorMode.Single0; break;
-                case 1: mirrorMode = MirrorMode.Single1; break;
-                case 2: mirrorMode = MirrorMode.Vertical; break;
-                case 3: mirrorMode = MirrorMode.Horizontal; break;
-            }
-            if (mirrorMode != prevMirrorMode)
-            {
-                prevMirrorMode = mirrorMode;
-                MirrorModeChanged?.Invoke(mirrorMode);
+                case 0: MirrorMode = MirrorMode.Single0; break;
+                case 1: MirrorMode = MirrorMode.Single1; break;
+                case 2: MirrorMode = MirrorMode.Vertical; break;
+                case 3: MirrorMode = MirrorMode.Horizontal; break;
             }
 
         }
@@ -277,6 +266,5 @@ namespace NesCore.Storage
         private int outerProgramRomBank;
         private int programRamBank;
         private byte[] programRam;
-        private MirrorMode prevMirrorMode;
     }
 }

@@ -11,9 +11,8 @@ namespace NesCore.Storage
     class CartridgeMapMmc5 : CartridgeMap
     {
         public CartridgeMapMmc5(Cartridge cartridge)
+            : base(cartridge)
         {
-            Cartridge = cartridge;
-
             // 64K ram total (switchable 8 banks of 8K)
             programRam = new byte[0x10000];
 
@@ -25,11 +24,7 @@ namespace NesCore.Storage
             programRomBank = (byte)(Cartridge.ProgramRom.Count / 0x2000 - 1);
 
             characterBanks = new ushort[12];
-
-            mirrorMode = cartridge.MirrorMode;
         }
-
-        public Cartridge Cartridge { get; private set; }
 
         public override string Name { get { return "MMC5"; } }
 
@@ -312,14 +307,9 @@ namespace NesCore.Storage
                 }
                 if (address == 0x5105)
                 {
-                    // DD CC BB AA
-                    MirrorMode newMirrorMode = (MirrorMode)value;
-                    if (newMirrorMode != mirrorMode)
-                    {
-                        mirrorMode = newMirrorMode;
-                        MirrorModeChanged?.Invoke(newMirrorMode);
-                        Debug.WriteLine("MMC5 Mirror Mode ($5105) = "+ newMirrorMode + " (" + Hex.Format((byte)newMirrorMode) + ") (" + Bin.Format((byte)newMirrorMode) + ")");
-                    }
+                    // Mirror mode - DD CC BB AA
+                    MirrorMode = (MirrorMode)value;
+                    Debug.WriteLine("MMC5 Mirror Mode ($5105) = " + MirrorMode + " (" + Hex.Format((byte)MirrorMode) + ") (" + Bin.Format((byte)MirrorMode) + ")");
 
                     return;
                 }
@@ -609,46 +599,63 @@ namespace NesCore.Storage
             }
         }
 
-        public override byte ReadNameTableC(ushort address, byte defaultValue)
+        public override byte ReadNameTableByte(ushort address)
         {
-            int offset = address % 0x400;
-            // TODO: depending on Ex mode
-            switch (extendedRamMode)
+            ushort mirroredAddress = MirrorAddress(MirrorMode, address);
+
+            int nameTableOffset = address % 0x400;
+
+            //mirroredAddress %= 0x800;
+            if (mirroredAddress < 0x800) // normal name tables A and B
+                return nameTableRam[mirroredAddress];
+            else if (mirroredAddress < 0xC00) // name table C - depends on ex mode
             {
-                case 0: return extendedRam[offset];
-                case 1:
-                    // AACC - CCCC - exram byte
-                    // ---- - --UU - $5130 upper 
-                    if (offset < 0x3C0) // nametable tile
-                    {
-                        // tile = UUCC CCCC
-                        byte value = extendedRam[offset];
-                        value &= 0x3F;
-                        value |= (byte)(characterBankUpper >> 6);
-                        return value;
-                    }
-                    else // tile attribute
-                    {
-                        // attribute = AA
-                        byte value = extendedRam[offset];
-                        value >>= 6;
-                        return value;
-                    }
-                default: // 2, 3
-                    return 0x00;
+                switch (extendedRamMode)
+                {
+                    case 0: return extendedRam[nameTableOffset];
+                    case 1:
+                        // AACC - CCCC - exram byte
+                        // ---- - --UU - $5130 upper 
+                        if (nameTableOffset < 0x3C0) // nametable tile
+                        {
+                            // tile = UUCC CCCC
+                            byte value = extendedRam[nameTableOffset];
+                            value &= 0x3F;
+                            value |= (byte)(characterBankUpper >> 6);
+                            return value;
+                        }
+                        else // tile attribute
+                        {
+                            // attribute = AA
+                            byte value = extendedRam[nameTableOffset];
+                            value >>= 6;
+                            return value;
+                        }
+                    default: // 2, 3
+                        return 0x00;
+                }
+            }
+            else // name table D - fill mode
+            {
+                return nameTableOffset < 0x3C0 ? fillModeTile : fillModeAttributes;
             }
         }
 
-        public override void WriteNameTableC(ushort address, byte value)
+        public override void WriteNameTableByte(ushort address, byte value)
         {
-            // NOTE: not sure if need to implement ex ram mode logic here as well
-            extendedRam[address % 0x400] = value;
-        }
+            ushort mirroredAddress = MirrorAddress(MirrorMode, address);
 
-        public override byte ReadNameTableD(ushort address, byte defaultValue)
-        {
-            address %= 0x400;
-            return address < 0x3C0 ? fillModeTile : fillModeAttributes;
+            if (mirroredAddress < 0x800) // normal name tables A and B
+                nameTableRam[mirroredAddress] = value;
+            else if (mirroredAddress < 0xC00) // name table C
+            {
+                // NOTE: not sure if need to implement ex ram mode logic here as well
+                extendedRam[address % 0x400] = value;
+            }
+            else // name table D
+            {
+                // do nothing - fill mode is read only and set via registers
+            }
         }
 
         public override byte EnhanceTileIndex(ushort characterAddress, ushort nameTableAddress, byte defaultTileIndex)
@@ -724,9 +731,6 @@ namespace NesCore.Storage
         private ushort[] characterBanks;
         private ushort characterBankUpper;
         private bool characterBankLastWrittenUpper;
-
-        // CHR mirroring
-        private MirrorMode mirrorMode;
 
         // fill mode
         byte fillModeTile;

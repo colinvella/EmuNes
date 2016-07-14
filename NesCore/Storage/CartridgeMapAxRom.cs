@@ -10,16 +10,14 @@ namespace NesCore.Storage
     class CartridgeMapAxRom : CartridgeMap
     {
         public CartridgeMapAxRom(Cartridge cartridge)
+            : base(cartridge)
         {
-            Cartridge = cartridge;
             programBank = 0;
             programRam = new byte[0x6000 - 0x4100];
-            prevMirrorMode = Cartridge.MirrorMode;
         }
 
         public override string Name { get { return "AxROM"; } }
 
-        public Cartridge Cartridge { get; private set; }
 
         public override byte this[ushort address]
         {
@@ -52,12 +50,7 @@ namespace NesCore.Storage
                     programBank = value & 7;
 
                     // mirror mode
-                    MirrorMode mirrorMode = (value & 0x10) == 0x10 ? MirrorMode.Single1 : MirrorMode.Single0;
-                    if (mirrorMode != prevMirrorMode)
-                    {
-                        prevMirrorMode = mirrorMode;
-                        MirrorModeChanged?.Invoke(mirrorMode);
-                    }
+                    MirrorMode = (value & 0x10) == 0x10 ? MirrorMode.Single1 : MirrorMode.Single0;
 
                     // invalidate address region
                     if (programBank != oldProgramBank)
@@ -74,6 +67,5 @@ namespace NesCore.Storage
 
         private int programBank;
         private byte[] programRam;
-        private MirrorMode prevMirrorMode;
     }
 }

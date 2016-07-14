@@ -22,8 +22,6 @@ namespace NesCore.Video
 
         public delegate void WriteByteHandler(ushort address, byte value);
 
-        public delegate byte ReadExternalNameTableHandler(ushort address, byte internalValue);
-
         public delegate byte EnhanceTileByteHandler(ushort characterAddress, ushort nametableAddress, byte defaultValue);
         public delegate byte EnhanceTileAttributesHandler(ushort characterAddress, byte defaultValue);
 
@@ -120,23 +118,8 @@ namespace NesCore.Video
         /// </summary>
         public Action EvaluatingBackgroundData { get; set; }
 
-        /// <summary>
-        /// Called when reading from name table C.
-        /// Example: MMC5 NameTable 2: ExRam, NameTable 3: Fill Mode;
-        /// </summary>
-        public ReadExternalNameTableHandler ReadNameTableC;
-
-        public WriteByteHandler WriteNameTableC;
-
-        /// <summary>
-        /// Called when reading from name table D.
-        /// Example: MMC5 NameTable 3: Fill Mode;
-        /// </summary>
-        public ReadExternalNameTableHandler ReadNameTableD;
-
-        public WriteByteHandler WriteNameTableD;
-
         public EnhanceTileByteHandler EnhanceTileByte { get; set; }
+
         public EnhanceTileAttributesHandler EnhanceTileAttributes { get; set; }
 
         /// <summary>

@@ -684,7 +684,7 @@ namespace NesCore.Processor
             // BRK - break (force interrupt)
             Execute Break = (address) =>
             {
-                Processor.PushWord(Processor.State.ProgramCounter);
+                Processor.PushWord((ushort)(Processor.State.ProgramCounter + 1));
                 PushProcessorStatus(address);
                 SetInterruptDisableFlag(address);
                 Processor.State.ProgramCounter = Processor.ReadWord(Mos6502.IrqVector);

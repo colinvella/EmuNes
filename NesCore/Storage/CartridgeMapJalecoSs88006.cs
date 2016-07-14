@@ -200,6 +200,7 @@ namespace NesCore.Storage
             irqCounter = (ushort)(fixedBits | (counterbits & irqCounterMask));
 
         }
+
         private int SetLowerNybble(int currentValue, byte nybble)
         {
             currentValue &= 0xF0;

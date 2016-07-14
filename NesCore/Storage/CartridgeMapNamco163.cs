@@ -15,7 +15,11 @@ namespace NesCore.Storage
             programRam = new byte[0x2000];
 
             programRomBank = new int[4];
+
             characterRomBank = new int[8];
+            useCharacterNametableA = new bool[8];
+            useCharacterNametableB = new bool[8];
+
             ramWriteEnableSection = new bool[4];
 
             int programBankCount = cartridge.ProgramRom.Count / 0x2000;
@@ -34,6 +38,7 @@ namespace NesCore.Storage
                     int bankIndex = address / 0x400;
                     int bankOffset = address % 0x400;
                     return Cartridge.CharacterRom[characterRomBank[bankIndex] + bankOffset];
+                    // note: may be overridden by CHR RAM - to do!
                 }
                 else if (address >= 0x6000 && address < 0x8000)
                 {
@@ -60,6 +65,8 @@ namespace NesCore.Storage
                     // irq low 8 bits
                     irqCounter &= 0x7F00;
                     irqCounter |= value;
+
+                    AcknowledgeInterrupt();
                 }
                 else if (address >= 0x5800 && address < 0x6000)
                 {
@@ -67,6 +74,8 @@ namespace NesCore.Storage
                     irqCounter &= 0x00FF;
                     irqCounter |= (ushort)((value & 0x7F) << 8);
                     irqEnabled = (value & 0x80) != 0;
+
+                    AcknowledgeInterrupt();
                 }
                 else if (address >= 0x6000 && address < 0x8000)
                 {
@@ -80,6 +89,25 @@ namespace NesCore.Storage
                         return;
 
                     programRam[address - 0x6000] = value;
+                }
+                else if (address >= 0x8000 && address < 0xC000)
+                {
+                    int bankIndex = (address - 0x8000) / 0x8000;
+                    if (value < 0xE0)
+                    {
+                        characterRomBank[bankIndex] = value;
+                        useCharacterNametableA[bankIndex] = useCharacterNametableB[bankIndex] = false;
+                    }
+                    else if (value % 2 == 0)
+                    {
+                        useCharacterNametableA[bankIndex] = true;
+                        useCharacterNametableB[bankIndex] = false;
+                    }
+                    else // odd
+                    {
+                        useCharacterNametableA[bankIndex] = false;
+                        useCharacterNametableB[bankIndex] = true;
+                    }
                 }
                 else if (address >= 0xE000 && address < 0xE800)
                 {
@@ -133,19 +161,47 @@ namespace NesCore.Storage
 
         public override string Name { get { return "Namco 163"; } }
 
+        public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
+        {
+            cpuClock++;
+            cpuClock %= 3;
+
+            if (irqCounter < 0x7FFF)
+                ++irqCounter;
+            else if (irqEnabled)
+            {
+                TriggerInterruptRequest?.Invoke();
+                irqTriggered = true;
+            }
+        }
+
+        private void AcknowledgeInterrupt()
+        {
+            if (irqTriggered)
+            {
+                CancelInterruptRequest?.Invoke();
+                irqTriggered = false;
+            }
+        }
+
         private byte[] programRam;
         private bool ramWriteEnable;
         private bool[] ramWriteEnableSection;
 
         private int[] programRomBank;
         private int[] characterRomBank;
+        private bool[] useCharacterNametableA;
+        private bool[] useCharacterNametableB;
         private bool characterRamEnabledLow;
         private bool characterRamEnabledHigh;
 
         private bool irqEnabled;
         private ushort irqCounter;
+        private bool irqTriggered;
+        private byte cpuClock;
 
         private bool soundEnabled;
+
 
     }
 

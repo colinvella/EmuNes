@@ -22,7 +22,7 @@ namespace NesCore.Storage
 
             ramWriteEnableSection = new bool[4];
 
-            int programBankCount = cartridge.ProgramRom.Count / 0x2000;
+            programBankCount = cartridge.ProgramRom.Count / 0x2000;
 
             programRomBank[3] = programBankCount - 1;
         }
@@ -116,7 +116,7 @@ namespace NesCore.Storage
                     // ||++-++++-Select 8KB page of PRG-ROM at $8000
                     // |+--------Namco 129, 163 only: Disable sound if set
                     // ++-------- Namco 340 only: Select mirroring
-                    programRomBank[0] = value & 0x3F;
+                    programRomBank[0] = (value & 0x3F) % programBankCount;
                     soundEnabled = (value & 0x40) == 0;
                 }
                 else if (address >= 0xE800 && address < 0xF000)
@@ -130,7 +130,7 @@ namespace NesCore.Storage
                     // +---------Disable CHR - RAM at $1000 -$1FFF(Namco 129, 163 only)
                     //             0: Pages $E0 -$FF use NT RAM as CHR - RAM
                     //             1: Pages $E0 -$FF are the last $20 banks of CHR - ROM
-                    programRomBank[1] = value & 0x3F;
+                    programRomBank[1] = (value & 0x3F) % programBankCount;
                     characterRamEnabledLow = (value & 0x40) != 0;
                     characterRamEnabledHigh = (value & 0x80) != 0;
                 }
@@ -139,7 +139,7 @@ namespace NesCore.Storage
                     // ..PP PPPP
                     //   || ||||
                     //   ++-++++- Select 8KB page of PRG-ROM at $C000
-                    programRomBank[2] = value & 0x3F;
+                    programRomBank[2] = (value & 0x3F) % programBankCount;
                 }
                 else if (address >= 0xF800)
                 {
@@ -188,7 +188,9 @@ namespace NesCore.Storage
         private bool ramWriteEnable;
         private bool[] ramWriteEnableSection;
 
+        private int programBankCount;
         private int[] programRomBank;
+
         private int[] characterRomBank;
         private bool[] useCharacterNametableA;
         private bool[] useCharacterNametableB;

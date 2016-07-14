@@ -1,5 +1,7 @@
-﻿using System;
+﻿using NesCore.Utility;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,7 +39,7 @@ namespace NesCore.Storage
                 {
                     int bankIndex = address / 0x400;
                     int bankOffset = address % 0x400;
-                    return Cartridge.CharacterRom[characterRomBank[bankIndex] + bankOffset];
+                    return Cartridge.CharacterRom[characterRomBank[bankIndex] * 0x400 + bankOffset];
                     // note: may be overridden by CHR RAM - to do!
                 }
                 else if (address >= 0x6000 && address < 0x8000)
@@ -59,6 +61,7 @@ namespace NesCore.Storage
                 if (address >= 0x4800 && address < 0x5000)
                 {
                     // sound data port
+                    Debug.WriteLine("Sound Data Port (" + Hex.Format(address) + ") = " + Hex.Format(value));
                 }
                 else if (address >= 0x5000 && address < 0x5800)
                 {
@@ -67,6 +70,8 @@ namespace NesCore.Storage
                     irqCounter |= value;
 
                     AcknowledgeInterrupt();
+
+                    Debug.WriteLine("IRQ Counter High (" + Hex.Format(address) + ") = " + Hex.Format(value) + " (IRQ Counter = " + Hex.Format(irqCounter) + ")");
                 }
                 else if (address >= 0x5800 && address < 0x6000)
                 {
@@ -76,6 +81,8 @@ namespace NesCore.Storage
                     irqEnabled = (value & 0x80) != 0;
 
                     AcknowledgeInterrupt();
+
+                    Debug.WriteLine("IRQ Counter Low (" + Hex.Format(address) + ") = " + Hex.Format(value) + " (IRQ Counter = " + Hex.Format(irqCounter) + ")");
                 }
                 else if (address >= 0x6000 && address < 0x8000)
                 {
@@ -92,7 +99,7 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0x8000 && address < 0xC000)
                 {
-                    int bankIndex = (address - 0x8000) / 0x8000;
+                    int bankIndex = (address - 0x8000) / 0x800;
                     if (value < 0xE0)
                     {
                         characterRomBank[bankIndex] = value;
@@ -109,6 +116,10 @@ namespace NesCore.Storage
                         useCharacterNametableB[bankIndex] = true;
                     }
                 }
+                else if (address >= 0xC000 && address < 0xE000)
+                {
+                    Debug.WriteLine("CHR RAM name table register set");
+                }
                 else if (address >= 0xE000 && address < 0xE800)
                 {
                     // MMPP PPPP
@@ -118,6 +129,8 @@ namespace NesCore.Storage
                     // ++-------- Namco 340 only: Select mirroring
                     programRomBank[0] = (value & 0x3F) % programBankCount;
                     soundEnabled = (value & 0x40) == 0;
+
+                    Debug.WriteLine("Program bank $8000 - $9FFF (" + Hex.Format(address) + ") = " + Hex.Format((byte)programRomBank[0]));
                 }
                 else if (address >= 0xE800 && address < 0xF000)
                 {
@@ -133,6 +146,8 @@ namespace NesCore.Storage
                     programRomBank[1] = (value & 0x3F) % programBankCount;
                     characterRamEnabledLow = (value & 0x40) != 0;
                     characterRamEnabledHigh = (value & 0x80) != 0;
+
+                    Debug.WriteLine("Program bank $A000 - $BFFF (" + Hex.Format(address) + ") = " + Hex.Format((byte)programRomBank[1]));
                 }
                 else if (address >= 0xF000 && address < 0xF800)
                 {
@@ -140,6 +155,8 @@ namespace NesCore.Storage
                     //   || ||||
                     //   ++-++++- Select 8KB page of PRG-ROM at $C000
                     programRomBank[2] = (value & 0x3F) % programBankCount;
+
+                    Debug.WriteLine("Program bank $C000 - $DFFF (" + Hex.Format(address) + ") = " + Hex.Format((byte)programRomBank[2]));
                 }
                 else if (address >= 0xF800)
                 {
@@ -165,6 +182,9 @@ namespace NesCore.Storage
         {
             cpuClock++;
             cpuClock %= 3;
+
+            if (cpuClock != 0)
+                return;
 
             if (irqCounter < 0x7FFF)
                 ++irqCounter;

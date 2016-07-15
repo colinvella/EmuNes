@@ -22,6 +22,7 @@ namespace NesCore.Storage
             ramWriteEnableSection = new bool[4];
 
             programBankCount = cartridge.ProgramRom.Count / 0x2000;
+            characterBankCount = cartridge.CharacterRom.Count() / 0x400;
 
             programRomBank[3] = programBankCount - 1;
 
@@ -32,23 +33,27 @@ namespace NesCore.Storage
         {
             get
             {
-                if (address < 0x1000)
+                if (address < 0x2000)
                 {
                     int bankIndex = address / 0x400;
                     int bankOffset = address % 0x400;
-                    if (characterRamEnabledLow && characterBank[bankIndex] >= 0xE0)
-                        return characterRam[characterBank[bankIndex] * 0x400 + bankOffset];
+                    bool ramMode = characterBank[bankIndex] >= 0xE0;
+                    if (address < 0x1000)
+                        ramMode = ramMode && characterRamEnabledLow;
                     else
-                        return Cartridge.CharacterRom[characterBank[bankIndex] * 0x400 + bankOffset];
-                }
-                else if (address < 0x2000)
-                {
-                    int bankIndex = address / 0x400;
-                    int bankOffset = address % 0x400;
-                    if (characterRamEnabledLow && characterBank[bankIndex] >= 0xE0)
-                        return characterRam[characterBank[bankIndex] * 0x400 + bankOffset];
+                        ramMode = ramMode && characterRamEnabledHigh;
+
+                    int flatAddress = characterBank[bankIndex] * 0x400 + bankOffset;
+                    if (ramMode)
+                    {
+                        flatAddress %= characterRam.Length;
+                        return characterRam[flatAddress];
+                    }
                     else
-                        return Cartridge.CharacterRom[characterBank[bankIndex] * 0x400 + bankOffset];
+                    {
+                        flatAddress %= Cartridge.CharacterRom.Length;
+                        return Cartridge.CharacterRom[flatAddress];
+                    }
                 }
                 else if (address >= 0x6000 && address < 0x8000)
                 {
@@ -66,7 +71,29 @@ namespace NesCore.Storage
 
             set
             {
-                if (address >= 0x4800 && address < 0x5000)
+                if (address < 0x2000)
+                {
+                    int bankIndex = address / 0x400;
+                    int bankOffset = address % 0x400;
+                    bool ramMode = characterBank[bankIndex] >= 0xE0;
+                    if (address < 0x1000)
+                        ramMode = ramMode && characterRamEnabledLow;
+                    else
+                        ramMode = ramMode && characterRamEnabledHigh;
+
+                    int flatAddress = characterBank[bankIndex] * 0x400 + bankOffset;
+                    if (ramMode)
+                    {
+                        flatAddress %= characterRam.Length;
+                        characterRam[flatAddress] = value;
+                    }
+                    else
+                    {
+                        flatAddress %= Cartridge.CharacterRom.Length;
+                        Cartridge.CharacterRom[flatAddress] = value;
+                    }
+                }
+                else if (address >= 0x4800 && address < 0x5000)
                 {
                     // sound data port
                     Debug.WriteLine("Sound Data Port (" + Hex.Format(address) + ") = " + Hex.Format(value));
@@ -224,6 +251,7 @@ namespace NesCore.Storage
         private int programBankCount;
         private int[] programRomBank;
 
+        private int characterBankCount;
         private int[] characterBank;
         private bool characterRamEnabledLow;
         private bool characterRamEnabledHigh;

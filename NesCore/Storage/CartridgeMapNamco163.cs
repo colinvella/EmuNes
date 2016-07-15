@@ -112,8 +112,8 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0xC000 && address < 0xE000)
                 {
-                    //int bankIndex = (address - 0xC000) / 0x800;
-                    //characterRamBank[bankIndex] = value;
+                    int bankIndex = (address - 0xC000) / 0x800;
+                    characterBank[bankIndex] = value;
                     Debug.WriteLine("CHR RAM name table register set");
                 }
                 else if (address >= 0xE000 && address < 0xE800)
@@ -200,8 +200,11 @@ namespace NesCore.Storage
                 ++irqCounter;
             else if (irqEnabled)
             {
-                TriggerInterruptRequest?.Invoke();
-                irqTriggered = true;
+                if (!irqTriggered)
+                {
+                    TriggerInterruptRequest?.Invoke();
+                    irqTriggered = true;
+                }
             }
         }
 

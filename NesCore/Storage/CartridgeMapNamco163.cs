@@ -18,6 +18,7 @@ namespace NesCore.Storage
             programRomBank = new int[4];
 
             characterRomBank = new int[8];
+            characterRamBank = new int[4];
             useCharacterNametableA = new bool[8];
             useCharacterNametableB = new bool[8];
 
@@ -36,8 +37,12 @@ namespace NesCore.Storage
                 {
                     int bankIndex = address / 0x400;
                     int bankOffset = address % 0x400;
-                    return Cartridge.CharacterRom[characterRomBank[bankIndex] * 0x400 + bankOffset];
-                    // note: may be overridden by CHR RAM - to do!
+                    if (useCharacterNametableA[bankIndex])
+                        return nameTableRam[bankOffset];
+                    else if (useCharacterNametableB[bankIndex])
+                        return nameTableRam[0x400 + bankOffset];
+                    else
+                        return Cartridge.CharacterRom[characterRomBank[bankIndex] * 0x400 + bankOffset];
                 }
                 else if (address >= 0x6000 && address < 0x8000)
                 {
@@ -115,14 +120,16 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0xC000 && address < 0xE000)
                 {
+                    int bankIndex = (address - 0xC000) / 0x800;
+                    characterRamBank[bankIndex] = value;
                     Debug.WriteLine("CHR RAM name table register set");
                 }
                 else if (address >= 0xE000 && address < 0xE800)
                 {
                     // MMPP PPPP
                     // |||| ||||
-                    // ||++-++++-Select 8KB page of PRG-ROM at $8000
-                    // |+--------Namco 129, 163 only: Disable sound if set
+                    // ||++-++++- Select 8KB page of PRG-ROM at $8000
+                    // |+-------- Namco 129, 163 only: Disable sound if set
                     // ++-------- Namco 340 only: Select mirroring
                     programRomBank[0] = (value & 0x3F) % programBankCount;
                     soundEnabled = (value & 0x40) == 0;
@@ -209,6 +216,7 @@ namespace NesCore.Storage
         private int[] programRomBank;
 
         private int[] characterRomBank;
+        private int[] characterRamBank;
         private bool[] useCharacterNametableA;
         private bool[] useCharacterNametableB;
         private bool characterRamEnabledLow;

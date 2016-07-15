@@ -27,6 +27,9 @@ namespace NesCore.Storage
             programBankCount = cartridge.ProgramRom.Count / 0x2000;
 
             programRomBank[3] = programBankCount - 1;
+
+            // this mapper has a larger banks-witched nametable ram
+            nameTableRam = new byte[0x4000];
         }
 
         public override byte this[ushort address]
@@ -181,6 +184,20 @@ namespace NesCore.Storage
         }
 
         public override string Name { get { return "Namco 163"; } }
+
+        public override byte ReadNameTableByte(ushort address)
+        {
+            int bankIndex = (address % 0x1000) / 0x400;
+            int bankOffset = address % 0x400;
+            return nameTableRam[characterRamBank[bankIndex] + bankOffset];
+        }
+
+        public override void WriteNameTableByte(ushort address, byte value)
+        {
+            int bankIndex = (address % 0x1000) / 0x400;
+            int bankOffset = address % 0x400;
+            nameTableRam[characterRamBank[bankIndex] + bankOffset] = value;
+        }
 
         public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
         {

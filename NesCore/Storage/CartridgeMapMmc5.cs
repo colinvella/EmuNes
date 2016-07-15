@@ -32,9 +32,23 @@ namespace NesCore.Storage
         {
             get
             {
+                int bankOffset = address % characterBankSize;
+
                 // character ROM
                 if (address < 0x2000)
                 {
+                    // handle extended mode - bank registers from extended ram page
+                    if (extendedRamMode == 1 && !AccessingSpriteCharacters)
+                    {
+                        bankOffset = address % 0x1000;
+                        
+                        int extendedCharacterBank = extendedRam[lastTileIndex];
+                        extendedCharacterBank &= 0x3F;
+                        extendedCharacterBank |= (characterBankUpper >> 2);
+                        return Cartridge.CharacterRom[extendedCharacterBank * 0x1000 + bankOffset];
+                    }
+
+
                     // handles all CHR modes
 
                     // bank range CHR modes 8K: [0], 4K: [0, 1] 2K: [0..3], 1k: [0..7]
@@ -57,7 +71,6 @@ namespace NesCore.Storage
                         bankIndex += 8;
                     }
 
-                    int bankOffset = address % characterBankSize;
                     int characterBank = characterBanks[bankIndex];
                     int addressBase = characterBank * characterBankSize;
                     return Cartridge.CharacterRom[addressBase + bankOffset];
@@ -604,6 +617,8 @@ namespace NesCore.Storage
             ushort mirroredAddress = MirrorAddress(MirrorMode, address);
 
             int nameTableOffset = address % 0x400;
+            if (nameTableOffset < 0x3C0)
+                lastTileIndex = nameTableOffset;
 
             //mirroredAddress %= 0x800;
             if (mirroredAddress < 0x800) // normal name tables A and B
@@ -658,20 +673,10 @@ namespace NesCore.Storage
             }
         }
 
-        public override byte EnhanceTileIndex(ushort characterAddress, ushort nameTableAddress, byte defaultTileIndex)
-        {
-            if (extendedRamMode != 1)
-                return defaultTileIndex;
-
-            int characterBank = extendedRam[nameTableAddress % 0x400];
-            characterBank &= 0x3F;
-            characterBank |= (characterBankUpper >> 2);
-            int addressBase = characterBank * 0x1000;
-            return Cartridge.CharacterRom[addressBase + characterAddress];
-        }
-
         public override byte EnhanceTileAttributes(ushort nameTableAddress, byte defaultTileAttributes)
         {
+            //return defaultTileAttributes;
+
             if (extendedRamMode != 1)
                 return defaultTileAttributes;
 
@@ -723,6 +728,7 @@ namespace NesCore.Storage
         private byte[] extendedRam;
         private byte extendedRamMode;
         private bool ppuRendering;
+        private int lastTileIndex;
 
         // character bank mode and switching
         private byte characterBankMode;

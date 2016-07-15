@@ -44,8 +44,6 @@ namespace NesCore.Storage
 
         public bool AccessingSpriteCharacters { get; set; }
 
-        public virtual byte EnhanceTileIndex(ushort characterAddress, ushort nameTableAddress, byte defaultTileIndex) { return defaultTileIndex; }
-
         public virtual byte EnhanceTileAttributes(ushort characterAddress, byte defaultTileAttriutes) { return defaultTileAttriutes; }
 
         public virtual byte ReadNameTableByte(ushort address)

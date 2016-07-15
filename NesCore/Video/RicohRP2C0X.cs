@@ -22,7 +22,6 @@ namespace NesCore.Video
 
         public delegate void WriteByteHandler(ushort address, byte value);
 
-        public delegate byte EnhanceTileByteHandler(ushort characterAddress, ushort nametableAddress, byte defaultValue);
         public delegate byte EnhanceTileAttributesHandler(ushort characterAddress, byte defaultValue);
 
         /// <summary>
@@ -117,8 +116,6 @@ namespace NesCore.Video
         /// Called before accessing character tiles for backgrounds
         /// </summary>
         public Action EvaluatingBackgroundData { get; set; }
-
-        public EnhanceTileByteHandler EnhanceTileByte { get; set; }
 
         public EnhanceTileAttributesHandler EnhanceTileAttributes { get; set; }
 
@@ -731,8 +728,6 @@ namespace NesCore.Video
             int fineY = (vramAddress >> 12) & 7;
             ushort address = (ushort)(backgroundPatternTableAddress + nameTableByte * 16 + fineY);
             lowTileByte = Memory[address];
-
-            lowTileByte = EnhanceTileByte(address, vramAddress, lowTileByte);
         }
 
         private void FetchHighTileByte()
@@ -740,8 +735,6 @@ namespace NesCore.Video
             int fineY = (vramAddress >> 12) & 7;
             ushort address = (ushort)(backgroundPatternTableAddress + nameTableByte * 16 + fineY + 8);
             highTileByte = Memory[address];
-
-            highTileByte = EnhanceTileByte(address, vramAddress, highTileByte);
         }
 
         private void StoreTileData()

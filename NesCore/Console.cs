@@ -117,8 +117,7 @@ namespace NesCore
             Video.EvaluatingBackgroundData = () =>
                 cartridge.Map.AccessingSpriteCharacters = false;
 
-            // wire enhance nametable tile and attributes (e.g. for MMC5 ExRam Mode 1)
-            Video.EnhanceTileByte = cartridge.Map.EnhanceTileIndex;
+            // wire enhance nametable attributes (e.g. for MMC5 ExRam Mode 1)
             Video.EnhanceTileAttributes = cartridge.Map.EnhanceTileAttributes;
 
             Cartridge = cartridge;

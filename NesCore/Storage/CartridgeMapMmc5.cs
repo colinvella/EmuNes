@@ -620,6 +620,17 @@ namespace NesCore.Storage
             if (nameTableOffset < 0x3C0)
                 lastTileIndex = nameTableOffset;
 
+            if (extendedRamMode == 1 && nameTableOffset >= 0x3C0)
+            {
+                // handle extended tile-level attributes
+                byte attributes = extendedRam[lastTileIndex];
+                // AABBBBBB -> ------AA -> ----AAAA -> AAAAAAAA
+                attributes >>= 6;
+                attributes |= (byte)(attributes << 2);
+                attributes |= (byte)(attributes << 4);
+                return attributes;
+            }
+
             //mirroredAddress %= 0x800;
             if (mirroredAddress < 0x800) // normal name tables A and B
                 return nameTableRam[mirroredAddress];
@@ -671,19 +682,6 @@ namespace NesCore.Storage
             {
                 // do nothing - fill mode is read only and set via registers
             }
-        }
-
-        public override byte EnhanceTileAttributes(ushort nameTableAddress, byte defaultTileAttributes)
-        {
-            //return defaultTileAttributes;
-
-            if (extendedRamMode != 1)
-                return defaultTileAttributes;
-
-            byte attributes = extendedRam[nameTableAddress % 0x400];
-            attributes >>= 6;
-            attributes <<= 2;
-            return attributes;
         }
 
         private void SetCharacterBankMode(byte newCharacterBankMode)

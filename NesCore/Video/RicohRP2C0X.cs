@@ -20,9 +20,7 @@ namespace NesCore.Video
         /// <returns></returns>
         public delegate byte ReadByteHandler(ushort address);
 
-        public delegate void WriteByteHandler(ushort address, byte value);
-
-        public delegate byte EnhanceTileAttributesHandler(ushort characterAddress, byte defaultValue);
+        //public delegate void WriteByteHandler(ushort address, byte value);
 
         /// <summary>
         /// delegate for writing pixel in a frame buffer implementation
@@ -116,8 +114,6 @@ namespace NesCore.Video
         /// Called before accessing character tiles for backgrounds
         /// </summary>
         public Action EvaluatingBackgroundData { get; set; }
-
-        public EnhanceTileAttributesHandler EnhanceTileAttributes { get; set; }
 
         /// <summary>
         /// Control register ($2000 PPUCTRL)
@@ -719,8 +715,6 @@ namespace NesCore.Video
             ushort address = (ushort)(0x23C0 | (vramAddress & 0x0C00) | ((vramAddress >> 4) & 0x38) | ((vramAddress >> 2) & 0x07));
             int shift = ((vramAddress >> 4) & 4) | (vramAddress & 2);
             attributeTableByte = (byte)(((Memory[address] >> shift) & 3) << 2);
-
-            attributeTableByte = EnhanceTileAttributes(vramAddress, attributeTableByte);
         }
 
         private void FetchLowTileByte()

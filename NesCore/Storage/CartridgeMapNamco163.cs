@@ -17,35 +17,38 @@ namespace NesCore.Storage
 
             programRomBank = new int[4];
 
-            characterRomBank = new int[8];
-            characterRamBank = new int[4];
-            useCharacterNametableA = new bool[8];
-            useCharacterNametableB = new bool[8];
-
+            characterBank = new int[8];
+            
             ramWriteEnableSection = new bool[4];
 
             programBankCount = cartridge.ProgramRom.Count / 0x2000;
 
             programRomBank[3] = programBankCount - 1;
 
-            // this mapper has a larger banks-witched nametable ram
-            nameTableRam = new byte[0x4000];
+            characterRam = new byte[0x4000];
         }
 
         public override byte this[ushort address]
         {
             get
             {
-                if (address < 0x2000)
+                if (address < 0x1000)
                 {
                     int bankIndex = address / 0x400;
                     int bankOffset = address % 0x400;
-                    if (useCharacterNametableA[bankIndex])
-                        return nameTableRam[bankOffset];
-                    else if (useCharacterNametableB[bankIndex])
-                        return nameTableRam[0x400 + bankOffset];
+                    if (characterRamEnabledLow && characterBank[bankIndex] >= 0xE0)
+                        return characterRam[characterBank[bankIndex] * 0x400 + bankOffset];
                     else
-                        return Cartridge.CharacterRom[characterRomBank[bankIndex] * 0x400 + bankOffset];
+                        return Cartridge.CharacterRom[characterBank[bankIndex] * 0x400 + bankOffset];
+                }
+                else if (address < 0x2000)
+                {
+                    int bankIndex = address / 0x400;
+                    int bankOffset = address % 0x400;
+                    if (characterRamEnabledLow && characterBank[bankIndex] >= 0xE0)
+                        return characterRam[characterBank[bankIndex] * 0x400 + bankOffset];
+                    else
+                        return Cartridge.CharacterRom[characterBank[bankIndex] * 0x400 + bankOffset];
                 }
                 else if (address >= 0x6000 && address < 0x8000)
                 {
@@ -105,26 +108,12 @@ namespace NesCore.Storage
                 else if (address >= 0x8000 && address < 0xC000)
                 {
                     int bankIndex = (address - 0x8000) / 0x800;
-                    if (value < 0xE0)
-                    {
-                        characterRomBank[bankIndex] = value;
-                        useCharacterNametableA[bankIndex] = useCharacterNametableB[bankIndex] = false;
-                    }
-                    else if (value % 2 == 0)
-                    {
-                        useCharacterNametableA[bankIndex] = true;
-                        useCharacterNametableB[bankIndex] = false;
-                    }
-                    else // odd
-                    {
-                        useCharacterNametableA[bankIndex] = false;
-                        useCharacterNametableB[bankIndex] = true;
-                    }
+                    characterBank[bankIndex] = value;
                 }
                 else if (address >= 0xC000 && address < 0xE000)
                 {
-                    int bankIndex = (address - 0xC000) / 0x800;
-                    characterRamBank[bankIndex] = value;
+                    //int bankIndex = (address - 0xC000) / 0x800;
+                    //characterRamBank[bankIndex] = value;
                     Debug.WriteLine("CHR RAM name table register set");
                 }
                 else if (address >= 0xE000 && address < 0xE800)
@@ -189,14 +178,14 @@ namespace NesCore.Storage
         {
             int bankIndex = (address % 0x1000) / 0x400;
             int bankOffset = address % 0x400;
-            return nameTableRam[characterRamBank[bankIndex] + bankOffset];
+            return nameTableRam[characterBank[bankIndex] + bankOffset];
         }
 
         public override void WriteNameTableByte(ushort address, byte value)
         {
             int bankIndex = (address % 0x1000) / 0x400;
             int bankOffset = address % 0x400;
-            nameTableRam[characterRamBank[bankIndex] + bankOffset] = value;
+            nameTableRam[characterBank[bankIndex] + bankOffset] = value;
         }
 
         public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
@@ -232,12 +221,10 @@ namespace NesCore.Storage
         private int programBankCount;
         private int[] programRomBank;
 
-        private int[] characterRomBank;
-        private int[] characterRamBank;
-        private bool[] useCharacterNametableA;
-        private bool[] useCharacterNametableB;
+        private int[] characterBank;
         private bool characterRamEnabledLow;
         private bool characterRamEnabledHigh;
+        private byte[] characterRam;
 
         private bool irqEnabled;
         private ushort irqCounter;

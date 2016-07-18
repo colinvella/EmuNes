@@ -18,6 +18,8 @@ namespace NesCore.Storage
             programRomBank = new int[4];
 
             characterBank = new int[8];
+
+            nameTableBank = new int[4];
             
             ramWriteEnableSection = new bool[4];
 
@@ -153,8 +155,8 @@ namespace NesCore.Storage
                 else if (address >= 0xC000 && address < 0xE000)
                 {
                     int bankIndex = (address - 0xC000) / 0x800;
-                    characterBank[bankIndex] = value;
-                    Debug.WriteLine("CHR RAM name table register set");
+                    nameTableBank[bankIndex] = value;
+                    //Debug.WriteLine("CHR RAM name table register set");
                 }
                 else if (address >= 0xE000 && address < 0xE800)
                 {
@@ -214,6 +216,28 @@ namespace NesCore.Storage
 
         public override string Name { get { return "Namco 163"; } }
 
+        public override byte ReadNameTableByte(ushort address)
+        {
+            int nameTableIndex = (address - 0x2000) / 0x400;
+            int bankOffset = address % 0x400;
+            int selectedBank = nameTableBank[nameTableIndex];
+            if (selectedBank < 0xE0)
+                return Cartridge.CharacterRom[selectedBank * 0x400 + bankOffset];
+            else       
+                return base.ReadNameTableByte((ushort)((selectedBank % 2) * 0x400 + bankOffset));
+        }
+
+        public override void WriteNameTableByte(ushort address, byte value)
+        {
+            int nameTableIndex = (address - 0x2000) / 0x400;
+            int bankOffset = address % 0x400;
+            int selectedBank = nameTableBank[nameTableIndex];
+            if (selectedBank < 0xE0)
+                Cartridge.CharacterRom[selectedBank * 0x400 + bankOffset] = value; // should allow or not?
+            else
+                base.WriteNameTableByte((ushort)((selectedBank % 2) * 0x400 + bankOffset), value);
+        }
+
         public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
         {
             cpuClock++;
@@ -261,9 +285,9 @@ namespace NesCore.Storage
         private bool irqTriggered;
         private byte cpuClock;
 
+        private int[] nameTableBank;
+
         private bool soundEnabled;
-
-
     }
 
 }

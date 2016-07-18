@@ -32,6 +32,8 @@ namespace NesCore.Storage
                 characterBank[index] = index % characterBankCount;
 
             characterRam = new byte[0x4000];
+
+            soundChip = new SoundChip();
         }
 
         public override byte this[ushort address]
@@ -111,6 +113,7 @@ namespace NesCore.Storage
                 else if (address >= 0x4800 && address < 0x5000)
                 {
                     // sound data port
+                    soundChip.DataPort = value;
                     Debug.WriteLine("Sound Data Port (" + Hex.Format(address) + ") = " + Hex.Format(value));
                 }
                 else if (address >= 0x5000 && address < 0x5800)
@@ -166,7 +169,7 @@ namespace NesCore.Storage
                     // |+-------- Namco 129, 163 only: Disable sound if set
                     // ++-------- Namco 340 only: Select mirroring
                     programRomBank[0] = (value & 0x3F) % programBankCount;
-                    soundEnabled = (value & 0x40) == 0;
+                    soundChip.SoundEnable = (value & 0x40) == 0;
 
                     Debug.WriteLine("Program bank $8000 - $9FFF (" + Hex.Format(address) + ") = " + Hex.Format((byte)programRomBank[0]));
                 }
@@ -210,6 +213,9 @@ namespace NesCore.Storage
                     ramWriteEnableSection[1] = (value & 0x02) != 0;
                     ramWriteEnableSection[2] = (value & 0x04) != 0;
                     ramWriteEnableSection[3] = (value & 0x08) != 0;
+
+                    // also Audio Chip address port (auto increment and 7bit internal address)
+                    soundChip.AddressPort = value;
                 }
             }
         }
@@ -287,7 +293,106 @@ namespace NesCore.Storage
 
         private int[] nameTableBank;
 
-        private bool soundEnabled;
+        private SoundChip soundChip;
+
+        private class SoundChip
+        {
+            public SoundChip()
+            {
+                memory = new byte[0x80];
+
+                soundChannels = new SoundChannel[8];
+                for (int channelIndex = 0; channelIndex < MaxChannels; channelIndex++)
+                    soundChannels[channelIndex] = new SoundChannel(memory, 0x40 + channelIndex * 0x08);
+            }
+
+            public bool SoundEnable { get; set; }
+
+            public byte AddressPort
+            {
+                set
+                {
+                    autoIncrement = (value & 0x80) != 0;
+                    address = (byte)(value & 0x7F);
+                }
+            }
+
+            public byte DataPort {
+                get
+                {
+                    byte value =  memory[address];
+                    ProcessAddress();
+                    return value;
+                }
+                set
+                {
+                    memory[address] = value;
+                    ProcessAddress();
+                }
+            }
+
+            public void Update()
+            {
+            }
+
+            private void ProcessAddress()
+            {
+                if (!autoIncrement)
+                    return;
+                ++address;
+                address &= 0x7F;                
+            }
+
+            private SoundChannel[] soundChannels;
+
+            private byte[] memory;
+            private bool autoIncrement;
+            private byte address;
+
+            public const int MaxChannels = 8;
+        }
+
+        private class SoundChannel
+        {
+            public SoundChannel(byte[] memory, int baseAddress)
+            {
+                this.channelIndex = (baseAddress - 0x40) / 0x08;
+                this.memory = memory;
+                this.baseAddress = baseAddress;
+            }
+
+            public bool Enabled
+            {
+                get
+                {
+                    int enabledChannels = (memory[0x7F] >> 4) & 0x07;
+                    return channelIndex >= SoundChip.MaxChannels - enabledChannels - 1;
+                }
+            }
+
+            public byte LowFrequency { get { return memory[baseAddress]; } }
+
+            public byte LowPhase { get { return memory[baseAddress + 1]; } }
+
+            public byte MidFrequency { get { return memory[baseAddress + 2]; } }
+
+            public byte MidPhase { get { return memory[baseAddress + 3]; } }
+
+            public byte HighFrequency { get { return (byte)(memory[baseAddress + 4] & 0x03); } }
+
+            public byte WaveLength { get { return (byte)(memory[baseAddress + 4] >> 2); } }
+
+            public byte HighPhase { get { return memory[baseAddress + 5]; } }
+
+            public byte WaveAddress { get { return memory[baseAddress + 6]; } }
+
+            public byte Volume { get { return (byte)(memory[baseAddress + 7] & 0x0F); } }
+
+            private int channelIndex;
+            private byte[] memory;
+            private int baseAddress;
+        }
+
     }
 
 }

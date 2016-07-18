@@ -26,6 +26,9 @@ namespace NesCore.Storage
 
             programRomBank[3] = programBankCount - 1;
 
+            for (int index = 0; index < 8; index++)
+                characterBank[index] = index % characterBankCount;
+
             characterRam = new byte[0x4000];
         }
 
@@ -54,6 +57,16 @@ namespace NesCore.Storage
                         flatAddress %= Cartridge.CharacterRom.Length;
                         return Cartridge.CharacterRom[flatAddress];
                     }
+                }
+                else if (address >= 0x5000 && address < 0x5800)
+                {
+                    AcknowledgeInterrupt();
+                    return (byte)(irqCounter & 0xff);
+                }
+                else if (address >= 0x5800 && address < 0x6000)
+                {
+                    AcknowledgeInterrupt();
+                    return (byte)(((irqCounter >> 8) & 0x7f) | (irqEnabled ? 0x80 : 0));
                 }
                 else if (address >= 0x6000 && address < 0x8000)
                 {
@@ -200,20 +213,6 @@ namespace NesCore.Storage
         }
 
         public override string Name { get { return "Namco 163"; } }
-
-        public override byte ReadNameTableByte(ushort address)
-        {
-            int bankIndex = (address % 0x1000) / 0x400;
-            int bankOffset = address % 0x400;
-            return nameTableRam[characterBank[bankIndex] + bankOffset];
-        }
-
-        public override void WriteNameTableByte(ushort address, byte value)
-        {
-            int bankIndex = (address % 0x1000) / 0x400;
-            int bankOffset = address % 0x400;
-            nameTableRam[characterBank[bankIndex] + bankOffset] = value;
-        }
 
         public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
         {

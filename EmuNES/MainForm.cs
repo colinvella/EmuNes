@@ -462,8 +462,6 @@ namespace SharpNes
 
             Console.Run(tickDelta);
 #endif
-            // apply any active cheats
-            cheatSystem.ApplyCheats(Console.Memory);
         }
 
         private void OnIconTick(object sender, EventArgs eventArgs)
@@ -763,7 +761,7 @@ namespace SharpNes
                 this.videoPathGif = ReplaceRomExtension(cartridgeRomPath, ".gif");
 
                 // load cheat file if present
-                cheatSystem.Cheats.Clear();
+                cheatSystem.Clear(Console.Processor);
                 string cheatFilePath = ReplaceRomExtension(cartridgeRomPath, ".cht");
                 if (File.Exists(cheatFilePath))
                 {
@@ -771,7 +769,11 @@ namespace SharpNes
                     emulatorStatusLabel.Text = "Cheat file loaded";
 
                     // temporary - enable all cheats
-                    //cheatSystem.Cheats.ForEach((cheat) => cheat.Active = true);
+                    foreach (Cheat cheat in cheatSystem.Cheats)
+                        cheat.Active = true;
+
+                    // patch in the cheats
+                    cheatSystem.PatchCheats(Console.Processor);
                 }
 
                 return true;

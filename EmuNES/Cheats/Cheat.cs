@@ -1,5 +1,4 @@
-﻿using NesCore.Memory;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -36,14 +35,6 @@ namespace SharpNes.Cheats
             }
             stringBuilder.Append(Description);
             return stringBuilder.ToString();
-        }
-
-        public void Apply(MemoryMap memoryMap)
-        {
-            if (NeedsComparison && memoryMap[Address] != CompareValue)
-                return;
-
-            memoryMap[Address] = Value;
         }
 
         public static Cheat Parse(string line)

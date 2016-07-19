@@ -105,17 +105,27 @@ namespace NesCore.Storage
 
             public byte LowFrequency { get { return memory[baseAddress]; } }
 
-            public byte LowPhase { get { return memory[baseAddress + 1]; } }
+            public byte LowPhase
+            {
+                get { return memory[baseAddress + 1]; }
+                set { memory[baseAddress + 1] = value; }
+            }
 
             public byte MidFrequency { get { return memory[baseAddress + 2]; } }
 
-            public byte MidPhase { get { return memory[baseAddress + 3]; } }
+            public byte MidPhase {
+                get { return memory[baseAddress + 3]; }
+                set { memory[baseAddress + 3] = value; }
+            }
 
             public byte HighFrequency { get { return (byte)(memory[baseAddress + 4] & 0x03); } }
 
             public byte WaveLength { get { return (byte)(memory[baseAddress + 4] >> 2); } }
 
-            public byte HighPhase { get { return memory[baseAddress + 5]; } }
+            public byte HighPhase {
+                get { return memory[baseAddress + 5]; }
+                set { memory[baseAddress + 5] = value; }
+            }
 
             public byte WaveAddress { get { return memory[baseAddress + 6]; } }
 
@@ -124,6 +134,11 @@ namespace NesCore.Storage
             public uint Phase
             {
                 get { return (uint)((HighPhase << 16) | (MidPhase << 8) | LowPhase); }
+                set {
+                    LowPhase = (byte)value;
+                    MidPhase = (byte)(value >> 8);
+                    HighPhase = (byte)(value >> 16);
+                }
             }
 
             public uint Frequency
@@ -142,9 +157,11 @@ namespace NesCore.Storage
                 {
                     uint phase = Phase;
                     int offset = WaveAddress;
-                    int accumulatedPhase = Length != 0 ? (int)(phase + Frequency) % (Length << 16) : 0;
-                    int sampleIndex = ((accumulatedPhase >> 16) + offset) & 0xFF;
+                    if (Length != 0)
+                        phase += (uint)((phase + Frequency) % (Length << 16));
+                    int sampleIndex = (int)(((phase >> 16) + offset) & 0xFF);
                     int output = (GetSample(sampleIndex) - 8) * Volume;
+                    Phase = phase;
                     return output;
                 }
             }

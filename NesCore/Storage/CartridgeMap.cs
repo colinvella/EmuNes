@@ -4,11 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static NesCore.Audio.Apu;
 
 namespace NesCore.Storage
 {
     public abstract class CartridgeMap
     {
+        public delegate void BankSwitchHandler(ushort address, ushort size);
+
         public CartridgeMap(Cartridge cartridge)
         {
             Cartridge = cartridge;
@@ -18,9 +21,10 @@ namespace NesCore.Storage
 
             // basic nametable ram supports 2 actual pages
             nameTableRam = new byte[0x800];
-        }
 
-        public delegate void BankSwitchHandler(ushort address, ushort size);
+            // default implementation provides no samples
+            WriteAudioSample = (sample) => { }; 
+        }
 
         public abstract string Name { get;  }
 
@@ -31,6 +35,8 @@ namespace NesCore.Storage
         public BankSwitchHandler ProgramBankSwitch { get; set; }
 
         public BankSwitchHandler CharacterBankSwitch { get; set; }
+
+        public WriteSampleHandler WriteAudioSample { get; set; }
 
         public Cartridge Cartridge { get; private set; }
 

@@ -264,6 +264,11 @@ namespace NesCore.Storage
             }
 
             soundChip.Update(1);
+            /*
+            int output = soundChip.Output;
+            Debug.WriteLineIf(output != 0, "Sound Output = " + output);
+            WriteAudioSample(output * 0.1f);
+            */
         }
 
         private void AcknowledgeInterrupt()

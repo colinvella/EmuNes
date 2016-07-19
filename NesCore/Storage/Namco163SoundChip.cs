@@ -64,13 +64,31 @@ namespace NesCore.Storage
                 SoundChannel soundChannel = soundChannels[currentChannel];
                 int output = soundChannel.Output;
 
-                Debug.WriteLineIf(output != 0, "Namco 163 SoundChip Output = " + output);
+                //Debug.WriteLineIf(output != 0, "Namco 163 SoundChip Output = " + output);
+
 
                 currentChannel++;
                 if (currentChannel >= MaxChannels)
                     currentChannel = startChannel;
 
                 availableCycles -= 15;
+            }
+        }
+
+        public int Output
+        {
+            get
+            {
+                int sample = 0;
+                for (int channelIndex = startChannel; channelIndex < MaxChannels; ++channelIndex)
+                {
+                    sample += soundChannels[channelIndex].Output * 16;
+                }
+                //this low pass filter is here to reduce noise in games using 8 channels 
+                //while still letting me output 1 after the other like the real chip does 
+                sample += lowPassAccumulator;
+                lowPassAccumulator -= sample / 16;            
+                return lowPassAccumulator;
             }
         }
 
@@ -91,6 +109,8 @@ namespace NesCore.Storage
         private int startChannel;
         private int currentChannel;
         private int availableCycles;
+
+        private int lowPassAccumulator;
 
         public const int MaxChannels = 8;
 
@@ -162,6 +182,10 @@ namespace NesCore.Storage
                     int sampleIndex = (int)(((phase >> 16) + offset) & 0xFF);
                     int output = (GetSample(sampleIndex) - 8) * Volume;
                     Phase = phase;
+                    if (Volume != 0)
+                    {
+                        int dummy = 1;
+                    }
                     return output;
                 }
             }

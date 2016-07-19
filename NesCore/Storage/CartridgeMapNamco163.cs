@@ -114,7 +114,7 @@ namespace NesCore.Storage
                 {
                     // sound data port
                     soundChip.DataPort = value;
-                    Debug.WriteLine("Sound Data Port (" + Hex.Format(address) + ") = " + Hex.Format(value));
+                    //Debug.WriteLine("Sound Data Port (" + Hex.Format(address) + ") = " + Hex.Format(value));
                 }
                 else if (address >= 0x5000 && address < 0x5800)
                 {
@@ -262,6 +262,8 @@ namespace NesCore.Storage
                     irqTriggered = true;
                 }
             }
+
+            soundChip.Update(1);
         }
 
         private void AcknowledgeInterrupt()
@@ -314,6 +316,9 @@ namespace NesCore.Storage
                 {
                     autoIncrement = (value & 0x80) != 0;
                     address = (byte)(value & 0x7F);
+
+                    Debug.WriteLine("Namco 163 Sound Chip Address = " + Hex.Format(address));
+                    Debug.WriteLine("Namco 163 Sound AutoIncrement = " + autoIncrement);
                 }
             }
 
@@ -327,12 +332,33 @@ namespace NesCore.Storage
                 set
                 {
                     memory[address] = value;
+                    if(address == 0x7F)
+                    {
+                        int enabledChannels = (value >> 4) & 0x07;
+                        startChannel = currentChannel = SoundChip.MaxChannels - enabledChannels - 1;
+                    }
+                    Debug.WriteLine("Namco 163 Sound Chip[" + Hex.Format(address) + "] = " + Hex.Format(value));
                     ProcessAddress();
                 }
             }
 
-            public void Update()
+            public void Update(int cpuCycles)
             {
+                availableCycles += cpuCycles;
+
+                while (availableCycles >= 15)
+                {
+                    SoundChannel soundChannel = soundChannels[currentChannel];
+                    int output = soundChannel.Output;
+
+                    Debug.WriteLineIf(output != 0, "Namco 163 SoundChip Output = " + output);
+
+                    currentChannel++;
+                    if (currentChannel >= MaxChannels)
+                        currentChannel = startChannel;
+
+                    availableCycles -= 15;
+                }
             }
 
             private void ProcessAddress()
@@ -349,6 +375,10 @@ namespace NesCore.Storage
             private bool autoIncrement;
             private byte address;
 
+            private int startChannel;
+            private int currentChannel;
+            private int availableCycles;
+
             public const int MaxChannels = 8;
         }
 
@@ -359,15 +389,6 @@ namespace NesCore.Storage
                 this.channelIndex = (baseAddress - 0x40) / 0x08;
                 this.memory = memory;
                 this.baseAddress = baseAddress;
-            }
-
-            public bool Enabled
-            {
-                get
-                {
-                    int enabledChannels = (memory[0x7F] >> 4) & 0x07;
-                    return channelIndex >= SoundChip.MaxChannels - enabledChannels - 1;
-                }
             }
 
             public byte LowFrequency { get { return memory[baseAddress]; } }
@@ -387,6 +408,41 @@ namespace NesCore.Storage
             public byte WaveAddress { get { return memory[baseAddress + 6]; } }
 
             public byte Volume { get { return (byte)(memory[baseAddress + 7] & 0x0F); } }
+
+            public uint Phase
+            {
+                get  { return (uint)((HighPhase << 16) | (MidPhase << 8) | LowPhase); }
+            }
+
+            public uint Frequency
+            {
+                get { return (uint)((HighFrequency << 16) | (MidFrequency << 8) | LowFrequency); }
+            }
+
+            public byte Length
+            {
+                get { return (byte)((64 - WaveLength) * 4); }
+            }
+
+            public int Output
+            {
+                get
+                {
+                    uint phase = Phase;
+                    int offset = WaveAddress;
+                    int accumulatedPhase = Length != 0 ? (int)(phase + Frequency) % (Length << 16) : 0;
+                    int sampleIndex = ((accumulatedPhase >> 16) + offset) & 0xFF;
+                    int output = (GetSample(sampleIndex) - 8) * Volume;
+                    return output;
+                }
+            }
+
+            private byte GetSample(int index)
+            {
+                index &= 0x7F;
+                int nybbleShift = (index & 0x01) * 4;
+                return (byte)((memory[index / 2] >> nybbleShift) & 0x0F);
+            }
 
             private int channelIndex;
             private byte[] memory;

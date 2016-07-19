@@ -94,7 +94,7 @@ namespace SharpNes.Cheats
                 // otherwise, compare unpatched value before applying
                 byte unpatchedValue = oldProcessorReadByte(address);
                 if (cheat.CompareValue == unpatchedValue)
-                    return cheat.CompareValue;
+                    return cheat.Value;
                 else
                     return unpatchedValue;
             };

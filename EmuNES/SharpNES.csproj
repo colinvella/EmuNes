@@ -66,6 +66,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audio\ApuAudioProvider.cs" />
+    <Compile Include="Cheats\Cheat.cs" />
+    <Compile Include="Cheats\CheatSystem.cs" />
     <Compile Include="Diagnostics\CodeDisassemblyForm.cs">
       <SubType>Form</SubType>
     </Compile>

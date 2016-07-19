@@ -25,6 +25,7 @@ using System.Xml.Linq;
 using System.Globalization;
 using BumpKit;
 using AForge.Video.FFMPEG;
+using SharpNes.Cheats;
 
 namespace SharpNes
 {
@@ -56,7 +57,6 @@ namespace SharpNes
             ConfigureVideo();
             ConfigureAudio();
             ConfigureControllers();
-
  
             gameState = GameState.Stopped;
 
@@ -71,6 +71,9 @@ namespace SharpNes
             // NST database
             nstDatabase = XDocument.Parse(Properties.Resources.NstDatabase);
             Cartridge.DetermineMapperId = DetermineCartridgeMapperId;
+
+            // cheat system
+            cheatSystem = new CheatSystem();
         }
 
         /// <summary>
@@ -459,6 +462,8 @@ namespace SharpNes
 
             Console.Run(tickDelta);
 #endif
+            // apply any active cheats
+            cheatSystem.ApplyCheats(Console.Memory);
         }
 
         private void OnIconTick(object sender, EventArgs eventArgs)
@@ -721,7 +726,8 @@ namespace SharpNes
                 romBinaryReader.Close();
 
                 // load SRAM if file exists
-                this.cartridgeSaveRamFilename = cartridgeRomPath.Replace(".nes", ".sram").Replace(".zip", ".sram");
+                this.cartridgeSaveRamFilename = ReplaceRomExtension(cartridgeRomPath, ".sram");
+
                 if (File.Exists(this.cartridgeSaveRamFilename))
                 {
                     BinaryReader saveRamBinaryReader = new BinaryReader(new FileStream(this.cartridgeSaveRamFilename, FileMode.Open));
@@ -753,8 +759,20 @@ namespace SharpNes
                 recentFileManager.AddRecentFile(cartridgeRomPath);
 
                 // set video file paths
-                this.videoPathMp4 = cartridgeRomPath.Replace(".nes", ".mp4").Replace(".zip", ".mp4");
-                this.videoPathGif = cartridgeRomPath.Replace(".nes", ".gif").Replace(".zip", ".gif");
+                this.videoPathMp4 = ReplaceRomExtension(cartridgeRomPath, ".mp4");
+                this.videoPathGif = ReplaceRomExtension(cartridgeRomPath, ".gif");
+
+                // load cheat file if present
+                cheatSystem.Cheats.Clear();
+                string cheatFilePath = ReplaceRomExtension(cartridgeRomPath, ".cht");
+                if (File.Exists(cheatFilePath))
+                {
+                    cheatSystem.Load(cheatFilePath);
+                    emulatorStatusLabel.Text = "Cheat file loaded";
+
+                    // temporary - enable all cheats
+                    //cheatSystem.Cheats.ForEach((cheat) => cheat.Active = true);
+                }
 
                 return true;
             }
@@ -763,6 +781,13 @@ namespace SharpNes
                 MessageBox.Show(this, "Unable to load cartridge rom. Reason: " + exception.Message, "Open Game ROM", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
+        }
+
+        private string ReplaceRomExtension(string cartridgeRomPath, string extension)
+        {
+            if (!extension.StartsWith("."))
+                extension = "." + extension;
+            return cartridgeRomPath.Replace(".nes", extension).Replace(".zip", extension);
         }
 
         private void StoreSaveRam()
@@ -1025,5 +1050,8 @@ namespace SharpNes
         private bool videoRecording;
         private bool videoRecordingMp4;
         private bool videoRecordingGif;
+
+        // cheat system
+        private CheatSystem cheatSystem;
     }
 }

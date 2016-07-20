@@ -44,6 +44,10 @@ namespace SharpNes.Cheats
 
         private void OnCheatNew(object sender, EventArgs eventArgs)
         {
+            Cheat newCheat = new Cheat();
+            CheatDetailsForm cheatDetailsForm = new CheatDetailsForm(newCheat, true);
+            cheatDetailsForm.ShowDialog();
+
             UpdateCheatListBox();
         }
 

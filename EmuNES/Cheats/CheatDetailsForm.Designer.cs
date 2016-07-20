@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.Label label1;
             System.Windows.Forms.Label label2;
             System.Windows.Forms.Label label3;
@@ -39,10 +40,12 @@
             this.descriptionTextBox = new System.Windows.Forms.TextBox();
             this.cancelButton = new System.Windows.Forms.Button();
             this.okButton = new System.Windows.Forms.Button();
+            this.errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             label1 = new System.Windows.Forms.Label();
             label2 = new System.Windows.Forms.Label();
             label3 = new System.Windows.Forms.Label();
             label4 = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -84,13 +87,17 @@
             // addressTextBox
             // 
             this.addressTextBox.Location = new System.Drawing.Point(76, 12);
+            this.addressTextBox.MaxLength = 4;
             this.addressTextBox.Name = "addressTextBox";
             this.addressTextBox.Size = new System.Drawing.Size(48, 20);
             this.addressTextBox.TabIndex = 1;
+            this.addressTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.OnValidatingAddress);
+            this.addressTextBox.Validated += new System.EventHandler(this.OnValidatedAddress);
             // 
             // valueTextBox
             // 
             this.valueTextBox.Location = new System.Drawing.Point(76, 38);
+            this.valueTextBox.MaxLength = 2;
             this.valueTextBox.Name = "valueTextBox";
             this.valueTextBox.Size = new System.Drawing.Size(24, 20);
             this.valueTextBox.TabIndex = 3;
@@ -98,6 +105,7 @@
             // compareTextBox
             // 
             this.compareTextBox.Location = new System.Drawing.Point(76, 64);
+            this.compareTextBox.MaxLength = 2;
             this.compareTextBox.Name = "compareTextBox";
             this.compareTextBox.Size = new System.Drawing.Size(24, 20);
             this.compareTextBox.TabIndex = 5;
@@ -137,6 +145,11 @@
             this.okButton.TabIndex = 10;
             this.okButton.Text = "&OK";
             this.okButton.UseVisualStyleBackColor = true;
+            this.okButton.Click += new System.EventHandler(this.OnButtonOk);
+            // 
+            // errorProvider
+            // 
+            this.errorProvider.ContainerControl = this;
             // 
             // CheatDetailsForm
             // 
@@ -163,6 +176,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "New Cheat";
             this.Load += new System.EventHandler(this.OnFormLoad);
+            ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -177,5 +191,6 @@
         private System.Windows.Forms.TextBox descriptionTextBox;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Button okButton;
+        private System.Windows.Forms.ErrorProvider errorProvider;
     }
 }

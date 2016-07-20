@@ -25,6 +25,7 @@ namespace SharpNes.Cheats
             if (isNew)
             {
                 this.Text = "New Cheat";
+                this.addressTextBox.ReadOnly = false;
             }
             else
             {
@@ -38,7 +39,32 @@ namespace SharpNes.Cheats
             }
         }
 
+        private void OnValidatingAddress(object sender, CancelEventArgs cancelEventArgs)
+        {
+            try
+            {
+                Convert.ToUInt16(addressTextBox.Text, 16);
+            }
+            catch (Exception)
+            {
+                cancelEventArgs.Cancel = true;
+                errorProvider.SetError(addressTextBox, "Address value must be in 4 hex-digit format");
+            }
+        }
+
+        private void OnValidatedAddress(object sender, EventArgs eventArgs)
+        {
+            addressTextBox.Text = addressTextBox.Text.ToUpper();
+            errorProvider.SetError(addressTextBox, "");
+        }
+
+        private void OnButtonOk(object sender, EventArgs eventArgs)
+        {
+
+        }
+
         private Cheat cheat;
         private bool isNew;
+
     }
 }

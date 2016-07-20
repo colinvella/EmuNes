@@ -29,16 +29,13 @@ namespace SharpNes.Cheats
             cheatsCheckedListBox.Items.Clear();
             foreach (Cheat cheat in cheatSystem.Cheats)
             {
-                cheatsCheckedListBox.Items.Add(cheat.Description, cheat.Active ? CheckState.Checked : CheckState.Unchecked);
+                cheatsCheckedListBox.Items.Add(cheat, cheat.Active ? CheckState.Checked : CheckState.Unchecked);
             }
         }
 
         private void OnCheatItemCheck(object sender, ItemCheckEventArgs itemCheckEventArgs)
         {
-            string itemText = cheatsCheckedListBox.Items[itemCheckEventArgs.Index].ToString();
-            Cheat cheat = cheatSystem.Cheats.FirstOrDefault((c) => c.Description == itemText);
-            if (cheat == null)
-                return;
+            Cheat cheat = (Cheat)cheatsCheckedListBox.Items[itemCheckEventArgs.Index];
             cheat.Active = itemCheckEventArgs.NewValue == CheckState.Checked;
         }
 

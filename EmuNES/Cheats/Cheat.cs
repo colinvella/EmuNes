@@ -22,6 +22,14 @@ namespace SharpNes.Cheats
 
         public override string ToString()
         {
+            return ToString(false);
+        }
+
+        public string ToString(bool longFormat)
+        {
+            if (!longFormat)
+                return description;
+
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append(NeedsComparison ? "SC:" : "S:");
             stringBuilder.Append(Address.ToString("X4"));

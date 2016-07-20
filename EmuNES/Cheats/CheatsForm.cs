@@ -24,6 +24,31 @@ namespace SharpNes.Cheats
             UpdateCheatListBox();
         }
 
+        private void OnCheatsListMouseDown(object sender, MouseEventArgs e)
+        {
+            cheatsCheckedListBox.SelectedIndex = cheatsCheckedListBox.IndexFromPoint(e.Location);
+        }
+
+        private void OnCheatItemCheck(object sender, ItemCheckEventArgs itemCheckEventArgs)
+        {
+            Cheat cheat = (Cheat)cheatsCheckedListBox.Items[itemCheckEventArgs.Index];
+            cheat.Active = itemCheckEventArgs.NewValue == CheckState.Checked;
+        }
+
+        private void OnCheatContextMenuOpening(object sender, CancelEventArgs cancelEventArgs)
+        {
+            cheatEditMenuItem.Enabled = cheatsCheckedListBox.SelectedIndex >= 0;
+            cheatNewMenuItem.Enabled = cheatsCheckedListBox.SelectedIndex < 0;
+        }
+
+        private void OnEditCheat(object sender, EventArgs eventArgs)
+        {
+        }
+
+        private void OnCheatNew(object sender, EventArgs eventArgs)
+        {
+        }
+
         private void UpdateCheatListBox()
         {
             cheatsCheckedListBox.Items.Clear();
@@ -31,12 +56,6 @@ namespace SharpNes.Cheats
             {
                 cheatsCheckedListBox.Items.Add(cheat, cheat.Active ? CheckState.Checked : CheckState.Unchecked);
             }
-        }
-
-        private void OnCheatItemCheck(object sender, ItemCheckEventArgs itemCheckEventArgs)
-        {
-            Cheat cheat = (Cheat)cheatsCheckedListBox.Items[itemCheckEventArgs.Index];
-            cheat.Active = itemCheckEventArgs.NewValue == CheckState.Checked;
         }
 
         private CheatSystem cheatSystem;

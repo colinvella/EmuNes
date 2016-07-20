@@ -30,6 +30,7 @@ namespace SharpNes.Cheats
             {
                 this.Text = "Edit Cheat";
                 this.addressTextBox.Text = cheat.Address.ToString("X4");
+                this.addressTextBox.ReadOnly = true;
                 this.valueTextBox.Text = cheat.Value.ToString("X2");
                 this.compareTextBox.Text = cheat.CompareValue.ToString("X2");
                 this.compareRequiredCheckBox.Checked = this.compareTextBox.Enabled = cheat.NeedsComparison;

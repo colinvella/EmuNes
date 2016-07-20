@@ -27,29 +27,41 @@ namespace SharpNes.Cheats
         private void OnCheatsListMouseDown(object sender, MouseEventArgs e)
         {
             cheatsCheckedListBox.SelectedIndex = cheatsCheckedListBox.IndexFromPoint(e.Location);
+            selectedCheat = (Cheat)cheatsCheckedListBox.SelectedItem;
         }
 
         private void OnCheatItemCheck(object sender, ItemCheckEventArgs itemCheckEventArgs)
         {
-            Cheat cheat = (Cheat)cheatsCheckedListBox.Items[itemCheckEventArgs.Index];
-            cheat.Active = itemCheckEventArgs.NewValue == CheckState.Checked;
+            selectedCheat.Active = itemCheckEventArgs.NewValue == CheckState.Checked;
         }
 
         private void OnCheatContextMenuOpening(object sender, CancelEventArgs cancelEventArgs)
         {
-            cheatEditMenuItem.Enabled = cheatsCheckedListBox.SelectedIndex >= 0;
-            cheatNewMenuItem.Enabled = cheatsCheckedListBox.SelectedIndex < 0;
-        }
-
-        private void OnEditCheat(object sender, EventArgs eventArgs)
-        {
-            Cheat cheat = (Cheat)cheatsCheckedListBox.SelectedItem;
-            CheatDetailsForm cheatDetailsForm = new CheatDetailsForm(cheat, false);
-            cheatDetailsForm.ShowDialog();
+            bool cheatSelected = cheatsCheckedListBox.SelectedIndex >= 0;
+            cheatEditMenuItem.Enabled = cheatDeleteMenuItem.Enabled = cheatSelected;
+            cheatNewMenuItem.Enabled = !cheatSelected;
         }
 
         private void OnCheatNew(object sender, EventArgs eventArgs)
         {
+            UpdateCheatListBox();
+        }
+
+        private void OnCheatEdit(object sender, EventArgs eventArgs)
+        {
+            CheatDetailsForm cheatDetailsForm = new CheatDetailsForm(selectedCheat, false);
+            cheatDetailsForm.ShowDialog();
+        }
+
+        private void OnCheatDelete(object sender, EventArgs e)
+        {
+            if (MessageBox.Show(this,
+                "Delete cheat '" + selectedCheat.Description + "'?", "Delete Cheat",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No)
+                return;
+
+            cheatSystem.RemoveCheat(selectedCheat.Address);
+            UpdateCheatListBox();
         }
 
         private void UpdateCheatListBox()
@@ -62,5 +74,7 @@ namespace SharpNes.Cheats
         }
 
         private CheatSystem cheatSystem;
+        private Cheat selectedCheat;
+
     }
 }

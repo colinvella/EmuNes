@@ -156,7 +156,11 @@
             this.Controls.Add(label2);
             this.Controls.Add(this.addressTextBox);
             this.Controls.Add(label1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "CheatDetailsForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "New Cheat";
             this.Load += new System.EventHandler(this.OnFormLoad);
             this.ResumeLayout(false);

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SharpNes.Cheats
 {
-    class Cheat
+    public class Cheat
     {
         public bool Active { get; set; }
         public bool NeedsComparison { get; set; }

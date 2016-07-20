@@ -11,21 +11,24 @@ using System.Windows.Forms;
 
 namespace SharpNes.Cheats
 {
-    class CheatSystem
+    public class CheatSystem
     {
-        public CheatSystem()
+        public CheatSystem(Mos6502 processor)
         {
+            this.processor = processor;
             cheats = new Dictionary<ushort, Cheat>();
+
+            PatchCheats();
         }
 
         public IEnumerable<ushort> PatchedAddresses { get { return cheats.Keys; } }
 
         public IEnumerable<Cheat> Cheats { get { return cheats.Values; } }
 
-        public void Clear(Mos6502 processor)
+        public void Clear()
         {
-            UnpatchCheats(processor);
             cheats.Clear();
+            UnpatchCheats();
         }
 
         public void AddCheat(Cheat cheat)
@@ -36,6 +39,7 @@ namespace SharpNes.Cheats
             }
 
             cheats[cheat.Address] = cheat;
+            PatchCheats();
         }
 
         public void RemoveCheat(ushort address)
@@ -46,6 +50,9 @@ namespace SharpNes.Cheats
             }
 
             cheats.Remove(address);
+
+            if (cheats.Count == 0)
+                UnpatchCheats();
         }
 
         public void Load(string filename)
@@ -84,15 +91,15 @@ namespace SharpNes.Cheats
                         "Load Cheat File", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+
+            if (cheats.Count > 0)
+                PatchCheats();
         }
 
-        public void PatchCheats(Mos6502 processor)
+        public void PatchCheats()
         {
             if (oldProcessorReadByte != null)
-                UnpatchCheats(processor);
-
-            if (cheats.Count == 0)
-                return;
+                UnpatchCheats();
 
             this.oldProcessorReadByte = processor.ReadByte;
 
@@ -123,7 +130,7 @@ namespace SharpNes.Cheats
             };
         }
 
-        public void UnpatchCheats(Mos6502 processor)
+        public void UnpatchCheats()
         {
             if (oldProcessorReadByte == null)
                 return;
@@ -133,8 +140,8 @@ namespace SharpNes.Cheats
             oldProcessorReadByte = null;
         }
 
+        private Mos6502 processor;
         private Dictionary<ushort, Cheat> cheats;
-
         private ReadByte oldProcessorReadByte;
     }
 }

@@ -73,7 +73,7 @@ namespace SharpNes
             Cartridge.DetermineMapperId = DetermineCartridgeMapperId;
 
             // cheat system
-            cheatSystem = new CheatSystem();
+            cheatSystem = new CheatSystem(Console.Processor);
         }
 
         /// <summary>
@@ -327,6 +327,13 @@ namespace SharpNes
             InputOptionsForm inputOptionsForm = new InputOptionsForm(Console, keyboardState, gameControllerManager);
             inputOptionsForm.ShowDialog(this);
         }
+
+        private void OnOptionsCheats(object sender, EventArgs eventArgs)
+        {
+            CheatsForm cheatsForm = new CheatsForm(this.cheatSystem);
+            cheatsForm.ShowDialog(this);
+        }
+
 
         private void OnRecordVideoMp4StartStop(object sender, EventArgs eventArgs)
         {
@@ -742,8 +749,10 @@ namespace SharpNes
 
                 this.Text = cartridgeRomFilename + " - " + Application.ProductName;
 
+                // enable some menu items dependent on a loaded cartridge
                 filePropertiesMenuItem.Enabled = true;
                 gameMenuItem.Enabled = true;
+                optionsCheatsMenuItem.Enabled = true;
 
                 if (traceEnabled)
                 {
@@ -761,19 +770,12 @@ namespace SharpNes
                 this.videoPathGif = ReplaceRomExtension(cartridgeRomPath, ".gif");
 
                 // load cheat file if present
-                cheatSystem.Clear(Console.Processor);
+                cheatSystem.Clear();
                 string cheatFilePath = ReplaceRomExtension(cartridgeRomPath, ".cht");
                 if (File.Exists(cheatFilePath))
                 {
                     cheatSystem.Load(cheatFilePath);
                     emulatorStatusLabel.Text = "Cheat file loaded";
-
-                    // temporary - enable all cheats
-                    foreach (Cheat cheat in cheatSystem.Cheats)
-                        cheat.Active = true;
-
-                    // patch in the cheats
-                    cheatSystem.PatchCheats(Console.Processor);
                 }
 
                 return true;
@@ -1055,5 +1057,6 @@ namespace SharpNes
 
         // cheat system
         private CheatSystem cheatSystem;
+
     }
 }

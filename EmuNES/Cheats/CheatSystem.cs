@@ -1,5 +1,6 @@
 ﻿using NesCore.Memory;
 using NesCore.Processor;
+using NesCore.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,12 +18,34 @@ namespace SharpNes.Cheats
             cheats = new Dictionary<ushort, Cheat>();
         }
 
+        public IEnumerable<ushort> PatchedAddresses { get { return cheats.Keys; } }
+
         public IEnumerable<Cheat> Cheats { get { return cheats.Values; } }
 
         public void Clear(Mos6502 processor)
         {
             UnpatchCheats(processor);
             cheats.Clear();
+        }
+
+        public void AddCheat(Cheat cheat)
+        {
+            if (cheats.ContainsKey(cheat.Address))
+            {
+                MessageBox.Show("A cheat is already patched at address: " + Hex.Format(cheat.Address), "Add Cheat", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            cheats[cheat.Address] = cheat;
+        }
+
+        public void RemoveCheat(ushort address)
+        {
+            if (!cheats.ContainsKey(address))
+            {
+                MessageBox.Show("No cheat patched at address: " + Hex.Format(address), "Remove Cheat", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            cheats.Remove(address);
         }
 
         public void Load(string filename)
@@ -111,6 +134,7 @@ namespace SharpNes.Cheats
         }
 
         private Dictionary<ushort, Cheat> cheats;
+
         private ReadByte oldProcessorReadByte;
     }
 }

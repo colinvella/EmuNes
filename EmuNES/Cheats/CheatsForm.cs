@@ -43,6 +43,9 @@ namespace SharpNes.Cheats
 
         private void OnEditCheat(object sender, EventArgs eventArgs)
         {
+            Cheat cheat = (Cheat)cheatsCheckedListBox.SelectedItem;
+            CheatDetailsForm cheatDetailsForm = new CheatDetailsForm(cheat, false);
+            cheatDetailsForm.ShowDialog();
         }
 
         private void OnCheatNew(object sender, EventArgs eventArgs)

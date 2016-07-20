@@ -67,6 +67,12 @@
   <ItemGroup>
     <Compile Include="Audio\ApuAudioProvider.cs" />
     <Compile Include="Cheats\Cheat.cs" />
+    <Compile Include="Cheats\CheatDetailsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Cheats\CheatDetailsForm.Designer.cs">
+      <DependentUpon>CheatDetailsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Cheats\CheatsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -116,6 +122,9 @@
     <Compile Include="RecentFileManager.cs" />
     <Compile Include="Video\ScreenFilter.cs" />
     <Compile Include="WindowsUser32.cs" />
+    <EmbeddedResource Include="Cheats\CheatDetailsForm.resx">
+      <DependentUpon>CheatDetailsForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Cheats\CheatsForm.resx">
       <DependentUpon>CheatsForm.cs</DependentUpon>
     </EmbeddedResource>

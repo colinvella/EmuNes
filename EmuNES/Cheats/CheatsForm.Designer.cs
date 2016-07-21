@@ -41,6 +41,8 @@
             this.cheatDeleteMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.closeButton = new System.Windows.Forms.Button();
+            this.cheatNewManualEntryMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cheatNewGameGenieMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.cheatsGroupBox.SuspendLayout();
@@ -50,12 +52,12 @@
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(143, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(208, 6);
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(143, 6);
+            toolStripSeparator2.Size = new System.Drawing.Size(208, 6);
             // 
             // cheatsGroupBox
             // 
@@ -89,20 +91,22 @@
             toolStripSeparator2,
             this.cheatDeleteMenuItem});
             this.cheatsContextMenuStrip.Name = "cheatsContextMenuStrip";
-            this.cheatsContextMenuStrip.Size = new System.Drawing.Size(212, 148);
+            this.cheatsContextMenuStrip.Size = new System.Drawing.Size(212, 126);
             this.cheatsContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.OnCheatContextMenuOpening);
             // 
             // cheatNewMenuItem
             // 
+            this.cheatNewMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cheatNewManualEntryMenuItem,
+            this.cheatNewGameGenieMenuItem});
             this.cheatNewMenuItem.Name = "cheatNewMenuItem";
-            this.cheatNewMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.cheatNewMenuItem.Size = new System.Drawing.Size(211, 22);
             this.cheatNewMenuItem.Text = "&New...";
-            this.cheatNewMenuItem.Click += new System.EventHandler(this.OnCheatNew);
             // 
             // cheatEditMenuItem
             // 
             this.cheatEditMenuItem.Name = "cheatEditMenuItem";
-            this.cheatEditMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.cheatEditMenuItem.Size = new System.Drawing.Size(211, 22);
             this.cheatEditMenuItem.Text = "&Edit...";
             this.cheatEditMenuItem.Click += new System.EventHandler(this.OnCheatEdit);
             // 
@@ -149,6 +153,19 @@
             this.closeButton.Text = "&Close";
             this.closeButton.UseVisualStyleBackColor = true;
             // 
+            // cheatNewManualEntryMenuItem
+            // 
+            this.cheatNewManualEntryMenuItem.Name = "cheatNewManualEntryMenuItem";
+            this.cheatNewManualEntryMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.cheatNewManualEntryMenuItem.Text = "Manual Entry...";
+            this.cheatNewManualEntryMenuItem.Click += new System.EventHandler(this.OnCheatNewManualEntry);
+            // 
+            // cheatNewGameGenieMenuItem
+            // 
+            this.cheatNewGameGenieMenuItem.Name = "cheatNewGameGenieMenuItem";
+            this.cheatNewGameGenieMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.cheatNewGameGenieMenuItem.Text = "Game Genie Code...";
+            // 
             // CheatsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -183,5 +200,7 @@
         private System.Windows.Forms.ToolStripMenuItem cheatDeleteMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cheatActivateAllMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cheatDeactivateAllMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cheatNewManualEntryMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cheatNewGameGenieMenuItem;
     }
 }

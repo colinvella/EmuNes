@@ -44,7 +44,7 @@ namespace SharpNes.Cheats
             cheatActivateAllMenuItem.Enabled = cheatDeactivateAllMenuItem.Enabled = cheatSystem.Cheats.Count() > 0;
         }
 
-        private void OnCheatNew(object sender, EventArgs eventArgs)
+        private void OnCheatNewManualEntry(object sender, EventArgs eventArgs)
         {
             Cheat newCheat = new Cheat();
             CheatDetailsForm cheatDetailsForm = new CheatDetailsForm(newCheat, true);

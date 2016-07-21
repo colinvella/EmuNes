@@ -36,16 +36,26 @@
             this.cheatsContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.cheatNewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cheatEditMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cheatActivateAllMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cheatDeactivateAllMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cheatDeleteMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.closeButton = new System.Windows.Forms.Button();
-            this.cheatActivateAllMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cheatDeactivateAllMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.cheatsGroupBox.SuspendLayout();
             this.cheatsContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(143, 6);
+            // 
+            // toolStripSeparator2
+            // 
+            toolStripSeparator2.Name = "toolStripSeparator2";
+            toolStripSeparator2.Size = new System.Drawing.Size(143, 6);
             // 
             // cheatsGroupBox
             // 
@@ -79,27 +89,44 @@
             toolStripSeparator2,
             this.cheatDeleteMenuItem});
             this.cheatsContextMenuStrip.Name = "cheatsContextMenuStrip";
-            this.cheatsContextMenuStrip.Size = new System.Drawing.Size(153, 148);
+            this.cheatsContextMenuStrip.Size = new System.Drawing.Size(212, 148);
             this.cheatsContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.OnCheatContextMenuOpening);
             // 
             // cheatNewMenuItem
             // 
             this.cheatNewMenuItem.Name = "cheatNewMenuItem";
-            this.cheatNewMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.cheatNewMenuItem.Size = new System.Drawing.Size(146, 22);
             this.cheatNewMenuItem.Text = "&New...";
             this.cheatNewMenuItem.Click += new System.EventHandler(this.OnCheatNew);
             // 
             // cheatEditMenuItem
             // 
             this.cheatEditMenuItem.Name = "cheatEditMenuItem";
-            this.cheatEditMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.cheatEditMenuItem.Size = new System.Drawing.Size(146, 22);
             this.cheatEditMenuItem.Text = "&Edit...";
             this.cheatEditMenuItem.Click += new System.EventHandler(this.OnCheatEdit);
+            // 
+            // cheatActivateAllMenuItem
+            // 
+            this.cheatActivateAllMenuItem.Name = "cheatActivateAllMenuItem";
+            this.cheatActivateAllMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
+            this.cheatActivateAllMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.cheatActivateAllMenuItem.Text = "Activate All";
+            this.cheatActivateAllMenuItem.Click += new System.EventHandler(this.OnCheatActivateAll);
+            // 
+            // cheatDeactivateAllMenuItem
+            // 
+            this.cheatDeactivateAllMenuItem.Name = "cheatDeactivateAllMenuItem";
+            this.cheatDeactivateAllMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Space)));
+            this.cheatDeactivateAllMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.cheatDeactivateAllMenuItem.Text = "Deactivate All";
+            this.cheatDeactivateAllMenuItem.Click += new System.EventHandler(this.OnCheatDeactivateAll);
             // 
             // cheatDeleteMenuItem
             // 
             this.cheatDeleteMenuItem.Name = "cheatDeleteMenuItem";
-            this.cheatDeleteMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.cheatDeleteMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
+            this.cheatDeleteMenuItem.Size = new System.Drawing.Size(211, 22);
             this.cheatDeleteMenuItem.Text = "Delete...";
             this.cheatDeleteMenuItem.Click += new System.EventHandler(this.OnCheatDelete);
             // 
@@ -121,30 +148,6 @@
             this.closeButton.TabIndex = 3;
             this.closeButton.Text = "&Close";
             this.closeButton.UseVisualStyleBackColor = true;
-            // 
-            // toolStripSeparator1
-            // 
-            toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
-            // 
-            // toolStripSeparator2
-            // 
-            toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
-            // 
-            // cheatActivateAllMenuItem
-            // 
-            this.cheatActivateAllMenuItem.Name = "cheatActivateAllMenuItem";
-            this.cheatActivateAllMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.cheatActivateAllMenuItem.Text = "Activate All";
-            this.cheatActivateAllMenuItem.Click += new System.EventHandler(this.OnCheatActivateAll);
-            // 
-            // cheatDeactivateAllMenuItem
-            // 
-            this.cheatDeactivateAllMenuItem.Name = "cheatDeactivateAllMenuItem";
-            this.cheatDeactivateAllMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.cheatDeactivateAllMenuItem.Text = "Deactivate All";
-            this.cheatDeactivateAllMenuItem.Click += new System.EventHandler(this.OnCheatDeactivateAll);
             // 
             // CheatsForm
             // 

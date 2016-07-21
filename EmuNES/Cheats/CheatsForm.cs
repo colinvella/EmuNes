@@ -41,6 +41,7 @@ namespace SharpNes.Cheats
         {
             bool cheatSelected = cheatsCheckedListBox.SelectedIndex >= 0;
             cheatEditMenuItem.Enabled = cheatDeleteMenuItem.Enabled = cheatSelected;
+            cheatActivateAllMenuItem.Enabled = cheatDeactivateAllMenuItem.Enabled = cheatSystem.Cheats.Count() > 0;
         }
 
         private void OnCheatNew(object sender, EventArgs eventArgs)
@@ -63,7 +64,21 @@ namespace SharpNes.Cheats
             UpdateCheatListBox();
         }
 
-        private void OnCheatDelete(object sender, EventArgs e)
+        private void OnCheatActivateAll(object sender, EventArgs eventArgs)
+        {
+            foreach (Cheat cheat in cheatSystem.Cheats)
+                cheat.Active = true;
+            UpdateCheatListBox();
+        }
+
+        private void OnCheatDeactivateAll(object sender, EventArgs eventArgs)
+        {
+            foreach (Cheat cheat in cheatSystem.Cheats)
+                cheat.Active = false;
+            UpdateCheatListBox();
+        }
+
+        private void OnCheatDelete(object sender, EventArgs eventArgs)
         {
             if (selectedCheat == null)
                 return;
@@ -88,6 +103,5 @@ namespace SharpNes.Cheats
 
         private CheatSystem cheatSystem;
         private Cheat selectedCheat;
-
     }
 }

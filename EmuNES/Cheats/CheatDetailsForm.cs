@@ -26,6 +26,7 @@ namespace SharpNes.Cheats
             {
                 this.Text = "New Cheat";
                 this.addressTextBox.ReadOnly = false;
+                this.compareTextBox.Enabled = false;
             }
             else
             {
@@ -84,12 +85,26 @@ namespace SharpNes.Cheats
             errorProvider.SetError(textBox, "");
         }
 
+        private void OnValidatedDescription(object sender, EventArgs eventargs)
+        {
+            descriptionTextBox.Text = descriptionTextBox.Text.Trim();
+        }
+
         private void OnButtonOk(object sender, EventArgs eventArgs)
         {
+            cheat.Address = Convert.ToUInt16(addressTextBox.Text, 16);
+            cheat.Value = Convert.ToByte(valueTextBox.Text, 16);
+            if (compareRequiredCheckBox.Checked)
+                cheat.CompareValue = Convert.ToByte(compareTextBox.Text, 16);
+            else
+                cheat.CompareValue = 0;
+            cheat.NeedsComparison = compareRequiredCheckBox.Checked;
+            cheat.Description = descriptionTextBox.Text;
             this.Close();
         }
 
         private Cheat cheat;
         private bool isNew;
+
     }
 }

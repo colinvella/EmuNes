@@ -131,6 +131,7 @@
             this.descriptionTextBox.Name = "descriptionTextBox";
             this.descriptionTextBox.Size = new System.Drawing.Size(196, 20);
             this.descriptionTextBox.TabIndex = 8;
+            this.descriptionTextBox.Validated += new System.EventHandler(this.OnValidatedDescription);
             // 
             // cancelButton
             // 

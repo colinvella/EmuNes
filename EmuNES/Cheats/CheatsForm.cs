@@ -32,6 +32,8 @@ namespace SharpNes.Cheats
 
         private void OnCheatItemCheck(object sender, ItemCheckEventArgs itemCheckEventArgs)
         {
+            if (selectedCheat == null)
+                return;
             selectedCheat.Active = itemCheckEventArgs.NewValue == CheckState.Checked;
         }
 
@@ -39,14 +41,16 @@ namespace SharpNes.Cheats
         {
             bool cheatSelected = cheatsCheckedListBox.SelectedIndex >= 0;
             cheatEditMenuItem.Enabled = cheatDeleteMenuItem.Enabled = cheatSelected;
-            cheatNewMenuItem.Enabled = !cheatSelected;
         }
 
         private void OnCheatNew(object sender, EventArgs eventArgs)
         {
             Cheat newCheat = new Cheat();
             CheatDetailsForm cheatDetailsForm = new CheatDetailsForm(newCheat, true);
-            cheatDetailsForm.ShowDialog();
+            if (cheatDetailsForm.ShowDialog() == DialogResult.No)
+                return;
+
+            cheatSystem.AddCheat(newCheat);
 
             UpdateCheatListBox();
         }
@@ -54,11 +58,16 @@ namespace SharpNes.Cheats
         private void OnCheatEdit(object sender, EventArgs eventArgs)
         {
             CheatDetailsForm cheatDetailsForm = new CheatDetailsForm(selectedCheat, false);
-            cheatDetailsForm.ShowDialog();
+            if (cheatDetailsForm.ShowDialog() == DialogResult.No)
+                return;
+            UpdateCheatListBox();
         }
 
         private void OnCheatDelete(object sender, EventArgs e)
         {
+            if (selectedCheat == null)
+                return;
+
             if (MessageBox.Show(this,
                 "Delete cheat '" + selectedCheat.Description + "'?", "Delete Cheat",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No)

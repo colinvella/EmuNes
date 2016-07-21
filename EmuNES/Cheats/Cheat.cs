@@ -20,6 +20,54 @@ namespace SharpNes.Cheats
             set { description = value.Trim().Replace(":", ""); }
         }
 
+        public string GameGenieCode
+        {
+            get
+            {
+                byte[] nybbles = new byte[NeedsComparison ? 8 : 6];
+
+                // reverse of
+                // address = 0x8000 + ((n3 & 7) << 12) | ((n5 & 7) << 8) | ((n4 & 8) << 8) | ((n2 & 7) << 4) | ((n1 & 8) << 4) | (n4 & 7) | (n3 & 8);
+
+                // common to both 6-letter and 8-letter codes
+                nybbles[0] = (byte)(((Value   >> 4) & 8) | ((Value   >>  0) & 7));
+                nybbles[1] = (byte)(((Address >> 4) & 8) | ((Value   >>  4) & 7));
+
+                nybbles[2] = (byte)(((Address >> 4) & 7)); // unknown bit 7 produces 2 variants
+                nybbles[3] = (byte)(((Address >> 0) & 8) | ((Address >> 12) & 7));
+                nybbles[4] = (byte)(((Address >> 8) & 8) | ((Address >>  0) & 7));
+
+                if (NeedsComparison)
+                {
+                    // reverse of
+                    // data = ((n1 & 7) << 4) | ((n0 & 8) << 4) | (n0 & 7) | (n7 & 8);
+                    // compare = ((n7 & 7) << 4) | ((n6 & 8) << 4) | (n6 & 7) | (n5 & 8);
+                    nybbles[5] = (byte)(((CompareValue >> 0) & 8) | ((Address      >> 8) & 7));
+                    nybbles[6] = (byte)(((CompareValue >> 4) & 8) | ((CompareValue >> 0) & 7));
+                    nybbles[7] = (byte)(((Value        >> 0) & 8) | ((CompareValue >> 4) & 7));
+                }
+                else // 6 letter code
+                {
+                    // reverse of
+                    // data = ((n1 & 7) << 4) | ((n0 & 8) << 4) | (n0 & 7) | (n5 & 8);
+                    nybbles[5] = (byte)(((Value   >> 0) & 8) | ((Address >> 8) & 7));
+                }
+
+                StringBuilder stringBuilder = new StringBuilder();
+                foreach (byte nybble in nybbles)
+                    stringBuilder.Append(gameGenieNybbleToChar[nybble]);
+
+                stringBuilder.Append(" / ");
+
+                nybbles[2] |= 8; // variant
+
+                foreach (byte nybble in nybbles)
+                    stringBuilder.Append(gameGenieNybbleToChar[nybble]);
+                
+                return stringBuilder.ToString();
+            }
+        }
+
         public override string ToString()
         {
             return ToString(false);
@@ -110,7 +158,7 @@ namespace SharpNes.Cheats
                 return false;
 
             foreach (char ch in gameGenieCode)
-                if (!gameGenieCharacterMap.ContainsKey(ch))
+                if (!gameGenieCharToNybble.ContainsKey(ch))
                     return false;
 
             return true;
@@ -123,7 +171,7 @@ namespace SharpNes.Cheats
 
             byte[] nybbles = new byte[gameGenieCode.Length];
             for (int index = 0; index < gameGenieCode.Length; index++)
-                nybbles[index] = gameGenieCharacterMap[gameGenieCode[index]];
+                nybbles[index] = gameGenieCharToNybble[gameGenieCode[index]];
 
             Cheat newCheat = new Cheat();
             newCheat.Address = DecodeGameGenieCodeAddress(nybbles);
@@ -153,27 +201,18 @@ namespace SharpNes.Cheats
 
         private string description;
 
-        private static Dictionary<char, byte> gameGenieCharacterMap;
+        private static char[] gameGenieNybbleToChar;
+        private static Dictionary<char, byte> gameGenieCharToNybble;
 
         static Cheat()
         {
-            gameGenieCharacterMap = new Dictionary<char, byte>();
-            gameGenieCharacterMap['A'] = 0x0;
-            gameGenieCharacterMap['P'] = 0x1;
-            gameGenieCharacterMap['Z'] = 0x2;
-            gameGenieCharacterMap['L'] = 0x3;
-            gameGenieCharacterMap['G'] = 0x4;
-            gameGenieCharacterMap['I'] = 0x5;
-            gameGenieCharacterMap['T'] = 0x6;
-            gameGenieCharacterMap['Y'] = 0x7;
-            gameGenieCharacterMap['E'] = 0x8;
-            gameGenieCharacterMap['O'] = 0x9;
-            gameGenieCharacterMap['X'] = 0xA;
-            gameGenieCharacterMap['U'] = 0xB;
-            gameGenieCharacterMap['K'] = 0xC;
-            gameGenieCharacterMap['S'] = 0xD;
-            gameGenieCharacterMap['V'] = 0xE;
-            gameGenieCharacterMap['N'] = 0xF;
+            gameGenieNybbleToChar = new char[]
+                { 'A', 'P', 'Z', 'L', 'G', 'I', 'T', 'Y',
+                  'E', 'O', 'X', 'U', 'K', 'S', 'V', 'N' };
+            gameGenieCharToNybble = new Dictionary<char, byte>();
+
+            for (byte nybble = 0; nybble < gameGenieNybbleToChar.Length; nybble++)
+                gameGenieCharToNybble[gameGenieNybbleToChar[nybble]] = nybble;
         }
     }
 }

@@ -40,7 +40,8 @@ namespace SharpNes.Cheats
         private void OnCheatContextMenuOpening(object sender, CancelEventArgs cancelEventArgs)
         {
             bool cheatSelected = cheatsCheckedListBox.SelectedIndex >= 0;
-            cheatEditMenuItem.Enabled = cheatDeleteMenuItem.Enabled = cheatSelected;
+            cheatEditMenuItem.Enabled = cheatDeleteMenuItem.Enabled
+                = cheatGenerateGameGenieCodeMenuItem.Enabled = cheatSelected;
             cheatActivateAllMenuItem.Enabled = cheatDeactivateAllMenuItem.Enabled = cheatSystem.Cheats.Count() > 0;
         }
 
@@ -84,6 +85,15 @@ namespace SharpNes.Cheats
             foreach (Cheat cheat in cheatSystem.Cheats)
                 cheat.Active = false;
             UpdateCheatListBox();
+        }
+
+        private void OnGenerateGameGenieCode(object sender, EventArgs eventArgs)
+        {
+            if (selectedCheat == null)
+                return;
+
+            MessageBox.Show(this, selectedCheat.GameGenieCode, "Game Genie Code Variants",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void OnCheatDelete(object sender, EventArgs eventArgs)

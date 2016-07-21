@@ -56,6 +56,13 @@ namespace SharpNes.Cheats
             UpdateCheatListBox();
         }
 
+        private void OnCheatNewGameGenieCode(object sender, EventArgs eventArgs)
+        {
+            cheatSystem.AddCheat("SXIOPO");
+            cheatSystem.AddCheat("AATOZE");            
+            UpdateCheatListBox();
+        }
+
         private void OnCheatEdit(object sender, EventArgs eventArgs)
         {
             CheatDetailsForm cheatDetailsForm = new CheatDetailsForm(selectedCheat, false);

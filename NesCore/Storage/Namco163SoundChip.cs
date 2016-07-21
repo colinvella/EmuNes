@@ -182,10 +182,6 @@ namespace NesCore.Storage
                     int sampleIndex = (int)(((phase >> 16) + offset) & 0xFF);
                     int output = (GetSample(sampleIndex) - 8) * Volume;
                     Phase = phase;
-                    if (Volume != 0)
-                    {
-                        int dummy = 1;
-                    }
                     return output;
                 }
             }

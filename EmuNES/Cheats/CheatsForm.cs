@@ -48,7 +48,7 @@ namespace SharpNes.Cheats
         {
             Cheat newCheat = new Cheat();
             CheatDetailsForm cheatDetailsForm = new CheatDetailsForm(newCheat, true);
-            if (cheatDetailsForm.ShowDialog() == DialogResult.No)
+            if (cheatDetailsForm.ShowDialog() == DialogResult.Cancel)
                 return;
 
             cheatSystem.AddCheat(newCheat);
@@ -58,15 +58,16 @@ namespace SharpNes.Cheats
 
         private void OnCheatNewGameGenieCode(object sender, EventArgs eventArgs)
         {
-            cheatSystem.AddCheat("SXIOPO");
-            cheatSystem.AddCheat("AATOZE");            
+            GameGenieEntryForm gameGenieEntryForm = new GameGenieEntryForm(cheatSystem);
+            if (gameGenieEntryForm.ShowDialog() == DialogResult.Cancel)
+                return;
             UpdateCheatListBox();
         }
 
         private void OnCheatEdit(object sender, EventArgs eventArgs)
         {
             CheatDetailsForm cheatDetailsForm = new CheatDetailsForm(selectedCheat, false);
-            if (cheatDetailsForm.ShowDialog() == DialogResult.No)
+            if (cheatDetailsForm.ShowDialog() == DialogResult.Cancel)
                 return;
             UpdateCheatListBox();
         }

@@ -80,6 +80,12 @@
       <DependentUpon>CheatsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Cheats\CheatSystem.cs" />
+    <Compile Include="Cheats\GameGenieEntryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Cheats\GameGenieEntryForm.Designer.cs">
+      <DependentUpon>GameGenieEntryForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Diagnostics\CodeDisassemblyForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -127,6 +133,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Cheats\CheatsForm.resx">
       <DependentUpon>CheatsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Cheats\GameGenieEntryForm.resx">
+      <DependentUpon>GameGenieEntryForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Diagnostics\CodeDisassemblyForm.resx">
       <DependentUpon>CodeDisassemblyForm.cs</DependentUpon>

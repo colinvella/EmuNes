@@ -22,7 +22,7 @@ namespace SharpNes.Cheats
         private void OnValidatingGameGenieCode(object sender, CancelEventArgs cancelEventArgs)
         {
             string gameGenieCode = gameGenieCodeTextBox.Text.Trim().ToUpper();
-            if (gameGenieCode.Length > 0 && !cheatSystem.IsValidGameGenieCode(gameGenieCode))
+            if (gameGenieCode.Length > 0 && !Cheat.IsValidGameGenieCode(gameGenieCode))
             {
                 errorProvider.SetError(gameGenieCodeTextBox, "Invalid Game Genie code");
                 cancelEventArgs.Cancel = true;

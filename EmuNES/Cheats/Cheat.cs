@@ -104,6 +104,76 @@ namespace SharpNes.Cheats
             return cheat;
         }
 
+        public static bool IsValidGameGenieCode(string gameGenieCode)
+        {
+            if (gameGenieCode.Length != 6 && gameGenieCode.Length != 8)
+                return false;
+
+            foreach (char ch in gameGenieCode)
+                if (!gameGenieCharacterMap.ContainsKey(ch))
+                    return false;
+
+            return true;
+        }
+
+        public static Cheat ParseGameGenieCode(string gameGenieCode)
+        {
+            if (!IsValidGameGenieCode(gameGenieCode))
+                return null;
+
+            byte[] nybbles = new byte[gameGenieCode.Length];
+            for (int index = 0; index < gameGenieCode.Length; index++)
+                nybbles[index] = gameGenieCharacterMap[gameGenieCode[index]];
+
+            Cheat newCheat = new Cheat();
+            newCheat.Address = DecodeGameGenieCodeAddress(nybbles);
+
+            if (gameGenieCode.Length == 6)
+            {
+                newCheat.Value = (byte)(((nybbles[1] & 7) << 4) | ((nybbles[0] & 8) << 4) | (nybbles[0] & 7) | (nybbles[5] & 8));
+            }
+            else // 8
+            {
+                newCheat.Value = (byte)(((nybbles[1] & 7) << 4) | ((nybbles[0] & 8) << 4) | (nybbles[0] & 7) | (nybbles[7] & 8));
+                newCheat.CompareValue = (byte)(((nybbles[7] & 7) << 4) | ((nybbles[6] & 8) << 4) | (nybbles[6] & 7) | (nybbles[5] & 8));
+                newCheat.NeedsComparison = true;
+            }
+
+            newCheat.Description = "Game Genie Code: " + gameGenieCode;
+
+            return newCheat;
+        }
+
+        private static ushort DecodeGameGenieCodeAddress(byte[] nybbles)
+        {
+            return (ushort)(0x8000
+                + ((nybbles[3] & 7) << 12) | ((nybbles[5] & 7) << 8) | ((nybbles[4] & 8) << 8)
+                | ((nybbles[2] & 7) << 4) | ((nybbles[1] & 8) << 4) | (nybbles[4] & 7) | (nybbles[3] & 8));
+        }
+
         private string description;
+
+        private static Dictionary<char, byte> gameGenieCharacterMap;
+
+        static Cheat()
+        {
+            gameGenieCharacterMap = new Dictionary<char, byte>();
+            gameGenieCharacterMap['A'] = 0x0;
+            gameGenieCharacterMap['P'] = 0x1;
+            gameGenieCharacterMap['Z'] = 0x2;
+            gameGenieCharacterMap['L'] = 0x3;
+            gameGenieCharacterMap['G'] = 0x4;
+            gameGenieCharacterMap['I'] = 0x5;
+            gameGenieCharacterMap['T'] = 0x6;
+            gameGenieCharacterMap['Y'] = 0x7;
+            gameGenieCharacterMap['E'] = 0x8;
+            gameGenieCharacterMap['O'] = 0x9;
+            gameGenieCharacterMap['X'] = 0xA;
+            gameGenieCharacterMap['U'] = 0xB;
+            gameGenieCharacterMap['K'] = 0xC;
+            gameGenieCharacterMap['S'] = 0xD;
+            gameGenieCharacterMap['V'] = 0xE;
+            gameGenieCharacterMap['N'] = 0xF;
+        }
     }
 }

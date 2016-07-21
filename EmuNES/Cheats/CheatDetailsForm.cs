@@ -52,19 +52,44 @@ namespace SharpNes.Cheats
             }
         }
 
+        private void OnCompareRequiredCheckedChanged(object sender, EventArgs eventArgs)
+        {
+            compareTextBox.Enabled = compareRequiredCheckBox.Checked;
+        }
+
         private void OnValidatedAddress(object sender, EventArgs eventArgs)
         {
             addressTextBox.Text = addressTextBox.Text.ToUpper();
             errorProvider.SetError(addressTextBox, "");
         }
 
+        private void OnValidatingByteValue(object sender, CancelEventArgs cancelEventArgs)
+        {
+            TextBox textBox = (TextBox)sender;
+            try
+            {
+                Convert.ToByte(textBox.Text, 16);
+            }
+            catch (Exception)
+            {
+                cancelEventArgs.Cancel = true;
+                errorProvider.SetError(textBox, "Byte value must be in 2 hex-digit format");
+            }
+        }
+
+        private void OnValidatedByteValue(object sender, EventArgs eventArgs)
+        {
+            TextBox textBox = (TextBox)sender;
+            textBox.Text = textBox.Text.ToUpper();
+            errorProvider.SetError(textBox, "");
+        }
+
         private void OnButtonOk(object sender, EventArgs eventArgs)
         {
-
+            this.Close();
         }
 
         private Cheat cheat;
         private bool isNew;
-
     }
 }

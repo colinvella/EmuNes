@@ -101,6 +101,8 @@
             this.valueTextBox.Name = "valueTextBox";
             this.valueTextBox.Size = new System.Drawing.Size(24, 20);
             this.valueTextBox.TabIndex = 3;
+            this.valueTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.OnValidatingByteValue);
+            this.valueTextBox.Validated += new System.EventHandler(this.OnValidatedByteValue);
             // 
             // compareTextBox
             // 
@@ -109,6 +111,8 @@
             this.compareTextBox.Name = "compareTextBox";
             this.compareTextBox.Size = new System.Drawing.Size(24, 20);
             this.compareTextBox.TabIndex = 5;
+            this.compareTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.OnValidatingByteValue);
+            this.compareTextBox.Validated += new System.EventHandler(this.OnValidatedByteValue);
             // 
             // compareRequiredCheckBox
             // 
@@ -119,6 +123,7 @@
             this.compareRequiredCheckBox.TabIndex = 6;
             this.compareRequiredCheckBox.Text = "Compare Required";
             this.compareRequiredCheckBox.UseVisualStyleBackColor = true;
+            this.compareRequiredCheckBox.CheckedChanged += new System.EventHandler(this.OnCompareRequiredCheckedChanged);
             // 
             // descriptionTextBox
             // 

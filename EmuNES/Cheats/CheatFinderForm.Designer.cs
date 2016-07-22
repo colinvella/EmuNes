@@ -41,16 +41,22 @@
             this.decreasedRadioButton = new System.Windows.Forms.RadioButton();
             this.increasedRadioButton = new System.Windows.Forms.RadioButton();
             this.filterGroupBox = new System.Windows.Forms.GroupBox();
-            this.resultRistBox = new System.Windows.Forms.ListBox();
+            this.resultListBox = new System.Windows.Forms.ListBox();
+            this.resetButton = new System.Windows.Forms.Button();
+            this.applyButton = new System.Windows.Forms.Button();
+            this.closeButton = new System.Windows.Forms.Button();
+            this.resultsGroupBox = new System.Windows.Forms.GroupBox();
             this.filterGroupBox.SuspendLayout();
+            this.resultsGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // valueMatchRadioButton
             // 
             this.valueMatchRadioButton.AutoSize = true;
-            this.valueMatchRadioButton.Location = new System.Drawing.Point(6, 19);
+            this.valueMatchRadioButton.Location = new System.Drawing.Point(9, 29);
+            this.valueMatchRadioButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.valueMatchRadioButton.Name = "valueMatchRadioButton";
-            this.valueMatchRadioButton.Size = new System.Drawing.Size(101, 17);
+            this.valueMatchRadioButton.Size = new System.Drawing.Size(153, 24);
             this.valueMatchRadioButton.TabIndex = 0;
             this.valueMatchRadioButton.TabStop = true;
             this.valueMatchRadioButton.Text = "Current value is ";
@@ -60,18 +66,20 @@
             // currentValueOnlyTextBox
             // 
             this.currentValueOnlyTextBox.Enabled = false;
-            this.currentValueOnlyTextBox.Location = new System.Drawing.Point(105, 18);
+            this.currentValueOnlyTextBox.Location = new System.Drawing.Point(158, 28);
+            this.currentValueOnlyTextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.currentValueOnlyTextBox.MaxLength = 2;
             this.currentValueOnlyTextBox.Name = "currentValueOnlyTextBox";
-            this.currentValueOnlyTextBox.Size = new System.Drawing.Size(24, 20);
+            this.currentValueOnlyTextBox.Size = new System.Drawing.Size(34, 26);
             this.currentValueOnlyTextBox.TabIndex = 1;
             // 
             // currentAndPreviousMatchRadioButton
             // 
             this.currentAndPreviousMatchRadioButton.AutoSize = true;
-            this.currentAndPreviousMatchRadioButton.Location = new System.Drawing.Point(6, 45);
+            this.currentAndPreviousMatchRadioButton.Location = new System.Drawing.Point(9, 69);
+            this.currentAndPreviousMatchRadioButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.currentAndPreviousMatchRadioButton.Name = "currentAndPreviousMatchRadioButton";
-            this.currentAndPreviousMatchRadioButton.Size = new System.Drawing.Size(101, 17);
+            this.currentAndPreviousMatchRadioButton.Size = new System.Drawing.Size(153, 24);
             this.currentAndPreviousMatchRadioButton.TabIndex = 2;
             this.currentAndPreviousMatchRadioButton.TabStop = true;
             this.currentAndPreviousMatchRadioButton.Text = "Current value is ";
@@ -81,36 +89,40 @@
             // currentValueTextBox
             // 
             this.currentValueTextBox.Enabled = false;
-            this.currentValueTextBox.Location = new System.Drawing.Point(105, 44);
+            this.currentValueTextBox.Location = new System.Drawing.Point(158, 68);
+            this.currentValueTextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.currentValueTextBox.MaxLength = 2;
             this.currentValueTextBox.Name = "currentValueTextBox";
-            this.currentValueTextBox.Size = new System.Drawing.Size(24, 20);
+            this.currentValueTextBox.Size = new System.Drawing.Size(34, 26);
             this.currentValueTextBox.TabIndex = 3;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(131, 47);
+            this.label1.Location = new System.Drawing.Point(196, 72);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(107, 13);
+            this.label1.Size = new System.Drawing.Size(166, 20);
             this.label1.TabIndex = 4;
             this.label1.Text = "and previous value is";
             // 
             // previousValueTextBox
             // 
             this.previousValueTextBox.Enabled = false;
-            this.previousValueTextBox.Location = new System.Drawing.Point(238, 44);
+            this.previousValueTextBox.Location = new System.Drawing.Point(357, 68);
+            this.previousValueTextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.previousValueTextBox.MaxLength = 2;
             this.previousValueTextBox.Name = "previousValueTextBox";
-            this.previousValueTextBox.Size = new System.Drawing.Size(24, 20);
+            this.previousValueTextBox.Size = new System.Drawing.Size(34, 26);
             this.previousValueTextBox.TabIndex = 5;
             // 
             // increasedByRadioButton
             // 
             this.increasedByRadioButton.AutoSize = true;
-            this.increasedByRadioButton.Location = new System.Drawing.Point(6, 71);
+            this.increasedByRadioButton.Location = new System.Drawing.Point(9, 109);
+            this.increasedByRadioButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.increasedByRadioButton.Name = "increasedByRadioButton";
-            this.increasedByRadioButton.Size = new System.Drawing.Size(115, 17);
+            this.increasedByRadioButton.Size = new System.Drawing.Size(172, 24);
             this.increasedByRadioButton.TabIndex = 6;
             this.increasedByRadioButton.TabStop = true;
             this.increasedByRadioButton.Text = "Value increased by";
@@ -120,27 +132,30 @@
             // incrementTextBox
             // 
             this.incrementTextBox.Enabled = false;
-            this.incrementTextBox.Location = new System.Drawing.Point(123, 70);
+            this.incrementTextBox.Location = new System.Drawing.Point(184, 108);
+            this.incrementTextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.incrementTextBox.MaxLength = 2;
             this.incrementTextBox.Name = "incrementTextBox";
-            this.incrementTextBox.Size = new System.Drawing.Size(24, 20);
+            this.incrementTextBox.Size = new System.Drawing.Size(34, 26);
             this.incrementTextBox.TabIndex = 7;
             // 
             // decrementTextBox
             // 
             this.decrementTextBox.Enabled = false;
-            this.decrementTextBox.Location = new System.Drawing.Point(123, 96);
+            this.decrementTextBox.Location = new System.Drawing.Point(184, 148);
+            this.decrementTextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.decrementTextBox.MaxLength = 2;
             this.decrementTextBox.Name = "decrementTextBox";
-            this.decrementTextBox.Size = new System.Drawing.Size(24, 20);
+            this.decrementTextBox.Size = new System.Drawing.Size(34, 26);
             this.decrementTextBox.TabIndex = 9;
             // 
             // decreasedByRadioButton
             // 
             this.decreasedByRadioButton.AutoSize = true;
-            this.decreasedByRadioButton.Location = new System.Drawing.Point(6, 97);
+            this.decreasedByRadioButton.Location = new System.Drawing.Point(9, 149);
+            this.decreasedByRadioButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.decreasedByRadioButton.Name = "decreasedByRadioButton";
-            this.decreasedByRadioButton.Size = new System.Drawing.Size(119, 17);
+            this.decreasedByRadioButton.Size = new System.Drawing.Size(177, 24);
             this.decreasedByRadioButton.TabIndex = 8;
             this.decreasedByRadioButton.TabStop = true;
             this.decreasedByRadioButton.Text = "Value decreased by";
@@ -150,9 +165,10 @@
             // decreasedRadioButton
             // 
             this.decreasedRadioButton.AutoSize = true;
-            this.decreasedRadioButton.Location = new System.Drawing.Point(6, 149);
+            this.decreasedRadioButton.Location = new System.Drawing.Point(9, 229);
+            this.decreasedRadioButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.decreasedRadioButton.Name = "decreasedRadioButton";
-            this.decreasedRadioButton.Size = new System.Drawing.Size(105, 17);
+            this.decreasedRadioButton.Size = new System.Drawing.Size(155, 24);
             this.decreasedRadioButton.TabIndex = 12;
             this.decreasedRadioButton.TabStop = true;
             this.decreasedRadioButton.Text = "Value decreased";
@@ -162,9 +178,10 @@
             // increasedRadioButton
             // 
             this.increasedRadioButton.AutoSize = true;
-            this.increasedRadioButton.Location = new System.Drawing.Point(6, 123);
+            this.increasedRadioButton.Location = new System.Drawing.Point(9, 189);
+            this.increasedRadioButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.increasedRadioButton.Name = "increasedRadioButton";
-            this.increasedRadioButton.Size = new System.Drawing.Size(101, 17);
+            this.increasedRadioButton.Size = new System.Drawing.Size(150, 24);
             this.increasedRadioButton.TabIndex = 10;
             this.increasedRadioButton.TabStop = true;
             this.increasedRadioButton.Text = "Value increased";
@@ -173,6 +190,8 @@
             // 
             // filterGroupBox
             // 
+            this.filterGroupBox.Controls.Add(this.applyButton);
+            this.filterGroupBox.Controls.Add(this.resetButton);
             this.filterGroupBox.Controls.Add(this.currentValueTextBox);
             this.filterGroupBox.Controls.Add(this.currentValueOnlyTextBox);
             this.filterGroupBox.Controls.Add(this.valueMatchRadioButton);
@@ -185,29 +204,79 @@
             this.filterGroupBox.Controls.Add(this.previousValueTextBox);
             this.filterGroupBox.Controls.Add(this.incrementTextBox);
             this.filterGroupBox.Controls.Add(this.increasedByRadioButton);
-            this.filterGroupBox.Location = new System.Drawing.Point(12, 12);
+            this.filterGroupBox.Location = new System.Drawing.Point(18, 18);
+            this.filterGroupBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.filterGroupBox.Name = "filterGroupBox";
-            this.filterGroupBox.Size = new System.Drawing.Size(294, 176);
+            this.filterGroupBox.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.filterGroupBox.Size = new System.Drawing.Size(441, 307);
             this.filterGroupBox.TabIndex = 13;
             this.filterGroupBox.TabStop = false;
             this.filterGroupBox.Text = "Search Filter";
             // 
-            // resultRistBox
+            // resultListBox
             // 
-            this.resultRistBox.FormattingEnabled = true;
-            this.resultRistBox.Location = new System.Drawing.Point(312, 18);
-            this.resultRistBox.Name = "resultRistBox";
-            this.resultRistBox.Size = new System.Drawing.Size(76, 173);
-            this.resultRistBox.TabIndex = 0;
+            this.resultListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.resultListBox.FormattingEnabled = true;
+            this.resultListBox.ItemHeight = 20;
+            this.resultListBox.Location = new System.Drawing.Point(3, 22);
+            this.resultListBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.resultListBox.Name = "resultListBox";
+            this.resultListBox.Size = new System.Drawing.Size(121, 282);
+            this.resultListBox.TabIndex = 0;
+            // 
+            // resetButton
+            // 
+            this.resetButton.Location = new System.Drawing.Point(204, 264);
+            this.resetButton.Name = "resetButton";
+            this.resetButton.Size = new System.Drawing.Size(112, 35);
+            this.resetButton.TabIndex = 13;
+            this.resetButton.Text = "Reset";
+            this.resetButton.UseVisualStyleBackColor = true;
+            this.resetButton.Click += new System.EventHandler(this.OnSearchReset);
+            // 
+            // applyButton
+            // 
+            this.applyButton.Enabled = false;
+            this.applyButton.Location = new System.Drawing.Point(322, 264);
+            this.applyButton.Name = "applyButton";
+            this.applyButton.Size = new System.Drawing.Size(112, 35);
+            this.applyButton.TabIndex = 14;
+            this.applyButton.Text = "&Apply";
+            this.applyButton.UseVisualStyleBackColor = true;
+            this.applyButton.Click += new System.EventHandler(this.OnSearchApply);
+            // 
+            // closeButton
+            // 
+            this.closeButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.closeButton.Location = new System.Drawing.Point(482, 336);
+            this.closeButton.Name = "closeButton";
+            this.closeButton.Size = new System.Drawing.Size(112, 35);
+            this.closeButton.TabIndex = 14;
+            this.closeButton.Text = "&Continue";
+            this.closeButton.UseVisualStyleBackColor = true;
+            this.closeButton.Click += new System.EventHandler(this.OnFormContinue);
+            // 
+            // resultsGroupBox
+            // 
+            this.resultsGroupBox.Controls.Add(this.resultListBox);
+            this.resultsGroupBox.Location = new System.Drawing.Point(467, 18);
+            this.resultsGroupBox.Name = "resultsGroupBox";
+            this.resultsGroupBox.Size = new System.Drawing.Size(127, 307);
+            this.resultsGroupBox.TabIndex = 15;
+            this.resultsGroupBox.TabStop = false;
+            this.resultsGroupBox.Text = "Results";
             // 
             // CheatFinderForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AcceptButton = this.closeButton;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(404, 261);
-            this.Controls.Add(this.resultRistBox);
+            this.ClientSize = new System.Drawing.Size(606, 383);
+            this.Controls.Add(this.resultsGroupBox);
+            this.Controls.Add(this.closeButton);
             this.Controls.Add(this.filterGroupBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "CheatFinderForm";
@@ -215,6 +284,7 @@
             this.Text = "Cheat Finder";
             this.filterGroupBox.ResumeLayout(false);
             this.filterGroupBox.PerformLayout();
+            this.resultsGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -234,6 +304,10 @@
         private System.Windows.Forms.RadioButton decreasedRadioButton;
         private System.Windows.Forms.RadioButton increasedRadioButton;
         private System.Windows.Forms.GroupBox filterGroupBox;
-        private System.Windows.Forms.ListBox resultRistBox;
+        private System.Windows.Forms.ListBox resultListBox;
+        private System.Windows.Forms.Button resetButton;
+        private System.Windows.Forms.Button applyButton;
+        private System.Windows.Forms.Button closeButton;
+        private System.Windows.Forms.GroupBox resultsGroupBox;
     }
 }

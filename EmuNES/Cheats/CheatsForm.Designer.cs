@@ -32,8 +32,6 @@
             System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
             System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
             System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-            this.cheatsGroupBox = new System.Windows.Forms.GroupBox();
-            this.cheatsCheckedListBox = new System.Windows.Forms.CheckedListBox();
             this.cheatsContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.cheatNewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cheatNewManualEntryMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,50 +39,33 @@
             this.cheatEditMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cheatActivateAllMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cheatDeactivateAllMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cheatDeleteMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cheatGenerateGameGenieCodeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.cheatDeleteMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeButton = new System.Windows.Forms.Button();
+            this.cheatsCheckedListBox = new System.Windows.Forms.CheckedListBox();
+            this.findButton = new System.Windows.Forms.Button();
+            this.exportButton = new System.Windows.Forms.Button();
+            this.importButton = new System.Windows.Forms.Button();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.cheatsGroupBox.SuspendLayout();
             this.cheatsContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(274, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(225, 6);
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(274, 6);
+            toolStripSeparator2.Size = new System.Drawing.Size(225, 6);
             // 
-            // cheatsGroupBox
+            // toolStripSeparator3
             // 
-            this.cheatsGroupBox.Controls.Add(this.cheatsCheckedListBox);
-            this.cheatsGroupBox.Location = new System.Drawing.Point(18, 18);
-            this.cheatsGroupBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.cheatsGroupBox.Name = "cheatsGroupBox";
-            this.cheatsGroupBox.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.cheatsGroupBox.Size = new System.Drawing.Size(540, 266);
-            this.cheatsGroupBox.TabIndex = 0;
-            this.cheatsGroupBox.TabStop = false;
-            this.cheatsGroupBox.Text = "Cheats";
-            // 
-            // cheatsCheckedListBox
-            // 
-            this.cheatsCheckedListBox.ContextMenuStrip = this.cheatsContextMenuStrip;
-            this.cheatsCheckedListBox.FormattingEnabled = true;
-            this.cheatsCheckedListBox.Location = new System.Drawing.Point(9, 20);
-            this.cheatsCheckedListBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.cheatsCheckedListBox.Name = "cheatsCheckedListBox";
-            this.cheatsCheckedListBox.Size = new System.Drawing.Size(520, 235);
-            this.cheatsCheckedListBox.TabIndex = 0;
-            this.cheatsCheckedListBox.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.OnCheatItemCheck);
-            this.cheatsCheckedListBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnCheatsListMouseDown);
+            toolStripSeparator3.Name = "toolStripSeparator3";
+            toolStripSeparator3.Size = new System.Drawing.Size(225, 6);
             // 
             // cheatsContextMenuStrip
             // 
@@ -100,7 +81,7 @@
             toolStripSeparator3,
             this.cheatDeleteMenuItem});
             this.cheatsContextMenuStrip.Name = "cheatsContextMenuStrip";
-            this.cheatsContextMenuStrip.Size = new System.Drawing.Size(278, 206);
+            this.cheatsContextMenuStrip.Size = new System.Drawing.Size(229, 154);
             this.cheatsContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.OnCheatContextMenuOpening);
             // 
             // cheatNewMenuItem
@@ -109,27 +90,27 @@
             this.cheatNewManualEntryMenuItem,
             this.cheatNewGameGenieMenuItem});
             this.cheatNewMenuItem.Name = "cheatNewMenuItem";
-            this.cheatNewMenuItem.Size = new System.Drawing.Size(277, 26);
+            this.cheatNewMenuItem.Size = new System.Drawing.Size(228, 22);
             this.cheatNewMenuItem.Text = "&New...";
             // 
             // cheatNewManualEntryMenuItem
             // 
             this.cheatNewManualEntryMenuItem.Name = "cheatNewManualEntryMenuItem";
-            this.cheatNewManualEntryMenuItem.Size = new System.Drawing.Size(213, 26);
+            this.cheatNewManualEntryMenuItem.Size = new System.Drawing.Size(178, 22);
             this.cheatNewManualEntryMenuItem.Text = "Manual Entry...";
             this.cheatNewManualEntryMenuItem.Click += new System.EventHandler(this.OnCheatNewManualEntry);
             // 
             // cheatNewGameGenieMenuItem
             // 
             this.cheatNewGameGenieMenuItem.Name = "cheatNewGameGenieMenuItem";
-            this.cheatNewGameGenieMenuItem.Size = new System.Drawing.Size(213, 26);
+            this.cheatNewGameGenieMenuItem.Size = new System.Drawing.Size(178, 22);
             this.cheatNewGameGenieMenuItem.Text = "Game Genie Code...";
             this.cheatNewGameGenieMenuItem.Click += new System.EventHandler(this.OnCheatNewGameGenieCode);
             // 
             // cheatEditMenuItem
             // 
             this.cheatEditMenuItem.Name = "cheatEditMenuItem";
-            this.cheatEditMenuItem.Size = new System.Drawing.Size(277, 26);
+            this.cheatEditMenuItem.Size = new System.Drawing.Size(228, 22);
             this.cheatEditMenuItem.Text = "&Edit...";
             this.cheatEditMenuItem.Click += new System.EventHandler(this.OnCheatEdit);
             // 
@@ -137,7 +118,7 @@
             // 
             this.cheatActivateAllMenuItem.Name = "cheatActivateAllMenuItem";
             this.cheatActivateAllMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.cheatActivateAllMenuItem.Size = new System.Drawing.Size(277, 26);
+            this.cheatActivateAllMenuItem.Size = new System.Drawing.Size(228, 22);
             this.cheatActivateAllMenuItem.Text = "Activate All";
             this.cheatActivateAllMenuItem.Click += new System.EventHandler(this.OnCheatActivateAll);
             // 
@@ -145,81 +126,99 @@
             // 
             this.cheatDeactivateAllMenuItem.Name = "cheatDeactivateAllMenuItem";
             this.cheatDeactivateAllMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Space)));
-            this.cheatDeactivateAllMenuItem.Size = new System.Drawing.Size(277, 26);
+            this.cheatDeactivateAllMenuItem.Size = new System.Drawing.Size(228, 22);
             this.cheatDeactivateAllMenuItem.Text = "Deactivate All";
             this.cheatDeactivateAllMenuItem.Click += new System.EventHandler(this.OnCheatDeactivateAll);
+            // 
+            // cheatGenerateGameGenieCodeMenuItem
+            // 
+            this.cheatGenerateGameGenieCodeMenuItem.Name = "cheatGenerateGameGenieCodeMenuItem";
+            this.cheatGenerateGameGenieCodeMenuItem.Size = new System.Drawing.Size(228, 22);
+            this.cheatGenerateGameGenieCodeMenuItem.Text = "Generate Game &Genie Code...";
+            this.cheatGenerateGameGenieCodeMenuItem.Click += new System.EventHandler(this.OnGenerateGameGenieCode);
             // 
             // cheatDeleteMenuItem
             // 
             this.cheatDeleteMenuItem.Name = "cheatDeleteMenuItem";
             this.cheatDeleteMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.cheatDeleteMenuItem.Size = new System.Drawing.Size(277, 26);
+            this.cheatDeleteMenuItem.Size = new System.Drawing.Size(228, 22);
             this.cheatDeleteMenuItem.Text = "Delete...";
             this.cheatDeleteMenuItem.Click += new System.EventHandler(this.OnCheatDelete);
-            // 
-            // cheatGenerateGameGenieCodeMenuItem
-            // 
-            this.cheatGenerateGameGenieCodeMenuItem.Name = "cheatGenerateGameGenieCodeMenuItem";
-            this.cheatGenerateGameGenieCodeMenuItem.Size = new System.Drawing.Size(277, 26);
-            this.cheatGenerateGameGenieCodeMenuItem.Text = "Generate Game &Genie Code...";
-            this.cheatGenerateGameGenieCodeMenuItem.Click += new System.EventHandler(this.OnGenerateGameGenieCode);
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Location = new System.Drawing.Point(18, 294);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.groupBox2.Size = new System.Drawing.Size(540, 198);
-            this.groupBox2.TabIndex = 1;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Cheat Finder";
             // 
             // closeButton
             // 
             this.closeButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.closeButton.Location = new System.Drawing.Point(446, 502);
-            this.closeButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.closeButton.Location = new System.Drawing.Point(297, 226);
             this.closeButton.Name = "closeButton";
-            this.closeButton.Size = new System.Drawing.Size(112, 35);
-            this.closeButton.TabIndex = 3;
+            this.closeButton.Size = new System.Drawing.Size(75, 23);
+            this.closeButton.TabIndex = 4;
             this.closeButton.Text = "&Close";
             this.closeButton.UseVisualStyleBackColor = true;
             // 
-            // toolStripSeparator3
+            // cheatsCheckedListBox
             // 
-            toolStripSeparator3.Name = "toolStripSeparator3";
-            toolStripSeparator3.Size = new System.Drawing.Size(274, 6);
+            this.cheatsCheckedListBox.CheckOnClick = true;
+            this.cheatsCheckedListBox.ContextMenuStrip = this.cheatsContextMenuStrip;
+            this.cheatsCheckedListBox.FormattingEnabled = true;
+            this.cheatsCheckedListBox.Location = new System.Drawing.Point(12, 12);
+            this.cheatsCheckedListBox.Name = "cheatsCheckedListBox";
+            this.cheatsCheckedListBox.Size = new System.Drawing.Size(360, 199);
+            this.cheatsCheckedListBox.TabIndex = 0;
+            this.cheatsCheckedListBox.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.OnCheatItemCheck);
+            this.cheatsCheckedListBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnCheatsListMouseDown);
+            // 
+            // findButton
+            // 
+            this.findButton.Location = new System.Drawing.Point(216, 226);
+            this.findButton.Name = "findButton";
+            this.findButton.Size = new System.Drawing.Size(75, 23);
+            this.findButton.TabIndex = 3;
+            this.findButton.Text = "&Find...";
+            this.findButton.UseVisualStyleBackColor = true;
+            // 
+            // exportButton
+            // 
+            this.exportButton.Location = new System.Drawing.Point(135, 226);
+            this.exportButton.Name = "exportButton";
+            this.exportButton.Size = new System.Drawing.Size(75, 23);
+            this.exportButton.TabIndex = 2;
+            this.exportButton.Text = "&Export...";
+            this.exportButton.UseVisualStyleBackColor = true;
+            // 
+            // importButton
+            // 
+            this.importButton.Location = new System.Drawing.Point(54, 226);
+            this.importButton.Name = "importButton";
+            this.importButton.Size = new System.Drawing.Size(75, 23);
+            this.importButton.TabIndex = 1;
+            this.importButton.Text = "&Import...";
+            this.importButton.UseVisualStyleBackColor = true;
             // 
             // CheatsForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.closeButton;
-            this.ClientSize = new System.Drawing.Size(576, 555);
+            this.ClientSize = new System.Drawing.Size(384, 261);
             this.Controls.Add(this.closeButton);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.cheatsGroupBox);
+            this.Controls.Add(this.findButton);
+            this.Controls.Add(this.exportButton);
+            this.Controls.Add(this.importButton);
+            this.Controls.Add(this.cheatsCheckedListBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "CheatsForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Cheats";
             this.Load += new System.EventHandler(this.OnFormLoad);
-            this.cheatsGroupBox.ResumeLayout(false);
             this.cheatsContextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.GroupBox cheatsGroupBox;
-        private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button closeButton;
-        private System.Windows.Forms.CheckedListBox cheatsCheckedListBox;
         private System.Windows.Forms.ContextMenuStrip cheatsContextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem cheatEditMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cheatNewMenuItem;
@@ -229,5 +228,9 @@
         private System.Windows.Forms.ToolStripMenuItem cheatNewManualEntryMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cheatNewGameGenieMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cheatGenerateGameGenieCodeMenuItem;
+        private System.Windows.Forms.CheckedListBox cheatsCheckedListBox;
+        private System.Windows.Forms.Button findButton;
+        private System.Windows.Forms.Button exportButton;
+        private System.Windows.Forms.Button importButton;
     }
 }

@@ -33,12 +33,14 @@ namespace SharpNes.Cheats
                 nybbles[0] = (byte)(((Value   >> 4) & 8) | ((Value   >>  0) & 7));
                 nybbles[1] = (byte)(((Address >> 4) & 8) | ((Value   >>  4) & 7));
 
-                nybbles[2] = (byte)(((Address >> 4) & 7)); // unknown bit 7 produces 2 variants
+                nybbles[2] = (byte)(((Address >> 4) & 7));
                 nybbles[3] = (byte)(((Address >> 0) & 8) | ((Address >> 12) & 7));
                 nybbles[4] = (byte)(((Address >> 8) & 8) | ((Address >>  0) & 7));
 
                 if (NeedsComparison)
                 {
+                    nybbles[2] |= 8; // set 3rd nybble bit 7 to make it behave nicely in real Game Genie
+ 
                     // reverse of
                     // data = ((n1 & 7) << 4) | ((n0 & 8) << 4) | (n0 & 7) | (n7 & 8);
                     // compare = ((n7 & 7) << 4) | ((n6 & 8) << 4) | (n6 & 7) | (n5 & 8);
@@ -54,13 +56,6 @@ namespace SharpNes.Cheats
                 }
 
                 StringBuilder stringBuilder = new StringBuilder();
-                foreach (byte nybble in nybbles)
-                    stringBuilder.Append(gameGenieNybbleToChar[nybble]);
-
-                stringBuilder.Append(" / ");
-
-                nybbles[2] |= 8; // variant
-
                 foreach (byte nybble in nybbles)
                     stringBuilder.Append(gameGenieNybbleToChar[nybble]);
                 

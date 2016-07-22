@@ -92,7 +92,11 @@ namespace SharpNes.Cheats
             if (selectedCheat == null)
                 return;
 
-            MessageBox.Show(this, selectedCheat.GameGenieCode, "Game Genie Code Variants",
+            string message = selectedCheat.Address >= 0x8000
+                ? selectedCheat.GameGenieCode
+                : "Cannot generate codes for addresses in the lower 32K region";
+
+            MessageBox.Show(this, message, "Game Genie Code",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 

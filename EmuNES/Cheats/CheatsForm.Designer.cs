@@ -32,6 +32,7 @@
             System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
             System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
             System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CheatsForm));
             this.cheatsContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.cheatNewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cheatNewManualEntryMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -81,7 +82,7 @@
             toolStripSeparator3,
             this.cheatDeleteMenuItem});
             this.cheatsContextMenuStrip.Name = "cheatsContextMenuStrip";
-            this.cheatsContextMenuStrip.Size = new System.Drawing.Size(233, 200);
+            this.cheatsContextMenuStrip.Size = new System.Drawing.Size(233, 178);
             this.cheatsContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.OnCheatContextMenuOpening);
             // 
             // cheatNewMenuItem
@@ -209,6 +210,7 @@
             this.Controls.Add(this.importButton);
             this.Controls.Add(this.cheatsCheckedListBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "CheatsForm";

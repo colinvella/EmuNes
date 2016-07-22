@@ -17,5 +17,13 @@ namespace SharpNes.Cheats
         {
             InitializeComponent();
         }
+
+        private void OnFilterOptionChanged(object sender, EventArgs eventArgs)
+        {
+            currentValueOnlyTextBox.Enabled = valueMatchRadioButton.Checked;
+            currentValueTextBox.Enabled = previousValueTextBox.Enabled = currentAndPreviousMatchRadioButton.Checked;
+            incrementTextBox.Enabled = increasedByRadioButton.Checked;
+            decrementTextBox.Enabled = decreasedByRadioButton.Checked;
+        }
     }
 }

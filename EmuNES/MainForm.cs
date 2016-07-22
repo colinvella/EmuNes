@@ -330,7 +330,7 @@ namespace SharpNes
 
         private void OnOptionsCheats(object sender, EventArgs eventArgs)
         {
-            CheatsForm cheatsForm = new CheatsForm(this.cheatSystem);
+            CheatsForm cheatsForm = new CheatsForm(Console.Memory,  this.cheatSystem);
             cheatsForm.ShowDialog(this);
         }
 

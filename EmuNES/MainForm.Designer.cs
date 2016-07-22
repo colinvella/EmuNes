@@ -60,6 +60,7 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsInputMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsCheatsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.recordMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.recordVideoMp4MenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.recordVideoMp4StartStopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -72,7 +73,6 @@
             this.emulatorStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.frameRateStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.iconTimer = new System.Windows.Forms.Timer(this.components);
-            this.optionsCheatsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mainMenuStrip.SuspendLayout();
@@ -340,9 +340,19 @@
             // 
             this.optionsInputMenuItem.Image = global::SharpNes.Properties.Resources.OptionsInput;
             this.optionsInputMenuItem.Name = "optionsInputMenuItem";
-            this.optionsInputMenuItem.Size = new System.Drawing.Size(156, 26);
+            this.optionsInputMenuItem.Size = new System.Drawing.Size(188, 26);
             this.optionsInputMenuItem.Text = "&Input...";
             this.optionsInputMenuItem.Click += new System.EventHandler(this.OnOptionsInput);
+            // 
+            // optionsCheatsMenuItem
+            // 
+            this.optionsCheatsMenuItem.Enabled = false;
+            this.optionsCheatsMenuItem.Name = "optionsCheatsMenuItem";
+            this.optionsCheatsMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt) 
+            | System.Windows.Forms.Keys.C)));
+            this.optionsCheatsMenuItem.Size = new System.Drawing.Size(188, 26);
+            this.optionsCheatsMenuItem.Text = "&Cheats...";
+            this.optionsCheatsMenuItem.Click += new System.EventHandler(this.OnOptionsCheats);
             // 
             // recordMenuItem
             // 
@@ -359,7 +369,7 @@
             this.recordVideoMp4MenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.recordVideoMp4StartStopMenuItem});
             this.recordVideoMp4MenuItem.Name = "recordVideoMp4MenuItem";
-            this.recordVideoMp4MenuItem.Size = new System.Drawing.Size(139, 22);
+            this.recordVideoMp4MenuItem.Size = new System.Drawing.Size(152, 22);
             this.recordVideoMp4MenuItem.Text = "&Video (MP4)";
             // 
             // recordVideoMp4StartStopMenuItem
@@ -375,7 +385,7 @@
             this.recordVideoGifMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.recordVideoGifStartStopMenuItem});
             this.recordVideoGifMenuItem.Name = "recordVideoGifMenuItem";
-            this.recordVideoGifMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.recordVideoGifMenuItem.Size = new System.Drawing.Size(152, 22);
             this.recordVideoGifMenuItem.Text = "Video (GIF)";
             // 
             // recordVideoGifStartStopMenuItem
@@ -450,14 +460,6 @@
             this.iconTimer.Enabled = true;
             this.iconTimer.Interval = 250;
             this.iconTimer.Tick += new System.EventHandler(this.OnIconTick);
-            // 
-            // optionsCheatsMenuItem
-            // 
-            this.optionsCheatsMenuItem.Enabled = false;
-            this.optionsCheatsMenuItem.Name = "optionsCheatsMenuItem";
-            this.optionsCheatsMenuItem.Size = new System.Drawing.Size(156, 26);
-            this.optionsCheatsMenuItem.Text = "&Cheats...";
-            this.optionsCheatsMenuItem.Click += new System.EventHandler(this.OnOptionsCheats);
             // 
             // MainForm
             // 

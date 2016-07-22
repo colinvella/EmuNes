@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NesCore.Memory;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,10 +13,11 @@ namespace SharpNes.Cheats
 {
     public partial class CheatsForm : Form
     {
-        public CheatsForm(CheatSystem cheatSystem)
+        public CheatsForm(MemoryMap memoryMap, CheatSystem cheatSystem)
         {
             InitializeComponent();
 
+            this.memoryMap = memoryMap;
             this.cheatSystem = cheatSystem;
         }
 
@@ -114,6 +116,13 @@ namespace SharpNes.Cheats
             UpdateCheatListBox();
         }
 
+        private void OnCheatFind(object sender, EventArgs eventArgs)
+        {
+            CheatFinderForm cheatFinderForm = new CheatFinderForm(memoryMap, cheatSystem);
+            cheatFinderForm.ShowDialog(this);
+            UpdateCheatListBox();
+        }
+
         private void UpdateCheatListBox()
         {
             cheatsCheckedListBox.Items.Clear();
@@ -123,6 +132,7 @@ namespace SharpNes.Cheats
             }
         }
 
+        private MemoryMap memoryMap;
         private CheatSystem cheatSystem;
         private Cheat selectedCheat;
     }

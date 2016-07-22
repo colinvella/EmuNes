@@ -175,6 +175,7 @@
             this.findButton.TabIndex = 3;
             this.findButton.Text = "&Find...";
             this.findButton.UseVisualStyleBackColor = true;
+            this.findButton.Click += new System.EventHandler(this.OnCheatFind);
             // 
             // exportButton
             // 

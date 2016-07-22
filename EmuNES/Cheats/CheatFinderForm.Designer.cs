@@ -41,9 +41,9 @@
             this.decreasedRadioButton = new System.Windows.Forms.RadioButton();
             this.increasedRadioButton = new System.Windows.Forms.RadioButton();
             this.filterGroupBox = new System.Windows.Forms.GroupBox();
-            this.resultListBox = new System.Windows.Forms.ListBox();
-            this.resetButton = new System.Windows.Forms.Button();
             this.applyButton = new System.Windows.Forms.Button();
+            this.resetButton = new System.Windows.Forms.Button();
+            this.resultListBox = new System.Windows.Forms.ListBox();
             this.closeButton = new System.Windows.Forms.Button();
             this.resultsGroupBox = new System.Windows.Forms.GroupBox();
             this.filterGroupBox.SuspendLayout();
@@ -208,25 +208,25 @@
             this.filterGroupBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.filterGroupBox.Name = "filterGroupBox";
             this.filterGroupBox.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.filterGroupBox.Size = new System.Drawing.Size(441, 307);
+            this.filterGroupBox.Size = new System.Drawing.Size(400, 307);
             this.filterGroupBox.TabIndex = 13;
             this.filterGroupBox.TabStop = false;
             this.filterGroupBox.Text = "Search Filter";
             // 
-            // resultListBox
+            // applyButton
             // 
-            this.resultListBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.resultListBox.FormattingEnabled = true;
-            this.resultListBox.ItemHeight = 20;
-            this.resultListBox.Location = new System.Drawing.Point(3, 22);
-            this.resultListBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.resultListBox.Name = "resultListBox";
-            this.resultListBox.Size = new System.Drawing.Size(121, 282);
-            this.resultListBox.TabIndex = 0;
+            this.applyButton.Enabled = false;
+            this.applyButton.Location = new System.Drawing.Point(279, 264);
+            this.applyButton.Name = "applyButton";
+            this.applyButton.Size = new System.Drawing.Size(112, 35);
+            this.applyButton.TabIndex = 14;
+            this.applyButton.Text = "&Apply";
+            this.applyButton.UseVisualStyleBackColor = true;
+            this.applyButton.Click += new System.EventHandler(this.OnSearchApply);
             // 
             // resetButton
             // 
-            this.resetButton.Location = new System.Drawing.Point(204, 264);
+            this.resetButton.Location = new System.Drawing.Point(161, 264);
             this.resetButton.Name = "resetButton";
             this.resetButton.Size = new System.Drawing.Size(112, 35);
             this.resetButton.TabIndex = 13;
@@ -234,16 +234,17 @@
             this.resetButton.UseVisualStyleBackColor = true;
             this.resetButton.Click += new System.EventHandler(this.OnSearchReset);
             // 
-            // applyButton
+            // resultListBox
             // 
-            this.applyButton.Enabled = false;
-            this.applyButton.Location = new System.Drawing.Point(322, 264);
-            this.applyButton.Name = "applyButton";
-            this.applyButton.Size = new System.Drawing.Size(112, 35);
-            this.applyButton.TabIndex = 14;
-            this.applyButton.Text = "&Apply";
-            this.applyButton.UseVisualStyleBackColor = true;
-            this.applyButton.Click += new System.EventHandler(this.OnSearchApply);
+            this.resultListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.resultListBox.Font = new System.Drawing.Font("Consolas", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.resultListBox.FormattingEnabled = true;
+            this.resultListBox.ItemHeight = 20;
+            this.resultListBox.Location = new System.Drawing.Point(3, 22);
+            this.resultListBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.resultListBox.Name = "resultListBox";
+            this.resultListBox.Size = new System.Drawing.Size(163, 282);
+            this.resultListBox.TabIndex = 0;
             // 
             // closeButton
             // 
@@ -259,9 +260,9 @@
             // resultsGroupBox
             // 
             this.resultsGroupBox.Controls.Add(this.resultListBox);
-            this.resultsGroupBox.Location = new System.Drawing.Point(467, 18);
+            this.resultsGroupBox.Location = new System.Drawing.Point(425, 18);
             this.resultsGroupBox.Name = "resultsGroupBox";
-            this.resultsGroupBox.Size = new System.Drawing.Size(127, 307);
+            this.resultsGroupBox.Size = new System.Drawing.Size(169, 307);
             this.resultsGroupBox.TabIndex = 15;
             this.resultsGroupBox.TabStop = false;
             this.resultsGroupBox.Text = "Results";

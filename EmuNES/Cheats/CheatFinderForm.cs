@@ -99,7 +99,7 @@ namespace SharpNes.Cheats
             int count = 0; ;
             foreach (ushort address in searchResults)
             {
-                resultListBox.Items.Add(Hex.Format(address));
+                resultListBox.Items.Add(address.ToString("X4") + ": " + currentValues[address].ToString("X2"));
                 if (++count == 256)
                 {
                     resultListBox.Items.Add("...");

@@ -16,6 +16,13 @@ namespace SharpNes.Cheats
         public CheatFinderForm(MemoryMap memoryMap, CheatSystem cheatSystem)
         {
             InitializeComponent();
+
+            this.memoryMap = memoryMap;
+
+            if (currentValues.Count == 0 && previousValues.Count == 0)
+                ResetSearch();
+
+            UpdateValueMaps();
         }
 
         private void OnFilterOptionChanged(object sender, EventArgs eventArgs)
@@ -25,5 +32,28 @@ namespace SharpNes.Cheats
             incrementTextBox.Enabled = increasedByRadioButton.Checked;
             decrementTextBox.Enabled = decreasedByRadioButton.Checked;
         }
+
+        private void ResetSearch()
+        {
+            currentValues.Clear();
+            previousValues.Clear();
+            for (int address = 0; address <= ushort.MaxValue; address++)
+            {
+                currentValues[(ushort)address] = previousValues[(ushort)address] = memoryMap[(ushort)address];
+            }
+        }
+
+        private void UpdateValueMaps()
+        {
+            previousValues = currentValues;
+
+            currentValues = new Dictionary<ushort, byte>();
+            foreach (ushort address in previousValues.Keys)
+                currentValues[(ushort)address] = memoryMap[(ushort)address];           
+        }
+
+        private MemoryMap memoryMap;
+        private static Dictionary<ushort, byte> currentValues= new Dictionary<ushort, byte>();
+        private static Dictionary<ushort, byte> previousValues = new Dictionary<ushort, byte>();
     }
 }

@@ -52,7 +52,7 @@ namespace NesCore.Storage
                         return Cartridge.SaveRam[offset];
                 }
                 else
-                    throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
+                    return (byte)(address >> 8); // open bus
             }
 
             set

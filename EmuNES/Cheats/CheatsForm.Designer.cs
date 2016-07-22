@@ -55,17 +55,17 @@
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(225, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(229, 6);
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new System.Drawing.Size(225, 6);
+            toolStripSeparator2.Size = new System.Drawing.Size(229, 6);
             // 
             // toolStripSeparator3
             // 
             toolStripSeparator3.Name = "toolStripSeparator3";
-            toolStripSeparator3.Size = new System.Drawing.Size(225, 6);
+            toolStripSeparator3.Size = new System.Drawing.Size(229, 6);
             // 
             // cheatsContextMenuStrip
             // 
@@ -81,7 +81,7 @@
             toolStripSeparator3,
             this.cheatDeleteMenuItem});
             this.cheatsContextMenuStrip.Name = "cheatsContextMenuStrip";
-            this.cheatsContextMenuStrip.Size = new System.Drawing.Size(229, 154);
+            this.cheatsContextMenuStrip.Size = new System.Drawing.Size(233, 200);
             this.cheatsContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.OnCheatContextMenuOpening);
             // 
             // cheatNewMenuItem
@@ -90,27 +90,28 @@
             this.cheatNewManualEntryMenuItem,
             this.cheatNewGameGenieMenuItem});
             this.cheatNewMenuItem.Name = "cheatNewMenuItem";
-            this.cheatNewMenuItem.Size = new System.Drawing.Size(228, 22);
+            this.cheatNewMenuItem.Size = new System.Drawing.Size(232, 26);
             this.cheatNewMenuItem.Text = "&New...";
             // 
             // cheatNewManualEntryMenuItem
             // 
             this.cheatNewManualEntryMenuItem.Name = "cheatNewManualEntryMenuItem";
-            this.cheatNewManualEntryMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.cheatNewManualEntryMenuItem.Size = new System.Drawing.Size(182, 26);
             this.cheatNewManualEntryMenuItem.Text = "Manual Entry...";
             this.cheatNewManualEntryMenuItem.Click += new System.EventHandler(this.OnCheatNewManualEntry);
             // 
             // cheatNewGameGenieMenuItem
             // 
+            this.cheatNewGameGenieMenuItem.Image = global::SharpNes.Properties.Resources.OptionsCheatsGameGenie;
             this.cheatNewGameGenieMenuItem.Name = "cheatNewGameGenieMenuItem";
-            this.cheatNewGameGenieMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.cheatNewGameGenieMenuItem.Size = new System.Drawing.Size(182, 26);
             this.cheatNewGameGenieMenuItem.Text = "Game Genie Code...";
             this.cheatNewGameGenieMenuItem.Click += new System.EventHandler(this.OnCheatNewGameGenieCode);
             // 
             // cheatEditMenuItem
             // 
             this.cheatEditMenuItem.Name = "cheatEditMenuItem";
-            this.cheatEditMenuItem.Size = new System.Drawing.Size(228, 22);
+            this.cheatEditMenuItem.Size = new System.Drawing.Size(232, 26);
             this.cheatEditMenuItem.Text = "&Edit...";
             this.cheatEditMenuItem.Click += new System.EventHandler(this.OnCheatEdit);
             // 
@@ -118,7 +119,7 @@
             // 
             this.cheatActivateAllMenuItem.Name = "cheatActivateAllMenuItem";
             this.cheatActivateAllMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.cheatActivateAllMenuItem.Size = new System.Drawing.Size(228, 22);
+            this.cheatActivateAllMenuItem.Size = new System.Drawing.Size(232, 26);
             this.cheatActivateAllMenuItem.Text = "Activate All";
             this.cheatActivateAllMenuItem.Click += new System.EventHandler(this.OnCheatActivateAll);
             // 
@@ -126,14 +127,15 @@
             // 
             this.cheatDeactivateAllMenuItem.Name = "cheatDeactivateAllMenuItem";
             this.cheatDeactivateAllMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Space)));
-            this.cheatDeactivateAllMenuItem.Size = new System.Drawing.Size(228, 22);
+            this.cheatDeactivateAllMenuItem.Size = new System.Drawing.Size(232, 26);
             this.cheatDeactivateAllMenuItem.Text = "Deactivate All";
             this.cheatDeactivateAllMenuItem.Click += new System.EventHandler(this.OnCheatDeactivateAll);
             // 
             // cheatGenerateGameGenieCodeMenuItem
             // 
+            this.cheatGenerateGameGenieCodeMenuItem.Image = global::SharpNes.Properties.Resources.OptionsCheatsGameGenie;
             this.cheatGenerateGameGenieCodeMenuItem.Name = "cheatGenerateGameGenieCodeMenuItem";
-            this.cheatGenerateGameGenieCodeMenuItem.Size = new System.Drawing.Size(228, 22);
+            this.cheatGenerateGameGenieCodeMenuItem.Size = new System.Drawing.Size(232, 26);
             this.cheatGenerateGameGenieCodeMenuItem.Text = "Generate Game &Genie Code...";
             this.cheatGenerateGameGenieCodeMenuItem.Click += new System.EventHandler(this.OnGenerateGameGenieCode);
             // 
@@ -141,7 +143,7 @@
             // 
             this.cheatDeleteMenuItem.Name = "cheatDeleteMenuItem";
             this.cheatDeleteMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.cheatDeleteMenuItem.Size = new System.Drawing.Size(228, 22);
+            this.cheatDeleteMenuItem.Size = new System.Drawing.Size(232, 26);
             this.cheatDeleteMenuItem.Text = "Delete...";
             this.cheatDeleteMenuItem.Click += new System.EventHandler(this.OnCheatDelete);
             // 

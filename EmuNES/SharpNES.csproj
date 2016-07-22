@@ -185,6 +185,8 @@
   <ItemGroup>
     <Content Include="Nes.ico" />
     <Content Include="Resources\FileExit.png" />
+    <None Include="Resources\OptionsCheatsGameGenie.png" />
+    <None Include="Resources\OptionsCheats.png" />
     <None Include="Resources\NstDatabase.xml" />
     <None Include="Resources\ViewNoSpriteOverflow.png" />
     <None Include="Resources\FilterPause.png" />

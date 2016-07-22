@@ -214,6 +214,26 @@ namespace SharpNes.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap OptionsCheats {
+            get {
+                object obj = ResourceManager.GetObject("OptionsCheats", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap OptionsCheatsGameGenie {
+            get {
+                object obj = ResourceManager.GetObject("OptionsCheatsGameGenie", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap OptionsInput {
             get {
                 object obj = ResourceManager.GetObject("OptionsInput", resourceCulture);

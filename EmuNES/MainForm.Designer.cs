@@ -347,6 +347,7 @@
             // optionsCheatsMenuItem
             // 
             this.optionsCheatsMenuItem.Enabled = false;
+            this.optionsCheatsMenuItem.Image = global::SharpNes.Properties.Resources.OptionsCheats;
             this.optionsCheatsMenuItem.Name = "optionsCheatsMenuItem";
             this.optionsCheatsMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt) 
             | System.Windows.Forms.Keys.C)));
@@ -369,7 +370,7 @@
             this.recordVideoMp4MenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.recordVideoMp4StartStopMenuItem});
             this.recordVideoMp4MenuItem.Name = "recordVideoMp4MenuItem";
-            this.recordVideoMp4MenuItem.Size = new System.Drawing.Size(152, 22);
+            this.recordVideoMp4MenuItem.Size = new System.Drawing.Size(139, 22);
             this.recordVideoMp4MenuItem.Text = "&Video (MP4)";
             // 
             // recordVideoMp4StartStopMenuItem
@@ -385,7 +386,7 @@
             this.recordVideoGifMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.recordVideoGifStartStopMenuItem});
             this.recordVideoGifMenuItem.Name = "recordVideoGifMenuItem";
-            this.recordVideoGifMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.recordVideoGifMenuItem.Size = new System.Drawing.Size(139, 22);
             this.recordVideoGifMenuItem.Text = "Video (GIF)";
             // 
             // recordVideoGifStartStopMenuItem

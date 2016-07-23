@@ -57,12 +57,12 @@ namespace SharpNes.Cheats
         private void OnSearchReset(object sender, EventArgs eventArgs)
         {
             ResetValueMaps();
-            searchResults.Clear();
             valueMatchRadioButton.Checked = currentAndPreviousMatchRadioButton.Checked
                 = increasedByRadioButton.Checked = decreasedByRadioButton.Checked
                 = increasedRadioButton.Checked = decreasedRadioButton.Checked 
                 = applyButton.Enabled = false;
             OnFilterOptionChanged(this, eventArgs);
+            PopulateResultsList();
         }
 
         private void OnSearchApply(object sender, EventArgs eventArgs)
@@ -70,16 +70,19 @@ namespace SharpNes.Cheats
             switch (searchType)
             {
                 case 0:
-                    SearchCurrentValueOnly(0);
+                    SearchCurrentValueOnly(
+                        Convert.ToByte(currentValueOnlyTextBox.Text, 16));
                     break;
                 case 1:
-                    SearchCurrentAndPreviousValues(0, 0);
+                    SearchCurrentAndPreviousValues(
+                        Convert.ToByte(currentValueTextBox.Text, 16),
+                        Convert.ToByte(previousValueTextBox.Text, 16));
                     break;
                 case 2:
-                    SearchValueIncreased();
+                    SearchValueIncreasedBy(Convert.ToByte(incrementTextBox.Text, 16));
                     break;
                 case 3:
-                    SearchValueDecreased();
+                    SearchValueDecreasedBy(Convert.ToByte(decrementTextBox.Text, 16));
                     break;
                 case 4:
                     SearchValueIncreased();
@@ -89,7 +92,54 @@ namespace SharpNes.Cheats
                     break;
             }
             if (searchType >= 0)
+            {
+                valuesRestricted = true;
                 PopulateResultsList();
+            }
+        }
+
+        private void OnFormContinue(object sender, EventArgs e)
+        {
+            if (valuesRestricted)
+            {
+                Dictionary<ushort, byte> restrictedCurrentValues = new Dictionary<ushort, byte>();
+                Dictionary<ushort, byte> restrictedPreviousValues = new Dictionary<ushort, byte>();
+
+                foreach (ushort address in searchResults)
+                {
+                    restrictedCurrentValues[address] = currentValues[address];
+                    restrictedPreviousValues[address] = previousValues[address];
+                }
+
+                currentValues = restrictedCurrentValues;
+                previousValues = restrictedPreviousValues;
+            }
+
+            Close();
+        }
+
+        private void OnValidatingByteTextBox(object sender, CancelEventArgs cancelEventArgs)
+        {
+            TextBox textBox = (TextBox)sender;
+            try
+            {
+                string byteText = textBox.Text.Trim();
+                if (byteText.Length > 0)
+                    Convert.ToByte(byteText, 16);
+                else textBox.Text = "00";
+            }
+            catch (Exception)
+            {
+                errorProvider.SetError(textBox, "Invalid hex byte value");
+                cancelEventArgs.Cancel = true;
+            }
+        }
+
+        private void OnValidatedByteTextBox(object sender, EventArgs eventArgs)
+        {
+            TextBox textBox = (TextBox)sender;
+            textBox.Text = textBox.Text.ToUpper().PadLeft(2, '0');
+            errorProvider.SetError(textBox, "");
         }
 
         private void PopulateResultsList()
@@ -181,26 +231,10 @@ namespace SharpNes.Cheats
 
         private MemoryMap memoryMap;
         private int searchType;
+        private bool valuesRestricted;
 
         private static Dictionary<ushort, byte> currentValues= new Dictionary<ushort, byte>();
         private static Dictionary<ushort, byte> previousValues = new Dictionary<ushort, byte>();
         private static HashSet<ushort> searchResults = new HashSet<ushort>();
-
-        private void OnFormContinue(object sender, EventArgs e)
-        {
-            Dictionary<ushort, byte> restrictedCurrentValues = new Dictionary<ushort, byte>();
-            Dictionary<ushort, byte> restrictedPreviousValues = new Dictionary<ushort, byte>();
-
-            foreach (ushort address in searchResults)
-            {
-                restrictedCurrentValues[address] = currentValues[address];
-                restrictedPreviousValues[address] = previousValues[address];
-            }
-
-            currentValues = restrictedCurrentValues;
-            previousValues = restrictedPreviousValues;
-
-            Close();
-        }
     }
 }

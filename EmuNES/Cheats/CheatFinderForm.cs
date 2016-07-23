@@ -19,6 +19,7 @@ namespace SharpNes.Cheats
             InitializeComponent();
 
             this.memoryMap = memoryMap;
+            this.cheatSystem = cheatSystem;
 
             this.searchType = -1;
 
@@ -142,6 +143,27 @@ namespace SharpNes.Cheats
             errorProvider.SetError(textBox, "");
         }
 
+        private void OnOpeningContextMenu(object sender, CancelEventArgs cancelEventArgs)
+        {
+            createCheatMenuItem.Enabled = resultListBox.SelectedIndex >= 0;
+        }
+
+        private void OnCreateCheatMenuItem(object sender, EventArgs eventArgs)
+        {
+            if (resultListBox.SelectedIndex < 0)
+                return;
+
+            Cheat newCheat = new Cheat();
+            newCheat.Address = Convert.ToUInt16(
+                resultListBox.SelectedItem.ToString().Substring(0, 4), 16);
+            CheatDetailsForm cheatDetailsForm = new CheatDetailsForm(newCheat, false);
+
+            if (cheatDetailsForm.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            cheatSystem.AddCheat(newCheat);
+        }
+
         private void PopulateResultsList()
         {
             resultListBox.BeginUpdate();
@@ -229,6 +251,7 @@ namespace SharpNes.Cheats
                     searchResults.Add(address);
         }
 
+        private CheatSystem cheatSystem;
         private MemoryMap memoryMap;
         private int searchType;
         private bool valuesRestricted;

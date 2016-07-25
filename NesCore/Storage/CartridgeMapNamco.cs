@@ -8,11 +8,53 @@ using System.Threading.Tasks;
 
 namespace NesCore.Storage
 {
-    class CartridgeMapNamco163 : CartridgeMap
+    class CartridgeMapNamco : CartridgeMap
     {
-        public CartridgeMapNamco163(Cartridge cartridge)
+        public enum Variant
+        {
+            Namco_129 = 1,
+            Namco_163 = 2,
+            Namco_175 = 4,
+            Namco_340 = 8
+        }
+
+        public CartridgeMapNamco(Cartridge cartridge, Variant variants)
             : base(cartridge)
         {
+            this.variants = variants;
+
+            // build name dynamically from variants
+            // and determine variant characteristics
+            isNamco129Or163 = false;
+            isNamco129or163or175 = false;
+            isNamco175 = false;
+            isNamco340 = false;
+            List<String> variantNames = new List<string>();
+            foreach (Variant variant in Enum.GetValues(typeof(Variant)))
+            {
+                if ((variants & variant) != 0)
+                {
+                    variantNames.Add(variant.ToString().Replace("_", " "));
+                    switch (variant)
+                    {
+                        case Variant.Namco_129:
+                        case Variant.Namco_163:
+                            isNamco129Or163 = true;
+                            isNamco129or163or175 = true;
+                            break;
+                        case Variant.Namco_175:
+                            isNamco129or163or175 = true;
+                            isNamco175 = true;
+                            break;
+                        case Variant.Namco_340:
+                            isNamco340 = true;
+                            break;
+
+                    }
+                }
+            }
+            this.mapperName = string.Join(" / ", variantNames);
+
             programRam = new byte[0x2000];
 
             programRomBank = new int[4];
@@ -33,7 +75,10 @@ namespace NesCore.Storage
 
             characterRam = new byte[0x4000];
 
-            soundChip = new Namco163SoundChip();
+            if (isNamco129Or163)
+            {
+                soundChip = new Namco163SoundChip();
+            }
         }
 
         public override byte this[ushort address]
@@ -74,7 +119,10 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0x6000 && address < 0x8000)
                 {
-                    return programRam[address - 0x6000];
+                    if (isNamco129or163or175)
+                        return programRam[address - 0x6000];
+                    else
+                        return (byte)(address >> 8); // open bus
                 }
                 else if (address >= 0x8000)
                 {
@@ -112,30 +160,39 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0x4800 && address < 0x5000)
                 {
-                    // sound data port
-                    soundChip.DataPort = value;
-                    //Debug.WriteLine("Sound Data Port (" + Hex.Format(address) + ") = " + Hex.Format(value));
+                    if (isNamco129Or163)
+                    {
+                        // sound data port
+                        soundChip.DataPort = value;
+                        //Debug.WriteLine("Sound Data Port (" + Hex.Format(address) + ") = " + Hex.Format(value));
+                    }
                 }
                 else if (address >= 0x5000 && address < 0x5800)
                 {
-                    // irq low 8 bits
-                    irqCounter &= 0x7F00;
-                    irqCounter |= value;
+                    if (isNamco129Or163)
+                    {
+                        // irq low 8 bits
+                        irqCounter &= 0x7F00;
+                        irqCounter |= value;
 
-                    AcknowledgeInterrupt();
+                        AcknowledgeInterrupt();
 
-                    Debug.WriteLine("IRQ Counter High (" + Hex.Format(address) + ") = " + Hex.Format(value) + " (IRQ Counter = " + Hex.Format(irqCounter) + ")");
+                        Debug.WriteLine("IRQ Counter High (" + Hex.Format(address) + ") = " + Hex.Format(value) + " (IRQ Counter = " + Hex.Format(irqCounter) + ")");
+                    }
                 }
                 else if (address >= 0x5800 && address < 0x6000)
                 {
-                    // irq enable and high 7 bits
-                    irqCounter &= 0x00FF;
-                    irqCounter |= (ushort)((value & 0x7F) << 8);
-                    irqEnabled = (value & 0x80) != 0;
+                    if (isNamco129Or163)
+                    {
+                        // irq enable and high 7 bits
+                        irqCounter &= 0x00FF;
+                        irqCounter |= (ushort)((value & 0x7F) << 8);
+                        irqEnabled = (value & 0x80) != 0;
 
-                    AcknowledgeInterrupt();
+                        AcknowledgeInterrupt();
 
-                    Debug.WriteLine("IRQ Counter Low (" + Hex.Format(address) + ") = " + Hex.Format(value) + " (IRQ Counter = " + Hex.Format(irqCounter) + ")");
+                        Debug.WriteLine("IRQ Counter Low (" + Hex.Format(address) + ") = " + Hex.Format(value) + " (IRQ Counter = " + Hex.Format(irqCounter) + ")");
+                    }
                 }
                 else if (address >= 0x6000 && address < 0x8000)
                 {
@@ -157,9 +214,20 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0xC000 && address < 0xE000)
                 {
-                    int bankIndex = (address - 0xC000) / 0x800;
-                    nameTableBank[bankIndex] = value;
-                    //Debug.WriteLine("CHR RAM name table register set");
+                    if (isNamco129Or163)
+                    {
+                        int bankIndex = (address - 0xC000) / 0x800;
+                        nameTableBank[bankIndex] = value;
+                        //Debug.WriteLine("CHR RAM name table register set");
+                    }
+                    if (isNamco175 && address < 0xC800)
+                    {
+                        // Namco 175 has a single RAM enable flag (Namco 129, 163 ram sections ignored)
+                        bool enableRam = (value & 0x01) != 0;
+                        ramWriteEnable = enableRam;
+                        for (int index = 0; index < 4; index++)
+                            ramWriteEnableSection[index] = enableRam;
+                    }
                 }
                 else if (address >= 0xE000 && address < 0xE800)
                 {
@@ -169,7 +237,22 @@ namespace NesCore.Storage
                     // |+-------- Namco 129, 163 only: Disable sound if set
                     // ++-------- Namco 340 only: Select mirroring
                     programRomBank[0] = (value & 0x3F) % programBankCount;
-                    soundChip.SoundEnable = (value & 0x40) == 0;
+                    if (isNamco129Or163)
+                    {
+                        soundChip.SoundEnable = (value & 0x40) == 0;
+                    }
+
+                    if (isNamco340)
+                    {
+                        // Namco 340 supports dynamic mirror mode change
+                        switch (value >> 6)
+                        {
+                            case 0: MirrorMode = MirrorMode.Single0; break;
+                            case 1: MirrorMode = MirrorMode.Vertical; break;
+                            case 2: MirrorMode = MirrorMode.Horizontal; break;
+                            case 3: MirrorMode = MirrorMode.Single1; break;
+                        }
+                    }
 
                     Debug.WriteLine("Program bank $8000 - $9FFF (" + Hex.Format(address) + ") = " + Hex.Format((byte)programRomBank[0]));
                 }
@@ -201,47 +284,60 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0xF800)
                 {
-                    // KKKK DCBA
-                    // |||| ||||
-                    // |||| ||| +- 1: Write - protect 2kB window of external RAM from $6000 -$67FF(0: write enable)
-                    // |||| || +-- 1: Write - protect 2kB window of external RAM from $6800 -$6FFF(0: write enable)
-                    // |||| | +--- 1: Write - protect 2kB window of external RAM from $7000 -$77FF(0: write enable)
-                    // |||| +----- 1: Write - protect 2kB window of external RAM from $7800 -$7FFF(0: write enable)
-                    // ++++------- Additionally the upper nybble must be equal to b0100 to enable writes
-                    ramWriteEnable = (value >> 4) == 0x04;
-                    ramWriteEnableSection[0] = (value & 0x01) != 0;
-                    ramWriteEnableSection[1] = (value & 0x02) != 0;
-                    ramWriteEnableSection[2] = (value & 0x04) != 0;
-                    ramWriteEnableSection[3] = (value & 0x08) != 0;
+                    if (isNamco129Or163)
+                    {
+                        // KKKK DCBA
+                        // |||| ||||
+                        // |||| ||| +- 1: Write - protect 2kB window of external RAM from $6000 -$67FF(0: write enable)
+                        // |||| || +-- 1: Write - protect 2kB window of external RAM from $6800 -$6FFF(0: write enable)
+                        // |||| | +--- 1: Write - protect 2kB window of external RAM from $7000 -$77FF(0: write enable)
+                        // |||| +----- 1: Write - protect 2kB window of external RAM from $7800 -$7FFF(0: write enable)
+                        // ++++------- Additionally the upper nybble must be equal to b0100 to enable writes
+                        ramWriteEnable = (value >> 4) == 0x04;
+                        ramWriteEnableSection[0] = (value & 0x01) != 0;
+                        ramWriteEnableSection[1] = (value & 0x02) != 0;
+                        ramWriteEnableSection[2] = (value & 0x04) != 0;
+                        ramWriteEnableSection[3] = (value & 0x08) != 0;
 
-                    // also Audio Chip address port (auto increment and 7bit internal address)
-                    soundChip.AddressPort = value;
+                        // also Audio Chip address port (auto increment and 7bit internal address)
+                        soundChip.AddressPort = value;
+                    }
                 }
             }
         }
 
-        public override string Name { get { return "Namco 163"; } }
+        public override string Name { get { return mapperName; } }
 
         public override byte ReadNameTableByte(ushort address)
         {
-            int nameTableIndex = (address - 0x2000) / 0x400;
-            int bankOffset = address % 0x400;
-            int selectedBank = nameTableBank[nameTableIndex];
-            if (selectedBank < 0xE0)
-                return Cartridge.CharacterRom[selectedBank * 0x400 + bankOffset];
-            else       
-                return base.ReadNameTableByte((ushort)((selectedBank % 2) * 0x400 + bankOffset));
+            if (isNamco129Or163)
+            {
+                int nameTableIndex = (address - 0x2000) / 0x400;
+                int bankOffset = address % 0x400;
+                int selectedBank = nameTableBank[nameTableIndex];
+                if (selectedBank < 0xE0)
+                    return Cartridge.CharacterRom[selectedBank * 0x400 + bankOffset];
+                else
+                    return base.ReadNameTableByte((ushort)((selectedBank % 2) * 0x400 + bankOffset));
+            }
+            else
+                return base.ReadNameTableByte(address);
         }
 
         public override void WriteNameTableByte(ushort address, byte value)
         {
-            int nameTableIndex = (address - 0x2000) / 0x400;
-            int bankOffset = address % 0x400;
-            int selectedBank = nameTableBank[nameTableIndex];
-            if (selectedBank < 0xE0)
-                Cartridge.CharacterRom[selectedBank * 0x400 + bankOffset] = value; // should allow or not?
+            if (isNamco129Or163)
+            {
+                int nameTableIndex = (address - 0x2000) / 0x400;
+                int bankOffset = address % 0x400;
+                int selectedBank = nameTableBank[nameTableIndex];
+                if (selectedBank < 0xE0)
+                    Cartridge.CharacterRom[selectedBank * 0x400 + bankOffset] = value; // should allow or not?
+                else
+                    base.WriteNameTableByte((ushort)((selectedBank % 2) * 0x400 + bankOffset), value);
+            }
             else
-                base.WriteNameTableByte((ushort)((selectedBank % 2) * 0x400 + bankOffset), value);
+                base.WriteNameTableByte(address, value);
         }
 
         public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
@@ -263,7 +359,8 @@ namespace NesCore.Storage
                 }
             }
 
-            soundChip.Update(1);
+            if (isNamco129Or163)
+                soundChip.Update(1);
             /*
             int output = soundChip.Output;
             Debug.WriteLineIf(output != 0, "Sound Output = " + output);
@@ -279,6 +376,13 @@ namespace NesCore.Storage
                 irqTriggered = false;
             }
         }
+
+        private Variant variants;
+        private bool isNamco129Or163;
+        private bool isNamco175;
+        private bool isNamco129or163or175;
+        private bool isNamco340;
+        private string mapperName;
 
         private byte[] programRam;
         private bool ramWriteEnable;

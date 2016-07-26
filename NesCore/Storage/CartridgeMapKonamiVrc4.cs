@@ -87,7 +87,7 @@ namespace NesCore.Storage
                 {
                     int bankIndex = address / 0x400;
                     int bankOffset = address % 0x400;
-                    return Cartridge.CharacterRom[characterBank[bankIndex] + bankOffset];
+                    return Cartridge.CharacterRom[characterBank[bankIndex] * 0x400 + bankOffset];
                 }
                 else if (address >= 0x8000 && address < 0xA000)
                 {

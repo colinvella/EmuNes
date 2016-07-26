@@ -182,6 +182,11 @@ namespace NesCore.Storage
                     irqEnable = (value & 0x02) != 0;
                     irqEnableOnAcknowledge = (value & 0x01) != 0;
                     irqTriggered = false;
+                    if (irqEnable)
+                    {
+                        irqPrescaler = 341;
+                        irqCounter = irqReloadValue;
+                    }
                     Debug.WriteLine("IRQ Count Mode = " + irqCountMode);
                 }
                 else if (irqAcknowledgeAddresses.Contains(address))
@@ -214,18 +219,18 @@ namespace NesCore.Storage
                 irqPrescaler -= 3;
                 if (irqPrescaler <= 0)
                 {
-                    UpdateIrqCounter();
+                    UpdateIrqCounter(scanLine);
                     irqPrescaler += 341;
                 }
             }
             else
             {
-                UpdateIrqCounter();
+                UpdateIrqCounter(scanLine);
             }
 
         }
 
-        private void UpdateIrqCounter()
+        private void UpdateIrqCounter(int scanLine)
         {
             if (irqCounter == 0xFF)
             {

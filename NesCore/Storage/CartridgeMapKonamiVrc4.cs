@@ -19,6 +19,7 @@ namespace NesCore.Storage
             : base(cartridge)
         {
             characterBankRegisterLowAddresses = new ushort[8][];
+            characterBankRegisterHighAddresses = new ushort[8][];
 
             characterBank = new int[8];
 
@@ -68,8 +69,10 @@ namespace NesCore.Storage
             }
 
             programBankCount = cartridge.ProgramRom.Count / 0x2000;
-            characterBankCount = cartridge.CharacterRom.Length / 0x400;
+            programBankLastAddress = (programBankCount - 1) * 0x2000;
+            programBankNextToLastAddress = programBankLastAddress - 0x2000;
 
+            characterBankCount = cartridge.CharacterRom.Length / 0x400;
         }
 
         public override string Name { get { return mapperName; } }
@@ -83,6 +86,32 @@ namespace NesCore.Storage
                     int bankIndex = address / 0x400;
                     int bankOffset = address % 0x400;
                     return Cartridge.CharacterRom[characterBank[bankIndex] + bankOffset];
+                }
+                else if (address >= 0x8000 && address < 0xA000)
+                {
+                    int bankOffset = address % 0x2000;
+                    if (programMode == ProgramMode.Mode0)
+                        return Cartridge.ProgramRom[programBank0 * 0x2000 + bankOffset];
+                    else
+                        return Cartridge.ProgramRom[programBankNextToLastAddress + bankOffset];
+                }
+                else if (address >= 0xA000 && address < 0xC000)
+                {
+                    int bankOffset = address % 0x2000;
+                    return Cartridge.ProgramRom[programBank1 * 0x2000 + bankOffset];
+                }
+                else if (address >= 0xC000 && address < 0xE000)
+                {
+                    int bankOffset = address % 0x2000;
+                    if (programMode == ProgramMode.Mode0)
+                        return Cartridge.ProgramRom[programBankNextToLastAddress + bankOffset];
+                    else
+                        return Cartridge.ProgramRom[programBank0 * 0x2000 + bankOffset];
+                }
+                else if (address >= 0xE000)
+                {
+                    int bankOffset = address % 0x2000;
+                    return Cartridge.ProgramRom[programBankLastAddress + bankOffset];
                 }
                 else
                     return (byte)(address >> 8); // open buss
@@ -142,16 +171,51 @@ namespace NesCore.Storage
                 }
                 else if (irqControlAddresses.Contains(address))
                 {
-
+                    irqCountMode = (IrqCountMode)((value >> 2) & 0x01);
+                    irqEnable = (value & 0x02) != 0;
+                    irqEnableOnAcknowledge = (value & 0x01) != 0;
                 }
                 else if (irqAcknowledgeAddresses.Contains(address))
                 {
-
+                    CancelInterruptRequest?.Invoke();
+                    irqEnable = irqEnableOnAcknowledge;
                 }
             }
         }
 
-        private Variant variant;
+        public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
+        {
+            cpuClock++;
+            cpuClock %= 3;
+
+            if (cpuClock != 0)
+                return;
+
+            if (!irqEnable)
+                return;
+
+            if (irqCounter == 0xFF)
+            {
+                irqCounter = irqReloadValue;
+                TriggerInterruptRequest?.Invoke();
+                return;
+            }
+
+            if (irqCountMode == IrqCountMode.Scanline)
+            {
+                irqPrescaler -= 3;
+                if (irqPrescaler <= 0)
+                {
+                    ++irqCounter;
+                    irqPrescaler += 341;
+                }
+            }
+            else
+            {
+                ++irqCounter;
+            }
+        }
+
         private string mapperName;
 
         private ushort[] programModeRegisterAddresses;
@@ -171,16 +235,30 @@ namespace NesCore.Storage
         private int programBankCount;
         private int programBank0;
         private int programBank1;
+        private int programBankLastAddress;
+        private int programBankNextToLastAddress;
 
         private int characterBankCount;
         private int[] characterBank;
 
+        private byte cpuClock;
+        private byte irqCounter;
         private byte irqReloadValue;
+        private IrqCountMode irqCountMode;
+        private bool irqEnable;
+        private bool irqEnableOnAcknowledge;
+        private int irqPrescaler;
 
         private enum ProgramMode
         {
             Mode0,
             Mode1
+        }
+
+        private enum IrqCountMode
+        {
+            Scanline,
+            Cpu
         }
 
     }

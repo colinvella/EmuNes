@@ -1,5 +1,7 @@
-﻿using System;
+﻿using NesCore.Utility;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -143,18 +145,23 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0xB000 && address < 0xF000)
                 {
+                    Debug.WriteLine("CHR Register " + Hex.Format(address) + " = " + Hex.Format(value));
                     for (int characterBankIndex = 0; characterBankIndex < 8; characterBankIndex++)
                     {
                         if (characterBankRegisterLowAddresses[characterBankIndex].Contains(address))
                         {
                             characterBank[characterBankIndex] &= 0x1F0;
                             characterBank[characterBankIndex] |= (value & 0x0F);
+                            characterBank[characterBankIndex] %= characterBankCount;
+                            Debug.WriteLine("CHR bank [" + characterBankIndex + "] (" + Hex.Format((ushort)(characterBankIndex * 0x400)) + ") = " + Hex.Format((ushort)characterBank[characterBankIndex]));
                             break;
                         }
                         else if (characterBankRegisterHighAddresses[characterBankIndex].Contains(address))
                         {
                             characterBank[characterBankIndex] &= 0x00F;
                             characterBank[characterBankIndex] |= ((value & 0x1F) << 4);
+                            characterBank[characterBankIndex] %= characterBankCount;
+                            Debug.WriteLine("CHR bank [" + characterBankIndex + "] (" + Hex.Format((ushort)(characterBankIndex * 0x400)) + ") = " + Hex.Format((ushort)characterBank[characterBankIndex]));
                             break;
                         }
                     }
@@ -179,6 +186,10 @@ namespace NesCore.Storage
                 {
                     CancelInterruptRequest?.Invoke();
                     irqEnable = irqEnableOnAcknowledge;
+                }
+                else
+                {
+                    Debug.WriteLine("VRC4 unknown write at " + Hex.Format(address) + " with value " + Hex.Format(value));
                 }
             }
         }

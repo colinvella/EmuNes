@@ -234,7 +234,7 @@ namespace NesCore.Storage
                 if (!irqTriggered)
                 {
                     TriggerInterruptRequest?.Invoke();
-                    irqTriggered = false;
+                    irqTriggered = true;
                 }
             }
             else

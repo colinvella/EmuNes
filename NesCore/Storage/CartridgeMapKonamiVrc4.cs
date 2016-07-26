@@ -205,26 +205,31 @@ namespace NesCore.Storage
             if (!irqEnable)
                 return;
 
-            if (irqCounter == 0xFF)
-            {
-                irqCounter = irqReloadValue;
-                TriggerInterruptRequest?.Invoke();
-                return;
-            }
-
             if (irqCountMode == IrqCountMode.Scanline)
             {
                 irqPrescaler -= 3;
                 if (irqPrescaler <= 0)
                 {
-                    ++irqCounter;
+                    UpdateIrqCounter();
                     irqPrescaler += 341;
                 }
             }
             else
             {
-                ++irqCounter;
+                UpdateIrqCounter();
             }
+
+        }
+
+        private void UpdateIrqCounter()
+        {
+            if (irqCounter == 0xFF)
+            {
+                irqCounter = irqReloadValue;
+                TriggerInterruptRequest?.Invoke();
+            }
+            else
+                ++irqCounter;
         }
 
         private string mapperName;

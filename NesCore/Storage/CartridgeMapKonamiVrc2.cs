@@ -18,19 +18,16 @@ namespace NesCore.Storage
 
         public CartridgeMapKonamiVrc2(Cartridge cartridge, Variant variant) : base(cartridge)
         {
-            if (variant == Variant.Vrc2a)
-            {
-                mapperName = "Konami VRC2 Rev A";
-            }
-            else
-            {
-                mapperName = "Konami VRC2 Rev B";
-            }
+            this.variant = variant;
+            mapperName = variant == Variant.Vrc2a ? "Konami VRC2 Rev A" : "Konami VRC2 Rev B";
+
+            programRam = new byte[0x2000];
 
             programBankCount = Cartridge.ProgramRom.Count / 0x2000;
             programLastTwoBanksAddress = (programBankCount - 2) * 0x2000;
 
-            programRam = new byte[0x2000];
+            characterBankCount = Cartridge.CharacterRom.Length / 0x400;
+            characterBank = new int[8];
         }
 
         public override string Name { get { return mapperName; } }
@@ -39,7 +36,13 @@ namespace NesCore.Storage
         {
             get
             {
-                if (address >= 0x6000 && address < 0x8000)
+                if (address < 0x2000)
+                {
+                    int bankIndex = address / 0x400;
+                    int bankOffset = address % 0x400;
+                    return Cartridge.CharacterRom[characterBank[bankIndex] * 0x400 + bankOffset];
+                }
+                else if (address >= 0x6000 && address < 0x8000)
                 {
                     return programRam[address % 0x2000];
                 }
@@ -65,12 +68,12 @@ namespace NesCore.Storage
                 {
                     programRam[address % 0x2000] = value;
                 }
-                if (address >= 0x8000 && address < 0x8004)
+                else if (address >= 0x8000 && address < 0x8004)
                 {
                     programBank0 = value & 0x1F;
                     programBank0 %= programBankCount;
                 }
-                if (address >= 0x9000 && address < 0x8009)
+                else if (address >= 0x9000 && address < 0x8009)
                 {
                     switch (value % 0x01)
                     {
@@ -78,7 +81,7 @@ namespace NesCore.Storage
                         case 1: MirrorMode = MirrorMode.Horizontal; break;
                     }
                 }
-                if (address >= 0xA000 && address < 0xA004)
+                else if (address >= 0xA000 && address < 0xA004)
                 {
                     programBank1 = value & 0x1F;
                     programBank1 %= programBankCount;
@@ -88,12 +91,17 @@ namespace NesCore.Storage
             }
         }
 
-        string mapperName;
+        private Variant variant;
+        private string mapperName;
 
         private byte[] programRam;
+
         private int programBankCount;
         private int programBank0;
         private int programBank1;
         private int programLastTwoBanksAddress;
+
+        private int characterBankCount;
+        private int[] characterBank;
     }
 }

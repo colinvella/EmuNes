@@ -25,12 +25,6 @@ namespace NesCore.Storage
 
             characterBank = new int[8];
 
-            // even CHR low address registers are common to all variants
-            characterBankRegisterLowAddresses[0] = new ushort[] { 0xB000 };
-            characterBankRegisterLowAddresses[2] = new ushort[] { 0xC000 };
-            characterBankRegisterLowAddresses[4] = new ushort[] { 0xD000 };
-            characterBankRegisterLowAddresses[6] = new ushort[] { 0xE000 };
-
             // IRQ reload address is common to all variants
             irqReloadLowAddress = 0xF000;
 
@@ -45,6 +39,7 @@ namespace NesCore.Storage
                     programModeRegisterAddresses = new ushort[] { 0x9004, 0x9006, 0x90C0 };
 
                     // define CHR regs 0 and 1 - the rest can be computed
+                    characterBankRegisterLowAddresses[0] = new ushort[] { 0xB000 };
                     characterBankRegisterHighAddresses[0] = new ushort[] { 0xB002, 0xB040 };
                     characterBankRegisterLowAddresses[1] = new ushort[] { 0xB004, 0x8080 };
                     characterBankRegisterHighAddresses[1] = new ushort[] { 0xB006, 0xB0C0 };
@@ -63,28 +58,26 @@ namespace NesCore.Storage
             }
 
             // PRG bank 1 registers can be computed from bank 0 registers
-            programBank1RegisterAddresses = new ushort[programBank0RegisterAddresses.Length];
-            for (int registerIndex = 0; registerIndex < programBank0RegisterAddresses.Length; registerIndex++)
-                programBank1RegisterAddresses[registerIndex] = (ushort)(programBank0RegisterAddresses[registerIndex] + 0x2000);
+            programBank1RegisterAddresses = programBank0RegisterAddresses.Select((a) => (ushort)(a + 0x2000)).ToArray();
 
-            // compute even CHR high register addresses 2, 4, 6 from 0
+            // compute even CHR low and high register addresses 2, 4, 6 from 0
             for (int index = 2; index < 8; index += 2)
             {
-                characterBankRegisterHighAddresses[index] = new ushort[2];
-                characterBankRegisterHighAddresses[index][0] = (ushort)(characterBankRegisterHighAddresses[0][0] + 0x1000 * (index / 2));
-                characterBankRegisterHighAddresses[index][1] = (ushort)(characterBankRegisterHighAddresses[0][1] + 0x1000 * (index / 2));
+                characterBankRegisterLowAddresses[index]
+                    = characterBankRegisterLowAddresses[0].Select((a) => (ushort)(a + 0x1000 * (index / 2))).ToArray();
+
+                characterBankRegisterHighAddresses[index]
+                    = characterBankRegisterHighAddresses[0].Select((a) => (ushort)(a + 0x1000 * (index / 2))).ToArray();
             }
 
             // compute odd CHR low and high register addresses 3, 5, 7 from 1
             for (int index = 3; index < 8; index += 2)
             {
-                characterBankRegisterLowAddresses[index] = new ushort[2];
-                characterBankRegisterLowAddresses[index][0] = (ushort)(characterBankRegisterLowAddresses[1][0] + 0x1000 * (index / 2));
-                characterBankRegisterLowAddresses[index][1] = (ushort)(characterBankRegisterLowAddresses[1][1] + 0x1000 * (index / 2));
+                characterBankRegisterLowAddresses[index]
+                    = characterBankRegisterLowAddresses[1].Select((a) => (ushort)(a + 0x1000 * (index / 2))).ToArray();
 
-                characterBankRegisterHighAddresses[index] = new ushort[2];
-                characterBankRegisterHighAddresses[index][0] = (ushort)(characterBankRegisterHighAddresses[1][0] + 0x1000 * (index / 2));
-                characterBankRegisterHighAddresses[index][1] = (ushort)(characterBankRegisterHighAddresses[1][1] + 0x1000 * (index / 2));
+                characterBankRegisterHighAddresses[index]
+                    = characterBankRegisterHighAddresses[1].Select((a) => (ushort)(a + 0x1000 * (index / 2))).ToArray();
             }
 
             programBankCount = cartridge.ProgramRom.Count / 0x2000;

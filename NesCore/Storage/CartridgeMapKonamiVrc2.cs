@@ -76,7 +76,7 @@ namespace NesCore.Storage
                     programBank0 = value & 0x1F;
                     programBank0 %= programBankCount;
                 }
-                else if (address >= 0x9000 && address < 0x8009)
+                else if (address >= 0x9000 && address < 0x9004)
                 {
                     switch (value % 0x01)
                     {

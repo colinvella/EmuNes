@@ -115,6 +115,8 @@ namespace NesCore.Storage
 
             // CHR bank count for bank index modulation
             characterBankCount = cartridge.CharacterRom.Length / 0x400;
+
+            programRam = new byte[0x2000];
         }
 
         public override string Name { get { return mapperName; } }
@@ -128,6 +130,11 @@ namespace NesCore.Storage
                     int bankIndex = address / 0x400;
                     int bankOffset = address % 0x400;
                     return Cartridge.CharacterRom[characterBank[bankIndex] * 0x400 + bankOffset];
+                }
+                else if (address >= 0x6000 && address < 0x8000)
+                {
+                    // note: PRG RAM needed due to VRC4 rev B/D and VRC2 mapper mixup - makes Ganbare Goemon Gaiden 2 work
+                    return programRam[address % 0x2000];
                 }
                 else if (address >= 0x8000 && address < 0xA000)
                 {
@@ -161,7 +168,11 @@ namespace NesCore.Storage
 
             set
             {
-                if (programModeRegisterAddresses.Contains(address))
+                if (address >= 0x6000 && address < 0x8000)
+                {
+                    programRam[address % 0x2000] = value;
+                }
+                else if (programModeRegisterAddresses.Contains(address))
                 {
                     programMode = (ProgramMode)((value >> 1) & 0x01);
                 }
@@ -319,6 +330,8 @@ namespace NesCore.Storage
         private bool irqEnableOnAcknowledge;
         private int irqPrescaler;
         private bool irqTriggered;
+
+        private byte[] programRam;
 
         private enum ProgramMode
         {

@@ -103,6 +103,7 @@ namespace NesCore.Storage
                 case 18: Map = new CartridgeMapJalecoSs88006(this); break;
                 case 19: Map = new CartridgeMapNamco(this, CartridgeMapNamco.Variant.Namco_129 | CartridgeMapNamco.Variant.Namco_163); break;
                 case 21: Map = new CartridgeMapKonamiVrc4(this, CartridgeMapKonamiVrc4.Variant.Vrc4RevAorC); break;
+                case 22: Map = new CartridgeMapKonamiVrc2(this, CartridgeMapKonamiVrc2.Variant.Vrc2a); break;
                 case 23: Map = new CartridgeMapKonamiVrc4(this, CartridgeMapKonamiVrc4.Variant.Vrc4RevEorF); break;
                 case 25: Map = new CartridgeMapKonamiVrc4(this, CartridgeMapKonamiVrc4.Variant.Vrc4RevBorD); break;
                 case 66: Map = new CartridgeMapGxRom(this); break;

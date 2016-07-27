@@ -45,6 +45,7 @@ namespace NesCore.Storage
                     characterBankRegisterLowAddresses[1] = new ushort[] { 0xB004, 0x8080 };
                     characterBankRegisterHighAddresses[1] = new ushort[] { 0xB006, 0xB0C0 };
 
+                    // IRQ registers
                     irqReloadHighAddresses = new ushort[] { 0xF002, 0xF040 };
                     irqControlAddresses = new ushort[] { 0xF004, 0xF080 };
                     irqAcknowledgeAddresses = new ushort[] { 0xF006, 0xF0C0 };
@@ -52,9 +53,45 @@ namespace NesCore.Storage
                     break;
                 case Variant.Vrc4RevBorD:
                     mapperName = "Konami VRC4b/VRC4d";
+                    
+                    // define PRG reg 0 (reg 1 addresses can be computed)
+                    programBank0RegisterAddresses = new ushort[] { 0x8000, 0x8002, 0x8001, 0x8003, 0x8008, 0x8004, 0x800C };
+
+                    mirroringRegisterAddresses = new ushort[] { 0x9000, 0x9002, 0x9008 };
+                    programModeRegisterAddresses = new ushort[] { 0x9001, 0x9003, 0x900C };
+
+                    // define CHR regs 0 and 1 - the rest can be computed
+                    characterBankRegisterLowAddresses[0] = new ushort[] { 0xB000 };
+                    characterBankRegisterHighAddresses[0] = new ushort[] { 0xB002, 0xB008 };
+                    characterBankRegisterLowAddresses[1] = new ushort[] { 0xB001, 0x8004 };
+                    characterBankRegisterHighAddresses[1] = new ushort[] { 0xB003, 0xB00C };
+
+                    // IRQ registers
+                    irqReloadHighAddresses = new ushort[] { 0xF002, 0xF008 };
+                    irqControlAddresses = new ushort[] { 0xF001, 0xF004 };
+                    irqAcknowledgeAddresses = new ushort[] { 0xF003, 0xF00C };
+
                     break;
                 case Variant.Vrc4RevEorF:
                     mapperName = "Konami VRC4e/VRC4f";
+
+                    // define PRG reg 0 (reg 1 addresses can be computed)
+                    programBank0RegisterAddresses = new ushort[] { 0x8000, 0x8004, 0x8008, 0x800C, 0x8001, 0x8002, 0x8003 };
+
+                    mirroringRegisterAddresses = new ushort[] { 0x9000, 0x9004, 0x9001 };
+                    programModeRegisterAddresses = new ushort[] { 0x9008, 0x900C, 0x9003 };
+
+                    // define CHR regs 0 and 1 - the rest can be computed
+                    characterBankRegisterLowAddresses[0] = new ushort[] { 0xB000 };
+                    characterBankRegisterHighAddresses[0] = new ushort[] { 0xB004, 0xB001 };
+                    characterBankRegisterLowAddresses[1] = new ushort[] { 0xB008, 0x8002 };
+                    characterBankRegisterHighAddresses[1] = new ushort[] { 0xB00C, 0xB003 };
+
+                    // IRQ registers
+                    irqReloadHighAddresses = new ushort[] { 0xF004, 0xF001 };
+                    irqControlAddresses = new ushort[] { 0xF008, 0xF002 };
+                    irqAcknowledgeAddresses = new ushort[] { 0xF00C, 0xF003 };
+
                     break;
             }
 
@@ -71,10 +108,12 @@ namespace NesCore.Storage
                     = characterBankRegisterHighAddresses[index % 2].Select((a) => (ushort)(a + 0x1000 * (index / 2))).ToArray();
             }
 
+            // program bank count and flat addresses to last and penultimate banks
             programBankCount = cartridge.ProgramRom.Count / 0x2000;
             programBankLastAddress = (programBankCount - 1) * 0x2000;
             programBankNextToLastAddress = programBankLastAddress - 0x2000;
 
+            // CHR bank count for bank index modulation
             characterBankCount = cartridge.CharacterRom.Length / 0x400;
         }
 

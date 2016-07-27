@@ -40,7 +40,10 @@ namespace NesCore.Storage
                 {
                     int bankIndex = address / 0x400;
                     int bankOffset = address % 0x400;
-                    return Cartridge.CharacterRom[characterBank[bankIndex] * 0x400 + bankOffset];
+                    int selectedCharacterBank = characterBank[bankIndex];
+                    if (variant == Variant.Vrc2a)
+                        selectedCharacterBank >>= 1;
+                    return Cartridge.CharacterRom[selectedCharacterBank * 0x400 + bankOffset];
                 }
                 else if (address >= 0x6000 && address < 0x8000)
                 {
@@ -85,6 +88,37 @@ namespace NesCore.Storage
                 {
                     programBank1 = value & 0x1F;
                     programBank1 %= programBankCount;
+                }
+                else if (address >= 0xB000 && address < 0xF000 && address % 0x1000 < 4)
+                {
+                    int low2Bits = address & 0x03;
+
+                    // normalise Rev A to Rev B for simplicity
+                    if (variant == Variant.Vrc2a)
+                    {
+                        if (low2Bits == 2)
+                            low2Bits = 1;
+                        else if (low2Bits == 1)
+                            low2Bits = 2;
+                    }
+
+                    int bankIndex = (address - 0xB000) / 0x1000;
+                    bankIndex *= 2;
+                    bankIndex += low2Bits / 2;
+
+                    if (low2Bits % 2 == 0)
+                    {
+                        // low 4 bits
+                        characterBank[bankIndex] &= 0xF0;
+                        characterBank[bankIndex] |= value & 0x0F;
+                    }
+                    else
+                    {
+                        // high 4 bits
+                        characterBank[bankIndex] &= 0x0F;
+                        characterBank[bankIndex] |= (value & 0x0F) << 4;
+                    }
+                    characterBank[bankIndex] %= characterBankCount;
                 }
                 else
                     Debug.WriteLine("VRC2: Unknown write of value " + Hex.Format(value) + " at address " + Hex.Format(address));

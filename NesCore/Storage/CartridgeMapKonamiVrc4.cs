@@ -31,7 +31,7 @@ namespace NesCore.Storage
             switch (variant)
             {
                 case Variant.Vrc4RevAorC:
-                    mapperName = "Konami VRC4a/VRC4c";
+                    mapperName = "Konami VRC4 rev A/C";
 
                     // define PRG reg 0 (reg 1 addresses can be computed)
                     programBank0RegisterAddresses = new ushort[] { 0x8000, 0x8002, 0x8004, 0x8006, 0x8040, 0x8080, 0x80C0 };
@@ -52,7 +52,7 @@ namespace NesCore.Storage
 
                     break;
                 case Variant.Vrc4RevBorD:
-                    mapperName = "Konami VRC4b/VRC4d";
+                    mapperName = "Konami VRC4 rev B / D";
                     
                     // define PRG reg 0 (reg 1 addresses can be computed)
                     programBank0RegisterAddresses = new ushort[] { 0x8000, 0x8002, 0x8001, 0x8003, 0x8008, 0x8004, 0x800C };
@@ -73,7 +73,7 @@ namespace NesCore.Storage
 
                     break;
                 case Variant.Vrc4RevEorF:
-                    mapperName = "Konami VRC4e/VRC4f";
+                    mapperName = "Konami VRC4 rev E / F";
 
                     // define PRG reg 0 (reg 1 addresses can be computed)
                     programBank0RegisterAddresses = new ushort[] { 0x8000, 0x8004, 0x8008, 0x800C, 0x8001, 0x8002, 0x8003 };

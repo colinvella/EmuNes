@@ -60,24 +60,14 @@ namespace NesCore.Storage
             // PRG bank 1 registers can be computed from bank 0 registers
             programBank1RegisterAddresses = programBank0RegisterAddresses.Select((a) => (ushort)(a + 0x2000)).ToArray();
 
-            // compute even CHR low and high register addresses 2, 4, 6 from 0
-            for (int index = 2; index < 8; index += 2)
+            // compute CHR low and high register addresses 2 - 7 from 0 or 1 depending on evenness
+            for (int index = 2; index < 8; index++)
             {
                 characterBankRegisterLowAddresses[index]
-                    = characterBankRegisterLowAddresses[0].Select((a) => (ushort)(a + 0x1000 * (index / 2))).ToArray();
+                    = characterBankRegisterLowAddresses[index % 2].Select((a) => (ushort)(a + 0x1000 * (index / 2))).ToArray();
 
                 characterBankRegisterHighAddresses[index]
-                    = characterBankRegisterHighAddresses[0].Select((a) => (ushort)(a + 0x1000 * (index / 2))).ToArray();
-            }
-
-            // compute odd CHR low and high register addresses 3, 5, 7 from 1
-            for (int index = 3; index < 8; index += 2)
-            {
-                characterBankRegisterLowAddresses[index]
-                    = characterBankRegisterLowAddresses[1].Select((a) => (ushort)(a + 0x1000 * (index / 2))).ToArray();
-
-                characterBankRegisterHighAddresses[index]
-                    = characterBankRegisterHighAddresses[1].Select((a) => (ushort)(a + 0x1000 * (index / 2))).ToArray();
+                    = characterBankRegisterHighAddresses[index % 2].Select((a) => (ushort)(a + 0x1000 * (index / 2))).ToArray();
             }
 
             programBankCount = cartridge.ProgramRom.Count / 0x2000;

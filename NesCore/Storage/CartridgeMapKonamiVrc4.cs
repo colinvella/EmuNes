@@ -145,7 +145,7 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0xB000 && address < 0xF000)
                 {
-                    Debug.WriteLine("CHR Register " + Hex.Format(address) + " = " + Hex.Format(value));
+                    //Debug.WriteLine("CHR Register " + Hex.Format(address) + " = " + Hex.Format(value));
                     for (int characterBankIndex = 0; characterBankIndex < 8; characterBankIndex++)
                     {
                         if (characterBankRegisterLowAddresses[characterBankIndex].Contains(address))
@@ -153,7 +153,7 @@ namespace NesCore.Storage
                             characterBank[characterBankIndex] &= 0x1F0;
                             characterBank[characterBankIndex] |= (value & 0x0F);
                             characterBank[characterBankIndex] %= characterBankCount;
-                            Debug.WriteLine("CHR bank [" + characterBankIndex + "] (" + Hex.Format((ushort)(characterBankIndex * 0x400)) + ") = " + Hex.Format((ushort)characterBank[characterBankIndex]));
+                            //Debug.WriteLine("CHR bank [" + characterBankIndex + "] (" + Hex.Format((ushort)(characterBankIndex * 0x400)) + ") = " + Hex.Format((ushort)characterBank[characterBankIndex]));
                             break;
                         }
                         else if (characterBankRegisterHighAddresses[characterBankIndex].Contains(address))
@@ -161,7 +161,7 @@ namespace NesCore.Storage
                             characterBank[characterBankIndex] &= 0x00F;
                             characterBank[characterBankIndex] |= ((value & 0x1F) << 4);
                             characterBank[characterBankIndex] %= characterBankCount;
-                            Debug.WriteLine("CHR bank [" + characterBankIndex + "] (" + Hex.Format((ushort)(characterBankIndex * 0x400)) + ") = " + Hex.Format((ushort)characterBank[characterBankIndex]));
+                            //Debug.WriteLine("CHR bank [" + characterBankIndex + "] (" + Hex.Format((ushort)(characterBankIndex * 0x400)) + ") = " + Hex.Format((ushort)characterBank[characterBankIndex]));
                             break;
                         }
                     }
@@ -219,18 +219,18 @@ namespace NesCore.Storage
                 irqPrescaler -= 3;
                 if (irqPrescaler <= 0)
                 {
-                    UpdateIrqCounter(scanLine);
+                    UpdateIrqCounter();
                     irqPrescaler += 341;
                 }
             }
             else
             {
-                UpdateIrqCounter(scanLine);
+                UpdateIrqCounter();
             }
 
         }
 
-        private void UpdateIrqCounter(int scanLine)
+        private void UpdateIrqCounter()
         {
             if (irqCounter == 0xFF)
             {

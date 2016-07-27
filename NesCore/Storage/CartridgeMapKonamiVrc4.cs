@@ -25,6 +25,13 @@ namespace NesCore.Storage
 
             characterBank = new int[8];
 
+            // even CHR low address registers are common to all variants
+            characterBankRegisterLowAddresses[0] = new ushort[] { 0xB000 };
+            characterBankRegisterLowAddresses[2] = new ushort[] { 0xC000 };
+            characterBankRegisterLowAddresses[4] = new ushort[] { 0xD000 };
+            characterBankRegisterLowAddresses[6] = new ushort[] { 0xE000 };
+
+            // IRQ reload address is common to all variants
             irqReloadLowAddress = 0xF000;
 
             switch (variant)
@@ -33,29 +40,14 @@ namespace NesCore.Storage
                     mapperName = "Konami VRC4a/VRC4c";
 
                     programBank0RegisterAddresses = new ushort[] { 0x8000, 0x8002, 0x8004, 0x8006, 0x8040, 0x8080, 0x80C0 };
-                    programBank1RegisterAddresses = new ushort[] { 0xA000, 0xA002, 0xA004, 0xA006, 0xA040, 0xA080, 0xA0C0 };
+
                     mirroringRegisterAddresses = new ushort[] { 0x9000, 0x9002, 0x9040 };
                     programModeRegisterAddresses = new ushort[] { 0x9004, 0x9006, 0x90C0 };
 
-                    characterBankRegisterLowAddresses[0] = new ushort[] { 0xB000 };
+                    // define CHR regs 0 and 1 - the rest can be computed
                     characterBankRegisterHighAddresses[0] = new ushort[] { 0xB002, 0xB040 };
                     characterBankRegisterLowAddresses[1] = new ushort[] { 0xB004, 0x8080 };
                     characterBankRegisterHighAddresses[1] = new ushort[] { 0xB006, 0xB0C0 };
-
-                    characterBankRegisterLowAddresses[2] = new ushort[] { 0xC000 };
-                    characterBankRegisterHighAddresses[2] = new ushort[] { 0xC002, 0xC040 };
-                    characterBankRegisterLowAddresses[3] = new ushort[] { 0xC004, 0xC080 };
-                    characterBankRegisterHighAddresses[3] = new ushort[] { 0xC006, 0xC0C0 };
-
-                    characterBankRegisterLowAddresses[4] = new ushort[] { 0xD000 };
-                    characterBankRegisterHighAddresses[4] = new ushort[] { 0xD002, 0xD040 };
-                    characterBankRegisterLowAddresses[5] = new ushort[] { 0xD004, 0xD080 };
-                    characterBankRegisterHighAddresses[5] = new ushort[] { 0xD006, 0xD0C0 };
-
-                    characterBankRegisterLowAddresses[6] = new ushort[] { 0xE000 };
-                    characterBankRegisterHighAddresses[6] = new ushort[] { 0xE002, 0xE040 };
-                    characterBankRegisterLowAddresses[7] = new ushort[] { 0xE004, 0xE080 };
-                    characterBankRegisterHighAddresses[7] = new ushort[] { 0xE006, 0xE0C0 };
 
                     irqReloadHighAddresses = new ushort[] { 0xF002, 0xF040 };
                     irqControlAddresses = new ushort[] { 0xF004, 0xF080 };
@@ -68,6 +60,31 @@ namespace NesCore.Storage
                 case Variant.Vrc4RevEorF:
                     mapperName = "Konami VRC4e/VRC4f";
                     break;
+            }
+
+            // PRG bank 1 registers can be computed from bank 0 registers
+            programBank1RegisterAddresses = new ushort[programBank0RegisterAddresses.Length];
+            for (int registerIndex = 0; registerIndex < programBank0RegisterAddresses.Length; registerIndex++)
+                programBank1RegisterAddresses[registerIndex] = (ushort)(programBank0RegisterAddresses[registerIndex] + 0x2000);
+
+            // compute even CHR high register addresses 2, 4, 6 from 0
+            for (int index = 2; index < 8; index += 2)
+            {
+                characterBankRegisterHighAddresses[index] = new ushort[2];
+                characterBankRegisterHighAddresses[index][0] = (ushort)(characterBankRegisterHighAddresses[0][0] + 0x1000 * (index / 2));
+                characterBankRegisterHighAddresses[index][1] = (ushort)(characterBankRegisterHighAddresses[0][1] + 0x1000 * (index / 2));
+            }
+
+            // compute odd CHR low and high register addresses 3, 5, 7 from 1
+            for (int index = 3; index < 8; index += 2)
+            {
+                characterBankRegisterLowAddresses[index] = new ushort[2];
+                characterBankRegisterLowAddresses[index][0] = (ushort)(characterBankRegisterLowAddresses[1][0] + 0x1000 * (index / 2));
+                characterBankRegisterLowAddresses[index][1] = (ushort)(characterBankRegisterLowAddresses[1][1] + 0x1000 * (index / 2));
+
+                characterBankRegisterHighAddresses[index] = new ushort[2];
+                characterBankRegisterHighAddresses[index][0] = (ushort)(characterBankRegisterHighAddresses[1][0] + 0x1000 * (index / 2));
+                characterBankRegisterHighAddresses[index][1] = (ushort)(characterBankRegisterHighAddresses[1][1] + 0x1000 * (index / 2));
             }
 
             programBankCount = cartridge.ProgramRom.Count / 0x2000;

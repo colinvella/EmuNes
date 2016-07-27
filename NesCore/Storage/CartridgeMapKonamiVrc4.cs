@@ -33,6 +33,7 @@ namespace NesCore.Storage
                 case Variant.Vrc4RevAorC:
                     mapperName = "Konami VRC4a/VRC4c";
 
+                    // define PRG reg 0 (reg 1 addresses can be computed)
                     programBank0RegisterAddresses = new ushort[] { 0x8000, 0x8002, 0x8004, 0x8006, 0x8040, 0x8080, 0x80C0 };
 
                     mirroringRegisterAddresses = new ushort[] { 0x9000, 0x9002, 0x9040 };

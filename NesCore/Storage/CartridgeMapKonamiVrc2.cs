@@ -72,6 +72,15 @@ namespace NesCore.Storage
                 int addressA2A3 = (address >> 2) & 0x03;
                 int addressLow2Bits = Math.Max(addressA0A1, addressA2A3);
 
+                // normalise Rev A to Rev B for simplicity
+                if (variant == Variant.Vrc2a)
+                {
+                    if (addressLow2Bits == 2)
+                        addressLow2Bits = 1;
+                    else if (addressLow2Bits == 1)
+                        addressLow2Bits = 2;
+                }
+
                 byte addressHighNybble = (byte)(address >> 12);
 
                 if (address >= 0x6000 && address < 0x8000)
@@ -98,15 +107,6 @@ namespace NesCore.Storage
                 }
                 else if (addressHighNybble >= 0xB && addressHighNybble < 0xF)
                 {
-                    // normalise Rev A to Rev B for simplicity
-                    if (variant == Variant.Vrc2a)
-                    {
-                        if (addressLow2Bits == 2)
-                            addressLow2Bits = 1;
-                        else if (addressLow2Bits == 1)
-                            addressLow2Bits = 2;
-                    }
-
                     int bankIndex = (address - 0xB000) / 0x1000;
                     bankIndex *= 2;
                     bankIndex += addressLow2Bits / 2;

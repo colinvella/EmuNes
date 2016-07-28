@@ -67,9 +67,10 @@ namespace NesCore.Storage
 
             set
             {
-                // for PRG ROM region, mask out all bits except for lines A12..A15, A0, A1
+                // for PRG ROM region, mask out unused bits
                 if (address >= 0x8000)
-                    address &= 0xF003;
+                    address &= 0xF00F;
+
                 byte addressHighNybble = (byte)(address >> 12);
 
                 if (address >= 0x6000 && address < 0x8000)
@@ -83,7 +84,7 @@ namespace NesCore.Storage
                 }
                 else if (addressHighNybble == 0x9)
                 {
-                    switch (value % 0x01)
+                    switch (value & 0x01)
                     {
                         case 0: MirrorMode = MirrorMode.Vertical; break;
                         case 1: MirrorMode = MirrorMode.Horizontal; break;
@@ -96,7 +97,10 @@ namespace NesCore.Storage
                 }
                 else if (addressHighNybble >= 0xB && addressHighNybble < 0xF)
                 {
-                    int low2Bits = address & 0x03;
+                    // determine heuristically if A0, A1 or A2, A3 should be used
+                    int low2BitsA = address & 0x03;
+                    int low2BitsB = (address >> 2) & 0x03;
+                    int low2Bits = Math.Max(low2BitsA, low2BitsB);
 
                     // normalise Rev A to Rev B for simplicity
                     if (variant == Variant.Vrc2a)

@@ -71,6 +71,11 @@ namespace NesCore.Storage
                 if (address >= 0x8000)
                     address &= 0xF00F;
 
+                // determine heuristically if A0, A1 or A2, A3 should be used
+                int addressA0A1 = address & 0x03;
+                int addressA2A3 = (address >> 2) & 0x03;
+                int addressLow2Bits = Math.Max(addressA0A1, addressA2A3);
+
                 byte addressHighNybble = (byte)(address >> 12);
 
                 if (address >= 0x6000 && address < 0x8000)
@@ -97,25 +102,20 @@ namespace NesCore.Storage
                 }
                 else if (addressHighNybble >= 0xB && addressHighNybble < 0xF)
                 {
-                    // determine heuristically if A0, A1 or A2, A3 should be used
-                    int low2BitsA = address & 0x03;
-                    int low2BitsB = (address >> 2) & 0x03;
-                    int low2Bits = Math.Max(low2BitsA, low2BitsB);
-
                     // normalise Rev A to Rev B for simplicity
                     if (variant == Variant.Vrc2a)
                     {
-                        if (low2Bits == 2)
-                            low2Bits = 1;
-                        else if (low2Bits == 1)
-                            low2Bits = 2;
+                        if (addressLow2Bits == 2)
+                            addressLow2Bits = 1;
+                        else if (addressLow2Bits == 1)
+                            addressLow2Bits = 2;
                     }
 
                     int bankIndex = (address - 0xB000) / 0x1000;
                     bankIndex *= 2;
-                    bankIndex += low2Bits / 2;
+                    bankIndex += addressLow2Bits / 2;
 
-                    if (low2Bits % 2 == 0)
+                    if (addressLow2Bits % 2 == 0)
                     {
                         // low 4 bits
                         characterBank[bankIndex] &= 0xF0;
@@ -129,9 +129,84 @@ namespace NesCore.Storage
                     }
                     characterBank[bankIndex] %= characterBankCount;
                 }
+                else if (addressHighNybble == 0xF)
+                {
+                    switch (addressLow2Bits)
+                    {
+                        case 0:
+                            irqReloadValue &= 0xF0;
+                            irqReloadValue |= (byte)(value & 0x0F);
+                            break;
+                        case 1:
+                            irqReloadValue &= 0x0F;
+                            irqReloadValue |= (byte)((value & 0x0F) << 4);
+                            break;
+                        case 2:
+                            irqCountMode = (IrqCountMode)((value >> 2) & 0x01);
+                            irqEnable = (value & 0x02) != 0;
+                            irqEnableOnAcknowledge = (value & 0x01) != 0;
+                            irqTriggered = false;
+                            if (irqEnable)
+                            {
+                                irqPrescaler = 341;
+                                irqCounter = irqReloadValue;
+                            }
+                            Debug.WriteLine("IRQ Count Mode = " + irqCountMode);
+                            break;
+                        case 3:
+                            if (irqTriggered)
+                                CancelInterruptRequest?.Invoke();
+                            irqEnable = irqEnableOnAcknowledge;
+                            irqTriggered = false;
+                            break;
+                    }
+                }
                 else
                     Debug.WriteLine("VRC2: Unknown write of value " + Hex.Format(value) + " at address " + Hex.Format(address));
             }
+        }
+
+        public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
+        {
+            cpuClock++;
+            cpuClock %= 3;
+
+            if (cpuClock != 0)
+                return;
+
+            if (!irqEnable)
+                return;
+
+            if (irqCountMode == IrqCountMode.Scanline)
+            {
+                irqPrescaler -= 3;
+                if (irqPrescaler <= 0)
+                {
+                    UpdateIrqCounter();
+                    irqPrescaler += 341;
+                }
+            }
+            else
+            {
+                UpdateIrqCounter();
+            }
+
+        }
+
+        private void UpdateIrqCounter()
+        {
+            if (irqCounter == 0xFF)
+            {
+                irqCounter = irqReloadValue;
+                Debug.WriteLine("IRQ counter reloaded to " + irqReloadValue);
+                if (!irqTriggered)
+                {
+                    TriggerInterruptRequest?.Invoke();
+                    irqTriggered = true;
+                }
+            }
+            else
+                ++irqCounter;
         }
 
         private Variant variant;
@@ -146,5 +221,20 @@ namespace NesCore.Storage
 
         private int characterBankCount;
         private int[] characterBank;
+
+        private byte cpuClock;
+        private byte irqCounter;
+        private byte irqReloadValue;
+        private IrqCountMode irqCountMode;
+        private bool irqEnable;
+        private bool irqEnableOnAcknowledge;
+        private int irqPrescaler;
+        private bool irqTriggered;
+
+        private enum IrqCountMode
+        {
+            Scanline,
+            Cpu
+        }
     }
 }

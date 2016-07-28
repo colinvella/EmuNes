@@ -43,6 +43,7 @@ namespace NesCore.Storage
                     int selectedCharacterBank = characterBank[bankIndex];
                     if (variant == Variant.Vrc2a)
                         selectedCharacterBank >>= 1;
+                    selectedCharacterBank %= characterBankCount;
                     return Cartridge.CharacterRom[selectedCharacterBank * 0x400 + bankOffset];
                 }
                 else if (address >= 0x6000 && address < 0x8000)
@@ -123,7 +124,7 @@ namespace NesCore.Storage
                         characterBank[bankIndex] &= 0x0F;
                         characterBank[bankIndex] |= (value & 0x0F) << 4;
                     }
-                    characterBank[bankIndex] %= characterBankCount;
+                    //characterBank[bankIndex] %= characterBankCount;
                 }
                 else if (addressHighNybble == 0xF)
                 {

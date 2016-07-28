@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NesCore.Storage
 {
-    class CartridgeMapKonamiVrc2 : CartridgeMap
+    class CartridgeMapKonamiVrc2 : CartridgeMapKonamiVrc
     {
         public enum Variant
         {
@@ -134,79 +134,22 @@ namespace NesCore.Storage
                     switch (addressLow2Bits)
                     {
                         case 0:
-                            irqReloadValue &= 0xF0;
-                            irqReloadValue |= (byte)(value & 0x0F);
+                            WriteIrqReloadValueLowNybble(value);
                             break;
                         case 1:
-                            irqReloadValue &= 0x0F;
-                            irqReloadValue |= (byte)((value & 0x0F) << 4);
+                            WriteIrqReloadValueHighNybble(value);
                             break;
                         case 2:
-                            irqCountMode = (IrqCountMode)((value >> 2) & 0x01);
-                            irqEnable = (value & 0x02) != 0;
-                            irqEnableOnAcknowledge = (value & 0x01) != 0;
-                            irqTriggered = false;
-                            if (irqEnable)
-                            {
-                                irqPrescaler = 341;
-                                irqCounter = irqReloadValue;
-                            }
-                            Debug.WriteLine("IRQ Count Mode = " + irqCountMode);
+                            WriteIrqControl(value);
                             break;
                         case 3:
-                            if (irqTriggered)
-                                CancelInterruptRequest?.Invoke();
-                            irqEnable = irqEnableOnAcknowledge;
-                            irqTriggered = false;
+                            WriteIrqAcknowledge();
                             break;
                     }
                 }
                 else
                     Debug.WriteLine("VRC2: Unknown write of value " + Hex.Format(value) + " at address " + Hex.Format(address));
             }
-        }
-
-        public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
-        {
-            cpuClock++;
-            cpuClock %= 3;
-
-            if (cpuClock != 0)
-                return;
-
-            if (!irqEnable)
-                return;
-
-            if (irqCountMode == IrqCountMode.Scanline)
-            {
-                irqPrescaler -= 3;
-                if (irqPrescaler <= 0)
-                {
-                    UpdateIrqCounter();
-                    irqPrescaler += 341;
-                }
-            }
-            else
-            {
-                UpdateIrqCounter();
-            }
-
-        }
-
-        private void UpdateIrqCounter()
-        {
-            if (irqCounter == 0xFF)
-            {
-                irqCounter = irqReloadValue;
-                Debug.WriteLine("IRQ counter reloaded to " + irqReloadValue);
-                if (!irqTriggered)
-                {
-                    TriggerInterruptRequest?.Invoke();
-                    irqTriggered = true;
-                }
-            }
-            else
-                ++irqCounter;
         }
 
         private Variant variant;
@@ -221,15 +164,6 @@ namespace NesCore.Storage
 
         private int characterBankCount;
         private int[] characterBank;
-
-        private byte cpuClock;
-        private byte irqCounter;
-        private byte irqReloadValue;
-        private IrqCountMode irqCountMode;
-        private bool irqEnable;
-        private bool irqEnableOnAcknowledge;
-        private int irqPrescaler;
-        private bool irqTriggered;
 
         private enum IrqCountMode
         {

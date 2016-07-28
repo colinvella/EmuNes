@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NesCore.Storage
 {
-    class CartridgeMapKonamiVrc4 : CartridgeMap
+    class CartridgeMapKonamiVrc4 : CartridgeMapKonamiVrc
     {
         public enum Variant
         {
@@ -219,82 +219,25 @@ namespace NesCore.Storage
                 }
                 else if (address == irqReloadLowAddress)
                 {
-                    irqReloadValue &= 0xF0;
-                    irqReloadValue |= (byte)(value & 0x0F);
+                    WriteIrqReloadValueLowNybble(value);
                 }
                 else if (irqReloadHighAddresses.Contains(address))
                 {
-                    irqReloadValue &= 0x0F;
-                    irqReloadValue |= (byte)((value & 0x0F) << 4);
+                    WriteIrqReloadValueHighNybble(value);
                 }
                 else if (irqControlAddresses.Contains(address))
                 {
-                    irqCountMode = (IrqCountMode)((value >> 2) & 0x01);
-                    irqEnable = (value & 0x02) != 0;
-                    irqEnableOnAcknowledge = (value & 0x01) != 0;
-                    irqTriggered = false;
-                    if (irqEnable)
-                    {
-                        irqPrescaler = 341;
-                        irqCounter = irqReloadValue;
-                    }
-                    Debug.WriteLine("IRQ Count Mode = " + irqCountMode);
+                    WriteIrqControl(value);
                 }
                 else if (irqAcknowledgeAddresses.Contains(address))
                 {
-                    if (irqTriggered)
-                        CancelInterruptRequest?.Invoke();
-                    irqEnable = irqEnableOnAcknowledge;
-                    irqTriggered = false;
+                    WriteIrqAcknowledge();
                 }
                 else
                 {
                     Debug.WriteLine("VRC4 unknown write at " + Hex.Format(address) + " with value " + Hex.Format(value));
                 }
             }
-        }
-
-        public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
-        {
-            cpuClock++;
-            cpuClock %= 3;
-
-            if (cpuClock != 0)
-                return;
-
-            if (!irqEnable)
-                return;
-
-            if (irqCountMode == IrqCountMode.Scanline)
-            {
-                irqPrescaler -= 3;
-                if (irqPrescaler <= 0)
-                {
-                    UpdateIrqCounter();
-                    irqPrescaler += 341;
-                }
-            }
-            else
-            {
-                UpdateIrqCounter();
-            }
-
-        }
-
-        private void UpdateIrqCounter()
-        {
-            if (irqCounter == 0xFF)
-            {
-                irqCounter = irqReloadValue;
-                Debug.WriteLine("IRQ counter reloaded to " + irqReloadValue);
-                if (!irqTriggered)
-                {
-                    TriggerInterruptRequest?.Invoke();
-                    irqTriggered = true;
-                }
-            }
-            else
-                ++irqCounter;
         }
 
         private string mapperName;
@@ -322,15 +265,6 @@ namespace NesCore.Storage
         private int characterBankCount;
         private int[] characterBank;
 
-        private byte cpuClock;
-        private byte irqCounter;
-        private byte irqReloadValue;
-        private IrqCountMode irqCountMode;
-        private bool irqEnable;
-        private bool irqEnableOnAcknowledge;
-        private int irqPrescaler;
-        private bool irqTriggered;
-
         private byte[] programRam;
 
         private enum ProgramMode
@@ -338,12 +272,5 @@ namespace NesCore.Storage
             Mode0,
             Mode1
         }
-
-        private enum IrqCountMode
-        {
-            Scanline,
-            Cpu
-        }
-
     }
 }

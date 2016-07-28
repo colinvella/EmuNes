@@ -67,16 +67,21 @@ namespace NesCore.Storage
 
             set
             {
+                // for PRG ROM region, mask out all bits except for lines A12..A15, A0, A1
+                if (address >= 0x8000)
+                    address &= 0xF003;
+                byte addressHighNybble = (byte)(address >> 12);
+
                 if (address >= 0x6000 && address < 0x8000)
                 {
                     programRam[address % 0x2000] = value;
                 }
-                else if (address >= 0x8000 && address < 0x8004)
+                else if (addressHighNybble == 0x8)
                 {
                     programBank0 = value & 0x1F;
                     programBank0 %= programBankCount;
                 }
-                else if (address >= 0x9000 && address < 0x9004)
+                else if (addressHighNybble == 0x9)
                 {
                     switch (value % 0x01)
                     {
@@ -84,12 +89,12 @@ namespace NesCore.Storage
                         case 1: MirrorMode = MirrorMode.Horizontal; break;
                     }
                 }
-                else if (address >= 0xA000 && address < 0xA004)
+                else if (addressHighNybble == 0x0A)
                 {
                     programBank1 = value & 0x1F;
                     programBank1 %= programBankCount;
                 }
-                else if (address >= 0xB000 && address < 0xF000 && address % 0x1000 < 4)
+                else if (addressHighNybble >= 0xB && addressHighNybble < 0xF)
                 {
                     int low2Bits = address & 0x03;
 

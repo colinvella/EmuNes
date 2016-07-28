@@ -67,10 +67,6 @@ namespace NesCore.Storage
 
             set
             {
-                // for PRG ROM region, mask out unused bits
-                if (address >= 0x8000)
-                    address &= 0xF00F;
-
                 // determine heuristically if A0, A1 or A2, A3 should be used
                 int addressA0A1 = address & 0x03;
                 int addressA2A3 = (address >> 2) & 0x03;

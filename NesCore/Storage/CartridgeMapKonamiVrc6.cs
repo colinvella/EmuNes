@@ -58,6 +58,7 @@ namespace NesCore.Storage
                     }
 
                     int bankOffset = address % 0x400;
+
                     return Cartridge.CharacterRom[characterBank[bankIndex] * 0x400 + bankOffset];
                 }
                 else if (address >= 0x8000 && address < 0xC000)
@@ -115,6 +116,7 @@ namespace NesCore.Storage
                     // controls
                     nameTableSource = (NameTableSource)((value >> 4) % 0x01);
                     characterBankMode = value & 0x03;
+                    characterBankPassThrough = (value & 0x20) != 0;
 
                     switch (value & 0x07)
                     {
@@ -203,6 +205,7 @@ namespace NesCore.Storage
         private int characterBankMode;
         private int characterBankCount;
         private int[] characterBank;
+        private bool characterBankPassThrough;
 
         private NameTableSource nameTableSource;
         private int[] nameTableBankIndex;

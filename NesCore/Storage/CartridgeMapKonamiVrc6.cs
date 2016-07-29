@@ -222,8 +222,8 @@ namespace NesCore.Storage
 
         private enum NameTableSource
         {
-            ChrRom,
-            CiRam
+            CiRam,
+            ChrRom
         }
     }
 }

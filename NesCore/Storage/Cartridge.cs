@@ -1,6 +1,7 @@
 ﻿using NesCore.Utility;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -116,6 +117,8 @@ namespace NesCore.Storage
                 default: throw new NotSupportedException(
                     "Mapper ID " + MapperId + " not supported");
             }
+
+            Debug.WriteLine(ToString());
         }
 
         public static DetermineMapperIdHandler DetermineMapperId { get; set; }
@@ -135,7 +138,7 @@ namespace NesCore.Storage
             return "PRG: " + Hex.Format((uint)ProgramRom.Count)
                 + "b, CHR: " + Hex.Format((uint)CharacterRom.Length)
                 + "b, Mapper ID: " + MapperId
-                + ", Mirror Mode:" + MirrorMode + " (" + (byte)MirrorMode + ")"
+                + ", Mirror Mode: " + MirrorMode + " (" + (byte)MirrorMode + ")"
                 + ", Battery: " + (BatteryPresent ? "Yes" : "No");
         }
 

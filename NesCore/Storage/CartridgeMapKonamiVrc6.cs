@@ -118,6 +118,14 @@ namespace NesCore.Storage
                     characterBankMode = value & 0x03;
                     characterBankPassThrough = (value & 0x20) != 0;
 
+                    switch ((value >> 2) & 0x03)
+                    {
+                        case 0: MirrorMode = MirrorMode.Vertical; break;
+                        case 1: MirrorMode = MirrorMode.Horizontal; break;
+                        case 2: MirrorMode = MirrorMode.Single0; break;
+                        case 3: MirrorMode = MirrorMode.Single1; break;
+                    }
+
                     switch (value & 0x07)
                     {
                         case 0:

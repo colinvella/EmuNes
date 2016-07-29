@@ -56,6 +56,11 @@ namespace NesCore.Storage
                 ++irqCounter;
         }
 
+        protected void WriteIrqReloadValue(byte value)
+        {
+            irqReloadValue = value;
+        }
+
         protected void WriteIrqReloadValueLowNybble(byte value)
         {
             irqReloadValue &= 0xF0;

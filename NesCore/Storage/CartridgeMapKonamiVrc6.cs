@@ -23,8 +23,17 @@ namespace NesCore.Storage
                 mapperName = "VRC6 Rev B";
 
             programBankCount16K = cartridge.ProgramRom.Count / 0x4000;
-            programBank8k = programBankCount16K * 2;
-            programBankLastBankAddress = cartridge.ProgramRom.Count - 0x2000;
+            programBankCount8K = programBankCount16K * 2;
+            programBank8kLastAddress = cartridge.ProgramRom.Count - 0x2000;
+
+            characterBankCount = cartridge.CharacterRom.Length / 0x400;
+            characterBank = new int[8];
+
+            nameTableBankIndex = new int[4];
+            nameTableBankIndex[0] = 6;
+            nameTableBankIndex[1] = 6;
+            nameTableBankIndex[2] = 7;
+            nameTableBankIndex[3] = 7;
         }
 
         public override string Name { get { return mapperName; } }
@@ -33,7 +42,41 @@ namespace NesCore.Storage
         {
             get
             {
-                return (byte)(address >> 8); // open bus
+                if (address < 0x2000)
+                {
+                    int bankIndex = address / 0x400;
+                    if (characterBankMode == 1)
+                        bankIndex /= 2;
+                    else if (characterBankMode >= 2)
+                    {
+                        if (bankIndex >= 4)
+                        {
+                            bankIndex -= 4;
+                            bankIndex /= 2;
+                            bankIndex += 4;
+                        }
+                    }
+
+                    int bankOffset = address % 0x400;
+                    return Cartridge.CharacterRom[characterBank[bankIndex] * 0x400 + bankOffset];
+                }
+                else if (address >= 0x8000 && address < 0xC000)
+                {
+                    int bankOffset = address % 0x4000;
+                    return Cartridge.ProgramRom[programBank16k * 0x4000 + bankOffset];
+                }
+                else if (address >= 0xC000 && address < 0xE000)
+                {
+                    int bankOffset = address % 0x2000;
+                    return Cartridge.ProgramRom[programBank8k * 0x2000 + bankOffset];
+                }
+                else if (address >= 0xE000)
+                {
+                    int bankOffset = address % 0x2000;
+                    return Cartridge.ProgramRom[programBank8kLastAddress + bankOffset];
+                }
+                else
+                    return (byte)(address >> 8); // open bus
             }
 
             set
@@ -70,11 +113,46 @@ namespace NesCore.Storage
                 else if (address == 0xB003)
                 {
                     // controls
+                    nameTableSource = (NameTableSource)((value >> 4) % 0x01);
+                    characterBankMode = value & 0x03;
+
+                    switch (value & 0x07)
+                    {
+                        case 0:
+                        case 6:
+                        case 7:
+                            nameTableBankIndex[0] = 6;
+                            nameTableBankIndex[1] = 6;
+                            nameTableBankIndex[2] = 7;
+                            nameTableBankIndex[3] = 7;
+                            break;
+                        case 1:
+                        case 5:
+                            nameTableBankIndex[0] = 4;
+                            nameTableBankIndex[1] = 5;
+                            nameTableBankIndex[2] = 6;
+                            nameTableBankIndex[3] = 7;
+                            break;
+                        case 2:
+                        case 3:
+                        case 4:
+                            nameTableBankIndex[0] = 6;
+                            nameTableBankIndex[1] = 7;
+                            nameTableBankIndex[2] = 6;
+                            nameTableBankIndex[3] = 7;
+                            break;
+                    }
                 }
                 else if (addressHighNybble == 0xC)
                 {
                     programBank8k = value & 0x1F;
                     programBank8k %= programBankCount8K; // paranoia
+                }
+                else if (addressHighNybble == 0xD || addressHighNybble == 0xE)
+                {
+                    int bankIndex = (addressHighNybble - 0xD) * 4;
+                    bankIndex += addressLowBits;
+                    characterBank[bankIndex] = value % characterBankCount;
                 }
                 else if (addressHighNybble == 0xF)
                 {
@@ -94,15 +172,47 @@ namespace NesCore.Storage
             }
         }
 
+        public override byte ReadNameTableByte(ushort address)
+        {
+            if (nameTableSource == NameTableSource.CiRam)
+                return base.ReadNameTableByte(address);
+
+            int bankIndex = (address % 0x1000) / 0x400;
+            int characterBankIndex = nameTableBankIndex[bankIndex];
+
+            int bankOffset = address % 0x400;
+
+            return Cartridge.CharacterRom[characterBank[characterBankIndex] * 0x400 + bankOffset];
+        }
+
+        public override void WriteNameTableByte(ushort address, byte value)
+        {
+            if (nameTableSource == NameTableSource.CiRam)
+                base.WriteNameTableByte(address, value);
+        }
+
         private Variant variant;
         private string mapperName;
 
         private int programBankCount16K;
         private int programBankCount8K;
-        private int programBankLastBankAddress;
+        private int programBank8kLastAddress;
         private int programBank16k;
         private int programBank8k;
 
+        private int characterBankMode;
+        private int characterBankCount;
+        private int[] characterBank;
+
+        private NameTableSource nameTableSource;
+        private int[] nameTableBankIndex;
+
         private bool programRamEnabled;
+
+        private enum NameTableSource
+        {
+            ChrRom,
+            CiRam
+        }
     }
 }

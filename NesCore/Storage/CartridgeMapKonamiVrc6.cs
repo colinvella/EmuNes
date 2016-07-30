@@ -36,8 +36,6 @@ namespace NesCore.Storage
             nameTableBankIndex[1] = 6;
             nameTableBankIndex[2] = 7;
             nameTableBankIndex[3] = 7;
-
-            programRam = new byte[0x2000];
         }
 
         public override string Name { get { return mapperName; } }
@@ -68,7 +66,7 @@ namespace NesCore.Storage
                 else if (address >= 0x6000 && address < 0x8000)
                 {
                     if (programRamEnabled)
-                        return programRam[address % 0x2000];
+                        return Cartridge.SaveRam[(ushort)(address % 0x2000)];
                     else
                         return (byte)(address >> 8); // if no ram, open bus?
                 }
@@ -112,7 +110,7 @@ namespace NesCore.Storage
                 if (address >= 0x6000 && address < 0x8000)
                 {
                     if (programRamEnabled)
-                        programRam[address % 0x2000] = value;
+                        Cartridge.SaveRam[(ushort)(address % 0x2000)] = value;
                 }
                 else if (addressHighNybble == 0x8)
                 {
@@ -240,7 +238,6 @@ namespace NesCore.Storage
         private int[] nameTableBankIndex;
 
         private bool programRamEnabled;
-        private byte[] programRam;
 
         private enum NameTableSource
         {

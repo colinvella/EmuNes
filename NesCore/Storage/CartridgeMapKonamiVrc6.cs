@@ -1,5 +1,7 @@
-﻿using System;
+﻿using NesCore.Utility;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,6 +36,8 @@ namespace NesCore.Storage
             nameTableBankIndex[1] = 6;
             nameTableBankIndex[2] = 7;
             nameTableBankIndex[3] = 7;
+
+            programRam = new byte[0x2000];
         }
 
         public override string Name { get { return mapperName; } }
@@ -61,6 +65,13 @@ namespace NesCore.Storage
 
                     return Cartridge.CharacterRom[characterBank[bankIndex] * 0x400 + bankOffset];
                 }
+                else if (address >= 0x6000 && address < 0x8000)
+                {
+                    if (programRamEnabled)
+                        return programRam[address % 0x2000];
+                    else
+                        return (byte)(address >> 8); // if no ram, open bus?
+                }
                 else if (address >= 0x8000 && address < 0xC000)
                 {
                     int bankOffset = address % 0x4000;
@@ -77,12 +88,16 @@ namespace NesCore.Storage
                     return Cartridge.ProgramRom[programBank8kLastAddress + bankOffset];
                 }
                 else
+                {
+                    Debug.WriteLine("Open bus read at address " + Hex.Format(address));
                     return (byte)(address >> 8); // open bus
+                }
             }
 
             set
             {
-                address &= 0xF003;
+                Debug.WriteLine(variant + ": [" + Hex.Format(address) + "] = " + Hex.Format(value));
+
                 byte addressHighNybble = (byte)(address >> 12);
                 byte addressLowBits = (byte)(address & 0x03);
                 if (variant == Variant.Vrc6b)
@@ -94,7 +109,12 @@ namespace NesCore.Storage
                         addressLowBits = 1;
                 }
 
-                if (addressHighNybble == 0x8)
+                if (address >= 0x6000 && address < 0x8000)
+                {
+                    if (programRamEnabled)
+                        programRam[address % 0x2000] = value;
+                }
+                else if (addressHighNybble == 0x8)
                 {
                     programBank16k = value & 0x0F;
                     programBank16k %= programBankCount16K; // paranoia
@@ -114,6 +134,7 @@ namespace NesCore.Storage
                 else if (address == 0xB003)
                 {
                     // controls
+                    programRamEnabled = (value & 0x80) != 0;
                     nameTableSource = (NameTableSource)((value >> 4) % 0x01);
                     characterBankMode = value & 0x03;
                     characterBankPassThrough = (value & 0x20) != 0;
@@ -219,6 +240,7 @@ namespace NesCore.Storage
         private int[] nameTableBankIndex;
 
         private bool programRamEnabled;
+        private byte[] programRam;
 
         private enum NameTableSource
         {

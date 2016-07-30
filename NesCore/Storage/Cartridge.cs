@@ -135,9 +135,9 @@ namespace NesCore.Storage
 
         public override string ToString()
         {
-            return "PRG: " + Hex.Format((uint)ProgramRom.Count)
-                + "b, CHR: " + Hex.Format((uint)CharacterRom.Length)
-                + "b, Mapper ID: " + MapperId
+            return "PRG ROM Size: " + KiloBytes.Format(ProgramRom.Count)
+                + ", CHR ROM Size: " + KiloBytes.Format(CharacterRom.Length)
+                + ", Mapper ID: " + MapperId
                 + ", Mirror Mode: " + MirrorMode + " (" + (byte)MirrorMode + ")"
                 + ", Battery: " + (BatteryPresent ? "Yes" : "No");
         }

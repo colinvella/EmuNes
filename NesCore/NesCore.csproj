@@ -90,6 +90,7 @@
     <Compile Include="Utility\Assembler.cs" />
     <Compile Include="Utility\AssemblerException.cs" />
     <Compile Include="Utility\Bin.cs" />
+    <Compile Include="Utility\KiloBytes.cs" />
     <Compile Include="Utility\Hex.cs" />
     <Compile Include="Video\Colour.cs" />
     <Compile Include="Video\Palette.cs" />

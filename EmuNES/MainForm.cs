@@ -185,8 +185,8 @@ namespace SharpNes
                 return;
 
             string cartridgeProperties
-                = "Program Rom Size: " + cartridge.ProgramRom.Count / 1024 + "k\r\n"
-                + "Character rom Size: " + cartridge.CharacterRom.Length / 1024 + "k\r\n"
+                = "Program ROM Size: " + KiloBytes.Format(cartridge.ProgramRom.Count) + "\r\n"
+                + "Character ROM Size: " + KiloBytes.Format(cartridge.CharacterRom.Length) + "\r\n"
                 + "Mapper ID: " + cartridge.MapperId + " (" + cartridge.Map.Name + ")\r\n"
                 + "Initial Mirroring Mode: " + cartridge.MirrorMode + "\r\n"
                 + "Battery Present: " + (cartridge.BatteryPresent ? "Yes" : "No")

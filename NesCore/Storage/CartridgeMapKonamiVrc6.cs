@@ -100,7 +100,7 @@ namespace NesCore.Storage
                 byte addressLowBits = (byte)(address & 0x03);
                 if (variant == Variant.Vrc6b)
                 {
-                    // for Rev B, swap A0 and A1
+                    // for Rev B, swap around A0 and A1
                     if (addressLowBits == 1)
                         addressLowBits = 2;
                     else if (addressLowBits == 2)

@@ -604,7 +604,8 @@ namespace SharpNes
                 MessageBox.Show(this,
                     "KIL instruction enountered at address " +
                     Hex.Format(Console.Processor.State.ProgramCounter) +
-                    ". There may be a problem with the ROM or a software bug in the emulator", "Processor Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ". There may be a problem with the ROM or a software bug in the emulator. ROM Details: " + cartridge.ToString(),
+                    "Processor Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             };
         }
 

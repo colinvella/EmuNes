@@ -47,7 +47,6 @@ namespace NesCore.Storage
                 {
                     int oldProgramBank = programBank;
                     programBank = (value >> 2) & 0x07;
-
                     if (programBank != oldProgramBank)
                         ProgramBankSwitch?.Invoke(0x8000, 0x4000);
                     

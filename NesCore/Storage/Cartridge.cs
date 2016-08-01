@@ -110,6 +110,7 @@ namespace NesCore.Storage
                 case 25: Map = new CartridgeMapKonamiVrc4(this, CartridgeMapKonamiVrc4.Variant.Vrc4RevBorD); break;
                 case 26: Map = new CartridgeMapKonamiVrc6(this, CartridgeMapKonamiVrc6.Variant.Vrc6b); break;
                 case 27: Map = new CartridgeMapKonamiVrc4(this, CartridgeMapKonamiVrc4.Variant.Vrc4RevEorF); break; // CHR broken
+                case 29: Map = new CartridgeMapSealieComputing(this); break;
                 case 66: Map = new CartridgeMapGxRom(this); break;
                 case 71: Map = new CartridgeMapCamerica71(this); break;
                 case 153: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.LZ93D50_with_SRAM); break;

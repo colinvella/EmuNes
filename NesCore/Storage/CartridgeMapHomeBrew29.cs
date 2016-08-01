@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace NesCore.Storage
 {
-    class CartridgeMapSealieComputing : CartridgeMap
+    class CartridgeMapHomeBrew29 : CartridgeMap
     {
-        public CartridgeMapSealieComputing(Cartridge cartridge) : base(cartridge)
+        public CartridgeMapHomeBrew29(Cartridge cartridge) : base(cartridge)
         {
             MirrorMode = MirrorMode.Vertical;
             programLastAddress16k = Cartridge.ProgramRom.Count - 0x4000;
         }
 
-        public override string Name { get { return "Sealie Computing"; } }
+        public override string Name { get { return "HomeBrew Mapper 29"; } }
 
         public override byte this[ushort address]
         {

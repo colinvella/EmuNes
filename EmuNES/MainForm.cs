@@ -620,16 +620,13 @@ namespace SharpNes
 
                 if (motionBlur)
                 {
-                    // bitmapBuffer.Bits[offset] = (byte)((colour.Blue * 2 + bitmapBuffer.Bits[offset++] * 2) / 4);
-                    // bitmapBuffer.Bits[offset] = (byte)((colour.Green * 2+ bitmapBuffer.Bits[offset++] * 2) / 4);
-                    // bitmapBuffer.Bits[offset] = (byte)((colour.Red * 2 + bitmapBuffer.Bits[offset] * 2) / 4);
-                    float delta = (colour.Blue - bitmapBuffer.Bits[offset]) / 4f;
+                    float delta = (colour.Blue - bitmapBuffer.Bits[offset]) / 2f;
                     if (Math.Abs(delta) < 1) delta = Math.Sign(delta);
                     bitmapBuffer.Bits[offset++] += (byte)delta;
-                    delta = (colour.Green - bitmapBuffer.Bits[offset]) / 4f;
+                    delta = (colour.Green - bitmapBuffer.Bits[offset]) / 2f;
                     if (Math.Abs(delta) < 1) delta = Math.Sign(delta);
                     bitmapBuffer.Bits[offset++] += (byte)delta;
-                    delta = (colour.Red - bitmapBuffer.Bits[offset]) / 4f;
+                    delta = (colour.Red - bitmapBuffer.Bits[offset]) / 2f;
                     if (Math.Abs(delta) < 1) delta = Math.Sign(delta);
                     bitmapBuffer.Bits[offset] += (byte)delta;
                 }

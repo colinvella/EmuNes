@@ -883,6 +883,8 @@ namespace SharpNes
 
             this.fullScreen = fullScreen;
 
+            this.TopMost = fullScreen;
+
             if (fullScreen)
             {
                 Cursor.Hide();
@@ -892,8 +894,8 @@ namespace SharpNes
                 this.MainMenuStrip.Hide();
                 this.statusStrip.Hide();
                 this.Left = this.Top = 0;
-                int screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
-                int screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
+                int screenWidth = Screen.PrimaryScreen.Bounds.Width;
+                int screenHeight = Screen.PrimaryScreen.Bounds.Height;
 
                 this.Width = screenWidth;
                 this.Height = screenHeight;

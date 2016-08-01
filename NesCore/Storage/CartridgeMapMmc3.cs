@@ -89,7 +89,7 @@ namespace NesCore.Storage
                 }
                 else if (mmc3AVariant && address >= 0x4100 && address < 0x6000)
                 {
-
+                    // MMC3 variant assigned to mapper 12
                     if (mmc3AVariant)
                     {
                         // ---R ---L

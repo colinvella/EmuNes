@@ -1,6 +1,7 @@
 ﻿using NesCore.Utility;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -49,11 +50,6 @@ namespace NesCore.Storage
 
                     return Cartridge.CharacterRom[flatAddress];
                 }
-                else if (address >= 0x4100 && address < 0x5FFF)
-                {
-                    // return open bus?
-                    return (byte)(address >> 8);
-                }
                 else if (address >= 0x8000)
                 {
                     address -= 0x8000;
@@ -65,7 +61,10 @@ namespace NesCore.Storage
                 else if (address >= 0x6000)
                     return Cartridge.SaveRam[(ushort)(address - 0x6000)];
                 else
-                    throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
+                {
+                    Debug.WriteLine(Name + ": Unexpected read from address " + Hex.Format(address));
+                    return (byte)(address >> 8); // return open bus
+                }
             }
 
             set
@@ -88,9 +87,8 @@ namespace NesCore.Storage
 
                     Cartridge.CharacterRom[flatAddress] = value;
                 }
-                else if (address >= 0x4100 && address < 0x6000)
+                else if (mmc3AVariant && address >= 0x4100 && address < 0x6000)
                 {
-                    // absorbing writes (e.g. Somari homebrew ROM writes to $4100 for some reason)
 
                     if (mmc3AVariant)
                     {
@@ -107,7 +105,10 @@ namespace NesCore.Storage
                 else if (address >= 0x6000)
                     Cartridge.SaveRam[(ushort)(address - 0x6000)] = value;
                 else
-                    throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
+                {
+                    // Somari homebrew ROM writes to $4100 as part mapper 116 to switch between VRC2/MMC3/MMc1
+                    Debug.WriteLine(Name + ": Unexpected write of value " + Hex.Format(value) + " at address " + Hex.Format(address));
+                }
             }
         }
 

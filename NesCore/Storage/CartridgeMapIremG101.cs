@@ -58,11 +58,10 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0x9000 && address < 0x9008)
                 {
-                    programBankMode = (value >> 1) & 0x01;
-
-                    // mapper controlled mirroring for all games except Major League
+                    // PRG mode mapper controlled mirroring for all games except Major League
                     if (Cartridge.Crc != 0x243A8735)
                     {
+                        programBankMode = (value >> 1) & 0x01;
                         MirrorMode = (value & 0x01) == 1 ? MirrorMode.Horizontal : MirrorMode.Vertical;
                     }
                 }

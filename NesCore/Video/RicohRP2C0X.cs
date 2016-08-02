@@ -451,6 +451,10 @@ namespace NesCore.Video
                 }
             }
 
+            // OAMADDR is set to 0 during each of ticks 257-320 (the sprite tile loading interval) of the pre-render and visible scanlines
+            if (ScanLine <= 240 && Cycle >= 257 && Cycle <= 320)
+                oamAddress = 0;
+
             // vblank logic
             if (ScanLine == 241 && Cycle == 1)
                 SetVerticalBlank();

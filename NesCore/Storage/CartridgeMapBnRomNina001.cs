@@ -115,7 +115,6 @@ namespace NesCore.Storage
         private int programBankCount;
         private int programBank;
 
-        private int characterBankCount;
         private int[] characterBank;
 
         private byte[] programRam;

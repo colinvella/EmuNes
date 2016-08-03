@@ -553,7 +553,7 @@ namespace NesCore.Video
             nmiOccurred = binaryReader.ReadBoolean();
             nmiOutput = binaryReader.ReadBoolean();
             nmiPrevious = binaryReader.ReadBoolean();
-            nmiDelay = binaryReader.ReadByte();
+            nmiDelay = binaryReader.ReadInt32();
 
             nameTableByte = binaryReader.ReadByte();
             attributeTableByte = binaryReader.ReadByte();
@@ -680,13 +680,13 @@ namespace NesCore.Video
             vramAddress = (ushort)((vramAddress & 0x841F) | (tempAddress & 0x7BE0));
         }
 
-        private void NmiChange()
+        private void NmiChange(int adjustment = 0)
         {
             bool nmi = nmiOutput && nmiOccurred;
 
             if (nmi && !nmiPrevious)
             {
-                nmiDelay = 21; // 7 cpu cycles = 7 * 3 ppu cycles ?
+                nmiDelay = 21 + adjustment; // 7 cpu cycles = 7 * 3 ppu cycles ?
             }
             nmiPrevious = nmi;
         }
@@ -696,7 +696,7 @@ namespace NesCore.Video
             //ppu.front, ppu.back = ppu.back, ppu.front
 
             nmiOccurred = true;
-            NmiChange();
+            NmiChange(-7);
 
             // call hook to present frame on vblank
             ShowFrame();
@@ -1014,7 +1014,7 @@ namespace NesCore.Video
         private bool nmiOccurred;
         private bool nmiOutput;
         private bool nmiPrevious;
-        private byte nmiDelay;
+        private int nmiDelay;
 
         // background temporary variables
         private byte nameTableByte;

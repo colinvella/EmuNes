@@ -1,5 +1,7 @@
-﻿using System;
+﻿using NesCore.Utility;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -83,6 +85,7 @@ namespace NesCore.Storage
                     programBank = programBankRR;
                     programBank %= programBankCount;
                 }
+                Debug.WriteLine(Hex.Format(address) + " = " + Hex.Format(value));
             }
         }
 

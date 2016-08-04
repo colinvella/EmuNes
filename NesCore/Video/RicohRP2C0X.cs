@@ -188,6 +188,11 @@ namespace NesCore.Video
                 nmiOccurred = false;
                 NmiChange();
 
+                // ensure correct behavior when $2002 is read near time
+                // VBL flag is set - NMI should be suppressed
+                if (nmiDelay > 12)
+                    nmiDelay = 0;
+
                 writeToggle = WriteToggle.First;
                 return result;
             }

@@ -178,11 +178,16 @@ namespace NesCore.Video
                     result |= 0x20;
                 if (spriteZeroHit)
                     result |= 0x40;
-                if (nmiOccurred)
-                    result |= 0x80;
+
+                if (vblDelay == 0)
+                {
+                    if (nmiOccurred)
+                        result |= 0x80;
+                }
 
                 nmiOccurred = false;
                 NmiChange();
+
                 writeToggle = WriteToggle.First;
                 return result;
             }
@@ -456,7 +461,7 @@ namespace NesCore.Video
                 oamAddress = 0;
 
             // vblank logic
-            if (ScanLine == 241 && Cycle == 1)
+            if (ScanLine == 241 && Cycle == 0) // change cycle == 0 from 1 for accurate VBL clear timing
                 SetVerticalBlank();
 
             if (preLine && Cycle == 1)
@@ -686,7 +691,9 @@ namespace NesCore.Video
 
             if (nmi && !nmiPrevious)
             {
-                nmiDelay = 21 + adjustment; // 7 cpu cycles = 7 * 3 ppu cycles ?
+                //nmiDelay = 21 + adjustment; // 7 cpu cycles = 7 * 3 ppu cycles ?
+                //TriggerNonMaskableInterupt?.Invoke();
+                nmiDelay = 15;
             }
             nmiPrevious = nmi;
         }
@@ -697,6 +704,7 @@ namespace NesCore.Video
 
             nmiOccurred = true;
             NmiChange(-7);
+            vblDelay = 1; // delay to suppress V flag in PPU Status
 
             // call hook to present frame on vblank
             ShowFrame();
@@ -964,12 +972,9 @@ namespace NesCore.Video
         {
             if (nmiDelay > 0)
             {
-                --nmiDelay;
-        
-                if (nmiDelay == 0 && nmiOutput && nmiOccurred)
-                {
+                --nmiDelay;        
+                if (nmiDelay == 0 )
                     TriggerNonMaskableInterupt();
-                }
             }
 
             if (ShowBackground || ShowSprites)
@@ -983,6 +988,9 @@ namespace NesCore.Video
                 }
             }
             ++Cycle;
+
+            if (vblDelay > 0)
+                --vblDelay;
 
             if (Cycle > 340)
             {
@@ -1043,6 +1051,7 @@ namespace NesCore.Video
         // $2002 PPUSTATUS
         private bool spriteZeroHit;
         private bool spriteOverflow;
+        private int vblDelay;
 
         // $2003 OAMADDR
         private byte oamAddress;

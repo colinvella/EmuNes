@@ -1,6 +1,7 @@
 ﻿using NesCore.Utility;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,6 @@ namespace NesCore.Storage
             : base(cartridge)
         {
             programBank = 0;
-            programRam = new byte[0x6000 - 0x4100];
         }
 
         public override string Name { get { return "AxROM"; } }
@@ -32,10 +32,8 @@ namespace NesCore.Storage
                 if (address >= 0x6000)
                     return Cartridge.SaveRam[(ushort)(address - 0x6000)];
 
-                if (address >= 0x4100)
-                    return programRam[address - 0x4100];
-
-                throw new Exception("Unhandled " + Name + " mapper read at address: " + Hex.Format(address));
+                Debug.WriteLine(Name + ": Unexpected read from address " + Hex.Format(address));
+                return (byte)(address >> 8); // open bus
             }
 
             set
@@ -58,14 +56,13 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0x6000)
                     Cartridge.SaveRam[(ushort)(address - 0x6000)] = value;
-                else if (address >= 0x4100)
-                    programRam[address - 0x4100] = value;
                 else
-                    throw new Exception("Unhandled " + Name + " mapper write at address: " + Hex.Format(address));
+                {
+                    Debug.WriteLine(Name + ": Unexpected write of value " + Hex.Format(value) + " at address " + Hex.Format(address));
+                }
             }
         }
 
         private int programBank;
-        private byte[] programRam;
     }
 }

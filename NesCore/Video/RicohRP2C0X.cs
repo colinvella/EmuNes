@@ -187,6 +187,7 @@ namespace NesCore.Video
 
                 nmiOccurred = false;
                 NmiChange();
+
                 writeToggle = WriteToggle.First;
                 return result;
             }
@@ -460,7 +461,7 @@ namespace NesCore.Video
                 oamAddress = 0;
 
             // vblank logic
-            if (ScanLine == 241 && Cycle == 1)
+            if (ScanLine == 241 && Cycle == 0) // change cycle == 0 from 1 for accurate VBL clear timing
                 SetVerticalBlank();
 
             if (preLine && Cycle == 1)
@@ -496,7 +497,7 @@ namespace NesCore.Video
             binaryWriter.Write(nmiOccurred);
             binaryWriter.Write(nmiOutput);
             binaryWriter.Write(nmiPrevious);
-            binaryWriter.Write(nmiDelay);
+            //binaryWriter.Write(nmiDelay);
 
             binaryWriter.Write(nameTableByte);
             binaryWriter.Write(attributeTableByte);
@@ -557,7 +558,7 @@ namespace NesCore.Video
             nmiOccurred = binaryReader.ReadBoolean();
             nmiOutput = binaryReader.ReadBoolean();
             nmiPrevious = binaryReader.ReadBoolean();
-            nmiDelay = binaryReader.ReadInt32();
+            //nmiDelay = binaryReader.ReadInt32();
 
             nameTableByte = binaryReader.ReadByte();
             attributeTableByte = binaryReader.ReadByte();
@@ -690,7 +691,8 @@ namespace NesCore.Video
 
             if (nmi && !nmiPrevious)
             {
-                nmiDelay = 21 + adjustment; // 7 cpu cycles = 7 * 3 ppu cycles ?
+                //nmiDelay = 21 + adjustment; // 7 cpu cycles = 7 * 3 ppu cycles ?
+                TriggerNonMaskableInterupt?.Invoke();
             }
             nmiPrevious = nmi;
         }
@@ -967,6 +969,7 @@ namespace NesCore.Video
         // tick updates Cycle, ScanLine and Frame counters
         private void Tick()
         {
+            /*
             if (nmiDelay > 0)
             {
                 --nmiDelay;
@@ -975,7 +978,7 @@ namespace NesCore.Video
                 {
                     TriggerNonMaskableInterupt();
                 }
-            }
+            }*/
 
             if (ShowBackground || ShowSprites)
             {
@@ -1022,7 +1025,7 @@ namespace NesCore.Video
         private bool nmiOccurred;
         private bool nmiOutput;
         private bool nmiPrevious;
-        private int nmiDelay;
+        //private int nmiDelay;
 
         // background temporary variables
         private byte nameTableByte;

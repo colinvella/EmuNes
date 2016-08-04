@@ -178,8 +178,12 @@ namespace NesCore.Video
                     result |= 0x20;
                 if (spriteZeroHit)
                     result |= 0x40;
-                if (nmiOccurred)
-                    result |= 0x80;
+
+                if (vblDelay == 0)
+                {
+                    if (nmiOccurred)
+                        result |= 0x80;
+                }
 
                 nmiOccurred = false;
                 NmiChange();
@@ -697,6 +701,7 @@ namespace NesCore.Video
 
             nmiOccurred = true;
             NmiChange(-7);
+            vblDelay = 1; // delay to suppress V flag in PPU Status
 
             // call hook to present frame on vblank
             ShowFrame();
@@ -984,6 +989,9 @@ namespace NesCore.Video
             }
             ++Cycle;
 
+            if (vblDelay > 0)
+                --vblDelay;
+
             if (Cycle > 340)
             {
                 Cycle = 0;
@@ -1043,6 +1051,7 @@ namespace NesCore.Video
         // $2002 PPUSTATUS
         private bool spriteZeroHit;
         private bool spriteOverflow;
+        private int vblDelay;
 
         // $2003 OAMADDR
         private byte oamAddress;

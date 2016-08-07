@@ -135,7 +135,11 @@ namespace NesCore.Video
                 masterSlave = (value & 0x40) != 0;
                 nmiOutput = (value & 0x80) != 0;
 
-                NmiChange();
+                // condition ensures correct NMI occurrence when enabled near time
+                // VBL flag is cleared - BLARGG test 07-nmi_on_timing.rom
+                if (!(ScanLine == 261 && Cycle < 4)) // 
+                    NmiChange();
+
                 // t: ....BA.. ........ = d: ......BA
                 tempAddress = (ushort)((tempAddress & 0xF3FF) | ((value & 0x03) << 10));
 

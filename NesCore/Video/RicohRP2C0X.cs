@@ -137,8 +137,18 @@ namespace NesCore.Video
 
                 // condition ensures correct NMI occurrence when enabled near time
                 // VBL flag is cleared - BLARGG test 07-nmi_on_timing.rom
-                if (!(ScanLine == 261 && Cycle < 4)) // 
+                bool nmiOnTimingSuppress = nmiOutput && ScanLine == 261 && Cycle < 4;
+                if (!nmiOnTimingSuppress)
+                {
                     NmiChange();
+                    Debug.WriteLine("NMI Change. nmiOutput = " + nmiOutput + " scanline = " + ScanLine + " cycle = " + Cycle);
+                }
+
+                // condition ensures correct NMI disable delay when done near time when VBL
+                // is set - BLARGG test 08-nmi_off_timing.rom
+                if (!nmiOutput && nmiDelay > 12)
+                    nmiDelay = 0;
+                
 
                 // t: ....BA.. ........ = d: ......BA
                 tempAddress = (ushort)((tempAddress & 0xF3FF) | ((value & 0x03) << 10));

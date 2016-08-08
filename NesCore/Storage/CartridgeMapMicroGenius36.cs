@@ -1,4 +1,5 @@
-﻿using NesCore.Utility;
+﻿using NesCore.Storage.Hacks;
+using NesCore.Utility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,6 +17,9 @@ namespace NesCore.Storage
             characterBankCount = Cartridge.CharacterRom.Length / 0x2000;
 
             programBank = programBankCount - 1;
+
+            if (Cartridge.Crc == 0x143DF524)
+                strikeWolfHack = new PpuStatusSpinHack();
         }
 
         public override string Name { get { return "Micro Genius TXC"; } }
@@ -38,7 +42,10 @@ namespace NesCore.Storage
                 {
                     byte value = Cartridge.ProgramRom[programBank * 0x8000 + address % 0x8000];
 
-                    return ApplyHacks(address, value);
+                    if (Cartridge.Crc == 0x143DF524)
+                        value = strikeWolfHack.Read(address, value);
+
+                    return value;
                 }
                 else
                     return (byte)(address >> 8);
@@ -90,26 +97,6 @@ namespace NesCore.Storage
             }
         }
 
-        private byte ApplyHacks(ushort address, byte value)
-        {
-            // check if Strike Wolf rom
-            if (Cartridge.Crc == 0x143DF524)
-            {
-                if (address >= 0x85E1 && address <= 0x85E5)
-                    ++hackStrikeWolfLoop;
-                else
-                    hackStrikeWolfLoop = 0;
-
-                if (hackStrikeWolfLoop > 10000 && address == 0x85E4)
-                {
-                    hackStrikeWolfLoop = 0;
-                    return 0xD0; // change BEQ to BNE
-                }
-            }
-
-            return value;
-        }
-
         private int programBankCount;
         private int programBankMode;
         private int programBankRR;
@@ -118,7 +105,7 @@ namespace NesCore.Storage
         private int characterBankCount;
         private int characterBank;
 
-        private static int hackStrikeWolfLoop = 0;
-
+        // Strike Wolf hack
+        private Hack strikeWolfHack;
     }
 }

@@ -1,4 +1,5 @@
-﻿using NesCore.Utility;
+﻿using NesCore.Storage.Hacks;
+using NesCore.Utility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,6 +15,9 @@ namespace NesCore.Storage
             : base(cartridge)
         {
             programBank = 0;
+
+            if (Cartridge.Crc == 0x279710DC)
+                battleToadsHack = new PpuStatusSpinHack();
         }
 
         public override string Name { get { return "AxROM"; } }
@@ -27,8 +31,15 @@ namespace NesCore.Storage
                     return Cartridge.CharacterRom[address];
 
                 if (address >= 0x8000)
-                    return Cartridge.ProgramRom[programBank * 0x8000 + address - 0x8000];
+                {
+                    byte value = Cartridge.ProgramRom[programBank * 0x8000 + address - 0x8000];
 
+                    // apply ppu spin loop hack to Battletoads ROM
+                    if (Cartridge.Crc == 0x279710DC)
+                        value = battleToadsHack.Read(address, value);
+
+                    return value;
+                }
                 if (address >= 0x6000)
                     return Cartridge.SaveRam[(ushort)(address - 0x6000)];
 
@@ -64,5 +75,6 @@ namespace NesCore.Storage
         }
 
         private int programBank;
+        private Hack battleToadsHack;
     }
 }

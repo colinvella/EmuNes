@@ -91,6 +91,8 @@
     <Compile Include="Storage\CartridgeMapHomeBrew29.cs" />
     <Compile Include="Storage\CartridgeMapUxRom.cs" />
     <Compile Include="Storage\Crc32.cs" />
+    <Compile Include="Storage\Hacks\Hack.cs" />
+    <Compile Include="Storage\Hacks\PpuStatusSpinHack.cs" />
     <Compile Include="Storage\MirrorMode.cs" />
     <Compile Include="Storage\Namco163SoundChip.cs" />
     <Compile Include="Storage\SaveRam.cs" />

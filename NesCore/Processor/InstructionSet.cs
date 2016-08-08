@@ -1017,7 +1017,7 @@ namespace NesCore.Processor
             instructions[0x77] = new Instruction(0x77, "RRA", AddressingMode.ZeroPageX, 6, FetchZeroPageX, RotateRightThenAdd);
             instructions[0x78] = new Instruction(0x78, "SEI", AddressingMode.Implied, 2, FetchNone, SetInterruptDisableFlag);
             instructions[0x79] = new Instruction(0x79, "ADC", AddressingMode.AbsoluteY, 4, FetchAbsoluteY, AddWithCarry);
-            instructions[0x7A] = new Instruction(0x7A, "NOPu", AddressingMode.Absolute, 2, FetchAbsolute, NoOperation);
+            instructions[0x7A] = new Instruction(0x7A, "NOPu", AddressingMode.Implied, 2, FetchAbsolute, NoOperation);
             instructions[0x7B] = new Instruction(0x7B, "RRA", AddressingMode.AbsoluteY, 7, FetchAbsoluteY, RotateRightThenAdd);
             instructions[0x7C] = new Instruction(0x7C, "TOP", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, TrippleNop);
             instructions[0x7D] = new Instruction(0x7D, "ADC", AddressingMode.AbsoluteX, 4, FetchAbsoluteX, AddWithCarry);

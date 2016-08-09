@@ -67,6 +67,9 @@ namespace SharpNes.Cheats
         private void OnValidatingByteValue(object sender, CancelEventArgs cancelEventArgs)
         {
             TextBox textBox = (TextBox)sender;
+            if (!textBox.Enabled)
+                return;
+
             try
             {
                 Convert.ToByte(textBox.Text, 16);
@@ -81,8 +84,21 @@ namespace SharpNes.Cheats
         private void OnValidatedByteValue(object sender, EventArgs eventArgs)
         {
             TextBox textBox = (TextBox)sender;
+            if (!textBox.Enabled)
+                return;
+
             textBox.Text = textBox.Text.ToUpper();
             errorProvider.SetError(textBox, "");
+        }
+
+        private void OnValidatingDescription(object sender, CancelEventArgs cancelEventArgs)
+        {
+            descriptionTextBox.Text = descriptionTextBox.Text.Trim();
+            if (descriptionTextBox.Text.Length == 0)
+            {
+                cancelEventArgs.Cancel = true;
+                errorProvider.SetError(descriptionTextBox, "No description specified");
+            }
         }
 
         private void OnValidatedDescription(object sender, EventArgs eventargs)
@@ -92,6 +108,18 @@ namespace SharpNes.Cheats
 
         private void OnButtonOk(object sender, EventArgs eventArgs)
         {
+            /*
+            if (!addressTextBox.Focus() || !valueTextBox.Focus() || !(compareRequiredCheckBox.Enabled && compareRequiredCheckBox.Focus()))
+            {
+                DialogResult = DialogResult.None;
+                return;
+            }*/
+            if (!ValidateChildren())
+            {
+                DialogResult = DialogResult.None;
+                return;
+            }
+
             cheat.Address = Convert.ToUInt16(addressTextBox.Text, 16);
             cheat.Value = Convert.ToByte(valueTextBox.Text, 16);
             if (compareRequiredCheckBox.Checked)
@@ -105,6 +133,5 @@ namespace SharpNes.Cheats
 
         private Cheat cheat;
         private bool isNew;
-
     }
 }

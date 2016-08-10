@@ -76,12 +76,13 @@ namespace SharpNes.Diagnostics
                 disassemblyRichTextBox.Clear();
                 for (int address = 0; address < 0x10000; address++)
                 {
+                    /*
                     if (queuedAddresses[address])
                     {
                         disassemblyRichTextBox.SelectionColor = Color.Gray;
                         disassemblyRichTextBox.AppendText("Queued for disassembly...\r\n");
                         continue;
-                    }
+                    }*/
 
                     DisassemblyLine disassemblyLine = disassemblyLines[address];
                     if (disassemblyLine == null)

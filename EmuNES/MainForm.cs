@@ -611,8 +611,9 @@ namespace SharpNes
 
         private void ConfigureVideo()
         {
-            Console.Video.WritePixel = (x, y, colour) =>
+            Console.Video.WritePixel = (x, y, colour, pixelType) =>
             {
+                // do not render top and bottom 8 rows
                 if (y < 8 || y > 231)
                     colour = Colour.Black;
 

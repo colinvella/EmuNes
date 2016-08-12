@@ -28,7 +28,8 @@ namespace NesCore.Video
         /// <param name="x">screen buffer x coordinate</param>
         /// <param name="y">screen buffer y coordinate</param>
         /// <param name="colour">pixel colour</param>
-        public delegate void WritePixelHandler(byte x, byte y, Colour colour);
+        /// <param name="pixelType>type of pixel being drawn (off, background or sprite)</param>"
+        public delegate void WritePixelHandler(byte x, byte y, Colour colour, PixelType pixelType);
 
         /// <summary>
         /// delegate called when sprite mode is changed
@@ -459,7 +460,8 @@ namespace NesCore.Video
                 // rendering disabled - trigger WritePixel hook with default background pixel
                 if (visibleLine && visibleCycle)
                 {
-                    WritePixel((byte)(Cycle - 1), (byte)ScanLine, paletteTints[tint][Memory[0x3F00]]);
+                    WritePixel((byte)(Cycle - 1), (byte)ScanLine,
+                        paletteTints[tint][Memory[0x3F00]], PixelType.Off);
                 }
             }
 
@@ -825,6 +827,7 @@ namespace NesCore.Video
         {
             byte x = (byte)(Cycle - 1);
             byte y = (byte)ScanLine;
+            PixelType pixelType = PixelType.Off;
 
             byte backgroundPixel = GetBackgroundPixel();
 
@@ -856,14 +859,21 @@ namespace NesCore.Video
 
                     // determine if sprite or background pixel prevails
                     if (sprites[spriteIndex].Priority == 0)
+                    {
                         colourIndex = (byte)(spritePixel | 0x10);
+                        pixelType = PixelType.Sprite;
+                    }
                     else
+                    {
                         colourIndex = backgroundPixel;
+                        pixelType = PixelType.Background;
+                    }
                 }
                 else
                 {
                     // opaque background and transparent sprite pixel
                     colourIndex = backgroundPixel;
+                    pixelType = PixelType.Background;
                 }
             }
             else
@@ -873,11 +883,13 @@ namespace NesCore.Video
                 {
                     // transparent background and opaque sprite pixels
                     colourIndex = (byte)(spritePixel | 0x10);
+                    pixelType = PixelType.Sprite;
                 }
                 else
                 {
                     // transparent background and sprite pixels
                     colourIndex = 0;
+                    pixelType = PixelType.Off;
                 }
             }
 
@@ -894,7 +906,7 @@ namespace NesCore.Video
             Colour colour = paletteTints[tint][paletteIndex];
 
             // hook to write pixel
-            WritePixel(x, y, colour);
+            WritePixel(x, y, colour, pixelType);
         }
 
         private uint FetchSpritePattern(int spriteIndex, int row)

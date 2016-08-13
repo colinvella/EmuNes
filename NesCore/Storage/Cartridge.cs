@@ -117,6 +117,7 @@ namespace NesCore.Storage
                 case 33: Map = new CartridgeMapTaitoTc0190(this); break;
                 case 34: Map = new CartridgeMapBnRomNina001(this); break;
                 case 36: Map = new CartridgeMapMicroGenius36(this); break;
+                case 38: Map = new CartridgeMapCrimeBusters(this); break;
                 case 66: Map = new CartridgeMapGxRom(this); break;
                 case 71: Map = new CartridgeMapCamerica71(this); break;
                 case 153: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.LZ93D50_with_SRAM); break;

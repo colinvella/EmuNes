@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 namespace NesCore.Input
 {
-    public delegate bool ButtonPressed();
-
     public class Joypad: Controller
     {
         public Joypad()
@@ -26,12 +24,14 @@ namespace NesCore.Input
         public ButtonPressed Left { get { return buttonPressed[6]; } set { buttonPressed[6] = value; } }
         public ButtonPressed Right { get { return buttonPressed[7]; } set { buttonPressed[7] = value; } }
 
+        public bool IsSerial { get { return true; } }
+
         public void Strobe()
         {
             buttonIndex = 0x00;
         }
 
-        public bool Read()
+        public bool ReadSerial()
         {
             bool value = false;
 
@@ -39,11 +39,10 @@ namespace NesCore.Input
                 value = true;
             ++buttonIndex;
 
-            //if ((strobe & 0x01) == 0x01)
-            //    buttonIndex = 0x00;
-
             return value;
         }
+
+        public byte PortValue { get { return 0x00; } }
 
         private ButtonPressed[] buttonPressed;
         private byte buttonIndex;

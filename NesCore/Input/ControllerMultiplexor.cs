@@ -18,10 +18,16 @@ namespace NesCore.Input
             {
                 byte value = 0x40;
 
-                if (Primary != null && Primary.Read())
-                    value |= 0x01;
+                if (Primary != null)
+                {
+                    if (Primary.IsSerial && Primary.ReadSerial())
+                        value |= 0x01;
 
-                if (Secondary != null && Secondary.Read())
+                    if (!Primary.IsSerial) // such as zapper Nes/Famicon version
+                        value |= Primary.PortValue;
+                }
+
+                if (Secondary != null && Secondary.IsSerial && Secondary.ReadSerial())
                     value |= 0x02;
 
                 return value;

@@ -27,8 +27,16 @@ namespace NesCore.Input
                         value |= Primary.PortValue;
                 }
 
-                if (Secondary != null && Secondary.IsSerial && Secondary.ReadSerial())
-                    value |= 0x02;
+                if (Secondary != null)
+                {
+                    if (Secondary.IsSerial && Secondary.ReadSerial())
+                        value |= 0x02;
+
+                    // i don't think it is possible to multiplex a zapper, but for
+                    // the sake of completeness - secondary inputs are ORed woth the result
+                    if (!Secondary.IsSerial) // such as zapper Nes/Famicon version
+                        value |= Secondary.PortValue;
+                }
 
                 return value;
             }

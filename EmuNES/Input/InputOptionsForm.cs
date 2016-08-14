@@ -18,12 +18,14 @@ namespace SharpNes.Input
         public InputOptionsForm(
             NesCore.Console console,
             KeyboardState keyboardState,
+            MouseState mouseState,
             GameControllerManager gameControllerManager)
         {
             InitializeComponent();
 
             this.console = console;
             this.keyboardState = keyboardState;
+            this.mouseState = mouseState;
             this.gameControllerManager = gameControllerManager;
         }
 
@@ -75,6 +77,7 @@ namespace SharpNes.Input
         private InputSettings inputSettings;
         private NesCore.Console console;
         private KeyboardState keyboardState;
+        private MouseState mouseState;
         private GameControllerManager gameControllerManager;
     }
 }

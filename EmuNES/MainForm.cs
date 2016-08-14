@@ -48,6 +48,9 @@ namespace SharpNes
             // map for key states to help controller mapping
             this.keyboardState = new KeyboardState();
 
+            // map for mouse states to help controller mapping
+            this.mouseState = new MouseState();
+
             // set up joystick object before console
             this.gameControllerManager = new GameControllerManager();
 
@@ -324,7 +327,7 @@ namespace SharpNes
 
         private void OnOptionsInput(object sender, EventArgs eventArgs)
         {
-            InputOptionsForm inputOptionsForm = new InputOptionsForm(Console, keyboardState, gameControllerManager);
+            InputOptionsForm inputOptionsForm = new InputOptionsForm(Console, keyboardState, mouseState, gameControllerManager);
             inputOptionsForm.ShowDialog(this);
         }
 
@@ -494,6 +497,20 @@ namespace SharpNes
         {
             if (gameState == GameState.Paused)
                 OnGameRunPause(sender, EventArgs.Empty);
+
+            if (mouseEventArgs.Button == MouseButtons.Left)
+                mouseState.LeftButtonPressed = true;
+        }
+
+        private void OnVideoPanelMouseUp(object sender, MouseEventArgs mouseEventArgs)
+        {
+            if (mouseEventArgs.Button == MouseButtons.Left)
+                mouseState.LeftButtonPressed = false;
+        }
+
+        private void OnVideoPanelMouseMove(object sender, MouseEventArgs mouseEventArgs)
+        {
+            mouseState.Position = mouseEventArgs.Location;
         }
 
         private void OnVideoPanelPaint(object sender, PaintEventArgs paintEventArgs)
@@ -1033,6 +1050,7 @@ namespace SharpNes
 
         // input system
         private KeyboardState keyboardState;
+        private MouseState mouseState;
         private GameControllerManager gameControllerManager;
 
         // debug

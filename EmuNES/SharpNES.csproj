@@ -109,7 +109,6 @@
     <Compile Include="Input\JoypadConfigurationForm.Designer.cs">
       <DependentUpon>JoypadConfigurationForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Input\Button.cs" />
     <Compile Include="Input\GameControllerEventArgs.cs" />
     <Compile Include="Input\WindowsMultiMedia.cs" />
     <Compile Include="Settings\JoypadSettings.cs" />

@@ -10,13 +10,13 @@ namespace SharpNes.Input
 
     public class GameControllerEventArgs
     {
-        public GameControllerEventArgs(byte id, Button button)
+        public GameControllerEventArgs(byte id, GameController.Button button)
         {
             Id = id;
             Button = button;
         }
 
         public byte Id { get; private set;}
-        public Button Button { get; private set; }
+        public GameController.Button Button { get; private set; }
     }
 }

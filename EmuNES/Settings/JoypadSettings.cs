@@ -45,7 +45,7 @@ namespace SharpNes.Settings
             return "key:" + key;
         }
 
-        public string EncodeJoystickMapping(byte controllerId, SharpNes.Input.Button button)
+        public string EncodeJoystickMapping(byte controllerId, SharpNes.Input.GameController.Button button)
         {
             return "joy:" + controllerId + ":" + button;
         }
@@ -86,7 +86,7 @@ namespace SharpNes.Settings
         {
             string[] tokens = mapping.Trim().Split(new char[] { ':' });
             byte controllerId = byte.Parse(tokens[1]);
-            SharpNes.Input.Button button = (SharpNes.Input.Button)Enum.Parse(typeof(SharpNes.Input.Button), tokens[2]);
+            GameController.Button button = (GameController.Button)Enum.Parse(typeof(GameController.Button), tokens[2]);
             if (controllerId < gameControllerManager.Count)
             {
                 GameController gameController = gameControllerManager[controllerId];

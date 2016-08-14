@@ -83,7 +83,7 @@ namespace SharpNes.Input
 
         private void OnControllerButtonPressed(object sender, GameControllerEventArgs gameControllerEventArgs)
         {
-            Button button = gameControllerEventArgs.Button;
+            GameController.Button button = gameControllerEventArgs.Button;
             GameController gameController = (GameController)sender;
             switch (joypadConfigState)
             {

@@ -112,6 +112,7 @@
     </Compile>
     <Compile Include="Input\GameControllerEventArgs.cs" />
     <Compile Include="Input\WindowsMultiMedia.cs" />
+    <Compile Include="Settings\ZapperSettings.cs" />
     <Compile Include="Settings\JoypadSettings.cs" />
     <Compile Include="Video\FastBitmap.cs" />
     <Compile Include="Input\GameController.cs" />

@@ -36,6 +36,8 @@ namespace SharpNes.Settings
 
             ZapperSettings zapperSettings = new ZapperSettings();
             zapperSettings.Port = 2;
+            zapperSettings.Trigger = "mouse:left";
+            zapperSettings.LightSense = "mouse:cursor";
 
             Zappers.Add(zapperSettings);
         }

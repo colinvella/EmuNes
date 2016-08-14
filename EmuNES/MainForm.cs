@@ -499,18 +499,40 @@ namespace SharpNes
                 OnGameRunPause(sender, EventArgs.Empty);
 
             if (mouseEventArgs.Button == MouseButtons.Left)
+            {
                 mouseState.LeftButtonPressed = true;
+            }
         }
 
         private void OnVideoPanelMouseUp(object sender, MouseEventArgs mouseEventArgs)
         {
             if (mouseEventArgs.Button == MouseButtons.Left)
+            {
                 mouseState.LeftButtonPressed = false;
+            }
         }
 
         private void OnVideoPanelMouseMove(object sender, MouseEventArgs mouseEventArgs)
         {
             mouseState.Position = mouseEventArgs.Location;
+            int x = mouseState.Position.X;
+            int y = mouseState.Position.Y;
+
+            x = x * 256 / bufferSize.Width;
+            y = y * 240 / bufferSize.Height;
+
+            if (x < 0 && x >= 256 || y < 0 || y >= 240)
+            {
+                mouseState.SensePixel = false;
+                return;
+            }
+
+            int off = y * 256 + x;
+            off *= 4;
+            byte r = bitmapBuffer.Bits[off];
+            byte g = bitmapBuffer.Bits[off + 1];
+            byte b = bitmapBuffer.Bits[off + 2];            
+            mouseState.SensePixel = r + g + b > 384;
         }
 
         private void OnVideoPanelPaint(object sender, PaintEventArgs paintEventArgs)
@@ -723,6 +745,11 @@ namespace SharpNes
             foreach (JoypadSettings joyPadSettings in inputSettings.Joypads)
                 Console.ConnectController(joyPadSettings.Port,
                     joyPadSettings.ConfigureJoypad(keyboardState, gameControllerManager));
+
+            // assign zappers
+            foreach (ZapperSettings zapperSettings in inputSettings.Zappers)
+                Console.ConnectController(zapperSettings.Port,
+                    zapperSettings.ConfigureZapper(mouseState));
         }
 
         private void LoadRecentRom(object sender, EventArgs eventArgs)

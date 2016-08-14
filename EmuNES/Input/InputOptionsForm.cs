@@ -48,7 +48,6 @@ namespace SharpNes.Input
 
         private void OnConfigureJoypad(object sender, EventArgs eventArgs)
         {
-            //JoypadSettings joypadSettings = inputSettings.Joypads[controllerIdComboBox.SelectedIndex];
             byte port = (byte)(controllerIdComboBox.SelectedIndex + 1);
             JoypadSettings joypadSettings = new JoypadSettings();
             joypadSettings.Port = port;
@@ -62,6 +61,20 @@ namespace SharpNes.Input
             OnPortChanged(sender, eventArgs);
         }
 
+        private void OnConfigureZapper(object sender, EventArgs eventArgs)
+        {
+            byte port = (byte)(controllerIdComboBox.SelectedIndex + 1);
+            ZapperSettings zapperSettings = new ZapperSettings();
+            zapperSettings.Port = port;
+
+            // temporary
+            zapperSettings.Trigger = "mouse:left";
+
+            inputSettings[port] = zapperSettings;
+
+            OnPortChanged(sender, eventArgs);
+        }
+
         private void OnOk(object sender, EventArgs eventArgs)
         {
             Properties.Settings.Default.InputSettings = inputSettings;
@@ -70,6 +83,10 @@ namespace SharpNes.Input
             foreach (JoypadSettings joypadSettings in inputSettings.Joypads)
                 console.ConnectController(joypadSettings.Port,
                     joypadSettings.ConfigureJoypad(keyboardState, gameControllerManager));
+
+            foreach (ZapperSettings zapperSettings in inputSettings.Zappers)
+                console.ConnectController(zapperSettings.Port,
+                    zapperSettings.ConfigureZapper(mouseState));
 
             DialogResult = DialogResult.OK;
         }

@@ -81,7 +81,7 @@
             "Controller 3",
             "Controller 4"});
             this.controllerIdComboBox.Location = new System.Drawing.Point(13, 13);
-            this.controllerIdComboBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.controllerIdComboBox.Margin = new System.Windows.Forms.Padding(4);
             this.controllerIdComboBox.Name = "controllerIdComboBox";
             this.controllerIdComboBox.Size = new System.Drawing.Size(144, 24);
             this.controllerIdComboBox.TabIndex = 9;
@@ -96,6 +96,7 @@
             this.configureZapperButton.TabIndex = 10;
             this.configureZapperButton.Text = "Configure &Zapper...";
             this.configureZapperButton.UseVisualStyleBackColor = true;
+            this.configureZapperButton.Click += new System.EventHandler(this.OnConfigureZapper);
             // 
             // mappingsPropertyGrid
             // 

@@ -26,10 +26,18 @@ namespace SharpNes.Settings
             return copy;
         }
 
-        public Zapper ConfigureZapper(KeyboardState keyboardState, GameControllerManager gameControllerManager)
+        public Zapper ConfigureZapper(MouseState mouseState)
         {
             Zapper zapper = new Zapper();
-            zapper.Trigger = DecodeMapping(Trigger, keyboardState, gameControllerManager);
+            zapper.Trigger = () =>
+            {
+                return mouseState.LeftButtonPressed;
+            };
+
+            zapper.LightSense = () =>
+            {
+                return mouseState.SensePixel;
+            };
             return zapper;
         }
     }

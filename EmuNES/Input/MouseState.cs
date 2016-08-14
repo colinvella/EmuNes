@@ -14,6 +14,7 @@ namespace SharpNes.Input
         }
 
         public Point Position { get; set; }
+        public bool SensePixel { get; set; }
         public bool LeftButtonPressed { get; set; }
     }
 }

@@ -37,7 +37,7 @@ namespace NesCore.Input
                     value |= 0x08;
                 if (Trigger())
                     value |= 0x10;
-                return 0x00;
+                return value;
             }
         }
     }

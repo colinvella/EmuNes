@@ -15,6 +15,7 @@ namespace SharpNes.Settings
         {
             controllerMap = null;
             Joypads = new List<JoypadSettings>();
+            Zappers = new List<ZapperSettings>();
         }
 
         public void BuildDefaultSettings()
@@ -32,6 +33,11 @@ namespace SharpNes.Settings
             joypadSettings.Right = joypadSettings.EncodeKeyboardMapping(Keys.Right);
 
             Joypads.Add(joypadSettings);
+
+            ZapperSettings zapperSettings = new ZapperSettings();
+            zapperSettings.Port = 2;
+
+            Zappers.Add(zapperSettings);
         }
 
         public ControllerSettings GetControllerForPort(byte port)
@@ -64,11 +70,15 @@ namespace SharpNes.Settings
 
         public List<JoypadSettings> Joypads { get; private set; }
 
+        public List<ZapperSettings> Zappers { get; private set; }
+
         public InputSettings Duplicate()
         {
             InputSettings copy = new InputSettings();
             foreach (JoypadSettings joypad in Joypads)
                 copy.Joypads.Add(joypad.Duplicate());
+            foreach (ZapperSettings zapper in Zappers)
+                copy.Zappers.Add(zapper.Duplicate());
             return copy;
         }
 
@@ -78,22 +88,27 @@ namespace SharpNes.Settings
             {
                 controllerMap = new Dictionary<byte, ControllerSettings>();
 
-                // TODO for all controller types
                 foreach (JoypadSettings joypadSettings in Joypads)
                     controllerMap[joypadSettings.Port] = joypadSettings;
+
+                foreach (ZapperSettings zapperSettings in Zappers)
+                    controllerMap[zapperSettings.Port] = zapperSettings;
             }
         }
 
         private void UpdateControllerLists()
         {
             Joypads.Clear();
+            Zappers.Clear();
+
             foreach (ControllerSettings controllerSettings in controllerMap.Values)
             {
                 if (controllerSettings is JoypadSettings)
                     Joypads.Add((JoypadSettings)controllerSettings);
-            }
 
-            // TODO: repeat for zappers etc.
+                if (controllerSettings is ZapperSettings)
+                    Zappers.Add((ZapperSettings)controllerSettings);
+            }
         }
 
         private Dictionary<byte, ControllerSettings> controllerMap;

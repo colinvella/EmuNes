@@ -67,8 +67,9 @@ namespace SharpNes.Input
             ZapperSettings zapperSettings = new ZapperSettings();
             zapperSettings.Port = port;
 
-            // temporary
+            // inputs hardwired for now
             zapperSettings.Trigger = "mouse:left";
+            zapperSettings.LightSense = "mouse:cursor";
 
             inputSettings[port] = zapperSettings;
 

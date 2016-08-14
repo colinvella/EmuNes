@@ -17,12 +17,14 @@ namespace SharpNes.Settings
         public ZapperSettings() { }
 
         [Category("Zapper")] public string Trigger { get; set; }
+        [Category("Zapper")] public string LightSense { get; set; }
 
         public ZapperSettings Duplicate()
         {
             ZapperSettings copy = new ZapperSettings();
             copy.Port = Port;
             copy.Trigger = Trigger;
+            copy.LightSense = LightSense;
             return copy;
         }
 

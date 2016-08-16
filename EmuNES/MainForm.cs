@@ -45,14 +45,7 @@ namespace SharpNes
                  System.Reflection.BindingFlags.Instance);
             aProp.SetValue(videoPanel, true, null);
 
-            // map for key states to help controller mapping
-            this.keyboardState = new KeyboardState();
-
-            // map for mouse states to help controller mapping
-            this.mouseState = new MouseState();
-
-            // set up joystick object before console
-            this.gameControllerManager = new GameControllerManager();
+            ConfigureInput();
 
             Console = new NesCore.Console();
 
@@ -60,19 +53,9 @@ namespace SharpNes
             ConfigureVideo();
             ConfigureAudio();
             ConfigureControllers();
- 
-            gameState = GameState.Stopped;
-
-            bitmapBuffer = new FastBitmap(256, 240);
-
-            waveOut = new WaveOut();
-            waveOut.DesiredLatency = 100;
-
-            apuAudioProvider = new ApuAudioProvider();
-            waveOut.Init(apuAudioProvider);
-
-            // NST database
             ConfigureNstDatabase();
+
+            gameState = GameState.Stopped;
 
             // cheat system
             cheatSystem = new CheatSystem(Console.Processor);
@@ -637,6 +620,18 @@ namespace SharpNes
             recordMenuItem.Enabled = gameState == GameState.Running;
         }
 
+        private void ConfigureInput()
+        {
+            // map for key states to help controller mapping
+            this.keyboardState = new KeyboardState();
+
+            // map for mouse states to help controller mapping
+            this.mouseState = new MouseState();
+
+            // set up joystick object before console
+            this.gameControllerManager = new GameControllerManager();
+        }
+
         private void ConfigureProcessor()
         {
             Console.Processor.Lockup = () =>
@@ -653,6 +648,8 @@ namespace SharpNes
 
         private void ConfigureVideo()
         {
+            bitmapBuffer = new FastBitmap(256, 240);
+
             Console.Video.WritePixel = (x, y, colour, pixelType) =>
             {
                 // do not render top and bottom 8 rows
@@ -711,6 +708,8 @@ namespace SharpNes
             float[] outputBuffer = new float[256];
             int writeIndex = 0;
 
+            apuAudioProvider = new ApuAudioProvider();
+
             Console.Audio.WriteSample = (sampleValue) =>
             {
                 // fill buffer
@@ -721,6 +720,12 @@ namespace SharpNes
                 if (writeIndex == 0)
                     apuAudioProvider.Queue(outputBuffer);
             };
+
+            waveOut = new WaveOut();
+            waveOut.DesiredLatency = 100;
+
+            waveOut.Init(apuAudioProvider);
+
         }
 
         private void ConfigureControllers()

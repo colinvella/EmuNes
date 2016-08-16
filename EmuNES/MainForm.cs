@@ -21,11 +21,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NesCore.Utility;
-using System.Xml.Linq;
 using System.Globalization;
 using BumpKit;
 using AForge.Video.FFMPEG;
 using SharpNes.Cheats;
+using SharpNes.Database;
 
 namespace SharpNes
 {
@@ -760,22 +760,7 @@ namespace SharpNes
 
         private void ConfigureNstDatabase()
         {
-            XDocument nstDatabase = XDocument.Parse(Properties.Resources.NstDatabase);
-
-            var cartridgeElements = nstDatabase.Descendants().Where(e => e.Name.LocalName.ToLower() == "cartridge");
-
-            nsdDatabaseRomMappers = new Dictionary<string, byte>();
-            foreach (var cartridgeelement in cartridgeElements)
-            {
-                string crc = cartridgeelement.Attribute("crc").Value.ToUpper();
-                var boardElement = cartridgeelement.Descendants().FirstOrDefault(e => e.Name.LocalName.ToLower() == "board");
-                var mapperIdAttribute = boardElement.Attribute("mapper");
-                if (mapperIdAttribute == null)
-                    continue;
-                byte mapperId = 0;
-                byte.TryParse(mapperIdAttribute.Value, out mapperId);
-                nsdDatabaseRomMappers[crc] = mapperId;
-            }
+            nstDatabase = new NstDatabase();
 
             Cartridge.DetermineMapperId = DetermineCartridgeMapperId;
         }
@@ -1043,16 +1028,15 @@ namespace SharpNes
 
         private byte DetermineCartridgeMapperId(uint romCrc, byte romMapperId)
         {
-            string crcKey = Hex.Format(romCrc).Replace("$", "");
-            if (!nsdDatabaseRomMappers.ContainsKey(crcKey))
+            NstDatabaseEntry nstDatabaseEntry = nstDatabase[romCrc];
+
+            if (nstDatabaseEntry == null)
                 return romMapperId;
-            else
-            {
-                byte overriddenMapperId = nsdDatabaseRomMappers[crcKey];
-                if (overriddenMapperId != romMapperId)
-                    emulatorStatusLabel.Text = "Incorrect Mapper ID detected (" + romMapperId + "), should be " + overriddenMapperId;
-                return overriddenMapperId;
-            }
+
+            if (nstDatabaseEntry.MapperId != romMapperId)
+                emulatorStatusLabel.Text = "Incorrect Mapper ID detected (" + romMapperId + "), should be " + nstDatabaseEntry.MapperId;
+
+            return nstDatabaseEntry.MapperId;
         }
 
         public NesCore.Console Console { get; private set; }
@@ -1106,7 +1090,7 @@ namespace SharpNes
         private static readonly IntPtr INVALID_HANDLE_VALUE = (IntPtr)(-1);
 
         // NST database
-        private Dictionary<string, byte> nsdDatabaseRomMappers;
+        private NstDatabase nstDatabase;
 
         // video capture
         private VideoFileWriter mp4VideoEncoder;

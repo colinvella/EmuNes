@@ -72,8 +72,7 @@ namespace SharpNes
             waveOut.Init(apuAudioProvider);
 
             // NST database
-            nstDatabase = XDocument.Parse(Properties.Resources.NstDatabase);
-            Cartridge.DetermineMapperId = DetermineCartridgeMapperId;
+            ConfigureNstDatabase();
 
             // cheat system
             cheatSystem = new CheatSystem(Console.Processor);
@@ -759,6 +758,28 @@ namespace SharpNes
             videoPanel.Cursor = inputSettings.Zappers.Count > 0 ? Cursors.Cross : Cursors.Default;
         }
 
+        private void ConfigureNstDatabase()
+        {
+            XDocument nstDatabase = XDocument.Parse(Properties.Resources.NstDatabase);
+
+            var cartridgeElements = nstDatabase.Descendants().Where(e => e.Name.LocalName.ToLower() == "cartridge");
+
+            nsdDatabaseRomMappers = new Dictionary<string, byte>();
+            foreach (var cartridgeelement in cartridgeElements)
+            {
+                string crc = cartridgeelement.Attribute("crc").Value.ToUpper();
+                var boardElement = cartridgeelement.Descendants().FirstOrDefault(e => e.Name.LocalName.ToLower() == "board");
+                var mapperIdAttribute = boardElement.Attribute("mapper");
+                if (mapperIdAttribute == null)
+                    continue;
+                byte mapperId = 0;
+                byte.TryParse(mapperIdAttribute.Value, out mapperId);
+                nsdDatabaseRomMappers[crc] = mapperId;
+            }
+
+            Cartridge.DetermineMapperId = DetermineCartridgeMapperId;
+        }
+
         private void LoadRecentRom(object sender, EventArgs eventArgs)
         {
             string cartridgeRomPath = ((ToolStripMenuItem)sender).Text;
@@ -1022,29 +1043,16 @@ namespace SharpNes
 
         private byte DetermineCartridgeMapperId(uint romCrc, byte romMapperId)
         {
-            string romCrcString = Hex.Format(romCrc).Replace("$", "");
-            var cartridgeElements = nstDatabase.Descendants().Where(e => e.Name.LocalName.ToLower() == "cartridge");
-
-            var matchingCartridgeElement = cartridgeElements.FirstOrDefault(e => e.Attribute("crc").Value.ToUpper() == romCrcString);
-            if (matchingCartridgeElement == null)
+            string crcKey = Hex.Format(romCrc).Replace("$", "");
+            if (!nsdDatabaseRomMappers.ContainsKey(crcKey))
                 return romMapperId;
-
-            var boardElement = matchingCartridgeElement.Descendants().FirstOrDefault(e => e.Name.LocalName.ToLower() == "board");
-            if (boardElement == null)
-                return romMapperId;
-
-            var mapperIdAttribute = boardElement.Attribute("mapper");
-            if (mapperIdAttribute == null)
-                return romMapperId;
-
-            byte overriddenMapperId = romMapperId;
-
-            byte.TryParse(mapperIdAttribute.Value, out overriddenMapperId);
-
-            if (overriddenMapperId != romMapperId)
-                emulatorStatusLabel.Text = "Incorrect Mapper ID detected (" + romMapperId + "), should be " + overriddenMapperId;
-
-            return overriddenMapperId;
+            else
+            {
+                byte overriddenMapperId = nsdDatabaseRomMappers[crcKey];
+                if (overriddenMapperId != romMapperId)
+                    emulatorStatusLabel.Text = "Incorrect Mapper ID detected (" + romMapperId + "), should be " + overriddenMapperId;
+                return overriddenMapperId;
+            }
         }
 
         public NesCore.Console Console { get; private set; }
@@ -1098,7 +1106,7 @@ namespace SharpNes
         private static readonly IntPtr INVALID_HANDLE_VALUE = (IntPtr)(-1);
 
         // NST database
-        private XDocument nstDatabase;
+        private Dictionary<string, byte> nsdDatabaseRomMappers;
 
         // video capture
         private VideoFileWriter mp4VideoEncoder;

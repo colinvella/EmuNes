@@ -329,6 +329,10 @@ namespace SharpNes
         {
             InputOptionsForm inputOptionsForm = new InputOptionsForm(Console, keyboardState, mouseState, gameControllerManager);
             inputOptionsForm.ShowDialog(this);
+
+            // set cursor to cross if there is at least one Zapper
+            InputSettings inputSettings = Properties.Settings.Default.InputSettings;
+            videoPanel.Cursor = inputSettings.Zappers.Count > 0 ? Cursors.Cross : Cursors.Default;
         }
 
         private void OnOptionsCheats(object sender, EventArgs eventArgs)
@@ -750,6 +754,9 @@ namespace SharpNes
             foreach (ZapperSettings zapperSettings in inputSettings.Zappers)
                 Console.ConnectController(zapperSettings.Port,
                     zapperSettings.ConfigureZapper(mouseState));
+
+            // set cursor to cross if there is at least one Zapper
+            videoPanel.Cursor = inputSettings.Zappers.Count > 0 ? Cursors.Cross : Cursors.Default;
         }
 
         private void LoadRecentRom(object sender, EventArgs eventArgs)
@@ -929,7 +936,8 @@ namespace SharpNes
 
             if (fullScreen)
             {
-                Cursor.Hide();
+                if (videoPanel.Cursor == Cursors.Default)
+                    Cursor.Hide();
 
                 this.windowModePosition = new Point(this.Left, this.Top);
                 this.FormBorderStyle = FormBorderStyle.None;

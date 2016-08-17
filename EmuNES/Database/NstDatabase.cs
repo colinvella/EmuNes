@@ -16,12 +16,20 @@ namespace SharpNes.Database
 
             XDocument nstDatabase = XDocument.Parse(Properties.Resources.NstDatabase);
 
-            var cartridgeElements = nstDatabase.Descendants().Where(e => e.Name.LocalName.ToLower() == "cartridge");
+            var gameElements = nstDatabase.Descendants().Where(e => e.Name.LocalName.ToLower() == "game");
 
-            foreach (var cartridgeelement in cartridgeElements)
+            foreach (var gameElement in gameElements)
             {
-                string crc = cartridgeelement.Attribute("crc").Value.ToUpper();
-                var boardElement = cartridgeelement.Descendants().FirstOrDefault(e => e.Name.LocalName.ToLower() == "board");
+                var cartridgeElement = gameElement.Elements("cartridge").FirstOrDefault();
+                if (cartridgeElement == null)
+                {
+                    cartridgeElement = gameElement.Elements("arcade").FirstOrDefault();
+                }
+                if (cartridgeElement == null)
+                    continue;
+
+                string crc = cartridgeElement.Attribute("crc").Value.ToUpper();
+                var boardElement = cartridgeElement.Elements("board").FirstOrDefault();
 
                 var mapperIdAttribute = boardElement.Attribute("mapper");
                 if (mapperIdAttribute == null)
@@ -31,7 +39,18 @@ namespace SharpNes.Database
                 if (!byte.TryParse(mapperIdAttribute.Value, out mapperId))
                     continue;
 
-                NstDatabaseEntry entry = new NstDatabaseEntry(crc, mapperId);
+                string inputType = "joypad";
+                var peripheralsElement = gameElement.Elements("peripherals").FirstOrDefault();
+                if (peripheralsElement != null)
+                {
+                    var deviceElement = peripheralsElement.Elements("device").FirstOrDefault();
+                    if (deviceElement != null)
+                    {
+                        inputType = deviceElement.Attribute("type").Value.ToLower();
+                    }
+                }
+
+                NstDatabaseEntry entry = new NstDatabaseEntry(crc, mapperId, inputType);
 
                 entries[crc] = entry;
             }

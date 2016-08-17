@@ -94,6 +94,7 @@
     </Compile>
     <Compile Include="Database\NstDatabase.cs" />
     <Compile Include="Database\NstDatabaseEntry.cs" />
+    <Compile Include="Database\Peripheral.cs" />
     <Compile Include="Diagnostics\CodeDisassemblyForm.cs">
       <SubType>Form</SubType>
     </Compile>

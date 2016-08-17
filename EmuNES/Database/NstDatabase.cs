@@ -39,18 +39,19 @@ namespace SharpNes.Database
                 if (!byte.TryParse(mapperIdAttribute.Value, out mapperId))
                     continue;
 
-                string inputType = "joypad";
+                Peripheral peripheral = Peripheral.Joypad;
                 var peripheralsElement = gameElement.Elements("peripherals").FirstOrDefault();
                 if (peripheralsElement != null)
                 {
                     var deviceElement = peripheralsElement.Elements("device").FirstOrDefault();
                     if (deviceElement != null)
                     {
-                        inputType = deviceElement.Attribute("type").Value.ToLower();
+                        string deviceType = deviceElement.Attribute("type").Value.ToLower();
+                        Enum.TryParse<Peripheral>(deviceType, true, out peripheral);
                     }
                 }
 
-                NstDatabaseEntry entry = new NstDatabaseEntry(crc, mapperId, inputType);
+                NstDatabaseEntry entry = new NstDatabaseEntry(crc, mapperId, peripheral);
 
                 entries[crc] = entry;
             }

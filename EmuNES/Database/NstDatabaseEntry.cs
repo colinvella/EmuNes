@@ -8,15 +8,15 @@ namespace SharpNes.Database
 {
     class NstDatabaseEntry
     {
-        public NstDatabaseEntry(string crc, byte mapperId, Peripheral peripheral)
+        public NstDatabaseEntry(string crc, byte mapperId, IReadOnlyCollection<Peripheral> peripherals)
         {
             Crc = crc;
             MapperId = mapperId;
-            Peripheral = peripheral;
+            Peripherals = new List<Peripheral>(peripherals);
         }
 
         public string Crc { get; private set; }
         public byte MapperId { get; private set; }
-        public Peripheral Peripheral { get; private set; }
+        public IReadOnlyCollection<Peripheral> Peripherals { get; private set; }
     }
 }

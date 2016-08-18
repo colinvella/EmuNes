@@ -39,19 +39,22 @@ namespace SharpNes.Database
                 if (!byte.TryParse(mapperIdAttribute.Value, out mapperId))
                     continue;
 
-                Peripheral peripheral = Peripheral.Joypad;
-                var peripheralsElement = gameElement.Elements("peripherals").FirstOrDefault();
-                if (peripheralsElement != null)
+                List<Peripheral> peripherals = new List<Peripheral>();
+                foreach (var peripheralsElement in gameElement.Elements("peripherals"))
                 {
                     var deviceElement = peripheralsElement.Elements("device").FirstOrDefault();
-                    if (deviceElement != null)
-                    {
-                        string deviceType = deviceElement.Attribute("type").Value.ToLower();
-                        Enum.TryParse<Peripheral>(deviceType, true, out peripheral);
-                    }
+                    if (deviceElement == null)
+                        continue;
+
+                    string deviceType = deviceElement.Attribute("type").Value.ToLower();
+
+                    Peripheral peripheral = Peripheral.Joypad;
+                    Enum.TryParse<Peripheral>(deviceType, true, out peripheral);
+
+                    peripherals.Add(peripheral);
                 }
 
-                NstDatabaseEntry entry = new NstDatabaseEntry(crc, mapperId, peripheral);
+                NstDatabaseEntry entry = new NstDatabaseEntry(crc, mapperId, peripherals);
 
                 entries[crc] = entry;
             }

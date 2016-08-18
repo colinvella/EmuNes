@@ -311,10 +311,6 @@ namespace SharpNes
         {
             InputOptionsForm inputOptionsForm = new InputOptionsForm(Console, keyboardState, mouseState, gameControllerManager);
             inputOptionsForm.ShowDialog(this);
-
-            // set cursor to cross if there is at least one Zapper
-            InputSettings inputSettings = Properties.Settings.Default.InputSettings;
-            videoPanel.Cursor = inputSettings.Zappers.Count > 0 ? Cursors.Cross : Cursors.Default;
         }
 
         private void OnOptionsCheats(object sender, EventArgs eventArgs)
@@ -758,9 +754,6 @@ namespace SharpNes
             foreach (ZapperSettings zapperSettings in inputSettings.Zappers)
                 Console.ConnectController(zapperSettings.Port,
                     zapperSettings.ConfigureZapper(mouseState));
-
-            // set cursor to cross if there is at least one Zapper
-            videoPanel.Cursor = inputSettings.Zappers.Count > 0 ? Cursors.Cross : Cursors.Default;
         }
 
         private void ConfigureNstDatabase()
@@ -829,6 +822,15 @@ namespace SharpNes
                 // set video file paths
                 this.videoPathMp4 = ReplaceRomExtension(cartridgeRomPath, ".mp4");
                 this.videoPathGif = ReplaceRomExtension(cartridgeRomPath, ".gif");
+
+                // set cursor to crosshairs if it is a gun-based game
+                cartridgeUsesGun = false;
+                NstDatabaseEntry nstDatabaseEntry = nstDatabase[cartridge.Crc];
+                if (nstDatabaseEntry != null && nstDatabaseEntry.Peripherals.Contains(Peripheral.Zapper))
+                {
+                    cartridgeUsesGun = true;
+                }
+                videoPanel.Cursor = cartridgeUsesGun ? Cursors.Cross : Cursors.Default;
 
                 // load cheat file if present
                 cheatSystem.Clear();
@@ -947,7 +949,7 @@ namespace SharpNes
 
             if (fullScreen)
             {
-                if (videoPanel.Cursor == Cursors.Default)
+                if (!cartridgeUsesGun)
                     Cursor.Hide();
 
                 this.windowModePosition = new Point(this.Left, this.Top);
@@ -1050,6 +1052,7 @@ namespace SharpNes
         private string cartridgeRomFilename;
         private string cartridgeSaveRamFilename;
         private RecentFileManager recentFileManager;
+        private bool cartridgeUsesGun;
 
         // execution state
         private GameState gameState;

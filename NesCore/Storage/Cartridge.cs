@@ -15,9 +15,68 @@ namespace NesCore.Storage
 
         public Cartridge(BinaryReader romBinaryReader)
         {
-            List<byte> romBody = new List<byte>();
+            byte[] romBody = LoadFromBinaryReader(romBinaryReader);
 
             SaveRam = new SaveRam();
+
+            // compute CRC
+            Crc32 crc32 = new Crc32();
+            Crc = crc32.ComputeChecksum(romBody.ToArray());
+
+            if (DetermineMapperId != null)
+                MapperId = DetermineMapperId(Crc, MapperId);
+
+            DetermineCartridgeMap();
+            Debug.WriteLine(ToString());
+        }
+
+        public Cartridge(byte[] programRom, byte[] characterRom, byte mapperId, MirrorMode mirrorMode)
+        {
+            ProgramRom = programRom.ToArray();
+            CharacterRom = characterRom.ToArray();
+            MapperId = mapperId;
+            MirrorMode = mirrorMode;
+
+            SaveRam = new SaveRam();
+
+            // compute CRC
+            byte[] romBody = new byte[programRom.Length + characterRom.Length];
+            Array.Copy(programRom, romBody, programRom.Length);
+            Array.Copy(characterRom, 0, romBody, programRom.Length, characterRom.Length);
+            Crc32 crc32 = new Crc32();
+            Crc = crc32.ComputeChecksum(romBody.ToArray());
+
+            if (DetermineMapperId != null)
+                MapperId = DetermineMapperId(Crc, MapperId);
+
+            DetermineCartridgeMap();
+            Debug.WriteLine(ToString());
+        }
+
+        public static DetermineMapperIdHandler DetermineMapperId { get; set; }
+
+        public IReadOnlyList<byte> ProgramRom { get; private set; }
+        public byte[] CharacterRom { get; private set; }
+        public SaveRam SaveRam { get; }
+        public byte MapperId { get; private set; }
+        public MirrorMode MirrorMode { get; private set; }
+        public bool BatteryPresent { get; private set; }
+        public uint Crc { get; private set; }
+
+        public CartridgeMap Map { get; private set; }
+
+        public override string ToString()
+        {
+            return "PRG ROM Size: " + KiloBytes.Format(ProgramRom.Count)
+                + ", CHR ROM Size: " + KiloBytes.Format(CharacterRom.Length)
+                + ", Mapper ID: " + MapperId
+                + ", Mirror Mode: " + MirrorMode + " (" + (byte)MirrorMode + ")"
+                + ", Battery: " + (BatteryPresent ? "Yes" : "No");
+        }
+
+        private byte[] LoadFromBinaryReader(BinaryReader romBinaryReader)
+        {
+            List<byte> romBody = new List<byte>();
 
             uint magicNumber = romBinaryReader.ReadUInt32();
 
@@ -76,14 +135,11 @@ namespace NesCore.Storage
                 romBody.AddRange(CharacterRom);
             }
 
-            // compute CRC
-            Crc32 crc32 = new Crc32();
-            Crc = crc32.ComputeChecksum(romBody.ToArray());
+            return romBody.ToArray();
+        }
 
-            //EffectMapperOverrides();
-            if (DetermineMapperId != null)
-                MapperId = DetermineMapperId(Crc, MapperId);
-
+        private void DetermineCartridgeMap()
+        {
             // instantiate appropriate mapper
             switch (MapperId)
             {
@@ -123,32 +179,10 @@ namespace NesCore.Storage
                 case 153: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.LZ93D50_with_SRAM); break;
                 case 157: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.Datach_Joint_Rom_System); break;
                 case 210: Map = new CartridgeMapNamco(this, CartridgeMapNamco.Variant.Namco_175 | CartridgeMapNamco.Variant.Namco_340); break;
-                default: throw new NotSupportedException(
-                    "Mapper ID " + MapperId + " not supported");
+                default:
+                    throw new NotSupportedException(
+                        "Mapper ID " + MapperId + " not supported");
             }
-
-            Debug.WriteLine(ToString());
-        }
-
-        public static DetermineMapperIdHandler DetermineMapperId { get; set; }
-
-        public IReadOnlyList<byte> ProgramRom { get; private set; }
-        public byte[] CharacterRom { get; private set; }
-        public SaveRam SaveRam { get; }
-        public byte MapperId { get; private set; }
-        public MirrorMode MirrorMode { get; private set; }
-        public bool BatteryPresent { get; private set; }
-        public uint Crc { get; private set; }
-
-        public CartridgeMap Map { get; private set; }
-
-        public override string ToString()
-        {
-            return "PRG ROM Size: " + KiloBytes.Format(ProgramRom.Count)
-                + ", CHR ROM Size: " + KiloBytes.Format(CharacterRom.Length)
-                + ", Mapper ID: " + MapperId
-                + ", Mirror Mode: " + MirrorMode + " (" + (byte)MirrorMode + ")"
-                + ", Battery: " + (BatteryPresent ? "Yes" : "No");
         }
 
         private const uint InesMagicNumber = 0x1a53454e;

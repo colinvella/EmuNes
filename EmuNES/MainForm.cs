@@ -792,7 +792,7 @@ namespace SharpNes
                     BinaryReader saveRamBinaryReader = new BinaryReader(new FileStream(this.cartridgeSaveRamFilename, FileMode.Open));
                     newCartridge.SaveRam.Load(saveRamBinaryReader);
                     saveRamBinaryReader.Close();
-                    emulatorStatusLabel.Text = "SaveRam file detected and loaded";
+                    statusHistoryLabel.Text = "SaveRam file detected and loaded";
                 }
 
                 Console.LoadCartridge(newCartridge);
@@ -838,7 +838,7 @@ namespace SharpNes
                 if (File.Exists(cheatFilePath))
                 {
                     cheatSystem.Load(cheatFilePath);
-                    emulatorStatusLabel.Text = "Cheat file loaded";
+                    statusHistoryLabel.Text = "Cheat file loaded";
                 }
 
                 return true;
@@ -862,7 +862,7 @@ namespace SharpNes
             BinaryWriter saveRamBinaryWriter = new BinaryWriter(new FileStream(this.cartridgeSaveRamFilename, FileMode.OpenOrCreate, FileAccess.Write));
             this.cartridge.SaveRam.Save(saveRamBinaryWriter);
             saveRamBinaryWriter.Close();
-            emulatorStatusLabel.Text = "SaveRam saved to disk";
+            statusHistoryLabel.Text = "SaveRam saved to disk";
 
         }
 
@@ -1041,7 +1041,7 @@ namespace SharpNes
                 return romMapperId;
 
             if (nstDatabaseEntry.MapperId != romMapperId)
-                emulatorStatusLabel.Text = "Incorrect Mapper ID detected (" + romMapperId + "), should be " + nstDatabaseEntry.MapperId;
+                statusHistoryLabel.Text = "Incorrect Mapper ID detected (" + romMapperId + "), should be " + nstDatabaseEntry.MapperId;
 
             return nstDatabaseEntry.MapperId;
         }

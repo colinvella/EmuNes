@@ -57,7 +57,6 @@
             this.viewScreenFilterLcdMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewMotionBlurMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewNoSpriteOverflowMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsInputMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsCheatsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -70,7 +69,7 @@
             this.diagnosticsCodeDisassemblyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.videoPanel = new System.Windows.Forms.Panel();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
-            this.emulatorStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.statusHistoryLabel = new ToolStripStatusHistoryLabel();
             this.frameRateStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.iconTimer = new System.Windows.Forms.Timer(this.components);
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -96,7 +95,6 @@
             this.fileMenuItem,
             this.gameMenuItem,
             this.viewMenuItem,
-            this.toolStripMenuItem1,
             this.optionsMenuItem,
             this.recordMenuItem,
             this.diagnosticsMenuItem});
@@ -322,11 +320,6 @@
             this.viewNoSpriteOverflowMenuItem.Text = "No Sprite &Overflow";
             this.viewNoSpriteOverflowMenuItem.Click += new System.EventHandler(this.OnViewNoSpriteOverflow);
             // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(12, 24);
-            // 
             // optionsMenuItem
             // 
             this.optionsMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -434,7 +427,7 @@
             this.statusStrip.BackColor = System.Drawing.SystemColors.Control;
             this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.emulatorStatusLabel,
+            this.statusHistoryLabel,
             this.frameRateStatusLabel});
             this.statusStrip.Location = new System.Drawing.Point(0, 483);
             this.statusStrip.Name = "statusStrip";
@@ -445,11 +438,11 @@
             // 
             // emulatorStatusLabel
             // 
-            this.emulatorStatusLabel.Name = "emulatorStatusLabel";
-            this.emulatorStatusLabel.Size = new System.Drawing.Size(453, 20);
-            this.emulatorStatusLabel.Spring = true;
-            this.emulatorStatusLabel.Text = "Status";
-            this.emulatorStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.statusHistoryLabel.Name = "emulatorStatusLabel";
+            this.statusHistoryLabel.Size = new System.Drawing.Size(453, 20);
+            this.statusHistoryLabel.Spring = true;
+            this.statusHistoryLabel.Text = "Status";
+            this.statusHistoryLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // frameRateStatusLabel
             // 
@@ -509,7 +502,7 @@
         private System.Windows.Forms.ToolStripMenuItem gameRunMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gameResetMenuItem;
         private System.Windows.Forms.StatusStrip statusStrip;
-        private System.Windows.Forms.ToolStripStatusLabel emulatorStatusLabel;
+        private ToolStripStatusHistoryLabel statusHistoryLabel;
         private System.Windows.Forms.ToolStripStatusLabel frameRateStatusLabel;
         private System.Windows.Forms.ToolStripMenuItem gameStopMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewMenuItem;
@@ -529,7 +522,6 @@
         private System.Windows.Forms.ToolStripMenuItem viewScreenFilterNoneMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewScreenFilterRasterMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewScreenFilterLcdMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem optionsMenuItem;
         private System.Windows.Forms.ToolStripMenuItem optionsInputMenuItem;
         private System.Windows.Forms.ToolStripMenuItem diagnosticsMenuItem;

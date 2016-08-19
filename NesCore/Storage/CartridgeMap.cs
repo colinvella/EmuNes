@@ -50,6 +50,8 @@ namespace NesCore.Storage
 
         public bool AccessingSpriteCharacters { get; set; }
 
+        public virtual void Reset() { }
+
         public virtual byte ReadNameTableByte(ushort address)
         {
             ushort mirroredAddress = MirrorAddress(MirrorMode, address);

@@ -133,6 +133,8 @@ namespace NesCore
             Memory[0x4017] = Memory[0x4015] = 0x00;
             for (ushort registerAddress = 0x4000; registerAddress <= 0x400f; registerAddress++)
                 Memory[registerAddress] = 0x00;
+
+            Cartridge?.Map.Reset();
         }
 
         /// <summary>

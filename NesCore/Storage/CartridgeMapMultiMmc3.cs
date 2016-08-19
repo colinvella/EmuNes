@@ -83,6 +83,17 @@ namespace NesCore.Storage
             }
         }
 
+        public override void Reset()
+        {
+            SelectOuterBank(0);
+
+            programBankOffsets[0] = GetProgramBankOffset(0);
+            programBankOffsets[1] = GetProgramBankOffset(1);
+            programBankOffsets[2] = GetProgramBankOffset(-2);
+            programBankOffsets[3] = GetProgramBankOffset(-1);
+
+        }
+
         public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
         {
             if (cycle != 260)

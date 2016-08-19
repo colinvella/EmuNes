@@ -36,7 +36,7 @@ namespace SharpNes
         protected override void OnClick(EventArgs eventArgs)
         {
             base.OnClick(eventArgs);
-            //MessageBox.Show(string.Join("\r", statusHistory));
+
             if (dropDownForm == null)
                 ConstructDropDownForm();
 
@@ -49,8 +49,10 @@ namespace SharpNes
             dropDownForm.Height = dropDownHeight;
 
             statusTextBox.Text = string.Join("\r\n", statusHistory);
-            statusTextBox.Select(0, 0);
             dropDownForm.Show();
+            statusTextBox.SelectionStart = statusTextBox.Text.Length;
+            statusTextBox.SelectionLength = 0;
+            statusTextBox.ScrollToCaret();
         }
 
         private void ConstructDropDownForm()
@@ -63,7 +65,7 @@ namespace SharpNes
             statusTextBox = new TextBox();
             statusTextBox.ReadOnly = true;
             statusTextBox.Multiline = true;
-            statusTextBox.ScrollBars = ScrollBars.Vertical;
+            statusTextBox.ScrollBars = ScrollBars.Both;
             statusTextBox.Dock = DockStyle.Fill;
 
             statusTextBox.LostFocus += (sender, e) => dropDownForm.Hide();

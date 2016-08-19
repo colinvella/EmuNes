@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,9 +36,43 @@ namespace SharpNes
         protected override void OnClick(EventArgs eventArgs)
         {
             base.OnClick(eventArgs);
-            MessageBox.Show(string.Join("\r", statusHistory));
+            //MessageBox.Show(string.Join("\r", statusHistory));
+            if (dropDownForm == null)
+                ConstructDropDownForm();
+
+            // position above status label
+            Rectangle statusStripRectangle = this.Parent.RectangleToScreen(this.ContentRectangle);
+            int dropDownHeight = this.Height * 5;
+            dropDownForm.Left = statusStripRectangle.Left;
+            dropDownForm.Top = statusStripRectangle.Top - dropDownHeight;
+            dropDownForm.Width = this.Width;
+            dropDownForm.Height = dropDownHeight;
+
+            statusTextBox.Text = string.Join("\r\n", statusHistory);
+            statusTextBox.Select(0, 0);
+            dropDownForm.Show();
         }
 
+        private void ConstructDropDownForm()
+        {
+            dropDownForm = new Form();
+            dropDownForm.FormBorderStyle = FormBorderStyle.FixedSingle;
+            dropDownForm.StartPosition = FormStartPosition.Manual;
+            dropDownForm.ControlBox = false;
+
+            statusTextBox = new TextBox();
+            statusTextBox.ReadOnly = true;
+            statusTextBox.Multiline = true;
+            statusTextBox.ScrollBars = ScrollBars.Vertical;
+            statusTextBox.Dock = DockStyle.Fill;
+
+            statusTextBox.LostFocus += (sender, e) => dropDownForm.Hide();
+
+            dropDownForm.Controls.Add(statusTextBox);
+        }
+
+        private Form dropDownForm;
+        private TextBox statusTextBox;
         private List<string> statusHistory;
     }
 }

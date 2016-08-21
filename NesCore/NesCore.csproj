@@ -70,6 +70,7 @@
     <Compile Include="Storage\CartridgeMapColourDreams.cs" />
     <Compile Include="Storage\CartridgeMapInfiniteNesLives.cs" />
     <Compile Include="Storage\CartridgeMapIremG101.cs" />
+    <Compile Include="Storage\CartridgeMapSmb2LostLevels.cs" />
     <Compile Include="Storage\CartridgeMapMicroGenius36.cs" />
     <Compile Include="Storage\CartridgeMapCrimeBusters.cs" />
     <Compile Include="Storage\CartridgeMapMultiMmc3.cs" />

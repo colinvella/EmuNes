@@ -39,7 +39,7 @@ namespace NesCore.Storage
                 }
                 else if (address >= 0xC000 && address < 0xE000)
                 {
-                    return Cartridge.ProgramRom[programBank9000 * 0x2000 + address % 0x2000];
+                    return Cartridge.ProgramRom[programBank * 0x2000 + address % 0x2000];
                 }
                 else if (address >= 0xE000)
                 {
@@ -54,9 +54,18 @@ namespace NesCore.Storage
 
             set
             {
-                if (address == 0x9000)
+                if (address >= 0x8000 && address < 0xA000)
                 {
-                    programBank9000 = value;
+                    irqEnabled = false;
+                    irqCounter = 0;
+                }
+                else if (address >= 0xA000 && address < 0xC000)
+                {
+                    irqEnabled = true;
+                }
+                else if (address >= 0xE000)
+                {
+                    programBank = value % 8;
                 }
                 else
                 {
@@ -65,6 +74,25 @@ namespace NesCore.Storage
             }
         }
 
-        int programBank9000;
+        public override void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites)
+        {
+            ++cpuClock;
+            cpuClock %= 3;
+
+            if (cpuClock != 0)
+                return;
+
+            if (irqEnabled)
+            {
+                ++irqCounter;
+                if (irqCounter >= 4096)
+                    TriggerInterruptRequest?.Invoke();
+            }
+        }
+
+        private int programBank;
+        private bool irqEnabled;
+        private int irqCounter;
+        private int cpuClock;
     }
 }

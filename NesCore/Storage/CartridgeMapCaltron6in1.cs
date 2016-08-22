@@ -22,15 +22,10 @@ namespace NesCore.Storage
             {
                 if (address < 0x2000)
                 {
-                    int flatAddress = characterBankOuter * 0x8000;
-                    int bankOffset = address % 0x8000;
-                    if (characterBankInnerEnabled)
-                    {
-                        flatAddress += characterBankInner * 0x2000;
-                        bankOffset = address % 0x2000;
-                    }
-                    flatAddress += bankOffset;
-                    return Cartridge.CharacterRom[flatAddress];
+                    return Cartridge.CharacterRom[
+                        characterBankOuter * 0x8000
+                        + characterBankInner * 0x2000 
+                        + address % 0x2000];
                 }
                 else if (address >= 0x8000)
                 {

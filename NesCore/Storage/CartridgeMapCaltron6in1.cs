@@ -47,15 +47,15 @@ namespace NesCore.Storage
             {
                 if (address >= 0x6000 && address < 0x6800)
                 {
-                    // ..MCCEPP
-                    programBank = value & 0x03;
-                    characterBankInnerEnabled = (value & Bin.Bit2) != 0;
-                    characterBankOuter = (value >> 3) & 0x03;
-                    MirrorMode = (value & Bin.Bit5) != 0 ? MirrorMode.Horizontal : MirrorMode.Vertical;
+                    // 0110 0... ..MC CEPP (address line)
+                    programBank = address & 0x07; // EPP (enabled and higher banks selected at the same time)
+                    characterBankInnerEnabled = (address & Bin.Bit2) != 0;
+                    characterBankOuter = (address >> 3) & 0x03;
+                    MirrorMode = (address & Bin.Bit5) != 0 ? MirrorMode.Horizontal : MirrorMode.Vertical;
                 }
-                if (address >= 0x8000)
+                else if (address >= 0x8000)
                 {
-                    // ..ZZ..cc
+                    // ..ZZ..cc (data line)
                     if (characterBankInnerEnabled)
                     {
                         characterBankInner = value & 0x03;

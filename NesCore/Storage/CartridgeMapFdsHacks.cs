@@ -90,7 +90,11 @@ namespace NesCore.Storage
             {
                 ++irqCounter;
                 if (irqCounter >= 0x6000)
+                {
                     TriggerInterruptRequest?.Invoke();
+                    irqEnabled = false;
+                    irqCounter = 0;
+                }
             }
         }
 

@@ -176,6 +176,7 @@ namespace NesCore.Storage
                 case 37: Map = new CartridgeMapMultiMmc3(this); break;
                 case 38: Map = new CartridgeMapCrimeBusters(this); break;
                 case 40: Map = new CartridgeMapSmb2LostLevels(this); break;
+                case 41: Map = new CartridgeMapCaltron6in1(this); break;
                 case 66: Map = new CartridgeMapGxRom(this); break;
                 case 71: Map = new CartridgeMapCamerica71(this); break;
                 case 153: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.LZ93D50_with_SRAM); break;

@@ -20,7 +20,6 @@ namespace NesCore.Storage
         {
             set
             {
-
                 if (address == 0x8000)
                 {
                     // ignore mirror mode set by register $8000 for TC0190
@@ -57,6 +56,7 @@ namespace NesCore.Storage
                 }
                 else
                 {
+                    // default Taito TC0190 behaviour (mapper 33)
                     base[address] = value;
                 }
 

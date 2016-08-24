@@ -38,8 +38,6 @@ namespace NesCore.Storage
                 {
                     // irq reload - set irq counter to reload value
                     irqReloadPrimed = true;
-                    //irqCounter = 0;
-                    //irqCounter = irqReload;
                 }
                 else if (address == 0xC002)
                 {

@@ -24,7 +24,7 @@ namespace NesCore.Storage
                     int bankOffset = address % 0x0400;
 
                     int flatAddress = outerBlock * 0x20000
-                        + characterBankOffsets[bankIndex] + bankOffset;
+                        + (characterBankOffsets[bankIndex] % 0x20000) + bankOffset;
 
                     return Cartridge.CharacterRom[flatAddress];
                 }
@@ -37,7 +37,7 @@ namespace NesCore.Storage
                         int bankIndex = address / 0x2000;
                         int bankOffset = address % 0x2000;
 
-                        flatAddress += programBankOffsets[bankIndex] + bankOffset;
+                        flatAddress += (programBankOffsets[bankIndex] % 0x20000) + bankOffset;
                     }
                     else
                     {
@@ -63,6 +63,8 @@ namespace NesCore.Storage
                     outerBlock = value >> 6;
                     programBank = (value >> 4) & 0x03;
                     programModeNormal = (value & 0x01) != 0;
+
+                    ProgramBankSwitch?.Invoke(0x8000, 0x8000);
                 }
                 else
                 {

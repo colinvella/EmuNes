@@ -303,6 +303,9 @@ namespace NesCore.Storage
             }
         }
 
+        protected int[] programBankOffsets;
+        protected int[] characterBankOffsets;
+
         private bool mmc3AVariant;
         private int leftUpperChr;
         private int rightUpperChr;
@@ -310,8 +313,6 @@ namespace NesCore.Storage
         private byte[] registers;
         private byte programBankMode;
         private byte characterBankMode;
-        private int[] programBankOffsets;
-        private int[] characterBankOffsets;
         private byte irqReload;
         private byte irqCounter;
         private bool irqEnable;

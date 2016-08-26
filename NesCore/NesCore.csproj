@@ -66,6 +66,7 @@
     <Compile Include="Storage\CartridgeMap100In1.cs" />
     <Compile Include="Storage\CartridgeMapBnRomNina001.cs" />
     <Compile Include="Storage\CartridgeMapCaltron6in1.cs" />
+    <Compile Include="Storage\CartridgeMapMapper201.cs" />
     <Compile Include="Storage\CartridgeMapRumbleStation.cs" />
     <Compile Include="Storage\CartridgeMapFdsHacks.cs" />
     <Compile Include="Storage\CartridgeMapGxRom.cs" />

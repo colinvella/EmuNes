@@ -185,6 +185,7 @@ namespace NesCore.Storage
                 case 71: Map = new CartridgeMapCamerica71(this); break;
                 case 153: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.LZ93D50_with_SRAM); break;
                 case 157: Map = new CartridgeMapBandaiFcg(this, CartridgeMapBandaiFcg.Variant.Datach_Joint_Rom_System); break;
+                case 201: Map = new CartridgeMapMapper201(this); break;
                 case 210: Map = new CartridgeMapNamco(this, CartridgeMapNamco.Variant.Namco_175 | CartridgeMapNamco.Variant.Namco_340); break;
                 default:
                     throw new NotSupportedException(

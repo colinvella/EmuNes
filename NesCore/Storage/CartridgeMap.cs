@@ -1,6 +1,8 @@
-﻿using NesCore.Video;
+﻿using NesCore.Utility;
+using NesCore.Video;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,7 +42,18 @@ namespace NesCore.Storage
 
         public Cartridge Cartridge { get; private set; }
 
-        public abstract byte this[ushort address] { get; set; }
+        public virtual byte this[ushort address]
+        {
+            get
+            {
+                Debug.WriteLine(Name + ": Unexpected read from address " + Hex.Format(address));
+                return (byte)(address >> 8); // open bus
+            }
+            set
+            {
+                Debug.WriteLine(Name + ": Unexpected write of value " + Hex.Format(value) + " at address " + Hex.Format(address));
+            }
+        }
 
         public virtual void StepVideo(int scanLine, int cycle, bool showBackground, bool showSprites) { }
 

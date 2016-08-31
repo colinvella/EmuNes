@@ -27,8 +27,9 @@ namespace NesCore.Storage
                 {
                     int bankSize = programMode == 0 ? 0x4000 : 0x8000;
                     int bankOffset = address % bankSize;
-                    int flataddress = programBank * bankSize + bankOffset;
-                    flataddress %= Cartridge.ProgramRom.Count;
+                    int selectedBank = programMode == 0 ? programBank : programBank >> 1;
+                    int flataddress = selectedBank * bankSize + bankOffset;
+                    //flataddress %= Cartridge.ProgramRom.Count;
                     return Cartridge.ProgramRom[flataddress];
                 }
                 else

@@ -39,7 +39,7 @@ namespace NesCore.Storage
 
             set
             {
-                if (address == 0x8000)
+                if ((address & 0x8800) == 0x8000)
                 {
                     // $8000:  [.H.. .AAA]
                     // H = High bit of CHR reg (bit 4)
@@ -48,7 +48,7 @@ namespace NesCore.Storage
                     characterBankA = value & Bin.B00000111;
                     characterBank = characterBankH | characterBankA | characterBankB;
                 }
-                else if (address == 0x8800)
+                else if ((address & 0x8800) == 0x8800)
                 {
                     // $8800:  [PPPO MBBB]
                     // P = PRG Reg

@@ -1,6 +1,7 @@
 ﻿using NesCore.Utility;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,6 +51,9 @@ namespace NesCore.Storage
                     characterBank = (address >> 3) & Bin.B00000111;
                     programMode = (address >> 6) & Bin.Bit0;
                     MirrorMode = (address & Bin.Bit7) != 0 ? MirrorMode.Horizontal : MirrorMode.Vertical;
+
+                    Debug.WriteLine(" ........MOCCCPPP");
+                    Debug.WriteLine(Bin.Format(address));
                 }
                 else
                 {

@@ -13,6 +13,11 @@ namespace NesCore.Utility
             return "%" + Convert.ToString(value, 2).PadLeft(8, '0');
         }
 
+        public static string Format(ushort value)
+        {
+            return "%" + Convert.ToString(value, 2).PadLeft(16, '0');
+        }
+
         public const byte Bit0 = 0x01;
         public const byte Bit1 = 0x02;
         public const byte Bit2 = 0x04;

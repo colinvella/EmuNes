@@ -45,7 +45,7 @@ namespace NesCore.Storage
                     // H = High bit of CHR reg (bit 4)
                     // A = Low 3 bits of CHR Reg (OR with 'B' bits)
                     characterBankH = (value & Bin.Bit6) >> 3;
-                    characterBankA = value & 0x07;
+                    characterBankA = value & Bin.B00000111;
                     characterBank = characterBankH | characterBankA | characterBankB;
                 }
                 else if (address == 0x8800)
@@ -56,9 +56,9 @@ namespace NesCore.Storage
                     // M = Mirroring (0=Vert, 1=Horz)
                     // B = Low 3 bits of CHR Reg (OR with 'A' bits)
                     programBank = value >> 5;
-                    programMode = (value >> 4) & 0x01;
+                    programMode = (value & Bin.Bit4) >> 4;
                     MirrorMode = (value & Bin.Bit3) != 0 ? MirrorMode.Horizontal : MirrorMode.Vertical;
-                    characterBankB = value & 0x07;
+                    characterBankB = value & Bin.B00000111;
                     characterBank = characterBankH | characterBankA | characterBankB;
                 }
                 else
